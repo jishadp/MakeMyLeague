@@ -71,6 +71,20 @@
                                 <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
                                 <p><span class="font-medium">⏳ Duration:</span> {{ $league->start_date->format('M d, Y') }} - {{ $league->end_date->format('M d, Y') }}</p>
                                 <p><span class="font-medium">👥 Teams:</span> {{ $league->max_teams }} (max {{ $league->max_team_players }} players each)</p>
+                                
+                                <!-- Venue Details -->
+                                @if($league->localBody)
+                                <p><span class="font-medium">🏟️ Venue:</span> {{ $league->localBody->name }}, {{ $league->localBody->district->name }}</p>
+                                @endif
+                                
+                                @if($league->venue_details)
+                                <p><span class="font-medium">📍 Details:</span> {{ strlen($league->venue_details) > 30 ? substr($league->venue_details, 0, 30) . '...' : $league->venue_details }}</p>
+                                @endif
+                                
+                                <!-- Ground Count -->
+                                @if(count($league->ground_ids ?? []) > 0)
+                                <p><span class="font-medium">🏏 Grounds:</span> {{ count($league->ground_ids) }} assigned</p>
+                                @endif
                             </div>
                             
                             <!-- Actions -->

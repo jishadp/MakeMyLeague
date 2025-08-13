@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Models\Ground;
 use App\Models\League;
+use App\Models\LocalBody;
+use App\Models\State;
+use App\Models\District;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -16,7 +20,7 @@ class LeagueController
      */
     public function index(): View
     {
-        $leagues = League::with('game', 'organizer')->get();
+        $leagues = League::with(['game', 'organizer', 'localBody.district'])->get();
         return view('leagues.index', compact('leagues'));
     }
 
@@ -26,7 +30,12 @@ class LeagueController
     public function create(): View
     {
         $games = Game::where('active', true)->get();
-        return view('leagues.create', compact('games'));
+        $grounds = Ground::where('is_available', true)->orderBy('name')->get();
+        $states = State::orderBy('name')->get();
+        $districts = District::orderBy('name')->get();
+        $localBodies = LocalBody::orderBy('name')->get();
+        
+        return view('leagues.create', compact('games', 'grounds', 'states', 'districts', 'localBodies'));
     }
 
     /**
@@ -38,6 +47,11 @@ class LeagueController
         
         // Add the current authenticated user as the organizer
         $validated['user_id'] = Auth::id();
+        
+        // Process ground_ids (convert to JSON array)
+        if ($request->has('ground_ids')) {
+            $validated['ground_ids'] = $request->ground_ids;
+        }
         
         // If this is the first league or is_default is checked, make it default
         if ($request->has('is_default') || League::count() === 0) {
@@ -57,6 +71,7 @@ class LeagueController
      */
     public function show(League $league): View
     {
+        $league->load(['game', 'organizer', 'localBody.district']);
         return view('leagues.show', compact('league'));
     }
 
@@ -66,7 +81,12 @@ class LeagueController
     public function edit(League $league): View
     {
         $games = Game::where('active', true)->get();
-        return view('leagues.edit', compact('league', 'games'));
+        $grounds = Ground::where('is_available', true)->orderBy('name')->get();
+        $states = State::orderBy('name')->get();
+        $districts = District::orderBy('name')->get();
+        $localBodies = LocalBody::orderBy('name')->get();
+        
+        return view('leagues.edit', compact('league', 'games', 'grounds', 'states', 'districts', 'localBodies'));
     }
 
     /**
@@ -75,6 +95,11 @@ class LeagueController
     public function update(Request $request, League $league): RedirectResponse
     {
         $validated = $request->validate(League::rules());
+        
+        // Process ground_ids (convert to JSON array)
+        if ($request->has('ground_ids')) {
+            $validated['ground_ids'] = $request->ground_ids;
+        }
         
         // Handle default league setting
         if ($request->has('is_default') && $request->is_default) {

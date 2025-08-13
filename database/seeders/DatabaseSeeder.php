@@ -55,5 +55,27 @@ class DatabaseSeeder extends Seeder
         
         // Run ground seeder
         $this->call(GroundSeeder::class);
+        
+        // Add grounds to the default league (after grounds are seeded)
+        $defaultLeague = League::where('is_default', true)->first();
+        if ($defaultLeague) {
+            // Get some random Wayanad grounds
+            $groundIds = \App\Models\Ground::where('district_id', function($query) {
+                $query->select('id')
+                    ->from('districts')
+                    ->where('name', 'Wayanad')
+                    ->first();
+            })->take(3)->pluck('id')->toArray();
+            
+            // Update the league with ground_ids and local body
+            if (!empty($groundIds)) {
+                $firstGround = \App\Models\Ground::find($groundIds[0]);
+                $defaultLeague->update([
+                    'ground_ids' => $groundIds,
+                    'localbody_id' => $firstGround->localbody_id,
+                    'venue_details' => 'Main Stadium Area, Near Bus Stand'
+                ]);
+            }
+        }
     }
 }

@@ -76,6 +76,56 @@
             </div>
         </div>
 
+        {{-- Ground & Venue --}}
+        <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
+            <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">
+                <span class="text-red-500">🏟️</span> Ground & Venue Details
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                <div>
+                    <label for="localbody_id" class="block text-sm font-medium text-gray-700 mb-1">Local Body</label>
+                    <select id="localbody_id" name="localbody_id"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        <option value="">Select Local Body</option>
+                        @foreach($localBodies as $localBody)
+                            <option value="{{ $localBody->id }}" {{ old('localbody_id', $league->localbody_id) == $localBody->id ? 'selected' : '' }}>
+                                {{ $localBody->name }}, {{ $localBody->district->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('localbody_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="venue_details" class="block text-sm font-medium text-gray-700 mb-1">Additional Venue Details</label>
+                    <input type="text" name="venue_details" id="venue_details" value="{{ old('venue_details', $league->venue_details) }}"
+                        placeholder="E.g., Near bus stand, Main entrance gate"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                    @error('venue_details') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Select Grounds for this League</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($grounds as $ground)
+                        <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <input type="checkbox" name="ground_ids[]" id="ground_{{ $ground->id }}" value="{{ $ground->id }}"
+                                {{ (is_array(old('ground_ids', $league->ground_ids)) && in_array($ground->id, old('ground_ids', $league->ground_ids))) ? 'checked' : '' }}
+                                class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-0.5">
+                            <label for="ground_{{ $ground->id }}" class="text-sm cursor-pointer">
+                                <span class="font-medium block text-gray-800">{{ $ground->name }}</span>
+                                <span class="text-gray-500 text-xs block">{{ $ground->localBody->name }}, {{ $ground->district->name }}</span>
+                                @if($ground->capacity)
+                                    <span class="text-gray-500 text-xs block">Capacity: {{ number_format($ground->capacity) }}</span>
+                                @endif
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+                @error('ground_ids') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
         {{-- Team Settings --}}
         <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
             <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">

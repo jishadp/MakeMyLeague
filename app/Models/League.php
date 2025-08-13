@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Relations\JsonArrayRelation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class League extends Model
@@ -21,6 +23,9 @@ class League extends Model
         'slug',
         'game_id',
         'user_id',
+        'ground_ids',
+        'localbody_id',
+        'venue_details',
         'season',
         'start_date',
         'end_date',
@@ -48,6 +53,7 @@ class League extends Model
         'team_reg_fee' => 'double',
         'player_reg_fee' => 'double',
         'team_wallet_limit' => 'double',
+        'ground_ids' => 'array',
     ];
 
     /**
@@ -102,6 +108,10 @@ class League extends Model
         return [
             'name' => 'required|string|max:255',
             'game_id' => 'required|exists:games,id',
+            'ground_ids' => 'nullable|array',
+            'ground_ids.*' => 'exists:grounds,id',
+            'localbody_id' => 'nullable|exists:local_bodies,id',
+            'venue_details' => 'nullable|string|max:255',
             'season' => 'required|integer|min:1|max:100',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
@@ -130,5 +140,27 @@ class League extends Model
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    
+    /**
+     * Get the local body that the league is located in.
+     */
+    public function localBody(): BelongsTo
+    {
+        return $this->belongsTo(LocalBody::class, 'localbody_id');
+    }
+    
+    /**
+     * Get the grounds associated with this league.
+     * 
+     * @return \App\Relations\JsonArrayRelation
+     */
+    public function grounds()
+    {
+        return new JsonArrayRelation(
+            Ground::query(),
+            $this,
+            'ground_ids'
+        );
     }
 }

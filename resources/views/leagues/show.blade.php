@@ -144,6 +144,66 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Ground & Venue Information -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Ground & Venue Information</h3>
+                    
+                    <!-- Venue Details -->
+                    @if($league->localbody_id || $league->venue_details)
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <h4 class="text-lg font-medium text-gray-800 mb-4">Venue Details</h4>
+                        <dl class="space-y-3">
+                            @if($league->localbody_id)
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">Local Body:</dt>
+                                <dd class="font-medium">{{ $league->localBody->name }}, {{ $league->localBody->district->name }}</dd>
+                            </div>
+                            @endif
+                            
+                            @if($league->venue_details)
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">Additional Details:</dt>
+                                <dd class="font-medium">{{ $league->venue_details }}</dd>
+                            </div>
+                            @endif
+                        </dl>
+                    </div>
+                    @endif
+                    
+                    <!-- Associated Grounds -->
+                    @if(count($league->grounds) > 0)
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-800 mb-4">Associated Grounds</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($league->grounds as $ground)
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                                <h5 class="font-semibold text-gray-900 mb-2">{{ $ground->name }}</h5>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p>{{ $ground->localBody->name }}, {{ $ground->district->name }}</p>
+                                    @if($ground->capacity)
+                                    <p>Capacity: {{ number_format($ground->capacity) }}</p>
+                                    @endif
+                                    @if($ground->details)
+                                    <p class="text-gray-500 truncate">{{ $ground->details }}</p>
+                                    @endif
+                                </div>
+                                <a href="{{ route('grounds.show', $ground) }}" class="mt-3 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                                    View Details
+                                    <svg class="ml-1 w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-gray-500">No grounds are associated with this league.</p>
+                    </div>
+                    @endif
+                </div>
 
                 <!-- Quick Actions -->
                 <div>
