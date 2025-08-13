@@ -7,7 +7,7 @@
         <div class="md:flex md:items-center md:justify-between mb-8">
             <div>
                 <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">My Leagues</h1>
-                <p class="mt-2 text-gray-600 text-lg">Manage your cricket leagues and tournaments</p>
+                <p class="mt-2 text-gray-600 text-lg">Manage your ssssssscricket leagues and tournaments</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <a href="{{ route('leagues.create') }}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all font-medium">

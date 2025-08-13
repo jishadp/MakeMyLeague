@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             PlayerSeeder::class,
         ]);
          // Create manager user
-        \App\Models\User::create([
+        User::create([
             'name' => 'Cricket Manager',
             'email' => 'manager@cricket.com',
             'password' => bcrypt('password123')
