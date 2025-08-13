@@ -13,11 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         // Create manager user
-        User::create([
-            'name' => 'Cricket Manager',
-            'email' => 'manager@cricket.com',
-            'password' => bcrypt('password123')
+        // User::factory(10)->create();
+
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
         ]);
     }
 }
