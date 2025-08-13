@@ -3,6 +3,8 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\LeagueController;
+use App\Http\Controllers\LeaguePlayerController;
+use App\Http\Controllers\LeagueTeamController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
@@ -52,6 +54,29 @@ Route::middleware('auth')->group(function(){
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
     Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault');
+    
+    // League Teams routes
+    Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show']);
+    Route::get('leagues/{league}/teams', [LeagueTeamController::class, 'index'])->name('league-teams.index');
+    Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create');
+    Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store');
+    Route::get('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'show'])->name('league-teams.show');
+    Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit');
+    Route::put('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'update'])->name('league-teams.update');
+    Route::delete('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'destroy'])->name('league-teams.destroy');
+    Route::patch('leagues/{league}/teams/{leagueTeam}/status', [LeagueTeamController::class, 'updateStatus'])->name('league-teams.updateStatus');
+    Route::patch('leagues/{league}/teams/{leagueTeam}/wallet', [LeagueTeamController::class, 'updateWallet'])->name('league-teams.updateWallet');
+    
+    // League Players routes
+    Route::get('leagues/{league}/players', [LeaguePlayerController::class, 'index'])->name('league-players.index');
+    Route::get('leagues/{league}/players/create', [LeaguePlayerController::class, 'create'])->name('league-players.create');
+    Route::post('leagues/{league}/players', [LeaguePlayerController::class, 'store'])->name('league-players.store');
+    Route::get('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'show'])->name('league-players.show');
+    Route::get('leagues/{league}/players/{leaguePlayer}/edit', [LeaguePlayerController::class, 'edit'])->name('league-players.edit');
+    Route::put('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'update'])->name('league-players.update');
+    Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy');
+    Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus');
+    Route::post('leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus');
 });
 
 

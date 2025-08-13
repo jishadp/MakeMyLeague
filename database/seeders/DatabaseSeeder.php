@@ -65,6 +65,12 @@ class DatabaseSeeder extends Seeder
         // Run player seeder
         $this->call(PlayerSeeder::class);
         
+        // Run league team seeder
+        $this->call(LeagueTeamSeeder::class);
+        
+        // Run league player seeder
+        $this->call(LeaguePlayerSeeder::class);
+        
         // Add grounds to the default league (after grounds are seeded)
         $defaultLeague = League::where('is_default', true)->first();
         if ($defaultLeague) {

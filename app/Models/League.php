@@ -6,6 +6,8 @@ use App\Relations\JsonArrayRelation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -162,5 +164,23 @@ class League extends Model
             $this,
             'ground_ids'
         );
+    }
+
+    /**
+     * Get the league teams for this league.
+     */
+    public function leagueTeams(): HasMany
+    {
+        return $this->hasMany(LeagueTeam::class);
+    }
+
+    /**
+     * Get all teams participating in this league through league teams.
+     */
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'league_teams')
+                    ->withPivot('status', 'wallet_balance')
+                    ->withTimestamps();
     }
 }

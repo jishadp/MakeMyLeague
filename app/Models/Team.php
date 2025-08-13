@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Team extends Model
@@ -118,5 +120,23 @@ class Team extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the league teams for this team.
+     */
+    public function leagueTeams(): HasMany
+    {
+        return $this->hasMany(LeagueTeam::class);
+    }
+
+    /**
+     * Get all leagues this team is participating in through league teams.
+     */
+    public function leagues(): BelongsToMany
+    {
+        return $this->belongsToMany(League::class, 'league_teams')
+                    ->withPivot('status', 'wallet_balance')
+                    ->withTimestamps();
     }
 }

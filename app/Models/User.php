@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -53,7 +54,7 @@ class User extends Authenticatable
     /**
      * Get the game role of the user.
      */
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(GameRole::class, 'role_id');
     }
@@ -61,7 +62,7 @@ class User extends Authenticatable
     /**
      * Get the local body of the user.
      */
-    public function localBody()
+    public function localBody(): BelongsTo
     {
         return $this->belongsTo(LocalBody::class, 'local_body_id');
     }
