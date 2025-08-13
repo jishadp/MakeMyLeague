@@ -38,4 +38,12 @@ class Game extends Model
     {
         return $this->hasMany(League::class);
     }
+    
+    /**
+     * Get the roles for the game.
+     */
+    public function roles(): HasMany
+    {
+        return $this->hasMany(GameRole::class);
+    }
 }
