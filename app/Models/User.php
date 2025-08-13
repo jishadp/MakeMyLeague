@@ -46,9 +46,4 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
-    public function leagues(): HasMany
-    {
-        return $this->hasMany(League::class, 'manager_id');
-    }
 }
