@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +21,13 @@ Route::get('/', function () {
         ->take(3)
         ->get();
         
-    return view('welcome', compact('featuredGrounds', 'featuredTeams'));
+    // Get 3 featured players for the landing page
+    $featuredPlayers = \App\Models\User::with(['role', 'localBody'])
+        ->players()
+        ->take(3)
+        ->get();
+        
+    return view('welcome', compact('featuredGrounds', 'featuredTeams', 'featuredPlayers'));
 });
 
 Route::get('login',[LoginController::class,'login'])->name('login');
@@ -34,6 +41,10 @@ Route::get('grounds/{ground}', [GroundController::class, 'show'])->name('grounds
 // Team routes
 Route::get('teams', [TeamController::class, 'index'])->name('teams.index');
 Route::get('teams/{team}', [TeamController::class, 'show'])->name('teams.show');
+
+// Player routes
+Route::get('players', [PlayerController::class, 'index'])->name('players.index');
+Route::get('players/{player}', [PlayerController::class, 'show'])->name('players.show');
 
 Route::middleware('auth')->group(function(){
     Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard');

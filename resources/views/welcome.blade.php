@@ -33,6 +33,8 @@
 
     @include('web.teams')
 
+    @include('web.players')
+
     @include('web.testimonials')
 
     @include('web.footer')

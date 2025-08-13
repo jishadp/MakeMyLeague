@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'mobile',
+        'pin',
+        'role_id',
+        'local_body_id',
     ];
 
     /**
@@ -44,5 +48,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    
+    /**
+     * Get the game role of the user.
+     */
+    public function role()
+    {
+        return $this->belongsTo(GameRole::class, 'role_id');
+    }
+    
+    /**
+     * Get the local body of the user.
+     */
+    public function localBody()
+    {
+        return $this->belongsTo(LocalBody::class, 'local_body_id');
+    }
+    
+    /**
+     * Scope a query to only include players.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePlayers($query)
+    {
+        return $query->whereNotNull('role_id');
     }
 }
