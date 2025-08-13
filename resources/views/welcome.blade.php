@@ -28,6 +28,8 @@
     @include('web.hero')
 
     @include('web.features')
+    
+    @include('web.grounds')
 
     @include('web.testimonials')
 

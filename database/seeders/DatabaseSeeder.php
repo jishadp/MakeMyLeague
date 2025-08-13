@@ -52,5 +52,8 @@ class DatabaseSeeder extends Seeder
         
         // Run location seeder
         $this->call(LocationSeeder::class);
+        
+        // Run ground seeder
+        $this->call(GroundSeeder::class);
     }
 }
