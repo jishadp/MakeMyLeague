@@ -1,0 +1,27 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $this->call([
+            TeamSeeder::class,
+            PlayerSeeder::class,
+        ]);
+         // Create manager user
+        \App\Models\User::create([
+            'name' => 'Cricket Manager',
+            'email' => 'manager@cricket.com',
+            'password' => bcrypt('password123')
+        ]);
+    }
+}

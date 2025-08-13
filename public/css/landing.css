@@ -1,0 +1,72 @@
+/* Custom animations and mobile optimizations */
+@keyframes fade-in {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slide-up {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.8s ease-out;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.8s ease-out 0.2s both;
+}
+
+/* Mobile-first touch targets */
+@media (max-width: 768px) {
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Ensure text is readable on mobile */
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    /* Improve button accessibility on mobile */
+    button, .btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+}
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+a:focus, button:focus {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .text-gray-600 {
+        color: #374151;
+    }
+    
+    .text-gray-400 {
+        color: #6b7280;
+    }
+}
