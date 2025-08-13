@@ -18,10 +18,17 @@
 
             <!-- Actions -->
             <div class="hidden md:flex items-center space-x-4">
-                <a href="{{ route('login')}}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Sign In</a>
-                <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                    Get Started
-                </a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Dashboard</a>
+                    <a href="{{ route('logout') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Sign Out
+                    </a>
+                @else
+                    <a href="{{ route('login')}}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Sign In</a>
+                    <a href="{{ route('login') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Get Started
+                    </a>
+                @endauth
             </div>
 
             <!-- Mobile Menu Button -->
@@ -47,10 +54,17 @@
             <a href="#" class="block text-gray-700 hover:text-indigo-600 font-medium">Players</a>
             <a href="#features" class="block text-gray-700 hover:text-indigo-600 font-medium">Features</a>
             <hr class="my-2">
-            <a href="/login" class="block text-gray-700 hover:text-indigo-600 font-medium">Sign In</a>
-            <a href="#" class="block bg-indigo-600 text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                Get Started
-            </a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Dashboard</a>
+                <a href="{{ route('logout') }}" class="block bg-indigo-600 text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    Sign Out
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Sign In</a>
+                <a href="{{ route('login') }}" class="block bg-indigo-600 text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    Get Started
+                </a>
+            @endauth
         </div>
     </nav>
 </header>

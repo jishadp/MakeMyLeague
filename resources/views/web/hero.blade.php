@@ -11,12 +11,21 @@
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
-            <a href="#" class="bg-primary text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-indigo-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto">
-                Start Your League
-            </a>
-            <a href="#features" class="text-primary border-2 border-primary px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-all duration-200 w-full sm:w-auto">
-                Learn More
-            </a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="bg-primary text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-indigo-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto">
+                    Dashboard
+                </a>
+                <a href="{{ route('leagues.create') }}" class="text-primary border-2 border-primary px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-all duration-200 w-full sm:w-auto">
+                    Create League
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="bg-primary text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-indigo-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto">
+                    Start Your League
+                </a>
+                <a href="#features" class="text-primary border-2 border-primary px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-all duration-200 w-full sm:w-auto">
+                    Learn More
+                </a>
+            @endauth
         </div>
     </div>
 </section>

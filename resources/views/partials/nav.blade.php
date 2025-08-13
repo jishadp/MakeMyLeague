@@ -13,17 +13,26 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="#" class="text-gray-700 hover:text-primary font-medium transition-colors">Home</a>
-                <a href="#about" class="text-gray-700 hover:text-primary font-medium transition-colors">About Us</a>
-                <a href="#features" class="text-gray-700 hover:text-primary font-medium transition-colors">Features</a>
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors">Home</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-primary font-medium transition-colors">Dashboard</a>
+                @else
+                    <a href="#about" class="text-gray-700 hover:text-primary font-medium transition-colors">About Us</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary font-medium transition-colors">Features</a>
+                @endauth
             </div>
 
             <!-- Actions -->
             <div class="hidden md:flex items-center space-x-4">
-                <a href="{{ route('login') }}" class="text-gray-700 hover:text-primary font-medium transition-colors">Login</a>
-                <a href="#registration" class="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                    Get Started
-                </a>
+                @auth
+                    <span class="text-gray-700 font-medium">{{ Auth::user()->name }}</span>
+                    <a href="{{ route('logout') }}" class="text-gray-700 hover:text-primary font-medium transition-colors">Logout</a>
+                @else
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-primary font-medium transition-colors">Login</a>
+                    <a href="#registration" class="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Get Started
+                    </a>
+                @endauth
             </div>
 
             <!-- Mobile Menu Button -->
@@ -45,14 +54,21 @@
 
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden mt-2 space-y-2 bg-white rounded-lg shadow-lg p-4">
-            <a href="#" class="block text-gray-700 hover:text-primary font-medium">Home</a>
-            <a href="#about" class="block text-gray-700 hover:text-primary font-medium">About Us</a>
-            <a href="#features" class="block text-gray-700 hover:text-primary font-medium">Features</a>
-            <hr class="my-2">
-            <a href="{{ route('login') }}" class="block text-gray-700 hover:text-primary font-medium">Login</a>
-            <a href="#registration" class="block bg-primary text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                Get Started
-            </a>
+            <a href="/" class="block text-gray-700 hover:text-primary font-medium">Home</a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="block text-gray-700 hover:text-primary font-medium">Dashboard</a>
+                <hr class="my-2">
+                <span class="block text-gray-700 font-medium">{{ Auth::user()->name }}</span>
+                <a href="{{ route('logout') }}" class="block text-gray-700 hover:text-primary font-medium">Logout</a>
+            @else
+                <a href="#about" class="block text-gray-700 hover:text-primary font-medium">About Us</a>
+                <a href="#features" class="block text-gray-700 hover:text-primary font-medium">Features</a>
+                <hr class="my-2">
+                <a href="{{ route('login') }}" class="block text-gray-700 hover:text-primary font-medium">Login</a>
+                <a href="#registration" class="block bg-primary text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    Get Started
+                </a>
+            @endauth
         </div>
     </nav>
 </header>

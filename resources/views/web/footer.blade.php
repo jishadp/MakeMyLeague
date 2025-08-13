@@ -26,6 +26,9 @@
                     <li><a href="#features" class="hover:text-indigo-400 transition-colors duration-200">Features</a></li>
                     <li><a href="/pricing" class="hover:text-indigo-400 transition-colors duration-200">Pricing</a></li>
                     <li><a href="/demo" class="hover:text-indigo-400 transition-colors duration-200">Demo</a></li>
+                    @auth
+                    <li><a href="{{ route('dashboard') }}" class="hover:text-indigo-400 transition-colors duration-200">Dashboard</a></li>
+                    @endauth
                 </ul>
             </div>
             
