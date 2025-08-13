@@ -95,6 +95,12 @@
                                     <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name }}</p>
                                     <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
                                     <p><span class="font-medium">⏳ Duration:</span> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</p>
+                                    @if($league->localbody_id)
+                                        <p><span class="font-medium">📍 Venue:</span> {{ $league->localBody->name }}</p>
+                                    @endif
+                                    @if($league->venue_details)
+                                        <p><span class="font-medium">🏟️ Details:</span> {{ $league->venue_details }}</p>
+                                    @endif
                                 </div>
                                 <div class="mt-6">
                                     <a href="{{ route('leagues.show', $league) }}"
@@ -137,6 +143,12 @@
                                 <p><span class="font-medium">Organizer:</span> {{ $league->organizer->name }}</p>
                                 <p><span class="font-medium">Teams:</span> 0 / {{ $league->max_teams }}</p>
                                 <p><span class="font-medium">Start Date:</span> {{ $league->start_date->format('M d, Y') }}</p>
+                                @if($league->localbody_id)
+                                    <p><span class="font-medium">Venue:</span> {{ $league->localBody->name }}</p>
+                                @endif
+                                @if($league->venue_details)
+                                    <p><span class="font-medium">Venue Details:</span> {{ $league->venue_details }}</p>
+                                @endif
                             </div>
                             <a href="{{ route('leagues.show', $league) }}"
                                class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">

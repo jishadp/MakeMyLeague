@@ -11,8 +11,8 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Teams</a>
-                <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Players</a>
+                <a href="{{ route('teams.index') }}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Teams</a>
+                <a href="{{ route('grounds.index') }}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Grounds</a>
                 <a href="#features" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Features</a>
             </div>
 
@@ -50,8 +50,8 @@
 
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden mt-2 space-y-2 bg-white rounded-lg shadow-lg p-4">
-            <a href="#" class="block text-gray-700 hover:text-indigo-600 font-medium">Teams</a>
-            <a href="#" class="block text-gray-700 hover:text-indigo-600 font-medium">Players</a>
+            <a href="{{ route('teams.index') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Teams</a>
+            <a href="{{ route('grounds.index') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Grounds</a>
             <a href="#features" class="block text-gray-700 hover:text-indigo-600 font-medium">Features</a>
             <hr class="my-2">
             @auth
