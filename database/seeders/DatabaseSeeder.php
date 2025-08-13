@@ -49,5 +49,8 @@ class DatabaseSeeder extends Seeder
             'is_default' => true,
             'status' => 'active'
         ]);
+        
+        // Run location seeder
+        $this->call(LocationSeeder::class);
     }
 }
