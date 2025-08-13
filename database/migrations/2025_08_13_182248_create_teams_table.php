@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->foreignId('owner_id')->constrained('users');
             $table->string('logo')->nullable();
             $table->foreignId('home_ground_id')->constrained('grounds');

@@ -31,6 +31,8 @@
     
     @include('web.grounds')
 
+    @include('web.teams')
+
     @include('web.testimonials')
 
     @include('web.footer')
