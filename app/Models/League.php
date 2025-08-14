@@ -173,6 +173,14 @@ class League extends Model
     {
         return $this->hasMany(LeagueTeam::class);
     }
+    
+    /**
+     * Get the league players for this league.
+     */
+    public function leaguePlayers(): HasMany
+    {
+        return $this->hasMany(LeaguePlayer::class);
+    }
 
     /**
      * Get all teams participating in this league through league teams.

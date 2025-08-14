@@ -18,12 +18,15 @@ class ManualAuctionController extends Controller
      */
     public function index(League $league)
     {
-        // Get available players for auction (not yet sold)
-        $availablePlayers = LeaguePlayer::with(['user', 'leagueTeam.team'])
-            ->whereHas('leagueTeam', function ($query) use ($league) {
-                $query->where('league_id', $league->id);
+        // Get available players for auction (those with status available, unsold, or skip, excluding retention players)
+        $availablePlayers = LeaguePlayer::with(['user', 'user.role', 'leagueTeam.team'])
+            ->where('league_id', $league->id)
+            ->where(function($query) {
+                $query->where('status', 'available')
+                      ->orWhere('status', 'unsold')
+                      ->orWhere('status', 'skip');
             })
-            ->where('status', 'available')
+            ->where('retention', false) // Exclude retention players
             ->orderBy('base_price', 'desc')
             ->paginate(20);
 
@@ -42,9 +45,7 @@ class ManualAuctionController extends Controller
             ->get();
 
         // Get player counts by status
-        $playerCounts = LeaguePlayer::whereHas('leagueTeam', function ($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
+        $playerCounts = LeaguePlayer::where('league_id', $league->id)
             ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
@@ -78,6 +79,16 @@ class ManualAuctionController extends Controller
                 return back()->withErrors(['error' => 'Invalid team for this league.']);
             }
 
+            // Update the league player status to sold and assign to team
+            // Use the direct league_id field instead of going through leagueTeam relation
+            $leaguePlayer = LeaguePlayer::where('user_id', $request->user_id)
+                ->where('league_id', $league->id)
+                ->first();
+
+            if (!$leaguePlayer) {
+                return back()->withErrors(['error' => 'Player not found in this league.']);
+            }
+
             // Create the auction record
             $auction = Auction::create([
                 'user_id' => $request->user_id,
@@ -86,19 +97,11 @@ class ManualAuctionController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
-            // Update the league player status to sold and assign to team
-            $leaguePlayer = LeaguePlayer::where('user_id', $request->user_id)
-                ->whereHas('leagueTeam', function ($query) use ($league) {
-                    $query->where('league_id', $league->id);
-                })
-                ->first();
-
-            if ($leaguePlayer) {
-                $leaguePlayer->update([
-                    'league_team_id' => $request->league_team_id,
-                    'status' => 'sold',
-                ]);
-            }
+            // Update player status to sold and assign to team
+            $leaguePlayer->update([
+                'league_team_id' => $request->league_team_id,
+                'status' => 'sold',
+            ]);
 
             // Deduct amount from team wallet
             $leagueTeam->decrement('wallet_balance', $request->amount);
@@ -133,7 +136,7 @@ class ManualAuctionController extends Controller
                 $leaguePlayer = LeaguePlayer::find($playerId);
                 
                 // Verify the player belongs to this league
-                if (!$leaguePlayer || $leaguePlayer->leagueTeam->league_id !== $league->id) {
+                if (!$leaguePlayer || $leaguePlayer->league_id !== $league->id) {
                     continue;
                 }
 
@@ -193,9 +196,7 @@ class ManualAuctionController extends Controller
         $search = $request->get('search');
 
         $players = LeaguePlayer::with(['user', 'leagueTeam.team'])
-            ->whereHas('leagueTeam', function ($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
+            ->where('league_id', $league->id)
             ->whereHas('user', function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%')
                       ->orWhere('mobile', 'like', '%' . $search . '%');

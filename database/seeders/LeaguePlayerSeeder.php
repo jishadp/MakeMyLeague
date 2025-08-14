@@ -40,6 +40,7 @@ class LeaguePlayerSeeder extends Seeder
         foreach ($players as $player) {
             // Create league player without team assignment (for auction)
             LeaguePlayer::create([
+                'league_id' => $league->id, // Add league_id
                 'league_team_id' => null, // No team assigned
                 'user_id' => $player->id,
                 'retention' => false, // Default retention is false

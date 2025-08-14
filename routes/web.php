@@ -72,6 +72,8 @@ Route::middleware('auth')->group(function(){
     // League Players routes
     Route::get('leagues/{league}/players', [LeaguePlayerController::class, 'index'])->name('league-players.index');
     Route::get('leagues/{league}/players/create', [LeaguePlayerController::class, 'create'])->name('league-players.create');
+    Route::get('leagues/{league}/players/bulk-create', [LeaguePlayerController::class, 'bulkCreate'])->name('league-players.bulk-create');
+    Route::post('leagues/{league}/players/bulk-store', [LeaguePlayerController::class, 'bulkStore'])->name('league-players.bulk-store');
     Route::post('leagues/{league}/players', [LeaguePlayerController::class, 'store'])->name('league-players.store');
     Route::get('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'show'])->name('league-players.show');
     Route::get('leagues/{league}/players/{leaguePlayer}/edit', [LeaguePlayerController::class, 'edit'])->name('league-players.edit');

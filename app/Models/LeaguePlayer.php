@@ -18,6 +18,7 @@ class LeaguePlayer extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'league_id',
         'league_team_id',
         'user_id',
         'slug',
@@ -130,6 +131,14 @@ class LeaguePlayer extends Model
     public function leagueTeam(): BelongsTo
     {
         return $this->belongsTo(LeagueTeam::class);
+    }
+
+    /**
+     * Get the league that owns this player.
+     */
+    public function league(): BelongsTo
+    {
+        return $this->belongsTo(League::class);
     }
 
     /**

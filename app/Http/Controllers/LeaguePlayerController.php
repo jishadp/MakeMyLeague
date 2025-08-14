@@ -17,6 +17,7 @@ class LeaguePlayerController extends Controller
     public function index(League $league): View
     {
         $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.role'])
+            ->where('league_id', $league->id)
             ->when(request('status'), function($query, $status) {
                 $query->where('status', $status);
             })
@@ -31,16 +32,6 @@ class LeaguePlayerController extends Controller
             ->when(request('team') === 'unassigned', function($query) {
                 $query->whereNull('league_team_id');
             });
-
-        // If no specific team filter, ensure we only get players for this league
-        if (!request('team')) {
-            $query->where(function($subQuery) use ($league) {
-                $subQuery->whereHas('leagueTeam', function($q) use ($league) {
-                    $q->where('league_id', $league->id);
-                })
-                ->orWhereNull('league_team_id'); // Include players without a team
-            });
-        }
 
         $leaguePlayers = $query->orderBy('base_price', 'desc')
             ->paginate(15);
@@ -85,13 +76,34 @@ class LeaguePlayerController extends Controller
             ->whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
                       ->from('league_players')
-                      ->join('league_teams', 'league_players.league_team_id', '=', 'league_teams.id')
-                      ->where('league_teams.league_id', $league->id);
+                      ->where('league_id', $league->id);
             })
             ->with('role')
             ->get();
 
         return view('league-players.create', compact('league', 'leagueTeams', 'availablePlayers'));
+    }
+    
+    /**
+     * Show the form for bulk creating league players.
+     */
+    public function bulkCreate(League $league): View
+    {
+        $leagueTeams = LeagueTeam::with('team')
+            ->where('league_id', $league->id)
+            ->get();
+
+        // Get players not already in this league
+        $availablePlayers = User::whereNotNull('role_id')
+            ->whereNotIn('id', function($query) use ($league) {
+                $query->select('user_id')
+                      ->from('league_players')
+                      ->where('league_id', $league->id);
+            })
+            ->with('role')
+            ->get();
+
+        return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers'));
     }
 
     /**
@@ -105,9 +117,9 @@ class LeaguePlayerController extends Controller
                 'required',
                 'exists:users,id',
                 function ($attribute, $value, $fail) use ($request, $league) {
-                    $exists = LeaguePlayer::whereHas('leagueTeam', function($query) use ($league) {
-                        $query->where('league_id', $league->id);
-                    })->where('user_id', $value)->exists();
+                    $exists = LeaguePlayer::where('user_id', $value)
+                        ->where('league_id', $league->id)
+                        ->exists();
                     
                     if ($exists) {
                         $fail('This player is already registered in this league.');
@@ -127,11 +139,66 @@ class LeaguePlayerController extends Controller
             }
         }
 
-        LeaguePlayer::create($request->all());
+        // Create league player with league_id
+        $data = $request->all();
+        $data['league_id'] = $league->id;
+        LeaguePlayer::create($data);
 
         return redirect()
             ->route('league-players.index', $league)
             ->with('success', 'Player added to league successfully!');
+    }
+    
+    /**
+     * Bulk store multiple league players.
+     */
+    public function bulkStore(Request $request, League $league)
+    {
+        $request->validate([
+            'league_team_id' => 'nullable|exists:league_teams,id',
+            'user_ids' => 'required|array',
+            'user_ids.*' => [
+                'exists:users,id',
+                function ($attribute, $value, $fail) use ($request, $league) {
+                    $exists = LeaguePlayer::where('user_id', $value)
+                        ->where('league_id', $league->id)
+                        ->exists();
+                    
+                    if ($exists) {
+                        $fail("Player with ID {$value} is already registered in this league.");
+                    }
+                },
+            ],
+            'status' => 'required|in:pending,available,sold,unsold,skip',
+            'base_price' => 'required|numeric|min:0',
+        ]);
+
+        // Validate league team belongs to current league if provided
+        if ($request->league_team_id) {
+            $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
+            if ($leagueTeam->league_id !== $league->id) {
+                return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
+            }
+        }
+
+        $addedCount = 0;
+        
+        foreach ($request->user_ids as $userId) {
+            LeaguePlayer::create([
+                'user_id' => $userId,
+                'league_id' => $league->id,
+                'league_team_id' => $request->league_team_id,
+                'base_price' => $request->base_price,
+                'status' => $request->status,
+                'retention' => false
+            ]);
+            
+            $addedCount++;
+        }
+
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', "{$addedCount} players added to league successfully!");
     }
 
     /**
@@ -176,7 +243,10 @@ class LeaguePlayerController extends Controller
             }
         }
 
-        $leaguePlayer->update($request->all());
+        // Ensure we don't accidentally change the league_id
+        $data = $request->all();
+        $data['league_id'] = $league->id;
+        $leaguePlayer->update($data);
 
         return redirect()
             ->route('league-players.index', $league)
@@ -285,9 +355,7 @@ class LeaguePlayerController extends Controller
         // If status is provided, update all player statuses
         if ($request->has('status')) {
             LeaguePlayer::whereIn('id', $request->player_ids)
-                ->whereHas('leagueTeam', function($query) use ($league) {
-                    $query->where('league_id', $league->id);
-                })
+                ->where('league_id', $league->id)
                 ->update(['status' => $request->status]);
         }
 
