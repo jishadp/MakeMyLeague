@@ -96,7 +96,8 @@ Route::middleware('auth')->group(function(){
         Route::get('bidding', [AuctionController::class, 'index'])->name('bidding');
         Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
-        Route::get('current-bids/{leaguePlayer}', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
+        Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
+        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
     });
 });
 

@@ -17,24 +17,12 @@ class AuctionController extends Controller
      */
     public function index(League $league)
     {
-        // Get current player being auctioned (latest available player)
-        $currentPlayer = LeaguePlayer::with(['user', 'leagueTeam.team'])
-            ->whereHas('leagueTeam', function ($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
+        // Get available players
+        $availablePlayers = LeaguePlayer::with(['user', 'leagueTeam.team'])
+            ->where('league_id', $league->id)
             ->where('status', 'available')
             ->orderBy('base_price', 'desc')
-            ->first();
-
-        // Get current bids for the player if exists
-        $currentBids = [];
-        if ($currentPlayer) {
-            $currentBids = AuctionBid::with(['leagueTeam.team'])
-                ->where('league_player_id', $currentPlayer->id)
-                ->where('status', 'ask')
-                ->orderBy('amount', 'desc')
-                ->get();
-        }
+            ->paginate(10);
 
         // Get teams in the league
         $leagueTeams = LeagueTeam::with(['team'])
@@ -52,7 +40,7 @@ class AuctionController extends Controller
                 ->first();
         }
 
-        return view('auction.bidding', compact('currentPlayer', 'currentBids', 'leagueTeams', 'userTeam', 'league'));
+        return view('auction.bidding', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league'));
     }
 
     /**
@@ -78,7 +66,7 @@ class AuctionController extends Controller
             }
 
             // Verify the player belongs to this league
-            if ($leaguePlayer->leagueTeam->league_id !== $league->id) {
+            if ($leaguePlayer->league_id !== $league->id) {
                 return response()->json(['error' => 'Invalid player for this league'], 400);
             }
 
@@ -140,7 +128,7 @@ class AuctionController extends Controller
             $leaguePlayer = LeaguePlayer::find($request->league_player_id);
 
             // Verify the player belongs to this league
-            if ($leaguePlayer->leagueTeam->league_id !== $league->id) {
+            if ($leaguePlayer->league_id !== $league->id) {
                 return response()->json(['error' => 'Invalid player for this league'], 400);
             }
 
@@ -198,12 +186,17 @@ class AuctionController extends Controller
     /**
      * Get current bids for a player.
      */
-    public function getCurrentBids(League $league, $leaguePlayerId)
+    public function getCurrentBids(Request $request, League $league)
     {
+        $request->validate([
+            'league_player_id' => 'required|exists:league_players,id',
+        ]);
+
+        $leaguePlayerId = $request->league_player_id;
         $leaguePlayer = LeaguePlayer::find($leaguePlayerId);
         
         // Verify the player belongs to this league
-        if (!$leaguePlayer || $leaguePlayer->leagueTeam->league_id !== $league->id) {
+        if (!$leaguePlayer || $leaguePlayer->league_id !== $league->id) {
             return response()->json(['error' => 'Invalid player for this league'], 400);
         }
 
@@ -214,5 +207,47 @@ class AuctionController extends Controller
             ->get();
 
         return response()->json($bids);
+    }
+    
+    /**
+     * Mark a player as unsold (skip).
+     */
+    public function skipPlayer(Request $request, League $league)
+    {
+        $request->validate([
+            'league_player_id' => 'required|exists:league_players,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+
+            // Verify the player belongs to this league
+            if ($leaguePlayer->league_id !== $league->id) {
+                return response()->json(['error' => 'Invalid player for this league'], 400);
+            }
+
+            // Delete all existing bids for this player
+            AuctionBid::where('league_player_id', $request->league_player_id)
+                ->where('status', 'ask')
+                ->delete();
+
+            // Update player status to unsold
+            $leaguePlayer->update([
+                'status' => 'unsold',
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Player marked as unsold'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to mark player as unsold: ' . $e->getMessage()], 500);
+        }
     }
 }
