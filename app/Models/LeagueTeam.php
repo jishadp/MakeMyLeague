@@ -100,4 +100,20 @@ class LeagueTeam extends Model
     {
         return $query->where('status', 'pending');
     }
+    
+    /**
+     * Get the auctions for this league team.
+     */
+    public function auctions(): HasMany
+    {
+        return $this->hasMany(\App\Models\Auction::class);
+    }
+    
+    /**
+     * Get the auction bids for this league team.
+     */
+    public function auctionBids(): HasMany
+    {
+        return $this->hasMany(\App\Models\AuctionBid::class);
+    }
 }

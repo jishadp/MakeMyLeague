@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeaguePlayer extends Model
 {
@@ -125,5 +126,13 @@ class LeaguePlayer extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+    
+    /**
+     * Get the auction bids for this league player.
+     */
+    public function auctionBids(): HasMany
+    {
+        return $this->hasMany(\App\Models\AuctionBid::class);
     }
 }

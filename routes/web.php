@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\LeaguePlayerController;
 use App\Http\Controllers\LeagueTeamController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ManualAuctionController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -77,6 +79,22 @@ Route::middleware('auth')->group(function(){
     Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy');
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus');
     Route::post('leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus');
+    
+    // Auction routes
+    Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
+        // Manual auction routes
+        Route::get('manual', [ManualAuctionController::class, 'index'])->name('manual');
+        Route::post('manual', [ManualAuctionController::class, 'store'])->name('manual.store');
+        Route::post('manual/update-status', [ManualAuctionController::class, 'updatePlayerStatus'])->name('manual.update-status');
+        Route::get('manual/search-players', [ManualAuctionController::class, 'searchPlayers'])->name('manual.search-players');
+        Route::get('manual/team-wallet/{teamId}', [ManualAuctionController::class, 'getTeamWallet'])->name('manual.team-wallet');
+        
+        // Bidding auction routes
+        Route::get('bidding', [AuctionController::class, 'index'])->name('bidding');
+        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid');
+        Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
+        Route::get('current-bids/{leaguePlayer}', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
+    });
 });
 
 

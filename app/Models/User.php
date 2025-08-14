@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -76,5 +77,21 @@ class User extends Authenticatable
     public function scopePlayers($query)
     {
         return $query->whereNotNull('role_id');
+    }
+    
+    /**
+     * Get the auctions where this user is the player.
+     */
+    public function auctions(): HasMany
+    {
+        return $this->hasMany(Auction::class, 'user_id');
+    }
+    
+    /**
+     * Get the auctions created by this user.
+     */
+    public function createdAuctions(): HasMany
+    {
+        return $this->hasMany(Auction::class, 'created_by');
     }
 }
