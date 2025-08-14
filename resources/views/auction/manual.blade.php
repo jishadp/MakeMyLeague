@@ -77,8 +77,8 @@
 
                         <!-- Players List -->
                         <div class="space-y-3" id="playersList">
-                            @forelse($availablePlayers as $player)
-                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-all duration-200 hover:shadow-sm player-card animate-fade-in" 
+                            @forelse($availablePlayers as $key => $player)
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-all duration-200 hover:shadow-sm player-card animate-fade-in {{ $key >= 3 ? 'hidden' : '' }}" 
                                  data-player-id="{{ $player->user->id }}"
                                  data-player-name="{{ $player->user->name }}"
                                  data-base-price="{{ $player->base_price }}"
@@ -98,7 +98,7 @@
                                         </div>
                                     </div>
                                     <button onclick="selectPlayer('{{ $player->user->id }}', '{{ $player->user->name }}', '{{ $player->base_price }}')"
-                                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200 w-full sm:w-auto">
+                                            class="auction-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200 w-full sm:w-auto">
                                         Auction
                                     </button>
                                 </div>
@@ -109,6 +109,14 @@
                             </div>
                             @endforelse
                         </div>
+
+                        @if(count($availablePlayers) > 3)
+                        <div class="mt-4 text-center" id="showMoreContainer">
+                            <button id="showMoreBtn" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+                                Show More Players ({{ count($availablePlayers) - 3 }} remaining)
+                            </button>
+                        </div>
+                        @endif
 
                         <!-- Pagination -->
                         @if($availablePlayers->hasPages())
@@ -121,7 +129,7 @@
             </div>
 
             <!-- Auction Form Section -->
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1" id="auctionFormSection">
                 <div class="bg-white rounded-lg shadow transition-all duration-300 hover:shadow-md">
                     <div class="px-4 py-4 sm:px-6 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Auction Player</h2>
@@ -163,6 +171,17 @@
                                 </div>
                             </div>
 
+                            <!-- Base Price Override Toggle -->
+                            <div class="mb-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="override_base_price" name="override_base_price" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="override_base_price" class="ml-2 block text-sm text-gray-700">
+                                        Override Base Price
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Allow amount below base price</p>
+                            </div>
+                            
                             <!-- Auction Amount -->
                             <div class="mb-6">
                                 <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Auction Amount</label>
@@ -250,10 +269,27 @@ function selectPlayer(playerId, playerName, basePrice) {
         <span class="text-xs">Base Price: ₹${parseFloat(basePrice).toLocaleString()}</span>
     `;
     document.getElementById('minAmount').textContent = parseFloat(basePrice).toLocaleString();
-    document.getElementById('amount').min = basePrice;
+    
+    // Set min value only if override is not checked
+    if (!document.getElementById('override_base_price').checked) {
+        document.getElementById('amount').min = basePrice;
+    } else {
+        document.getElementById('amount').min = 0;
+    }
+    
     document.getElementById('amount').value = basePrice;
     
     checkFormValid();
+    
+    // On mobile screens, scroll to auction form
+    if (window.innerWidth < 1024) { // lg breakpoint in Tailwind
+        const auctionFormSection = document.getElementById('auctionFormSection');
+        if (auctionFormSection) {
+            setTimeout(() => {
+                auctionFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100); // Small delay to allow state to update
+        }
+    }
 }
 
 function toggleSelectAll() {
@@ -340,6 +376,15 @@ function showBulkModal(action) {
                 <label class="block text-sm font-medium text-gray-700 mb-2">Auction Amount</label>
                 <input type="number" name="amount" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter amount">
             </div>
+            <div class="mb-4">
+                <div class="flex items-center">
+                    <input type="checkbox" id="bulk_override_base_price" name="override_base_price" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="bulk_override_base_price" class="ml-2 block text-sm text-gray-700">
+                        Override Base Price
+                    </label>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Allow amount below base price</p>
+            </div>
         `;
         document.getElementById('bulkSubmitBtn').textContent = 'Sell Players';
         document.getElementById('bulkSubmitBtn').className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors duration-200';
@@ -383,6 +428,7 @@ document.getElementById('amount').addEventListener('input', function() {
     const teamSelect = document.getElementById('league_team_id');
     const selectedOption = teamSelect.options[teamSelect.selectedIndex];
     const walletBalance = parseFloat(selectedOption.getAttribute('data-wallet') || 0);
+    const playerId = document.getElementById('selectedPlayerId').value;
     
     if (amount > walletBalance) {
         this.setCustomValidity('Amount exceeds team wallet balance');
@@ -391,6 +437,25 @@ document.getElementById('amount').addEventListener('input', function() {
     }
     
     checkFormValid();
+});
+
+// Base price override toggle handler
+document.getElementById('override_base_price').addEventListener('change', function() {
+    const basePrice = document.getElementById('minAmount').textContent;
+    const amountInput = document.getElementById('amount');
+    
+    if (this.checked) {
+        // Remove base price validation when override is checked
+        amountInput.min = 0;
+    } else {
+        // Restore base price validation when override is unchecked
+        amountInput.min = parseFloat(basePrice.replace(/,/g, ''));
+        
+        // Validate current value against base price
+        if (parseFloat(amountInput.value) < parseFloat(basePrice.replace(/,/g, ''))) {
+            amountInput.value = basePrice.replace(/,/g, '');
+        }
+    }
 });
 
 function checkFormValid() {
@@ -410,10 +475,62 @@ function checkFormValid() {
 document.getElementById('playerSearch').addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase();
     const playerCards = document.querySelectorAll('.player-card');
+    const showMoreBtn = document.getElementById('showMoreBtn');
+    const showMoreContainer = document.getElementById('showMoreContainer');
     
-    playerCards.forEach(card => {
-        const playerName = card.getAttribute('data-player-name').toLowerCase();
-        card.style.display = playerName.includes(searchTerm) ? 'block' : 'none';
+    // If search is active, show all matching players
+    if (searchTerm.length > 0) {
+        playerCards.forEach(card => {
+            const playerName = card.getAttribute('data-player-name').toLowerCase();
+            const playerId = card.getAttribute('data-player-id');
+            const showMatch = playerName.includes(searchTerm);
+            card.style.display = showMatch ? 'block' : 'none';
+            if (showMatch) {
+                card.classList.remove('hidden');
+            }
+        });
+        // Hide "Show More" button during search
+        if (showMoreContainer) showMoreContainer.style.display = 'none';
+    } else {
+        // If search is cleared, go back to showing only first 3
+        playerCards.forEach((card, index) => {
+            if (index < 3) {
+                card.style.display = 'block';
+                card.classList.remove('hidden');
+            } else {
+                card.style.display = 'none';
+                card.classList.add('hidden');
+            }
+        });
+        // Show "Show More" button again
+        if (showMoreContainer) showMoreContainer.style.display = 'block';
+    }
+});
+
+// "Show More" button functionality
+if (document.getElementById('showMoreBtn')) {
+    document.getElementById('showMoreBtn').addEventListener('click', function() {
+        const hiddenPlayers = document.querySelectorAll('.player-card.hidden');
+        hiddenPlayers.forEach(player => {
+            player.classList.remove('hidden');
+            player.style.display = 'block';
+        });
+        document.getElementById('showMoreContainer').style.display = 'none';
+    });
+}
+
+// Auction button click handler for mobile - scroll to auction form
+document.querySelectorAll('.auction-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // On mobile screens, scroll to auction form
+        if (window.innerWidth < 1024) { // lg breakpoint in Tailwind
+            const auctionForm = document.getElementById('auctionForm');
+            if (auctionForm) {
+                setTimeout(() => {
+                    auctionForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100); // Small delay to allow state to update
+            }
+        }
     });
 });
 

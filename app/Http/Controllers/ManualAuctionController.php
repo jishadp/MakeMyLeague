@@ -63,6 +63,7 @@ class ManualAuctionController extends Controller
             'user_id' => 'required|exists:users,id',
             'league_team_id' => 'required|exists:league_teams,id',
             'amount' => 'required|numeric|min:0',
+            'override_base_price' => 'sometimes',
         ]);
 
         try {
@@ -87,6 +88,11 @@ class ManualAuctionController extends Controller
 
             if (!$leaguePlayer) {
                 return back()->withErrors(['error' => 'Player not found in this league.']);
+            }
+
+            // Validate against base price if override is not checked
+            if (!$request->has('override_base_price') && $request->amount < $leaguePlayer->base_price) {
+                return back()->withErrors(['amount' => 'Auction amount must be greater than or equal to the base price.']);
             }
 
             // Create the auction record
@@ -127,6 +133,7 @@ class ManualAuctionController extends Controller
             'status' => 'required|in:sold,unsold,skip',
             'league_team_id' => 'required_if:status,sold|exists:league_teams,id',
             'amount' => 'required_if:status,sold|numeric|min:0',
+            'override_base_price' => 'sometimes',
         ]);
 
         try {
@@ -146,6 +153,11 @@ class ManualAuctionController extends Controller
                     // Check wallet balance
                     if ($leagueTeam->wallet_balance < $request->amount) {
                         return back()->withErrors(['amount' => 'Team does not have sufficient wallet balance.']);
+                    }
+
+                    // Validate against base price if override is not present
+                    if (!$request->has('override_base_price') && $request->amount < $leaguePlayer->base_price) {
+                        return back()->withErrors(['amount' => "Auction amount must be greater than or equal to {$leaguePlayer->user->name}'s base price of ₹{$leaguePlayer->base_price}."]);
                     }
 
                     // Create auction record
