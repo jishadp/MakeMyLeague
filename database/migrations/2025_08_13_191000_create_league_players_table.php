@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('league_team_id')->constrained('league_teams')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('slug')->unique();
             $table->boolean('retention')->default(false);
             $table->enum('status', ['pending', 'available', 'sold', 'unsold', 'skip'])->default('pending');
             $table->double('base_price')->default(0.0);

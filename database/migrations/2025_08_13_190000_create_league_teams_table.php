@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('league_id')->constrained('leagues')->onDelete('cascade');
             $table->foreignId('team_id')->constrained('teams')->onDelete('cascade');
+            $table->string('slug')->unique();
             $table->enum('status', ['pending', 'available'])->default('pending');
             $table->double('wallet_balance')->default(0.0);
             $table->timestamps();

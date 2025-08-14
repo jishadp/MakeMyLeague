@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class LeaguePlayer extends Model
 {
@@ -19,6 +20,7 @@ class LeaguePlayer extends Model
     protected $fillable = [
         'league_team_id',
         'user_id',
+        'slug',
         'retention',
         'status',
         'base_price',
@@ -33,6 +35,71 @@ class LeaguePlayer extends Model
         'retention' => 'boolean',
         'base_price' => 'double',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-generate slug before creating a new record
+        static::creating(function ($leaguePlayer) {
+            if (empty($leaguePlayer->slug)) {
+                $leaguePlayer->slug = $leaguePlayer->generateUniqueSlug();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique slug.
+     *
+     * @return string
+     */
+    protected function generateUniqueSlug()
+    {
+        // Load relationships if not already loaded
+        if (!$this->relationLoaded('user')) {
+            $this->load('user');
+        }
+        if (!$this->relationLoaded('leagueTeam')) {
+            $this->load('leagueTeam.team');
+        }
+        
+        $user = $this->user;
+        $leagueTeam = $this->leagueTeam;
+        
+        if (!$user || !$leagueTeam) {
+            // Fallback: load by IDs if relationships still aren't available
+            $user = \App\Models\User::find($this->user_id);
+            $leagueTeam = \App\Models\LeagueTeam::with('team')->find($this->league_team_id);
+        }
+        
+        if (!$user || !$leagueTeam) {
+            // Final fallback slug if relationships aren't available
+            $slug = 'league-player-' . ($this->id ?? uniqid());
+        } else {
+            $teamName = $leagueTeam->team ? $leagueTeam->team->name : 'unknown-team';
+            $slug = Str::slug($user->name . '-' . $teamName);
+        }
+        
+        $count = static::where('league_team_id', $this->league_team_id)
+                      ->whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
+                      ->where('id', '!=', $this->id ?? 0)
+                      ->count();
+
+        return $count ? "{$slug}-{$count}" : $slug;
+    }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 
     /**
      * Validation rules for the model.

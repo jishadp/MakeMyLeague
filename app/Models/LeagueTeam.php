@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class LeagueTeam extends Model
 {
@@ -19,6 +20,7 @@ class LeagueTeam extends Model
     protected $fillable = [
         'league_id',
         'team_id',
+        'slug',
         'status',
         'wallet_balance',
     ];
@@ -31,6 +33,70 @@ class LeagueTeam extends Model
     protected $casts = [
         'wallet_balance' => 'double',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-generate slug before creating a new record
+        static::creating(function ($leagueTeam) {
+            if (empty($leagueTeam->slug)) {
+                $leagueTeam->slug = $leagueTeam->generateUniqueSlug();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique slug.
+     *
+     * @return string
+     */
+    protected function generateUniqueSlug()
+    {
+        // Load relationships if not already loaded
+        if (!$this->relationLoaded('league')) {
+            $this->load('league');
+        }
+        if (!$this->relationLoaded('team')) {
+            $this->load('team');
+        }
+        
+        $league = $this->league;
+        $team = $this->team;
+        
+        if (!$league || !$team) {
+            // Fallback: load by IDs if relationships still aren't available
+            $league = \App\Models\League::find($this->league_id);
+            $team = \App\Models\Team::find($this->team_id);
+        }
+        
+        if (!$league || !$team) {
+            // Final fallback slug if relationships aren't available
+            $slug = 'league-team-' . ($this->id ?? uniqid());
+        } else {
+            $slug = Str::slug($league->name . '-' . $team->name);
+        }
+        
+        $count = static::where('league_id', $this->league_id)
+                      ->whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
+                      ->where('id', '!=', $this->id ?? 0)
+                      ->count();
+
+        return $count ? "{$slug}-{$count}" : $slug;
+    }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 
     /**
      * Validation rules for the model.
