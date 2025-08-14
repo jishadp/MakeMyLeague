@@ -123,6 +123,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <p class="text-blue-100 text-sm" id="selectedPlayerBasePrice"></p>
+                                        <p class="text-blue-100 text-xs mt-1" id="lastBiddedTeam" style="display: none;">Last bid by: <span class="font-semibold"></span></p>
                                     </div>
                                     <div class="bg-white bg-opacity-20 rounded-lg p-2">
                                         <p class="text-xs text-blue-100">Current Bid</p>
@@ -195,7 +196,7 @@
                             
                             <!-- Place Bid Button -->
                             <button id="placeBidBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors duration-200 text-lg font-medium mb-3 relative overflow-hidden">
-                                <span class="relative z-10">Place Bid</span>
+                                <span class="relative z-10" id="placeBidText">Place Bid</span>
                                 <span class="absolute inset-0 bg-green-500 transform scale-x-0 origin-left transition-transform duration-300" id="bidPulse"></span>
                             </button>
                             
@@ -306,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (bidButtonLocked) return;
         lockBidButton();
         incrementBid(100);
+        updatePlaceBidButton(parseFloat(document.getElementById('bidAmount').value));
     });
     
     // Increment bid by 500
@@ -313,6 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (bidButtonLocked) return;
         lockBidButton();
         incrementBid(500);
+        updatePlaceBidButton(parseFloat(document.getElementById('bidAmount').value));
     });
     
     // Increment bid by 1000
@@ -320,6 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (bidButtonLocked) return;
         lockBidButton();
         incrementBid(1000);
+        updatePlaceBidButton(parseFloat(document.getElementById('bidAmount').value));
     });
     
     // Quick bid buttons
@@ -333,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('bidAmount').value = amount;
                 document.getElementById('customBidAmount').value = amount;
                 currentBidAmount = amount;
+                updatePlaceBidButton(amount);
                 // Visual feedback
                 this.classList.add('bg-blue-300');
                 setTimeout(() => {
@@ -360,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set the bid amount
         document.getElementById('bidAmount').value = customAmount;
         currentBidAmount = customAmount;
+        updatePlaceBidButton(customAmount);
     });
     
     // Place bid button
@@ -437,6 +443,21 @@ document.addEventListener('DOMContentLoaded', function() {
             stopAutoRefresh();
         }
     });
+    
+    // Update place bid button when bid amount changes
+    document.getElementById('bidAmount').addEventListener('input', function() {
+        const amount = parseFloat(this.value);
+        updatePlaceBidButton(amount);
+    });
+    
+    // Update place bid button when custom bid amount changes
+    document.getElementById('customBidAmount').addEventListener('input', function() {
+        const amount = parseFloat(this.value);
+        if (!isNaN(amount)) {
+            document.getElementById('bidAmount').value = amount;
+            updatePlaceBidButton(amount);
+        }
+    });
 });
 
 // Mobile: Back to players button
@@ -466,6 +487,16 @@ function incrementBid(amount) {
     bidAmountInput.value = newAmount;
     document.getElementById('customBidAmount').value = newAmount;
     currentBidAmount = newAmount;
+}
+
+// Update place bid button text with current amount
+function updatePlaceBidButton(amount) {
+    const placeBidText = document.getElementById('placeBidText');
+    if (amount && amount > 0) {
+        placeBidText.textContent = `Place Bid - ₹${amount.toLocaleString()}`;
+    } else {
+        placeBidText.textContent = 'Place Bid';
+    }
 }
 
 // Select player for bidding
@@ -498,6 +529,12 @@ function selectPlayerForBidding(playerId, playerName, basePrice) {
     document.getElementById('bidAmount').value = baseBidAmount;
     document.getElementById('customBidAmount').value = baseBidAmount;
     document.getElementById('currentBidAmount').textContent = '₹' + baseBidAmount.toLocaleString();
+    
+    // Hide last bidded team initially
+    document.getElementById('lastBiddedTeam').style.display = 'none';
+    
+    // Update place bid button
+    updatePlaceBidButton(baseBidAmount);
     
     // Show bidding card, hide placeholder
     document.getElementById('noBiddingPlayer').classList.add('hidden');
@@ -686,11 +723,14 @@ function updateBiddingHistory(bids) {
 // Update current bid display
 function updateCurrentBid(bids) {
     const currentBidAmount = document.getElementById('currentBidAmount');
+    const lastBiddedTeam = document.getElementById('lastBiddedTeam');
     
     if (!bids || bids.length === 0) {
         currentBidAmount.textContent = '₹' + baseBidAmount.toLocaleString();
         document.getElementById('bidAmount').value = baseBidAmount;
         document.getElementById('customBidAmount').value = baseBidAmount;
+        lastBiddedTeam.style.display = 'none';
+        updatePlaceBidButton(baseBidAmount);
         return;
     }
     
@@ -711,6 +751,12 @@ function updateCurrentBid(bids) {
     currentBidAmount.textContent = newAmountText;
     document.getElementById('bidAmount').value = newBidAmount;
     document.getElementById('customBidAmount').value = newBidAmount;
+    
+    // Show last bidded team
+    lastBiddedTeam.style.display = 'block';
+    lastBiddedTeam.querySelector('span').textContent = highestBid.league_team.team.name;
+    
+    updatePlaceBidButton(newBidAmount);
 }
 
 // Auto-refresh functionality
