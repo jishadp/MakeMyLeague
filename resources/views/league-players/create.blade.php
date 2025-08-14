@@ -23,17 +23,20 @@
 
                 <div>
                     <label for="league_team_id" class="block text-sm font-medium text-gray-700 mb-2">
-                        Select Team <span class="text-red-500">*</span>
+                        Select Team <span class="text-gray-500">(optional)</span>
                     </label>
-                    <select name="league_team_id" id="league_team_id" required
+                    <select name="league_team_id" id="league_team_id"
                             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('league_team_id') border-red-500 @enderror">
-                        <option value="">Choose a team...</option>
+                        <option value="">No team (available for auction)</option>
                         @foreach($leagueTeams as $leagueTeam)
                             <option value="{{ $leagueTeam->id }}" {{ old('league_team_id') == $leagueTeam->id ? 'selected' : '' }}>
                                 {{ $leagueTeam->team->name }} ({{ ucfirst($leagueTeam->status) }})
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-sm text-gray-500">
+                        If you don't select a team, player will be available for auction
+                    </p>
                     @error('league_team_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

@@ -53,6 +53,7 @@ class LeagueTeamController extends Controller
             'team_id' => $request->team_id,
             'status' => $request->status,
             'wallet_balance' => $request->wallet_balance ?? $league->team_wallet_limit,
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()

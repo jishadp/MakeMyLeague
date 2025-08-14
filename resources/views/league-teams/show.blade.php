@@ -301,6 +301,8 @@
                 
                 <form action="{{ route('league-players.bulkStatus', $league) }}" method="POST" id="retentionForm">
                     @csrf
+                    <!-- Since we might use PATCH method via JavaScript -->
+                    @method('POST')
                     <input type="hidden" name="status" value="available">
                     
                     <div class="space-y-4">
@@ -523,11 +525,11 @@
                 csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 retentionForm.appendChild(csrfToken);
                 
-                // Method PATCH
+                // Method - this should be POST, not PATCH to match the route
                 const methodInput = document.createElement('input');
                 methodInput.type = 'hidden';
                 methodInput.name = '_method';
-                methodInput.value = 'PATCH';
+                methodInput.value = 'POST'; // Changed from PATCH to POST
                 retentionForm.appendChild(methodInput);
                 
                 // Add player IDs and set retention status

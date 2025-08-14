@@ -23,6 +23,7 @@ class LeagueTeam extends Model
         'slug',
         'status',
         'wallet_balance',
+        'created_by',
     ];
 
     /**
@@ -181,5 +182,13 @@ class LeagueTeam extends Model
     public function auctionBids(): HasMany
     {
         return $this->hasMany(\App\Models\AuctionBid::class);
+    }
+    
+    /**
+     * Get the user who created this league team.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

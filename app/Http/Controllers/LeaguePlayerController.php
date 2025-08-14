@@ -16,22 +16,33 @@ class LeaguePlayerController extends Controller
      */
     public function index(League $league): View
     {
-        $leaguePlayers = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.role'])
-            ->whereHas('leagueTeam', function($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
+        $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.role'])
             ->when(request('status'), function($query, $status) {
                 $query->where('status', $status);
             })
             ->when(request('retention'), function($query, $retention) {
                 $query->where('retention', $retention === 'true');
             })
-            ->when(request('team'), function($query, $teamSlug) {
+            ->when(request('team') && request('team') !== 'unassigned', function($query, $teamSlug) {
                 $query->whereHas('leagueTeam.team', function($subQuery) use ($teamSlug) {
                     $subQuery->where('slug', $teamSlug);
                 });
             })
-            ->orderBy('base_price', 'desc')
+            ->when(request('team') === 'unassigned', function($query) {
+                $query->whereNull('league_team_id');
+            });
+
+        // If no specific team filter, ensure we only get players for this league
+        if (!request('team')) {
+            $query->where(function($subQuery) use ($league) {
+                $subQuery->whereHas('leagueTeam', function($q) use ($league) {
+                    $q->where('league_id', $league->id);
+                })
+                ->orWhereNull('league_team_id'); // Include players without a team
+            });
+        }
+
+        $leaguePlayers = $query->orderBy('base_price', 'desc')
             ->paginate(15);
 
         // Get available teams for filtering
@@ -40,16 +51,24 @@ class LeaguePlayerController extends Controller
             ->get()
             ->pluck('team');
 
-        // Get status counts
-        $statusCounts = LeaguePlayer::whereHas('leagueTeam', function($query) use ($league) {
-            $query->where('league_id', $league->id);
-        })
-        ->selectRaw('status, count(*) as count')
-        ->groupBy('status')
-        ->pluck('count', 'status')
-        ->toArray();
+        // Get status counts for all players in the league
+        $statusQuery = LeaguePlayer::where(function($query) use ($league) {
+            $query->whereHas('leagueTeam', function($q) use ($league) {
+                $q->where('league_id', $league->id);
+            })
+            ->orWhereNull('league_team_id');
+        });
+        
+        $statusCounts = $statusQuery->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
 
-        return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts'));
+        // Count players without a team
+        $unassignedCount = LeaguePlayer::whereNull('league_team_id')
+            ->count();
+
+        return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts', 'unassignedCount'));
     }
 
     /**
@@ -81,7 +100,7 @@ class LeaguePlayerController extends Controller
     public function store(Request $request, League $league)
     {
         $request->validate([
-            'league_team_id' => 'required|exists:league_teams,id',
+            'league_team_id' => 'nullable|exists:league_teams,id',
             'user_id' => [
                 'required',
                 'exists:users,id',
@@ -100,10 +119,12 @@ class LeaguePlayerController extends Controller
             'base_price' => 'required|numeric|min:0',
         ]);
 
-        // Validate league team belongs to current league
-        $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
-        if ($leagueTeam->league_id !== $league->id) {
-            return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
+        // Validate league team belongs to current league if provided
+        if ($request->league_team_id) {
+            $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
+            if ($leagueTeam->league_id !== $league->id) {
+                return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
+            }
         }
 
         LeaguePlayer::create($request->all());
@@ -141,16 +162,18 @@ class LeaguePlayerController extends Controller
     public function update(Request $request, League $league, LeaguePlayer $leaguePlayer)
     {
         $request->validate([
-            'league_team_id' => 'required|exists:league_teams,id',
+            'league_team_id' => 'nullable|exists:league_teams,id',
             'retention' => 'boolean',
             'status' => 'required|in:pending,available,sold,unsold,skip',
             'base_price' => 'required|numeric|min:0',
         ]);
 
-        // Validate league team belongs to current league
-        $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
-        if ($leagueTeam->league_id !== $league->id) {
-            return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
+        // Validate league team belongs to current league if provided
+        if ($request->league_team_id) {
+            $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
+            if ($leagueTeam->league_id !== $league->id) {
+                return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
+            }
         }
 
         $leaguePlayer->update($request->all());

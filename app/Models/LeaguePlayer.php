@@ -24,6 +24,7 @@ class LeaguePlayer extends Model
         'retention',
         'status',
         'base_price',
+        'created_by',
     ];
 
     /**
@@ -209,5 +210,13 @@ class LeaguePlayer extends Model
     public function auctionBids(): HasMany
     {
         return $this->hasMany(\App\Models\AuctionBid::class);
+    }
+    
+    /**
+     * Get the user who created this league player entry.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
