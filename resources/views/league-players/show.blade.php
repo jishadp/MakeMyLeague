@@ -158,9 +158,23 @@
                             @method('DELETE')
                             <button type="submit" 
                                     class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700">
-                                Remove from League
+                                Remove from Team
                             </button>
                         </form>
+                        
+                        @if($leaguePlayer->retention)
+                        <form action="{{ route('league-players.updateStatus', [$league, $leaguePlayer]) }}" 
+                              method="POST" 
+                              onsubmit="return confirm('Are you sure you want to remove the retention status from this player?')">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="retention" value="0">
+                            <button type="submit" 
+                                    class="w-full flex items-center justify-center px-4 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700">
+                                Remove Retention
+                            </button>
+                        </form>
+                        @endif
                     </div>
                 </div>
                 

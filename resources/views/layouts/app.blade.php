@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="League Manager - Register today to manage leagues, teams, and players seamlessly">
     <meta name="keywords" content="league manager, sports management, team management, player registration">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'League Manager - Register Today')</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         tailwind.config = {
             theme: {

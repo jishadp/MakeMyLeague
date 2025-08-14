@@ -43,42 +43,60 @@ class LeaguePlayerSeeder extends Seeder
 
         // Shuffle players for random distribution
         $shuffledPlayers = $players->shuffle();
-        $playerIndex = 0;
 
         // Base prices array
         $basePrices = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000];
-
-        foreach ($leagueTeams as $leagueTeam) {
-            // Add players to each team (max_team_players limit)
-            $playersPerTeam = min($league->max_team_players, 
-                                 ceil($shuffledPlayers->count() / $leagueTeams->count()));
+        
+        // First, create available players without team assignment for auction
+        foreach ($shuffledPlayers as $player) {
+            // Create league player without team assignment (for auction)
+            LeaguePlayer::create([
+                'league_team_id' => null, // No team assigned initially
+                'user_id' => $player->id,
+                'retention' => false, // Default retention is false
+                'status' => 'available', // All players are available
+                'base_price' => $basePrices[array_rand($basePrices)],
+            ]);
+        }
+        
+        // If retention is enabled, assign retention players to teams
+        if ($league->retention) {
+            $this->command->info("Assigning retention players to teams...");
             
-            for ($i = 0; $i < $playersPerTeam && $playerIndex < $shuffledPlayers->count(); $i++) {
-                $player = $shuffledPlayers[$playerIndex];
+            // Reset player index
+            $playerIndex = 0;
+            
+            foreach ($leagueTeams as $leagueTeam) {
+                // Number of retention players per team
+                $retentionCount = min($league->retention_players ?? 2, 
+                                    ceil($shuffledPlayers->count() / $leagueTeams->count()));
                 
-                // Determine if player is retained (only if league has retention enabled)
-                $isRetention = $league->retention && $i < $league->retention_players && rand(0, 1);
-                
-                // Determine status
-                $status = 'pending';
-                if ($leagueTeam->status === 'available') {
-                    $statusOptions = ['pending', 'available', 'sold', 'unsold'];
-                    $status = $statusOptions[array_rand($statusOptions)];
+                for ($i = 0; $i < $retentionCount && $playerIndex < $shuffledPlayers->count(); $i++) {
+                    $player = $shuffledPlayers[$playerIndex];
+                    
+                    // Find the player in the league players table
+                    $leaguePlayer = LeaguePlayer::where('user_id', $player->id)
+                                               ->where('league_team_id', null)
+                                               ->first();
+                    
+                    if ($leaguePlayer) {
+                        // Update to make this a retention player
+                        $leaguePlayer->update([
+                            'league_team_id' => $leagueTeam->id,
+                            'retention' => true, // Mark as retention player
+                            'status' => 'sold', // Player is already sold to this team
+                        ]);
+                    }
+                    
+                    $playerIndex++;
                 }
-
-                LeaguePlayer::create([
-                    'league_team_id' => $leagueTeam->id,
-                    'user_id' => $player->id,
-                    'retention' => $isRetention,
-                    'status' => $status,
-                    'base_price' => $basePrices[array_rand($basePrices)],
-                ]);
-
-                $playerIndex++;
             }
         }
 
         $this->command->info('League players seeded successfully!');
-        $this->command->info("Added players to {$leagueTeams->count()} teams in league: {$league->name}");
+        $this->command->info("Created " . $shuffledPlayers->count() . " league players for auction");
+        if ($league->retention) {
+            $this->command->info("Assigned retention players to {$leagueTeams->count()} teams in league: {$league->name}");
+        }
     }
 }

@@ -62,29 +62,37 @@ class LeaguePlayer extends Model
         if (!$this->relationLoaded('user')) {
             $this->load('user');
         }
-        if (!$this->relationLoaded('leagueTeam')) {
-            $this->load('leagueTeam.team');
-        }
         
         $user = $this->user;
-        $leagueTeam = $this->leagueTeam;
+        $leagueTeam = null;
         
-        if (!$user || !$leagueTeam) {
-            // Fallback: load by IDs if relationships still aren't available
-            $user = \App\Models\User::find($this->user_id);
-            $leagueTeam = \App\Models\LeagueTeam::with('team')->find($this->league_team_id);
+        if ($this->league_team_id) {
+            if (!$this->relationLoaded('leagueTeam')) {
+                $this->load('leagueTeam.team');
+            }
+            $leagueTeam = $this->leagueTeam;
         }
         
-        if (!$user || !$leagueTeam) {
+        if (!$user) {
+            // Fallback: load by IDs if relationships still aren't available
+            $user = \App\Models\User::find($this->user_id);
+        }
+        
+        if (!$user) {
             // Final fallback slug if relationships aren't available
             $slug = 'league-player-' . ($this->id ?? uniqid());
         } else {
-            $teamName = $leagueTeam->team ? $leagueTeam->team->name : 'unknown-team';
-            $slug = Str::slug($user->name . '-' . $teamName);
+            if ($leagueTeam && $leagueTeam->team) {
+                // Player assigned to a team
+                $teamName = $leagueTeam->team->name;
+                $slug = Str::slug($user->name . '-' . $teamName);
+            } else {
+                // Player available for auction (no team)
+                $slug = Str::slug($user->name . '-available');
+            }
         }
         
-        $count = static::where('league_team_id', $this->league_team_id)
-                      ->whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
+        $count = static::whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
                       ->where('id', '!=', $this->id ?? 0)
                       ->count();
 
@@ -107,7 +115,7 @@ class LeaguePlayer extends Model
     public static function rules()
     {
         return [
-            'league_team_id' => 'required|exists:league_teams,id',
+            'league_team_id' => 'nullable|exists:league_teams,id',
             'user_id' => 'required|exists:users,id',
             'retention' => 'boolean',
             'status' => 'required|in:pending,available,sold,unsold,skip',

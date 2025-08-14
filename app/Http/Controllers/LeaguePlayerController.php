@@ -26,9 +26,9 @@ class LeaguePlayerController extends Controller
             ->when(request('retention'), function($query, $retention) {
                 $query->where('retention', $retention === 'true');
             })
-            ->when(request('team'), function($query, $teamId) {
-                $query->whereHas('leagueTeam', function($subQuery) use ($teamId) {
-                    $subQuery->where('team_id', $teamId);
+            ->when(request('team'), function($query, $teamSlug) {
+                $query->whereHas('leagueTeam.team', function($subQuery) use ($teamSlug) {
+                    $subQuery->where('slug', $teamSlug);
                 });
             })
             ->orderBy('base_price', 'desc')
@@ -165,11 +165,24 @@ class LeaguePlayerController extends Controller
      */
     public function destroy(League $league, LeaguePlayer $leaguePlayer)
     {
+        // Store the team ID before deletion for redirection
+        $leagueTeamId = $leaguePlayer->league_team_id;
+        $leagueTeam = LeagueTeam::find($leagueTeamId);
+        
+        $playerName = $leaguePlayer->user->name;
         $leaguePlayer->delete();
+
+        // Check if the request is coming from team page
+        $referer = request()->headers->get('referer');
+        if ($referer && $leagueTeam && strpos($referer, 'teams/' . $leagueTeam->slug) !== false) {
+            return redirect()
+                ->route('league-teams.show', [$league, $leagueTeam])
+                ->with('success', "Player {$playerName} removed from team successfully!");
+        }
 
         return redirect()
             ->route('league-players.index', $league)
-            ->with('success', 'Player removed from league successfully!');
+            ->with('success', "Player {$playerName} removed from league successfully!");
     }
 
     /**
@@ -177,13 +190,49 @@ class LeaguePlayerController extends Controller
      */
     public function updateStatus(Request $request, League $league, LeaguePlayer $leaguePlayer)
     {
-        $request->validate([
-            'status' => 'required|in:pending,available,sold,unsold,skip',
+        $validatedData = $request->validate([
+            'status' => 'nullable|in:pending,available,sold,unsold,skip',
+            'retention' => 'nullable|boolean',
         ]);
 
-        $leaguePlayer->update(['status' => $request->status]);
+        $updates = [];
+        
+        if (isset($validatedData['status'])) {
+            $updates['status'] = $validatedData['status'];
+        }
+        
+        if (isset($validatedData['retention'])) {
+            $updates['retention'] = $validatedData['retention'];
+            
+            // If removing retention, check where the request is coming from for proper redirection
+            if ($validatedData['retention'] == 0) {
+                $successMessage = 'Player retention status removed successfully.';
+            } else {
+                $successMessage = 'Player status updated successfully!';
+            }
+        } else {
+            $successMessage = 'Player status updated successfully!';
+        }
 
-        return back()->with('success', 'Player status updated successfully!');
+        $leaguePlayer->update($updates);
+
+        // Check if the request is coming from team page
+        $referer = request()->headers->get('referer');
+        $leagueTeam = $leaguePlayer->leagueTeam;
+        
+        if ($referer && $leagueTeam && strpos($referer, 'teams/' . $leagueTeam->slug) !== false) {
+            return redirect()
+                ->route('league-teams.show', [$league, $leagueTeam])
+                ->with('success', $successMessage);
+        }
+        
+        if ($referer && strpos($referer, 'players/' . $leaguePlayer->slug) !== false) {
+            return redirect()
+                ->route('league-players.show', [$league, $leaguePlayer])
+                ->with('success', $successMessage);
+        }
+
+        return back()->with('success', $successMessage);
     }
 
     /**
@@ -194,16 +243,56 @@ class LeaguePlayerController extends Controller
         $request->validate([
             'player_ids' => 'required|array',
             'player_ids.*' => 'exists:league_players,id',
-            'status' => 'required|in:pending,available,sold,unsold,skip',
+            'status' => 'nullable|in:pending,available,sold,unsold,skip',
+            'retention' => 'nullable|array',
+            'retention.*' => 'boolean',
         ]);
 
-        LeaguePlayer::whereIn('id', $request->player_ids)
-            ->whereHas('leagueTeam', function($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
-            ->update(['status' => $request->status]);
+        // Get the referer to determine which team page we came from
+        $referer = request()->headers->get('referer');
+        $teamSlug = null;
+        
+        if ($referer && preg_match('/teams\/([^\/]+)/', $referer, $matches)) {
+            $teamSlug = $matches[1];
+            $leagueTeam = LeagueTeam::where('slug', $teamSlug)
+                                    ->where('league_id', $league->id)
+                                    ->first();
+        }
+
+        // If status is provided, update all player statuses
+        if ($request->has('status')) {
+            LeaguePlayer::whereIn('id', $request->player_ids)
+                ->whereHas('leagueTeam', function($query) use ($league) {
+                    $query->where('league_id', $league->id);
+                })
+                ->update(['status' => $request->status]);
+        }
+
+        // If retention is provided, update individual player retention status
+        if ($request->has('retention')) {
+            foreach ($request->player_ids as $playerId) {
+                if (isset($request->retention[$playerId])) {
+                    $leaguePlayer = LeaguePlayer::find($playerId);
+                    
+                    if (!$leaguePlayer) continue;
+                    
+                    // For retained players from other teams, move them to the current team
+                    if ((bool)$request->retention[$playerId] && $leagueTeam && $leaguePlayer->league_team_id != $leagueTeam->id) {
+                        $leaguePlayer->update([
+                            'league_team_id' => $leagueTeam->id,
+                            'retention' => true
+                        ]);
+                    } else {
+                        // Just update the retention status
+                        $leaguePlayer->update([
+                            'retention' => (bool)$request->retention[$playerId]
+                        ]);
+                    }
+                }
+            }
+        }
 
         $count = count($request->player_ids);
-        return back()->with('success', "{$count} players' status updated successfully!");
+        return back()->with('success', "{$count} players updated successfully!");
     }
 }

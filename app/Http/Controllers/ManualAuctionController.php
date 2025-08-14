@@ -210,9 +210,11 @@ class ManualAuctionController extends Controller
     /**
      * Get team wallet balance.
      */
-    public function getTeamWallet($teamId, League $league)
+    public function getTeamWallet($teamSlug, League $league)
     {
-        $leagueTeam = LeagueTeam::where('id', $teamId)
+        $leagueTeam = LeagueTeam::whereHas('team', function($query) use ($teamSlug) {
+                $query->where('slug', $teamSlug);
+            })
             ->where('league_id', $league->id)
             ->first();
             

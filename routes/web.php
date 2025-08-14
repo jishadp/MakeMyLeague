@@ -88,7 +88,7 @@ Route::middleware('auth')->group(function(){
         Route::post('manual', [ManualAuctionController::class, 'store'])->name('manual.store');
         Route::post('manual/update-status', [ManualAuctionController::class, 'updatePlayerStatus'])->name('manual.update-status');
         Route::get('manual/search-players', [ManualAuctionController::class, 'searchPlayers'])->name('manual.search-players');
-        Route::get('manual/team-wallet/{teamId}', [ManualAuctionController::class, 'getTeamWallet'])->name('manual.team-wallet');
+        Route::get('manual/team-wallet/{teamSlug}', [ManualAuctionController::class, 'getTeamWallet'])->name('manual.team-wallet');
         
         // Bidding auction routes
         Route::get('bidding', [AuctionController::class, 'index'])->name('bidding');
