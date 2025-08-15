@@ -43,7 +43,6 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <span class="text-xs mt-1 font-medium">Menu</span>
                 </button>
                 <div class="w-16 h-6 opacity-0">Spacer</div>
             </div>
@@ -73,71 +72,4 @@
             </a>
         </div>
     </div>
-
-    <style>
-        .home-button {
-            top: -20px;
-            z-index: 1;
-        }
-        
-        .nav-item {
-            position: relative;
-            z-index: 0;
-            min-width: 60px;
-        }
-        
-        @media (max-width: 400px) {
-            .nav-item span {
-                font-size: 0.65rem;
-            }
-        }
-        
-        /* Hamburger Menu Small Animation */
-        .hamburger-menu-small {
-            width: 20px;
-            height: 14px;
-            position: relative;
-            margin: 0 auto;
-        }
-        
-        .hamburger-menu-small span {
-            display: block;
-            position: absolute;
-            height: 2px;
-            width: 100%;
-            background: #5c9c85;
-            border-radius: 2px;
-            opacity: 1;
-            left: 0;
-            transform: rotate(0deg);
-            transition: .25s ease-in-out;
-        }
-        
-        .hamburger-menu-small span:nth-child(1) {
-            top: 0px;
-        }
-        
-        .hamburger-menu-small span:nth-child(2) {
-            top: 6px;
-        }
-        
-        .hamburger-menu-small span:nth-child(3) {
-            top: 12px;
-        }
-        
-        .open .hamburger-menu-small span:nth-child(1) {
-            top: 6px;
-            transform: rotate(135deg);
-        }
-        
-        .open .hamburger-menu-small span:nth-child(2) {
-            opacity: 0;
-            left: -60px;
-        }
-        
-        .open .hamburger-menu-small span:nth-child(3) {
-            top: 6px;
-            transform: rotate(-135deg);
-        }
-    </style>
 </div>

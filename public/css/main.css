@@ -1,0 +1,178 @@
+/* Animation keyframes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.delay-100 { animation-delay: 0.05s; }
+.delay-200 { animation-delay: 0.1s; }
+.delay-300 { animation-delay: 0.15s; }
+
+.sidebar-visible {
+    animation: slideInLeft 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@media (prefers-reduced-motion) {
+    .animate-fade-in, .slide-in-left {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* Hamburger Menu Top Animation */
+.hamburger-menu-top {
+    width: 24px;
+    height: 16px;
+    position: relative;
+    cursor: pointer;
+}
+
+.hamburger-menu-top span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: white;
+    border-radius: 2px;
+    opacity: 1;
+    left: 0;
+    transform: rotate(0deg);
+    transition: .25s ease-in-out;
+}
+
+.hamburger-menu-top span:nth-child(1) {
+    top: 0px;
+}
+
+.hamburger-menu-top span:nth-child(2) {
+    top: 7px;
+}
+
+.hamburger-menu-top span:nth-child(3) {
+    top: 14px;
+}
+
+.open .hamburger-menu-top span:nth-child(1) {
+    top: 7px;
+    transform: rotate(135deg);
+}
+
+.open .hamburger-menu-top span:nth-child(2) {
+    opacity: 0;
+    left: -60px;
+}
+
+.open .hamburger-menu-top span:nth-child(3) {
+    top: 7px;
+    transform: rotate(-135deg);
+}
+
+/* Hamburger Menu Small Animation */
+.hamburger-menu-small {
+    width: 20px;
+    height: 14px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.hamburger-menu-small span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: #5c9c85;
+    border-radius: 2px;
+    opacity: 1;
+    left: 0;
+    transform: rotate(0deg);
+    transition: .25s ease-in-out;
+}
+
+.hamburger-menu-small span:nth-child(1) {
+    top: 0px;
+}
+
+.hamburger-menu-small span:nth-child(2) {
+    top: 6px;
+}
+
+.hamburger-menu-small span:nth-child(3) {
+    top: 12px;
+}
+
+.open .hamburger-menu-small span:nth-child(1) {
+    top: 6px;
+    transform: rotate(135deg);
+}
+
+.open .hamburger-menu-small span:nth-child(2) {
+    opacity: 0;
+    left: -60px;
+}
+
+.open .hamburger-menu-small span:nth-child(3) {
+    top: 6px;
+    transform: rotate(-135deg);
+}
+
+/* Bottom Navigation Styles */
+.home-button {
+    top: -20px;
+    z-index: 1;
+}
+
+.nav-item {
+    position: relative;
+    z-index: 0;
+    min-width: 60px;
+}
+
+@media (max-width: 400px) {
+    .nav-item span {
+        font-size: 0.65rem;
+    }
+}
+
+/* Mobile sidebar animation */
+#sidebar {
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Ensure the logout button is always visible on mobile */
+@media (max-width: 768px) {
+    #sidebar {
+        padding-bottom: 100px; /* Extra space to ensure logout is visible */
+    }
+    
+    #sidebar form button {
+        position: relative;
+        z-index: 60; /* Higher than sidebar but lower than bottom nav */
+        margin-bottom: 28px; /* Extra margin to push above bottom nav */
+    }
+}
+
+/* Responsive adjustments for desktop navigation */
+@media (min-width: 768px) {
+    .nav-links-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+}
