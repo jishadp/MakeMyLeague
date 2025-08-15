@@ -31,8 +31,18 @@
             </div>
             @endauth
 
-            <!-- User Name (For All Devices) -->
-            <div class="flex items-center">
+            <!-- User Name & Theme Switcher (For All Devices) -->
+            <div class="flex items-center space-x-3">
+                <!-- Theme Switcher Button -->
+                <button id="theme-switcher" type="button" 
+                        class="flex items-center justify-center p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 active:scale-95" 
+                        aria-label="Switch theme"
+                        title="Switch theme (Ctrl+T)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5zM21 15a2 2 0 00-2-2h-4a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2v-2z"/>
+                    </svg>
+                </button>
+                
                 @auth
                     <span class="text-white font-medium drop-shadow">{{ Auth::user()->name }}</span>
                 @endauth

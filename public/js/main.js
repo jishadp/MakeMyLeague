@@ -114,4 +114,86 @@
             }
         });
     }
+
+    /** Theme Switching functionality */
+    function setupThemeSwitcher() {
+        const body = document.getElementById('app-body');
+        const themeCssLink = document.getElementById('theme-css');
+        const themeSwitcherButton = document.getElementById('theme-switcher');
+        
+        // Available themes
+        const themes = {
+            'glacier-blue': {
+                name: 'Glacier Blue',
+                cssFile: '/css/glacier-blue-theme.css',
+                bodyClass: 'glacier-blue-theme'
+            },
+            'deep-teal': {
+                name: 'Deep Teal',
+                cssFile: '/css/deep-teal-theme.css',
+                bodyClass: 'deep-teal-theme'
+            }
+        };
+        
+        // Get current theme from localStorage or default to glacier-blue
+        let currentTheme = localStorage.getItem('selectedTheme') || 'glacier-blue';
+        
+        // Apply theme on page load
+        applyTheme(currentTheme);
+        
+        function applyTheme(themeId) {
+            const theme = themes[themeId];
+            if (!theme) return;
+            
+            // Update CSS file
+            themeCssLink.href = theme.cssFile + '?v=' + Date.now();
+            
+            // Update body class
+            // Remove all theme classes first
+            Object.values(themes).forEach(t => {
+                body.classList.remove(t.bodyClass);
+            });
+            
+            // Add new theme class
+            body.classList.add(theme.bodyClass);
+            
+            // Save to localStorage
+            localStorage.setItem('selectedTheme', themeId);
+            currentTheme = themeId;
+            
+            // Update button title
+            if (themeSwitcherButton) {
+                themeSwitcherButton.title = `Current: ${theme.name} | Switch theme (Ctrl+T)`;
+            }
+        }
+        
+        // Theme switcher button click event
+        if (themeSwitcherButton) {
+            themeSwitcherButton.addEventListener('click', function() {
+                const themeIds = Object.keys(themes);
+                const currentIndex = themeIds.indexOf(currentTheme);
+                const nextIndex = (currentIndex + 1) % themeIds.length;
+                applyTheme(themeIds[nextIndex]);
+            });
+        }
+        
+        // Expose theme switching function globally for potential UI controls
+        window.switchTheme = function(themeId) {
+            applyTheme(themeId);
+        };
+        
+        // Add keyboard shortcut for theme switching (Ctrl/Cmd + T)
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 't' && !e.shiftKey) {
+                e.preventDefault();
+                const themeIds = Object.keys(themes);
+                const currentIndex = themeIds.indexOf(currentTheme);
+                const nextIndex = (currentIndex + 1) % themeIds.length;
+                applyTheme(themeIds[nextIndex]);
+            }
+        });
+    }
+    
+    // Initialize theme switcher
+    setupThemeSwitcher();
 })();
