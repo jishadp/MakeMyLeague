@@ -34,7 +34,7 @@ class LeaguePlayerSeeder extends Seeder
         }
 
         // Base prices array
-        $basePrices = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000];
+        $basePrices = [200];
         
         // Create all players as available for auction without team assignment
         foreach ($players as $player) {
