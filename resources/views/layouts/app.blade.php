@@ -49,15 +49,37 @@
 
     @yield('styles')
 </head>
-<body class="bg-gray-50 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 antialiased min-h-screen flex flex-col pb-28">
     @include('partials.nav')
     
-    <main class="flex-grow">
+    <main class="flex-grow" id="top">
+        
         @yield('content')
+        
+        @auth
+            @include('partials.bottom-navigation-buttons')
+        @endauth
     </main>
     
     @include('partials.footer')
     
     @yield('scripts')
+    
+    <script>
+        // Smooth scroll for Back to Top button
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopLinks = document.querySelectorAll('a[href="#top"]');
+            
+            backToTopLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
