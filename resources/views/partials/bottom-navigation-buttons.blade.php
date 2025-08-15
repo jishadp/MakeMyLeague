@@ -36,7 +36,8 @@
                           flex flex-col items-center justify-center rounded-full 
                           bg-white text-[#5c9c85] w-16 h-16
                           shadow-lg hover:shadow-xl transition-all duration-300
-                          active:scale-95 border-4 border-[#89a894]/30">
+                          active:scale-95 border-4 border-[#89a894]/30"
+                   aria-label="Toggle menu">
                     <div class="hamburger-menu-small">
                         <span></span>
                         <span></span>
