@@ -8,6 +8,44 @@
     const closeButton = document.getElementById('close-sidebar');
     const desktopLeagueSelector = document.getElementById('header-league-selector');
     const mobileLeagueSelector = document.getElementById('mobile-league-selector');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    /** Loading Overlay functionality */
+    function setupLoadingAnimation() {
+        // Get all navigation links that are not anchor links or JavaScript actions
+        const navLinks = document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript"])');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Skip if modifier keys are pressed (for opening in new tab, etc.)
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                
+                // Skip for external links
+                const url = new URL(link.href, window.location.origin);
+                if (url.origin !== window.location.origin) return;
+                
+                // Show loading overlay
+                e.preventDefault();
+                loadingOverlay.classList.add('active');
+                
+                // Navigate after a small delay to allow animation to be seen
+                setTimeout(() => {
+                    window.location.href = link.href;
+                }, 400);
+            });
+        });
+        
+        // Also add loading for form submissions (like logout)
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // If it's a logout form or other navigation form
+                if (form.method.toLowerCase() === 'post') {
+                    loadingOverlay.classList.add('active');
+                }
+            });
+        });
+    }
 
     /** Smooth Scroll Back to Top */
     if (backToTopLinks.length) {
@@ -55,10 +93,25 @@
     if (desktopLeagueSelector && mobileLeagueSelector) {
         const syncAndNavigate = (source, target) => {
             target.value = source.value;
-            if (source.value) window.location.href = `/leagues/${source.value}`;
+            if (source.value) {
+                loadingOverlay.classList.add('active');
+                window.location.href = `/leagues/${source.value}`;
+            }
         };
         desktopLeagueSelector.value = mobileLeagueSelector.value;
         desktopLeagueSelector.addEventListener('change', () => syncAndNavigate(desktopLeagueSelector, mobileLeagueSelector));
         mobileLeagueSelector.addEventListener('change', () => syncAndNavigate(mobileLeagueSelector, desktopLeagueSelector));
+    }
+
+    // Set up loading animation for all navigation links
+    if (loadingOverlay) {
+        setupLoadingAnimation();
+        
+        // Hide loading overlay when back button is used
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                loadingOverlay.classList.remove('active');
+            }
+        });
     }
 })();

@@ -47,6 +47,11 @@
     
     @include('partials.footer')
     
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader"></div>
+    </div>
+    
     <!-- External JavaScript -->
     <script src="{{ asset('js/main.js') }}?v={{ time() }}" defer></script>
     

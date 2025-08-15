@@ -176,3 +176,77 @@
         width: 100%;
     }
 }
+
+/* Loading Animation Styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(92, 156, 133, 0.3);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loader {
+    width: 8vmax;
+    height: 8vmax;
+    border-right: 4px solid #5c9c85;
+    border-radius: 100%;
+    animation: spinRight 800ms linear infinite;
+    position: relative;
+    transform-origin: center;
+}
+
+.loader:before, .loader:after {
+    content: '';
+    width: 6vmax;
+    height: 6vmax;
+    border-left: 3px solid #7ea28b;
+    border-radius: 100%;
+    position: absolute;
+    top: calc(50% - 3vmax);
+    left: calc(50% - 3vmax);
+    animation: spinLeft 800ms linear infinite;
+    transform-origin: center;
+}
+
+.loader:after {
+    width: 4vmax;
+    height: 4vmax;
+    top: calc(50% - 2vmax);
+    left: calc(50% - 2vmax);
+    border: 0;
+    border-right: 2px solid #89a894;
+    animation: none;
+}
+
+@keyframes spinLeft {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-720deg);
+    }
+}
+
+@keyframes spinRight {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(720deg);
+    }
+}
