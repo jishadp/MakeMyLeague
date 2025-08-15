@@ -29,10 +29,10 @@
     <!-- Filters Section -->
     <section class="py-6 px-4 sm:px-6 lg:px-8 bg-white border-b">
         <div class="max-w-7xl mx-auto">
-            <form action="{{ route('auctions.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form action="{{ route('auctions.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <label for="league" class="block text-sm font-medium text-gray-700 mb-1">Filter by League</label>
-                    <select id="league" name="league_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <select id="league" name="league_id" class="w-full h-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-3 text-center">
                         <option value="">All Leagues</option>
                         @foreach($leagues as $league)
                             <option value="{{ $league->id }}" {{ request('league_id') == $league->id ? 'selected' : '' }}>
@@ -44,7 +44,7 @@
                 
                 <div>
                     <label for="team" class="block text-sm font-medium text-gray-700 mb-1">Filter by Team</label>
-                    <select id="team" name="team_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <select id="team" name="team_id" class="w-full h-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-3 text-center">
                         <option value="">All Teams</option>
                         @foreach($teams as $team)
                             <option value="{{ $team->id }}" {{ request('team_id') == $team->id ? 'selected' : '' }}>
@@ -56,7 +56,7 @@
                 
                 <div>
                     <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
-                    <select id="sort" name="sort" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <select id="sort" name="sort" class="w-full h-12 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-3 text-center">
                         <option value="latest" {{ request('sort') == 'latest' || !request('sort') ? 'selected' : '' }}>Latest First</option>
                         <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
                         <option value="amount_high" {{ request('sort') == 'amount_high' ? 'selected' : '' }}>Highest Amount</option>
@@ -65,7 +65,7 @@
                 </div>
                 
                 <div class="flex items-end">
-                    <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                    <button type="submit" class="w-full h-12 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors font-medium">
                         Apply Filters
                     </button>
                 </div>

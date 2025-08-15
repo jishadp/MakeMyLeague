@@ -18,11 +18,11 @@
             <form action="{{ route('players.index') }}" method="GET">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Filter Players</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                     <!-- Role Filter -->
                     <div>
                         <label for="role_id" class="block text-sm font-medium text-gray-700 mb-1">Playing Role</label>
-                        <select name="role_id" id="role_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        <select name="role_id" id="role_id" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 text-center"
                                 onchange="this.form.submit()">
                             <option value="">All Roles</option>
                             @foreach($roles as $role)
@@ -36,18 +36,25 @@
                     <!-- Sort By -->
                     <div>
                         <label for="sort_by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                        <div class="flex gap-2">
-                            <select name="sort_by" id="sort_by" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
-                            </select>
-                            <select name="sort_dir" id="sort_dir" class="w-28 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="asc" {{ request('sort_dir') == 'asc' ? 'selected' : '' }}>Asc</option>
-                                <option value="desc" {{ request('sort_dir') == 'desc' ? 'selected' : '' }}>Desc</option>
-                            </select>
-                            <button type="submit" class="bg-indigo-600 text-white rounded-lg px-4 hover:bg-indigo-700 transition-colors">
-                                Sort
-                            </button>
-                        </div>
+                        <select name="sort_by" id="sort_by" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 text-center">
+                            <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Sort Direction -->
+                    <div>
+                        <label for="sort_dir" class="block text-sm font-medium text-gray-700 mb-1">Direction</label>
+                        <select name="sort_dir" id="sort_dir" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 text-center">
+                            <option value="asc" {{ request('sort_dir') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                            <option value="desc" {{ request('sort_dir') == 'desc' ? 'selected' : '' }}>Descending</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full h-12 bg-indigo-600 text-white rounded-lg px-4 py-2 hover:bg-indigo-700 transition-colors font-medium">
+                            Apply Filters
+                        </button>
                     </div>
                 </div>
                 

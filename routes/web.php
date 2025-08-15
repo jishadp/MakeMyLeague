@@ -30,8 +30,15 @@ Route::get('/', function () {
         ->players()
         ->take(3)
         ->get();
+    
+    // Get statistics for features section
+    $stats = [
+        'leagues' => \App\Models\League::where('status', '!=', 'cancelled')->count(),
+        'teams' => \App\Models\Team::count(),
+        'players' => \App\Models\User::players()->count(),
+    ];
         
-    return view('welcome', compact('featuredGrounds', 'featuredTeams', 'featuredPlayers'));
+    return view('welcome', compact('featuredGrounds', 'featuredTeams', 'featuredPlayers', 'stats'));
 });
 
 Route::get('login',[LoginController::class,'login'])->name('login');
