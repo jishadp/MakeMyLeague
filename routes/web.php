@@ -53,7 +53,12 @@ Route::delete('teams/{team}', [TeamController::class, 'destroy'])->name('teams.d
 
 // Player routes
 Route::get('players', [PlayerController::class, 'index'])->name('players.index');
+Route::get('players/create', [PlayerController::class, 'create'])->name('players.create')->middleware('auth');
+Route::post('players', [PlayerController::class, 'store'])->name('players.store')->middleware('auth');
 Route::get('players/{player}', [PlayerController::class, 'show'])->name('players.show');
+Route::get('players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit')->middleware('auth');
+Route::put('players/{player}', [PlayerController::class, 'update'])->name('players.update')->middleware('auth');
+Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
 
 Route::middleware('auth')->group(function(){
     Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard');

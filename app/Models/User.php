@@ -27,6 +27,7 @@ class User extends Authenticatable
         'pin',
         'role_id',
         'local_body_id',
+        'photo',
     ];
 
     /**
@@ -77,6 +78,18 @@ class User extends Authenticatable
     public function scopePlayers($query)
     {
         return $query->whereNotNull('role_id');
+    }
+    
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        // For now, let's assume users with ID 1 are admins
+        // In a production app, you would use a proper role system
+        return $this->id === 1;
     }
     
     /**
