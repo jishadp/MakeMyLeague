@@ -21,14 +21,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share the default league with all views
+        // Share the default league and all active leagues with all views
         View::composer('*', function ($view) {
             try {
                 $defaultLeague = League::where('is_default', true)->first();
-                $view->with('defaultLeague', $defaultLeague);
+                $activeLeagues = League::where('status', 'active')->orderBy('name')->get();
+                
+                $view->with([
+                    'defaultLeague' => $defaultLeague,
+                    'navLeagues' => $activeLeagues
+                ]);
             } catch (\Exception $e) {
                 // Handle case when database isn't set up yet
-                $view->with('defaultLeague', null);
+                $view->with([
+                    'defaultLeague' => null,
+                    'navLeagues' => collect()
+                ]);
             }
         });
     }

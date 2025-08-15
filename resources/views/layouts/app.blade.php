@@ -49,10 +49,10 @@
 
     @yield('styles')
 </head>
-<body class="bg-gray-50 antialiased min-h-screen flex flex-col pb-28">
+<body class="bg-gray-50 antialiased min-h-screen flex flex-col">
     @include('partials.nav')
     
-    <main class="flex-grow" id="top">
+    <main class="flex-grow pb-28" id="top">
         
         @yield('content')
         
@@ -79,6 +79,23 @@
                     });
                 });
             });
+            
+            // Make the bottom menu button work with the sidebar
+            const bottomMenuToggle = document.querySelector('.bottom-navigation-buttons #mobile-menu-toggle');
+            const headerMenuToggle = document.querySelector('header #mobile-menu-toggle');
+            
+            if (bottomMenuToggle && headerMenuToggle) {
+                bottomMenuToggle.addEventListener('click', function() {
+                    // Trigger the header menu toggle
+                    headerMenuToggle.click();
+                    // Match the open state
+                    if (headerMenuToggle.classList.contains('open')) {
+                        bottomMenuToggle.classList.add('open');
+                    } else {
+                        bottomMenuToggle.classList.remove('open');
+                    }
+                });
+            }
         });
     </script>
 </body>

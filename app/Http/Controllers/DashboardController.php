@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Auction;
 use App\Models\League;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\GameRole;
+use App\Models\LeagueTeam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class DashboardController 
 {
@@ -31,5 +34,29 @@ class DashboardController
             ->get();
         
         return view('dashboard', compact('leagues', 'userLeagues', 'userOwnedTeams', 'playerInfo', 'recentPlayers'));
+    }
+    
+    /**
+     * Display the auction listing page.
+     */
+    public function auctionsIndex()
+    {
+        // Get all completed auctions with relationships
+        $auctions = Auction::with([
+            'player', 
+            'leagueTeam.team', 
+            'leagueTeam.league', 
+            'creator'
+        ])
+        ->latest()
+        ->paginate(10);
+        
+        // Get leagues for filter dropdown
+        $leagues = League::all();
+        
+        // Get teams for filter dropdown
+        $teams = LeagueTeam::with('team')->get();
+        
+        return view('dashboard.auctions.index', compact('auctions', 'leagues', 'teams'));
     }
 }

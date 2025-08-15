@@ -62,6 +62,7 @@ Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('p
 
 Route::middleware('auth')->group(function(){
     Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard');
+    Route::get('dashboard/auctions',[DashboardController::class,'auctionsIndex'])->name('auctions.index');
     
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
