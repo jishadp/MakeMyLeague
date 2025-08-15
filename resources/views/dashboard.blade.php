@@ -123,19 +123,34 @@
     <!-- Owned Teams Section -->
     <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-900">Owned Teams</h2>
-                <p class="text-gray-600">Teams you own and manage</p>
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Owned Teams</h2>
+                    <p class="text-gray-600">Teams you own and manage</p>
+                </div>
+                <a href="{{ route('teams.create') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#89a894] to-[#5c9c85] text-white rounded-md hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Create New Team
+                </a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Owned Team 1 -->
+                @forelse($userOwnedTeams as $team)
+                <!-- Owned Team Card -->
                 <div class="bg-gray-50 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
                     <div class="h-40 overflow-hidden relative">
-                        <img src="{{ asset('images/owned.jpg') }}" 
-                             alt="Super Kings" class="w-full h-full object-cover">
+                        @if($team->logo)
+                            <img src="{{ asset($team->logo) }}" 
+                                 alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/owned.jpg') }}" 
+                                 alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        @endif
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                            <h3 class="text-lg font-semibold text-white p-4">Super Kings</h3>
+                            <h3 class="text-lg font-semibold text-white p-4">{{ $team->name }}</h3>
                         </div>
                         <div class="absolute top-3 right-3">
                             <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Owner</span>
@@ -146,50 +161,37 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm bg-green-100 text-green-800">
                                 Active
                             </span>
-                            <span class="text-gray-500 text-sm">Since 2024</span>
+                            <span class="text-gray-500 text-sm">Since {{ $team->created_at->format('M Y') }}</span>
                         </div>
                         <div class="space-y-2 text-sm text-gray-600 mb-4">
-                            <p><span class="font-medium">League:</span> Kerala Cricket League</p>
-                            <p><span class="font-medium">Players:</span> 12 / 15</p>
-                            <p><span class="font-medium">Matches:</span> Won 7, Lost 2</p>
-                            <p><span class="font-medium">Position:</span> Top of the table</p>
+                            <p><span class="font-medium">Home Ground:</span> {{ $team->homeGround->name ?? 'Not specified' }}</p>
+                            <p><span class="font-medium">Location:</span> {{ $team->localBody->name }}</p>
                         </div>
-                        <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                            Manage Team →
+                        <a href="{{ route('teams.show', $team) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                            View Team →
                         </a>
                     </div>
                 </div>
-
-                <!-- Owned Team 2 -->
-                <div class="bg-gray-50 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
-                    <div class="h-40 overflow-hidden relative">
-                        <img src="{{ asset('images/owned.jpg') }}" 
-                             alt="Bangalore Strikers" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                            <h3 class="text-lg font-semibold text-white p-4">Bangalore Strikers</h3>
-                        </div>
-                        <div class="absolute top-3 right-3">
-                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Owner</span>
-                        </div>
+                @empty
+                <!-- No Teams Message -->
+                <div class="col-span-full bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="mb-4">
+                        <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
                     </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm bg-yellow-100 text-yellow-800">
-                                Pre-season
-                            </span>
-                            <span class="text-gray-500 text-sm">New Team</span>
-                        </div>
-                        <div class="space-y-2 text-sm text-gray-600 mb-4">
-                            <p><span class="font-medium">League:</span> South Indian Cricket Cup</p>
-                            <p><span class="font-medium">Players:</span> 8 / 15</p>
-                            <p><span class="font-medium">Registration:</span> In Progress</p>
-                            <p><span class="font-medium">Position:</span> Not Started</p>
-                        </div>
-                        <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                            Complete Registration →
-                        </a>
-                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">You don't have any teams yet</h3>
+                    <p class="text-gray-600 mb-6">Create your first team to get started</p>
+                    <a href="{{ route('teams.create') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#89a894] to-[#5c9c85] text-white rounded-md hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Create Your First Team
+                    </a>
                 </div>
+                @endforelse
             </div>
         </div>
     </section>

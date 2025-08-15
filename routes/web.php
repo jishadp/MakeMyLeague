@@ -38,13 +38,18 @@ Route::get('login',[LoginController::class,'login'])->name('login');
 Route::post('do-login',[LoginController::class,'doLogin'])->name('do.login');
 Route::get('logout',[LoginController::class,'logout'])->name('logout');
 
-// Public routes
+// Ground routes
 Route::get('grounds', [GroundController::class, 'index'])->name('grounds.index');
 Route::get('grounds/{ground}', [GroundController::class, 'show'])->name('grounds.show');
 
-// Team routes
+// Team routes with slugs
 Route::get('teams', [TeamController::class, 'index'])->name('teams.index');
+Route::get('teams/create', [TeamController::class, 'create'])->name('teams.create')->middleware('auth');
+Route::post('teams', [TeamController::class, 'store'])->name('teams.store')->middleware('auth');
 Route::get('teams/{team}', [TeamController::class, 'show'])->name('teams.show');
+Route::get('teams/{team}/edit', [TeamController::class, 'edit'])->name('teams.edit')->middleware('auth');
+Route::put('teams/{team}', [TeamController::class, 'update'])->name('teams.update')->middleware('auth');
+Route::delete('teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy')->middleware('auth');
 
 // Player routes
 Route::get('players', [PlayerController::class, 'index'])->name('players.index');
