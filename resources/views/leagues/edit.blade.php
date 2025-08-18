@@ -3,10 +3,10 @@
 @section('title', 'Edit League')
 
 @section('content')
-<div class="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
-    <h1 class="text-3xl font-bold mb-10 text-gray-800">🏆 Edit League</h1>
+<div class="max-w-6xl mx-auto py-6 sm:py-12 px-4 sm:px-6 lg:px-10">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-10 text-gray-800">🏆 Edit League</h1>
 
-    <form action="{{ route('leagues.update', $league) }}" method="POST" id="leagueForm" class="space-y-10">
+    <form action="{{ route('leagues.update', $league) }}" method="POST" id="leagueForm" class="space-y-6 sm:space-y-10">
         @csrf
         @method('PUT')
 
@@ -21,11 +21,11 @@
         @endif
 
         {{-- Basic Info --}}
-        <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
-            <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">
+        <div class="bg-white shadow-md rounded-2xl p-4 sm:p-8 border border-gray-100">
+            <h2 class="text-lg font-semibold mb-6 sm:mb-8 flex items-center gap-2">
                 <span class="text-indigo-500">📄</span> Basic Information
             </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">League Name *</label>
                     <input type="text" name="name" id="name" value="{{ old('name', $league->name) }}" required minlength="3"
@@ -63,14 +63,30 @@
                 </div>
                 <div>
                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $league->start_date->format('Y-m-d')) }}" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                    <div class="relative">
+                        <input type="text" name="start_date" id="start_date" value="{{ old('start_date', $league->start_date->format('Y-m-d')) }}" required readonly
+                            placeholder="Select start date"
+                            class="datepicker-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
                     @error('start_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
-                    <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $league->end_date->format('Y-m-d')) }}" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                    <div class="relative">
+                        <input type="text" name="end_date" id="end_date" value="{{ old('end_date', $league->end_date->format('Y-m-d')) }}" required readonly
+                            placeholder="Select end date"
+                            class="datepicker-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
                     @error('end_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -216,8 +232,8 @@
         </div>
 
         {{-- Submit --}}
-        <div class="flex justify-end">
-            <a href="{{ route('leagues.index') }}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg shadow mr-4 hover:bg-gray-300">
+        <div class="flex flex-col sm:flex-row justify-end gap-3">
+            <a href="{{ route('leagues.index') }}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 text-center">
                 Cancel
             </a>
             <button type="submit"
@@ -227,4 +243,268 @@
         </div>
     </form>
 </div>
+
+<!-- Datepicker Modal -->
+<div id="datepicker-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-auto">
+            <!-- Datepicker Header -->
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Select Date</h3>
+                <button type="button" class="close-datepicker text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Datepicker Content -->
+            <div class="p-4">
+                <div id="datepicker-calendar" class="space-y-4">
+                    <!-- Month/Year Navigation -->
+                    <div class="flex items-center justify-between">
+                        <button type="button" id="prev-month" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h4 id="current-month" class="text-lg font-medium text-gray-900"></h4>
+                        <button type="button" id="next-month" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Week Days -->
+                    <div class="grid grid-cols-7 gap-1">
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Sun</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Mon</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Tue</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Wed</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Thu</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Fri</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Sat</div>
+                    </div>
+                    
+                    <!-- Calendar Days -->
+                    <div id="calendar-days" class="grid grid-cols-7 gap-1">
+                        <!-- Days will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Datepicker Footer -->
+            <div class="flex items-center justify-between p-4 border-t">
+                <button type="button" class="close-datepicker px-4 py-2 text-gray-600 hover:text-gray-800">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-date" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Datepicker Styles -->
+<style>
+.datepicker-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.calendar-day {
+    @apply text-center py-2 px-1 text-sm cursor-pointer rounded-lg transition-colors;
+}
+
+.calendar-day:hover {
+    @apply bg-gray-100;
+}
+
+.calendar-day.selected {
+    @apply bg-indigo-600 text-white;
+}
+
+.calendar-day.today {
+    @apply bg-indigo-100 text-indigo-700 font-medium;
+}
+
+.calendar-day.other-month {
+    @apply text-gray-300;
+}
+
+.calendar-day.disabled {
+    @apply text-gray-300 cursor-not-allowed;
+}
+
+.calendar-day.disabled:hover {
+    @apply bg-transparent;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    #datepicker-modal .bg-white {
+        @apply mx-4;
+    }
+    
+    .calendar-day {
+        @apply py-3 px-2 text-base;
+    }
+}
+</style>
+
+<!-- Datepicker JavaScript -->
+<script>
+class MobileDatepicker {
+    constructor() {
+        this.currentDate = new Date();
+        this.selectedDate = null;
+        this.activeInput = null;
+        this.modal = document.getElementById('datepicker-modal');
+        this.calendarDays = document.getElementById('calendar-days');
+        this.currentMonthElement = document.getElementById('current-month');
+        
+        this.init();
+    }
+    
+    init() {
+        // Bind event listeners
+        document.querySelectorAll('.datepicker-input').forEach(input => {
+            input.addEventListener('click', (e) => this.openDatepicker(e.target));
+        });
+        
+        document.querySelectorAll('.close-datepicker').forEach(button => {
+            button.addEventListener('click', () => this.closeDatepicker());
+        });
+        
+        document.getElementById('prev-month').addEventListener('click', () => this.previousMonth());
+        document.getElementById('next-month').addEventListener('click', () => this.nextMonth());
+        document.getElementById('confirm-date').addEventListener('click', () => this.confirmDate());
+        
+        // Close on backdrop click
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.closeDatepicker();
+            }
+        });
+        
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.modal.classList.contains('hidden')) {
+                this.closeDatepicker();
+            }
+        });
+    }
+    
+    openDatepicker(input) {
+        this.activeInput = input;
+        this.currentDate = new Date();
+        
+        // Set current date if input has value
+        if (input.value) {
+            const dateParts = input.value.split('-');
+            if (dateParts.length === 3) {
+                this.currentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            }
+        }
+        
+        this.renderCalendar();
+        this.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    closeDatepicker() {
+        this.modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        this.activeInput = null;
+    }
+    
+    previousMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+        this.renderCalendar();
+    }
+    
+    nextMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+        this.renderCalendar();
+    }
+    
+    renderCalendar() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        
+        // Update month/year display
+        this.currentMonthElement.textContent = new Date(year, month).toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+        
+        let html = '';
+        const today = new Date();
+        
+        for (let i = 0; i < 42; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const isCurrentMonth = currentDate.getMonth() === month;
+            const isToday = currentDate.toDateString() === today.toDateString();
+            const isSelected = this.selectedDate && currentDate.toDateString() === this.selectedDate.toDateString();
+            
+            let classes = 'calendar-day';
+            if (!isCurrentMonth) classes += ' other-month';
+            if (isToday) classes += ' today';
+            if (isSelected) classes += ' selected';
+            
+            html += `<div class="${classes}" data-date="${currentDate.toISOString().split('T')[0]}">${currentDate.getDate()}</div>`;
+        }
+        
+        this.calendarDays.innerHTML = html;
+        
+        // Add click listeners to days
+        this.calendarDays.querySelectorAll('.calendar-day').forEach(day => {
+            day.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('other-month')) {
+                    this.selectDate(e.target.dataset.date);
+                }
+            });
+        });
+    }
+    
+    selectDate(dateString) {
+        // Remove previous selection
+        this.calendarDays.querySelectorAll('.calendar-day.selected').forEach(day => {
+            day.classList.remove('selected');
+        });
+        
+        // Add selection to clicked day
+        const clickedDay = this.calendarDays.querySelector(`[data-date="${dateString}"]`);
+        if (clickedDay) {
+            clickedDay.classList.add('selected');
+        }
+        
+        this.selectedDate = new Date(dateString);
+    }
+    
+    confirmDate() {
+        if (this.selectedDate && this.activeInput) {
+            const dateString = this.selectedDate.toISOString().split('T')[0];
+            this.activeInput.value = dateString;
+            this.closeDatepicker();
+        }
+    }
+}
+
+// Initialize datepicker when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new MobileDatepicker();
+});
+</script>
 @endsection
