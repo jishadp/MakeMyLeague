@@ -41,13 +41,13 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get all completed auctions with relationships
+        // Get all completed auction bids with relationships
         $auctions = Auction::with([
-            'player', 
+            'leaguePlayer.user', 
             'leagueTeam.team', 
-            'leagueTeam.league', 
-            'creator'
+            'leagueTeam.league'
         ])
+        ->where('status', 'won')
         ->latest()
         ->paginate(10);
         

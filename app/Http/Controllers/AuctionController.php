@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuctionBid;
+use App\Models\Auction;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
@@ -40,7 +40,7 @@ class AuctionController extends Controller
                 ->first();
         }
 
-        return view('auction.bidding', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league'));
+        return view('auction.index', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league'));
     }
 
     /**
@@ -81,7 +81,7 @@ class AuctionController extends Controller
             }
 
             // Get current highest bid
-            $highestBid = AuctionBid::where('league_player_id', $request->league_player_id)
+            $highestBid = Auction::where('league_player_id', $request->league_player_id)
                 ->where('status', 'ask')
                 ->orderBy('amount', 'desc')
                 ->first();
@@ -92,7 +92,7 @@ class AuctionController extends Controller
             }
 
             // Create the bid
-            $bid = AuctionBid::create([
+            $bid = Auction::create([
                 'league_player_id' => $request->league_player_id,
                 'league_team_id' => $request->league_team_id,
                 'amount' => $request->amount,
@@ -161,13 +161,8 @@ class AuctionController extends Controller
             $winningTeam = LeagueTeam::find($winningBid->league_team_id);
             $winningTeam->decrement('wallet_balance', $winningBid->amount);
 
-            // Create auction record for tracking
-            \App\Models\Auction::create([
-                'user_id' => $leaguePlayer->user_id,
-                'league_team_id' => $winningBid->league_team_id,
-                'amount' => $winningBid->amount,
-                'created_by' => Auth::id(),
-            ]);
+            // Update the winning bid status to 'won'
+            $winningBid->update(['status' => 'won']);
 
             DB::commit();
 
@@ -200,7 +195,7 @@ class AuctionController extends Controller
             return response()->json(['error' => 'Invalid player for this league'], 400);
         }
 
-        $bids = AuctionBid::with(['leagueTeam.team'])
+                    $bids = Auction::with(['leagueTeam.team'])
             ->where('league_player_id', $leaguePlayerId)
             ->where('status', 'ask')
             ->orderBy('amount', 'desc')
@@ -229,7 +224,7 @@ class AuctionController extends Controller
             }
 
             // Delete all existing bids for this player
-            AuctionBid::where('league_player_id', $request->league_player_id)
+            Auction::where('league_player_id', $request->league_player_id)
                 ->where('status', 'ask')
                 ->delete();
 

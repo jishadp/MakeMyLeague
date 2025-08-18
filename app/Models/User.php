@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -93,18 +94,10 @@ class User extends Authenticatable
     }
     
     /**
-     * Get the auctions where this user is the player.
+     * Get the auction bids where this user is the player.
      */
     public function auctions(): HasMany
     {
-        return $this->hasMany(Auction::class, 'user_id');
-    }
-    
-    /**
-     * Get the auctions created by this user.
-     */
-    public function createdAuctions(): HasMany
-    {
-        return $this->hasMany(Auction::class, 'created_by');
+        return $this->hasManyThrough(Auction::class, LeaguePlayer::class, 'user_id', 'league_player_id');
     }
 }

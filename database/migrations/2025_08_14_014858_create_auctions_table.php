@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('auctions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('league_player_id')->constrained()->onDelete('cascade');
             $table->foreignId('league_team_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2);
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->enum('status', ['won', 'ask'])->default('ask');
             $table->timestamps();
         });
     }

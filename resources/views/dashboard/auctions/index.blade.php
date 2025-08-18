@@ -115,7 +115,7 @@
                                     Date
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Created By
+                                    Status
                                 </th>
                             </tr>
                         </thead>
@@ -125,8 +125,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10">
-                                                @if($auction->player && $auction->player->photo)
-                                                    <img class="h-10 w-10 rounded-full object-cover" src="{{ asset($auction->player->photo) }}" alt="{{ $auction->player->name }}">
+                                                @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->photo)
+                                                    <img class="h-10 w-10 rounded-full object-cover" src="{{ asset($auction->leaguePlayer->user->photo) }}" alt="{{ $auction->leaguePlayer->user->name }}">
                                                 @else
                                                     <svg class="h-10 w-10 rounded-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -135,15 +135,15 @@
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    @if($auction->player)
-                                                        {{ $auction->player->name }}
+                                                    @if($auction->leaguePlayer && $auction->leaguePlayer->user)
+                                                        {{ $auction->leaguePlayer->user->name }}
                                                     @else
                                                         Unknown Player
                                                     @endif
                                                 </div>
                                                 <div class="text-sm text-gray-500">
-                                                    @if($auction->player && $auction->player->role)
-                                                        {{ $auction->player->role->name }}
+                                                    @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->role)
+                                                        {{ $auction->leaguePlayer->user->role->name }}
                                                     @else
                                                         Role Unknown
                                                     @endif
@@ -177,12 +177,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $auction->created_at->format('M d, Y H:i') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        @if($auction->creator)
-                                            {{ $auction->creator->name }}
-                                        @else
-                                            Unknown
-                                        @endif
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ ucfirst($auction->status) }}
+                                        </span>
                                     </td>
                                 </tr>
                             @endforeach

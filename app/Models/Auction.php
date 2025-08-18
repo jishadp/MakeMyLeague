@@ -16,10 +16,10 @@ class Auction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+        'league_player_id',
         'league_team_id',
         'amount',
-        'created_by',
+        'status',
     ];
 
     /**
@@ -37,31 +37,23 @@ class Auction extends Model
     public static function rules()
     {
         return [
-            'user_id' => 'required|exists:users,id',
+            'league_player_id' => 'required|exists:league_players,id',
             'league_team_id' => 'required|exists:league_teams,id',
             'amount' => 'required|numeric|min:0',
-            'created_by' => 'required|exists:users,id',
+            'status' => 'required|in:won,ask',
         ];
     }
 
     /**
-     * Get the player (user) for this auction.
+     * Get the league player for this bid.
      */
-    public function player(): BelongsTo
+    public function leaguePlayer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(LeaguePlayer::class);
     }
 
     /**
-     * Get the user for this auction.
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * Get the league team for this auction.
+     * Get the league team for this bid.
      */
     public function leagueTeam(): BelongsTo
     {
@@ -69,15 +61,15 @@ class Auction extends Model
     }
 
     /**
-     * Get the user who created this auction.
+     * Scope to get bids for a specific league player.
      */
-    public function creator(): BelongsTo
+    public function scopeForLeaguePlayer($query, $leaguePlayerId)
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $query->where('league_player_id', $leaguePlayerId);
     }
 
     /**
-     * Scope to get auctions for a specific league team.
+     * Scope to get bids for a specific league team.
      */
     public function scopeForLeagueTeam($query, $leagueTeamId)
     {
@@ -85,10 +77,18 @@ class Auction extends Model
     }
 
     /**
-     * Scope to get auctions for a specific player.
+     * Scope to get won bids.
      */
-    public function scopeForPlayer($query, $userId)
+    public function scopeWon($query)
     {
-        return $query->where('user_id', $userId);
+        return $query->where('status', 'won');
+    }
+
+    /**
+     * Scope to get ask bids.
+     */
+    public function scopeAsk($query)
+    {
+        return $query->where('status', 'ask');
     }
 }
