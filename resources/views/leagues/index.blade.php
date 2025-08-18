@@ -12,8 +12,8 @@
                 My Leagues
             </h1>
             <a href="{{ route('leagues.create') }}"
-               class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all duration-200
-                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center">
+               class="bg-blue-700 hover:bg-blue-800 active:scale-95 transition-all duration-200
+                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
                 + Create New League
             </a>
         </div>

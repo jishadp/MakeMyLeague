@@ -21,16 +21,14 @@
                             My Leagues
                         </a>
                         <a href="{{ route('leagues.create') }}"
-                           class="bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium 
-                                  hover:bg-indigo-400 border border-indigo-300 active:scale-95 
-                                  transition-all shadow-md hover:shadow-lg">
+                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
+                                  active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create New League
                         </a>
                         @if(auth()->user()->isAdmin())
                         <a href="{{ route('players.create') }}"
-                           class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-medium 
-                                  hover:from-green-600 hover:to-emerald-600 active:scale-95 
-                                  transition-all shadow-md hover:shadow-lg border border-green-400">
+                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
+                                  active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create New Player
                         </a>
                         @endif
@@ -51,7 +49,7 @@
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
                 <a href="{{ route('leagues.create') }}"
-                   class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                   class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -73,8 +71,8 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You haven't created any leagues yet</h3>
                     <p class="text-gray-600 mb-6">Get started by creating your first cricket league.</p>
                     <a href="{{ route('leagues.create') }}"
-                       class="inline-block bg-indigo-600 text-white py-2 px-6 rounded-lg font-medium 
-                              hover:bg-indigo-700 active:scale-95 transition-all shadow-md hover:shadow-lg">
+                       class="inline-block bg-blue-700 hover:bg-blue-800 text-white py-2 px-6 rounded-lg font-medium 
+                              active:scale-95 transition-all shadow-md hover:shadow-lg">
                         Create Your First League
                     </a>
                 </div>
@@ -137,7 +135,7 @@
                     <p class="text-gray-600">Teams you own and manage</p>
                 </div>
                 <a href="{{ route('teams.create') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#89a894] to-[#5c9c85] text-white rounded-md hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-300">
+                   class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
@@ -192,7 +190,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You don't have any teams yet</h3>
                     <p class="text-gray-600 mb-6">Create your first team to get started</p>
                     <a href="{{ route('teams.create') }}" 
-                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#89a894] to-[#5c9c85] text-white rounded-md hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-300">
+                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>

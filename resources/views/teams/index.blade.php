@@ -11,6 +11,10 @@
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
                 Cricket Teams
             </h1>
+            <a href="{{ route('teams.create') }}"
+               class="inline-flex items-center px-8 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                + Create New Team
+            </a>
         </div>
 
         <!-- Filters -->

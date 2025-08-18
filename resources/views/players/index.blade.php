@@ -12,8 +12,7 @@
                 Cricket Players
             </h1>
             <a href="{{ route('players.create') }}"
-               class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all duration-200
-                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center">
+               class="inline-flex items-center px-8 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 + Create New Player
             </a>
         </div>
