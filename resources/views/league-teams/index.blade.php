@@ -5,7 +5,7 @@
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -14,11 +14,11 @@
                     <p class="text-gray-600 mt-2">{{ $league->name }} - Managing {{ $leagueTeams->total() }} teams</p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ route('league-teams.create', $league) }}" 
+                    <a href="{{ route('league-teams.create', $league) }}"
                        class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
                         Add Team
                     </a>
-                    <a href="{{ route('leagues.show', $league) }}" 
+                    <a href="{{ route('leagues.show', $league) }}"
                        class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors">
                         Back to League
                     </a>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white p-6 rounded-lg shadow-sm">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white p-6 rounded-lg shadow-sm">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -75,7 +75,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white p-6 rounded-lg shadow-sm">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -130,8 +130,8 @@
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 @if($leagueTeam->team->logo)
-                                                    <img class="h-10 w-10 rounded-full object-cover" 
-                                                         src="{{ $leagueTeam->team->logo }}" 
+                                                    <img class="h-10 w-10 rounded-full object-cover"
+                                                         src="{{ $leagueTeam->team->logo }}"
                                                          alt="{{ $leagueTeam->team->name }}">
                                                 @else
                                                     <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
@@ -171,12 +171,12 @@
                                         {{ $leagueTeam->players->count() }} / {{ $league->max_team_players }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <a href="{{ route('league-teams.show', [$league, $leagueTeam]) }}" 
+                                        <a href="{{ route('league-teams.show', [$league, $leagueTeam]) }}"
                                            class="text-indigo-600 hover:text-indigo-900">View</a>
-                                        <a href="{{ route('league-teams.edit', [$league, $leagueTeam]) }}" 
+                                        <a href="{{ route('league-teams.edit', [$league, $leagueTeam]) }}"
                                            class="text-blue-600 hover:text-blue-900">Edit</a>
-                                        <form action="{{ route('league-teams.destroy', [$league, $leagueTeam]) }}" 
-                                              method="POST" class="inline" 
+                                        <form action="{{ route('league-teams.destroy', [$league, $leagueTeam]) }}"
+                                              method="POST" class="inline"
                                               onsubmit="return confirm('Are you sure you want to remove this team from the league?')">
                                             @csrf
                                             @method('DELETE')
@@ -188,7 +188,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $leagueTeams->links() }}
@@ -201,7 +201,7 @@
                     <h3 class="mt-2 text-sm font-medium text-gray-900">No teams</h3>
                     <p class="mt-1 text-sm text-gray-500">Get started by adding a team to this league.</p>
                     <div class="mt-6">
-                        <a href="{{ route('league-teams.create', $league) }}" 
+                        <a href="{{ route('league-teams.create', $league) }}"
                            class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700">
                             Add Team
                         </a>
@@ -209,7 +209,7 @@
                 </div>
             @endif
         </div>
-        
+
     </div>
 </div>
 @endsection

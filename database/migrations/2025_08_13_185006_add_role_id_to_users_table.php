@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->constrained('game_roles');
-            $table->foreignId('local_body_id')->nullable()->constrained('local_bodies');
+            $table->foreignId('role_id')->after('remember_token')->nullable()->constrained('game_roles');
+            $table->foreignId('local_body_id')->after('role_id')->nullable()->constrained('local_bodies');
         });
     }
 

@@ -5,19 +5,19 @@
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Main Card -->
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-6 sm:p-10">
-                
+
                 <!-- Header -->
                 <div class="flex flex-col sm:flex-row justify-between items-start mb-10 gap-6">
                     <div>
-                        <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ $league->name }}</h1>
+                        <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ $league->name }} - {{ $league->season }}</h1>
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold 
-                                {{ $league->status === 'active' ? 'bg-green-100 text-green-800' : 
-                                   ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold
+                                {{ $league->status === 'active' ? 'bg-green-100 text-green-800' :
+                                   ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                    ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')) }}">
                                 {{ ucfirst($league->status) }}
                             </span>
@@ -28,19 +28,19 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <a href="{{ route('leagues.edit', $league) }}" 
+                        <a href="{{ route('leagues.edit', $league) }}"
                            class="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors text-center">
                             Edit League
                         </a>
-                        <a href="{{ route('leagues.index') }}" 
+                        <a href="{{ route('leagues.index') }}"
                            class="px-6 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center">
                             Back to Leagues
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- Quick Actions -->
                 <div class="mb-12">
                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">Quick Actions</h3>
@@ -85,7 +85,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- League Summary -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                     <!-- Card -->
@@ -189,11 +189,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Ground & Venue Information -->
                 <div class="mb-12">
                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">Ground & Venue Information</h3>
-                    
+
                     <!-- Venue Details -->
                     @if($league->localbody_id || $league->venue_details)
                     <div class="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
@@ -205,7 +205,7 @@
                                 <dd class="font-medium">{{ $league->localBody->name }}, {{ $league->localBody->district->name }}</dd>
                             </div>
                             @endif
-                            
+
                             @if($league->venue_details)
                             <div class="flex justify-between">
                                 <dt class="text-gray-600">Additional Details:</dt>
@@ -215,7 +215,7 @@
                         </dl>
                     </div>
                     @endif
-                    
+
                     <!-- Associated Grounds -->
                     @if(count($league->grounds) > 0)
                     <div>
@@ -252,7 +252,7 @@
 
             </div>
         </div>
-        
+
     </div>
 </div>
 @endsection
