@@ -25,7 +25,7 @@ class League extends Model
         'slug',
         'game_id',
         'user_id',
-        'ground_ids',
+        'ground_id',
         'localbody_id',
         'venue_details',
         'season',
@@ -55,7 +55,6 @@ class League extends Model
         'team_reg_fee' => 'double',
         'player_reg_fee' => 'double',
         'team_wallet_limit' => 'double',
-        'ground_ids' => 'array',
     ];
 
     /**
@@ -110,8 +109,7 @@ class League extends Model
         return [
             'name' => 'required|string|max:255',
             'game_id' => 'required|exists:games,id',
-            'ground_ids' => 'nullable|array',
-            'ground_ids.*' => 'exists:grounds,id',
+            'ground_id' => 'nullable|exists:grounds,id',
             'localbody_id' => 'nullable|exists:local_bodies,id',
             'venue_details' => 'nullable|string|max:255',
             'season' => 'required|integer|min:1|max:100',
@@ -153,17 +151,11 @@ class League extends Model
     }
     
     /**
-     * Get the grounds associated with this league.
-     * 
-     * @return \App\Relations\JsonArrayRelation
+     * Get the ground that hosts this league.
      */
-    public function grounds()
+    public function ground(): BelongsTo
     {
-        return new JsonArrayRelation(
-            Ground::query(),
-            $this,
-            'ground_ids'
-        );
+        return $this->belongsTo(Ground::class);
     }
 
     /**

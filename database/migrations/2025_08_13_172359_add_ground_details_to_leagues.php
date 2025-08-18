@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('leagues', function (Blueprint $table) {
-            $table->json('ground_ids')->nullable()->after('user_id')->comment('JSON array of ground IDs used in this league');
-            $table->foreignId('localbody_id')->nullable()->after('ground_ids')->constrained('local_bodies')->onDelete('set null');
+            $table->foreignId('ground_id')->nullable()->after('user_id')->constrained('grounds')->onDelete('set null')->comment('Ground ID for this league');
+            $table->foreignId('localbody_id')->nullable()->after('ground_id')->constrained('local_bodies')->onDelete('set null');
             $table->string('venue_details')->nullable()->after('localbody_id')->comment('Additional venue information');
         });
     }
@@ -24,8 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('leagues', function (Blueprint $table) {
+            $table->dropForeign(['ground_id']);
             $table->dropForeign(['localbody_id']);
-            $table->dropColumn(['ground_ids', 'localbody_id', 'venue_details']);
+            $table->dropColumn(['ground_id', 'localbody_id', 'venue_details']);
         });
     }
 };

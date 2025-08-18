@@ -42,12 +42,12 @@
                 @enderror
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6">
                 <!-- Home Ground -->
                 <div>
                     <label for="home_ground_id" class="block text-sm font-medium text-gray-700 mb-1">Home Ground <span class="text-red-600">*</span></label>
                     <select name="home_ground_id" id="home_ground_id" required
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
+                            class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
                         <option value="">Select Home Ground</option>
                         @foreach($grounds as $ground)
                             <option value="{{ $ground->id }}" {{ old('home_ground_id') == $ground->id ? 'selected' : '' }}>
@@ -64,7 +64,7 @@
                 <div>
                     <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-1">Local Body <span class="text-red-600">*</span></label>
                     <select name="local_body_id" id="local_body_id" required
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
+                            class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
                         <option value="">Select Local Body</option>
                         @foreach($localBodies as $localBody)
                             <option value="{{ $localBody->id }}" {{ old('local_body_id') == $localBody->id ? 'selected' : '' }}>
@@ -90,4 +90,17 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'Select an option',
+            allowClear: true
+        });
+    });
+</script>
 @endsection

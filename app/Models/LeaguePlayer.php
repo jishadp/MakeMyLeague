@@ -25,6 +25,7 @@ class LeaguePlayer extends Model
         'retention',
         'status',
         'base_price',
+        'bid_price',
         'created_by',
     ];
 
@@ -36,6 +37,7 @@ class LeaguePlayer extends Model
     protected $casts = [
         'retention' => 'boolean',
         'base_price' => 'double',
+        'bid_price' => 'double',
     ];
 
     /**
@@ -122,6 +124,7 @@ class LeaguePlayer extends Model
             'retention' => 'boolean',
             'status' => 'required|in:pending,available,sold,unsold,skip',
             'base_price' => 'numeric|min:0',
+            'bid_price' => 'nullable|numeric|min:0',
         ];
     }
 

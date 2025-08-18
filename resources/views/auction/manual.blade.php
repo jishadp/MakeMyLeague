@@ -151,7 +151,7 @@
                             <div class="mb-4">
                                 <label for="league_team_id" class="block text-sm font-medium text-gray-700 mb-2">Select Team</label>
                                 <select name="league_team_id" id="league_team_id" required 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        class="select2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                         aria-required="true">
                                     <option value="">Choose a team...</option>
                                     @foreach($leagueTeams as $leagueTeam)
@@ -365,7 +365,7 @@ function showBulkModal(action) {
             <p class="mb-4">Mark ${selectedPlayers.length} selected player(s) as sold.</p>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Select Team</label>
-                <select name="league_team_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="league_team_id" required class="select2 w-full px-3 py-2 border border-gray-300 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Choose a team...</option>
                     @foreach($leagueTeams as $leagueTeam)
                     <option value="{{ $leagueTeam->id }}">{{ $leagueTeam->team->name }} (₹{{ number_format($leagueTeam->wallet_balance) }})</option>

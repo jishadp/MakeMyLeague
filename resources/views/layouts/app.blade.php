@@ -33,6 +33,9 @@
     
     <!-- Theme CSS Files -->
     <link rel="stylesheet" id="theme-css" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
+    
+    <!-- Include CDN Links for Select2 and Bootstrap Datepicker -->
+    @include('partials.cdn-links')
 
     @yield('styles')
 </head>
@@ -57,6 +60,7 @@
     
     <!-- External JavaScript -->
     <script src="{{ asset('js/main.js') }}?v={{ time() }}" defer></script>
+    <script src="{{ asset('js/scripts.js') }}?v={{ time() }}" defer></script>
     
     @yield('scripts')
 </body>

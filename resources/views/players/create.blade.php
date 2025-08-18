@@ -46,9 +46,9 @@
                 <form action="{{ route('players.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6">
                         <!-- Basic Information -->
-                        <div class="col-span-1 md:col-span-2">
+                        <div>
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
                         </div>
                         
@@ -90,7 +90,7 @@
                         </div>
                         
                         <!-- Contact Information -->
-                        <div class="col-span-1 md:col-span-2 mt-6">
+                        <div class="mt-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
                         </div>
                         
@@ -118,7 +118,7 @@
                         <div>
                             <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-1">Location <span class="text-red-500">*</span></label>
                             <select name="local_body_id" id="local_body_id" required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="select2 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Select Location</option>
                                 @foreach($localBodies as $localBody)
                                     <option value="{{ $localBody->id }}" {{ old('local_body_id') == $localBody->id ? 'selected' : '' }}>
@@ -135,7 +135,7 @@
                         <div>
                             <label for="role_id" class="block text-sm font-medium text-gray-700 mb-1">Player Role <span class="text-red-500">*</span></label>
                             <select name="role_id" id="role_id" required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="select2 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
@@ -148,12 +148,13 @@
                             @enderror
                         </div>
                         
+                        
                         <!-- Profile Photo -->
-                        <div class="col-span-1 md:col-span-2 mt-6">
+                        <div class="mt-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Profile Photo</h2>
                         </div>
                         
-                        <div class="col-span-1 md:col-span-2">
+                        <div>
                             <label for="photo" class="block text-sm font-medium text-gray-700 mb-1">Upload Photo (Optional)</label>
                             <input type="file" name="photo" id="photo"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -188,4 +189,17 @@
 .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'Select an option',
+            allowClear: true
+        });
+    });
+</script>
 @endsection

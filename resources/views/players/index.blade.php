@@ -11,6 +11,11 @@
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
                 Cricket Players
             </h1>
+            <a href="{{ route('players.create') }}"
+               class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all duration-200
+                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center">
+                + Create New Player
+            </a>
         </div>
 
         <!-- Filters -->

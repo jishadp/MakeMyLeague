@@ -34,7 +34,7 @@
                 <div>
                     <label for="game_id" class="block text-sm font-medium text-gray-700 mb-1">Game Type *</label>
                     <select id="game_id" name="game_id" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        class="select2 w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                         @foreach($games as $game)
                             <option value="{{ $game->id }}" {{ old('game_id') == $game->id ? 'selected' : '' }}>
                                 {{ $game->name }}
@@ -52,7 +52,7 @@
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
                     <select id="status" name="status" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        class="select2 w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                         <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
@@ -63,13 +63,13 @@
                 <div>
                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
                     <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        class="datepicker w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                     @error('start_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
                     <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" required
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        class="datepicker w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                     @error('end_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -84,7 +84,7 @@
                 <div>
                     <label for="localbody_id" class="block text-sm font-medium text-gray-700 mb-1">Local Body</label>
                     <select id="localbody_id" name="localbody_id"
-                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        class="select2 w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                         <option value="">Select Local Body</option>
                         @foreach($localBodies as $localBody)
                             <option value="{{ $localBody->id }}" {{ old('localbody_id') == $localBody->id ? 'selected' : '' }}>

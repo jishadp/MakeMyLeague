@@ -31,7 +31,7 @@
                 <p class="text-gray-600 mb-4">You haven't created any leagues yet.</p>
                 <a href="{{ route('leagues.create') }}"
                    class="text-indigo-600 hover:text-indigo-800 font-medium">
-                    Get started by creating your first league
+                    Register by creating your first league
                 </a>
             </div>
         @else
@@ -82,8 +82,8 @@
                                 @endif
 
                                 <!-- Ground Count -->
-                                @if(count($league->ground_ids ?? []) > 0)
-                                <p><span class="font-medium">🏏 Grounds:</span> {{ count($league->ground_ids) }} assigned</p>
+                                @if($league->ground_id)
+                                <p><span class="font-medium">🏏 Ground:</span> Assigned</p>
                                 @endif
                             </div>
 

@@ -26,8 +26,8 @@
                     </a>
                 @else
                     <a href="{{ route('login')}}" class="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Sign In</a>
-                    <a href="{{ route('login') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                        Get Started
+                    <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Register
                     </a>
                 @endauth
             </div>
@@ -64,7 +64,7 @@
             @else
                 <a href="{{ route('login') }}" class="block text-gray-700 hover:text-indigo-600 font-medium">Sign In</a>
                 <a href="{{ route('login') }}" class="block bg-indigo-600 text-white text-center px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                    Get Started
+                    Register
                 </a>
             @endauth
         </div>
