@@ -79,7 +79,8 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($userLeagues as $league)
-                        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                        <a href="{{ route('leagues.show', $league) }}" class="block">
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                             <div class="h-40 overflow-hidden relative">
                                 <img src="{{ asset('images/league.jpg') }}" 
                                      alt="{{ $league->name }}" class="w-full h-full object-cover">
@@ -113,13 +114,13 @@
                                     @endif
                                 </div>
                                 <div class="mt-6">
-                                    <a href="{{ route('leagues.show', $league) }}"
-                                       class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
                                         View Details →
-                                    </a>
+                                    </span>
                                 </div>
                             </div>
                         </div>
+                        </a>
                     @endforeach
                 </div>
             @endif
@@ -146,7 +147,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($userOwnedTeams as $team)
                 <!-- Owned Team Card -->
-                <div class="bg-gray-50 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                <a href="{{ route('teams.show', $team) }}" class="block">
+                    <div class="bg-gray-50 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-40 overflow-hidden relative">
                         @if($team->logo)
                             <img src="{{ asset($team->logo) }}" 
@@ -173,11 +175,12 @@
                             <p><span class="font-medium">Home Ground:</span> {{ $team->homeGround->name ?? 'Not specified' }}</p>
                             <p><span class="font-medium">Location:</span> {{ $team->localBody->name }}</p>
                         </div>
-                        <a href="{{ route('teams.show', $team) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                        <span class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                             View Team →
-                        </a>
+                        </span>
                     </div>
                 </div>
+                </a>
                 @empty
                 <!-- No Teams Message -->
                 <div class="col-span-full bg-white rounded-xl shadow-md p-6 text-center">
@@ -218,7 +221,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Team Card 1 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-48 overflow-hidden relative">
                         <img src="{{ asset('images/leagueteams.jpg') }}" alt="Royal Challengers" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
@@ -240,14 +244,16 @@
                             <p><span class="font-medium">🏅 Position:</span> 2nd in league</p>
                         </div>
                         <div class="mt-6 flex justify-between">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</a>
+                            <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
                             <span class="text-gray-500 text-sm">Won 5/7 matches</span>
                         </div>
                     </div>
                 </div>
+                </a>
 
                 <!-- Team Card 2 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-48 overflow-hidden relative">
                         <img src="{{ asset('images/leagueteams.jpg') }}" alt="Chennai Kings" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
@@ -269,14 +275,16 @@
                             <p><span class="font-medium">🏅 Position:</span> Registration Phase</p>
                         </div>
                         <div class="mt-6 flex justify-between">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</a>
+                            <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
                             <span class="text-gray-500 text-sm">Upcoming season</span>
                         </div>
                     </div>
                 </div>
+                </a>
 
                 <!-- Team Card 3 -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                <a href="#" class="block">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-48 overflow-hidden relative">
                         <img src="{{ asset('images/leagueteams.jpg') }}" alt="Mumbai Indians" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
@@ -298,11 +306,12 @@
                             <p><span class="font-medium">🏅 Position:</span> Champions</p>
                         </div>
                         <div class="mt-6 flex justify-between">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</a>
+                            <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
                             <span class="text-gray-500 text-sm">Won 8/10 matches</span>
                         </div>
                     </div>
                 </div>
+                </a>
             </div>
         </div>
     </section>
@@ -500,8 +509,9 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($recentPlayers as $player)
-                    <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
-                                hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    <a href="{{ route('players.show', $player->id) }}" class="block">
+                        <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
+                                    hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                         <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-24 flex items-center justify-center">
                             <div class="text-white text-center p-4">
                                 @if($player->photo)
@@ -532,13 +542,13 @@
                             
                             <!-- View Details -->
                             <div class="mt-4 flex justify-end items-center">
-                                <a href="{{ route('players.show', $player->id) }}"
-                                   class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                                <span class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
                                     View Profile
-                                </a>
+                                </span>
                             </div>
                         </div>
                     </div>
+                    </a>
                 @empty
                     <div class="col-span-4 bg-white rounded-xl shadow-md p-6 text-center">
                         <p class="text-gray-600">No players have been added recently.</p>
@@ -560,56 +570,61 @@
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                         <!-- Player Management Card -->
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <a href="{{ route('players.index') }}" class="block">
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer">
                             <div class="p-5 bg-gradient-to-r from-emerald-500 to-green-500">
                                 <h3 class="text-xl font-bold text-white">Player Management</h3>
                             </div>
                             <div class="p-5">
                                 <p class="text-gray-600 mb-4">View, create, and manage cricket players</p>
                                 <div class="flex justify-between">
-                                    <a href="{{ route('players.index') }}" class="text-emerald-600 hover:text-emerald-800 font-medium">
+                                    <span class="text-emerald-600 hover:text-emerald-800 font-medium">
                                         Browse Players →
-                                    </a>
+                                    </span>
                                     @if(auth()->user()->isAdmin())
-                                    <a href="{{ route('players.create') }}" class="text-emerald-600 hover:text-emerald-800 font-medium">
+                                    <span class="text-emerald-600 hover:text-emerald-800 font-medium">
                                         Add Player →
-                                    </a>
+                                    </span>
                                     @endif
                                 </div>
                             </div>
                         </div>
+                        </a>
                         
                         <!-- Team Management Card -->
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <a href="{{ route('teams.index') }}" class="block">
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer">
                             <div class="p-5 bg-gradient-to-r from-blue-500 to-indigo-500">
                                 <h3 class="text-xl font-bold text-white">Team Management</h3>
                             </div>
                             <div class="p-5">
                                 <p class="text-gray-600 mb-4">Create and manage cricket teams</p>
                                 <div class="flex justify-between">
-                                    <a href="{{ route('teams.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
                                         Browse Teams →
-                                    </a>
-                                    <a href="{{ route('teams.create') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                    </span>
+                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
                                         Create Team →
-                                    </a>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-xl overflow-hidden">
-                    <div class="p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                        <h3 class="text-2xl font-semibold mb-4">Become a League Organizer</h3>
-                        <p class="mb-6">Create and manage your own cricket leagues, set rules, schedule matches, and oversee competitions.</p>
-                        <a href="{{ route('leagues.create') }}"
-                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
-                                  hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg inline-block">
-                            Create Your First League
                         </a>
                     </div>
                 </div>
+                
+                <a href="{{ route('leagues.create') }}" class="block">
+                    <div class="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer hover:shadow-2xl transition-all">
+                    <div class="p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                        <h3 class="text-2xl font-semibold mb-4">Become a League Organizer</h3>
+                        <p class="mb-6">Create and manage your own cricket leagues, set rules, schedule matches, and oversee competitions.</p>
+                        <span class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
+                                  hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg inline-block">
+                            Create Your First League
+                        </span>
+                    </div>
+                </div>
+                </a>
             </div>
         </div>
     </section>
