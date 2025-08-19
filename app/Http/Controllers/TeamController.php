@@ -83,8 +83,8 @@ class TeamController extends Controller
         }
 
         // Check if there's a league context and add team to league
-        if ($request->has('league_id')) {
-            $league = League::findOrFail($request->league_id);
+        if ($request->has('league_slug')) {
+            $league = League::where('slug', $request->league_slug)->firstOrFail();
             
             // Check if team is not already in this league
             $existingTeam = LeagueTeam::where('team_id', $team->id)

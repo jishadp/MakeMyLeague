@@ -27,7 +27,7 @@ class StorePlayerRequest extends FormRequest
             'position_id' => 'required|exists:game_positions,id',
             'local_body_id' => 'nullable|exists:local_bodies,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'league_id' => 'nullable|exists:leagues,id',
+            'league_slug' => 'nullable|exists:leagues,slug',
         ];
     }
 

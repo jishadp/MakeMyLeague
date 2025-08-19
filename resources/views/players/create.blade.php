@@ -33,14 +33,14 @@
         <!-- Header -->
         <div class="mb-8 text-center">
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                @if(request('league_id'))
+                @if(request('league_slug'))
                     Create Player for League
                 @else
                     Create Player
                 @endif
             </h1>
             <p class="mt-2 text-lg text-gray-600">
-                @if(request('league_id'))
+                @if(request('league_slug'))
                     Add a new cricket player that will be automatically added to the league
                 @else
                     Add a new cricket player to the system
@@ -63,8 +63,8 @@
 
                 <form action="{{ route('players.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @if(request('league_id'))
-                        <input type="hidden" name="league_id" value="{{ request('league_id') }}">
+                    @if(request('league_slug'))
+                        <input type="hidden" name="league_slug" value="{{ request('league_slug') }}">
                     @endif
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

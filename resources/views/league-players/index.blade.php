@@ -15,7 +15,7 @@
                 </div>
                 <!-- Mobile: 2 buttons per row -->
                 <div class="grid grid-cols-2 gap-3 sm:hidden">
-                    <a href="{{ route('players.create') }}?league_id={{ $league->id }}"
+                    <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                        class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -50,7 +50,7 @@
                 
                 <!-- Desktop: Original layout -->
                 <div class="hidden sm:flex gap-3">
-                    <a href="{{ route('players.create') }}?league_id={{ $league->id }}"
+                    <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

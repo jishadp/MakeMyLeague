@@ -93,8 +93,8 @@ class PlayerController extends Controller
         }
 
         // Check if there's a league context and add player to league
-        if ($request->has('league_id')) {
-            $league = League::findOrFail($request->league_id);
+        if ($request->has('league_slug')) {
+            $league = League::where('slug', $request->league_slug)->firstOrFail();
             
             // Check if player is not already in this league
             $existingPlayer = LeaguePlayer::where('user_id', $player->id)

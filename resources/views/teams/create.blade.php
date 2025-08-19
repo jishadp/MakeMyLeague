@@ -33,14 +33,14 @@
         <!-- Page Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                @if(request('league_id'))
+                @if(request('league_slug'))
                     Create New Team for League
                 @else
                     Create New Team
                 @endif
             </h1>
             <p class="mt-2 text-lg text-gray-600">
-                @if(request('league_id'))
+                @if(request('league_slug'))
                     Add a new cricket team that will be automatically added to the league
                 @else
                     Add a new cricket team to your collection
@@ -53,8 +53,8 @@
             <div class="p-8">
                 <form action="{{ route('teams.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
-                    @if(request('league_id'))
-                        <input type="hidden" name="league_id" value="{{ request('league_id') }}">
+                    @if(request('league_slug'))
+                        <input type="hidden" name="league_slug" value="{{ request('league_slug') }}">
                     @endif
 
                     <!-- Team Name -->

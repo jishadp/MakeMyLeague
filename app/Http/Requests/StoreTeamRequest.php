@@ -24,7 +24,7 @@ class StoreTeamRequest extends FormRequest
             'home_ground_id' => 'nullable|exists:grounds,id',
             'local_body_id' => 'required|exists:local_bodies,id',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'league_id' => 'nullable|exists:leagues,id',
+            'league_slug' => 'nullable|exists:leagues,slug',
         ];
     }
 
