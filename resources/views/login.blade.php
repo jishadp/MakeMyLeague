@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - League Manager</title>
+    <title>Login - {{config('app.name')}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
@@ -19,7 +19,7 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                <p class="text-gray-600">Sign in to your League Manager account</p>
+                <p class="text-gray-600">Sign in to your {{config('app.name')}} account</p>
             </div>
 
             <!-- Login Form Card -->

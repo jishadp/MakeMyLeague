@@ -1,7 +1,7 @@
 <section class="bg-gradient-to-br from-blue-500 to-indigo-600 py-20 px-4 sm:px-6 lg:px-8 text-white">
     <div class="max-w-7xl mx-auto text-center">
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
-            Join the Ultimate League Manager Platform
+            Join the Ultimate {{config('app.name')}} Platform
         </h1>
 
         <p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto animate-fade-in delay-100">

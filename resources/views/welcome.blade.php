@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>League Manager - Organize Your Sports Leagues</title>
+    <title>{{config('app.name')}} - Organize Your Sports Leagues</title>
     <meta name="description" content="Create, manage, and track your sports leagues with ease. Built with Laravel for modern league management.">
 
     <!-- Tailwind CSS -->

@@ -1,4 +1,4 @@
-// scripts.js - Common UI scripts for CricBid
+// scripts.js - Common UI scripts for {{config('app.name')}}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Select2 for all select elements

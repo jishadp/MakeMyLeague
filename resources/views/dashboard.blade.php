@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'League Manager - Dashboard')
+@section('title', config('app.name').' - Dashboard')
 
 @section('content')
 
     <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-12 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
+    <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-4 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 drop-shadow">
-                        Welcome to {{ config('app.name')}}
+                        Hello {{auth()->user()->name}}
                     </h1>
-                    <p class="text-lg sm:text-xl text-indigo-100 mb-8">
+                    <p class="text-lg sm:text-xl text-white-100">
                         Organize leagues, manage teams, track player stats, and run exciting tournaments.
                     </p>
                     <div class="flex flex-wrap gap-4">
@@ -49,7 +49,7 @@
 
     <!-- My Leagues Section -->
     @if(auth()->user()->isOrganizer())
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
@@ -135,9 +135,9 @@
 
     <!-- Open Leagues Section -->
     @if(auth()->user()->isPlayer())
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-2">
                 <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
             </div>
 

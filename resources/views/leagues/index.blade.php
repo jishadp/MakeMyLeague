@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'League Manager - My Leagues')
+@section('title', config('app.name').' - My Leagues')
 
 @section('content')
-<div class="py-12 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
+<div class="py-2 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fadeIn">
 
         <!-- Header -->
@@ -13,7 +13,7 @@
             </h1>
             <a href="{{ route('leagues.create') }}"
                class="bg-blue-700 hover:bg-blue-800 active:scale-95 transition-all duration-200
-                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
+                      text-gray px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
                 + Create New League
             </a>
         </div>
