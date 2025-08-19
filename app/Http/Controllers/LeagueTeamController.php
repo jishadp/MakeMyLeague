@@ -68,7 +68,13 @@ class LeagueTeamController extends Controller
     {
         $leagueTeam->load(['team', 'team.owner', 'team.homeGround', 'players.user']);
 
-        return view('league-teams.show', compact('league', 'leagueTeam'));
+        // Get other league players available for auction
+        $otherLeaguePlayers = \App\Models\LeaguePlayer::with(['user', 'user.position'])
+            ->whereNull('league_team_id')
+            ->where('status', 'available')
+            ->get();
+
+        return view('league-teams.show', compact('league', 'leagueTeam', 'otherLeaguePlayers'));
     }
 
     /**

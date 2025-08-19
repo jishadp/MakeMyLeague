@@ -356,13 +356,6 @@
                                                 <div id="other-league-players" class="mt-6" style="display:none;">
                             <h5 class="font-medium text-sm text-gray-600 mb-2">Available Players for Auction</h5>
                             
-                            @php
-                                $otherLeaguePlayers = \App\Models\LeaguePlayer::with(['user', 'user.position'])
-                                    ->whereNull('league_team_id')
-                                    ->where('status', 'available')
-                                    ->get();
-                            @endphp
-                            
                             @if($otherLeaguePlayers->count() > 0)
                                 @foreach($otherLeaguePlayers as $player)
                                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2 player-item" data-type="league">
