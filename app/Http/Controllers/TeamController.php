@@ -6,6 +6,9 @@ use App\Models\District;
 use App\Models\Ground;
 use App\Models\LocalBody;
 use App\Models\Team;
+use App\Models\League;
+use App\Models\LeagueTeam;
+use App\Http\Requests\StoreTeamRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -60,30 +63,47 @@ class TeamController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTeamRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'home_ground_id' => 'required|exists:grounds,id',
-            'local_body_id' => 'required|exists:local_bodies,id',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $validated = $request->validated();
 
-        $team = new Team();
-        $team->name = $validated['name'];
-        // Let the model handle slug generation
-        $team->owner_id = Auth::id();
-        $team->home_ground_id = $validated['home_ground_id'];
-        $team->local_body_id = $validated['local_body_id'];
-        $team->created_by = Auth::id();
+        $team = Team::create([
+            'name' => $validated['name'],
+            'owner_id' => Auth::id(),
+            'home_ground_id' => $validated['home_ground_id'],
+            'local_body_id' => $validated['local_body_id'],
+            'created_by' => Auth::id(),
+        ]);
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('team-logos', 'public');
             $team->logo = 'storage/' . $logoPath;
+            $team->save();
         }
 
-        $team->save();
+        // Check if there's a league context and add team to league
+        if ($request->has('league_id')) {
+            $league = League::findOrFail($request->league_id);
+            
+            // Check if team is not already in this league
+            $existingTeam = LeagueTeam::where('team_id', $team->id)
+                ->where('league_id', $league->id)
+                ->first();
+                
+            if (!$existingTeam) {
+                LeagueTeam::create([
+                    'team_id' => $team->id,
+                    'league_id' => $league->id,
+                    'status' => 'available',
+                    'wallet_balance' => $league->team_wallet_limit,
+                    'created_by' => Auth::id(),
+                ]);
+                
+                return redirect()->route('league-teams.index', $league)
+                    ->with('success', 'Team created and added to league successfully!');
+            }
+        }
 
         return redirect()->route('teams.show', $team)
             ->with('success', 'Team created successfully!');

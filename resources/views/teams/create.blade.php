@@ -32,8 +32,20 @@
 
         <!-- Page Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Create New Team</h1>
-            <p class="mt-2 text-lg text-gray-600">Add a new cricket team to your collection</p>
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                @if(request('league_id'))
+                    Create New Team for League
+                @else
+                    Create New Team
+                @endif
+            </h1>
+            <p class="mt-2 text-lg text-gray-600">
+                @if(request('league_id'))
+                    Add a new cricket team that will be automatically added to the league
+                @else
+                    Add a new cricket team to your collection
+                @endif
+            </p>
         </div>
 
         <!-- Create Team Form -->
@@ -41,6 +53,9 @@
             <div class="p-8">
                 <form action="{{ route('teams.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
+                    @if(request('league_id'))
+                        <input type="hidden" name="league_id" value="{{ request('league_id') }}">
+                    @endif
 
                     <!-- Team Name -->
                     <div>

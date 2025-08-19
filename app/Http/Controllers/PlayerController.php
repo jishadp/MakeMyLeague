@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\GamePosition;
 use App\Models\User;
 use App\Models\LocalBody;
+use App\Models\League;
+use App\Models\LeaguePlayer;
+use App\Http\Requests\StorePlayerRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -69,39 +72,48 @@ class PlayerController extends Controller
     /**
      * Store a newly created player in storage.
      */
-    public function store(Request $request)
+    public function store(StorePlayerRequest $request)
     {
-        // Check if the current user has admin privileges
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
-            return redirect()->route('players.index')
-                ->with('error', 'You do not have permission to create players.');
-        }
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'mobile' => 'required|string|max:15',
-            'pin' => 'required|string|max:10',
-            'email' => 'nullable|string|email|max:255|unique:users',
-            'position_id' => 'required|exists:game_positions,id',
-            'local_body_id' => 'nullable|exists:local_bodies,id',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        $player = User::create([
+            'name' => $validated['name'],
+            'mobile' => $validated['mobile'],
+            'pin' => bcrypt($validated['pin']),
+            'email' => $validated['email'] ?? null,
+            'position_id' => $validated['position_id'],
+            'local_body_id' => $validated['local_body_id'] ?? null,
         ]);
-
-        $player = new User();
-        $player->name = $validated['name'];
-        $player->mobile = $validated['mobile'];
-        $player->pin = $validated['pin'];
-        $player->email = $validated['email'] ?? null;
-        $player->position_id = $validated['position_id'];
-        $player->local_body_id = $validated['local_body_id'] ?? null;
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('player-photos', 'public');
             $player->photo = 'storage/' . $photoPath;
+            $player->save();
         }
 
-        $player->save();
+        // Check if there's a league context and add player to league
+        if ($request->has('league_id')) {
+            $league = League::findOrFail($request->league_id);
+            
+            // Check if player is not already in this league
+            $existingPlayer = LeaguePlayer::where('user_id', $player->id)
+                ->where('league_id', $league->id)
+                ->first();
+                
+            if (!$existingPlayer) {
+                LeaguePlayer::create([
+                    'user_id' => $player->id,
+                    'league_id' => $league->id,
+                    'status' => 'available',
+                    'base_price' => $league->player_reg_fee,
+                    'retention' => false,
+                ]);
+                
+                return redirect()->route('league-players.index', $league)
+                    ->with('success', 'Player created and added to league successfully!');
+            }
+        }
 
         return redirect()->route('players.show', $player)
             ->with('success', 'Player created successfully!');

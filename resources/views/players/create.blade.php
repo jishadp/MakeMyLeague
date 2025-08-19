@@ -33,10 +33,18 @@
         <!-- Header -->
         <div class="mb-8 text-center">
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                Create Player
+                @if(request('league_id'))
+                    Create Player for League
+                @else
+                    Create Player
+                @endif
             </h1>
             <p class="mt-2 text-lg text-gray-600">
-                Add a new cricket player to the system
+                @if(request('league_id'))
+                    Add a new cricket player that will be automatically added to the league
+                @else
+                    Add a new cricket player to the system
+                @endif
             </p>
         </div>
         
@@ -55,6 +63,9 @@
 
                 <form action="{{ route('players.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @if(request('league_id'))
+                        <input type="hidden" name="league_id" value="{{ request('league_id') }}">
+                    @endif
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Name -->
