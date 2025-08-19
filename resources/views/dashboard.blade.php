@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 drop-shadow">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 drop-shadow">
                         Hello {{auth()->user()->name}}
                     </h1>
                     <p class="text-lg sm:text-xl text-white-100">

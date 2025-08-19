@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -125,20 +126,15 @@ class User extends Authenticatable
      */
     public function isOrganizer(): bool
     {
-        return $this->id === 1;
+        return $this->roles->contains('role_id',1);
     }
     public function isOwner(): bool
     {
-        return $this->roles()->where('name', 'Owner')->exists();
+        return $this->roles->contains('role_id',2);
     }
     public function isPlayer(): bool
     {
-         return $this->roles()->where('name', 'Player')->exists();
-    }
-    
-    public function isOrganiser(): bool
-    {
-        return $this->roles()->where('name', 'Organiser')->exists();
+         return $this->roles->contains('role_id',3);
     }
     
     /**
@@ -166,28 +162,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the roles assigned to the user.
+     * Get all of the comments for the User
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function roles(): BelongsToMany
+    public function roles(): HasManyThrough
     {
-        return $this->belongsToMany(Role::class, 'user_roles');
-    }
-    
-    /**
-     * Check if the user has a specific role.
-     */
-    public function hasRole($roleName): bool
-    {
-        return $this->roles()->where('name', $roleName)->exists();
-    }
-    
-    /**
-     * Check if the user has any of the specified roles.
-     */
-    public function hasAnyRole($roleNames): bool
-    {
-        return $this->roles()->whereIn('name', (array) $roleNames)->exists();
+        return $this->hasManyThrough(UserRole::class,Role::class,'id','user_id');
     }
 }

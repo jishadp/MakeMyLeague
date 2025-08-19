@@ -221,7 +221,7 @@ class LeaguePlayer extends Model
      */
     public function auctionBids(): HasMany
     {
-        return $this->hasMany(\App\Models\AuctionBid::class);
+        return $this->hasMany(\App\Models\Auction::class);
     }
     
     /**

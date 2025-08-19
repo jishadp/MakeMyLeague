@@ -81,8 +81,6 @@
                                name="base_price" 
                                id="base_price" 
                                value="{{ old('base_price', $leaguePlayer->base_price) }}"
-                               min="0" 
-                               step="1000"
                                required
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('base_price') border-red-300 @enderror"
                                placeholder="Enter base price">

@@ -230,7 +230,7 @@ class LeaguePlayerController extends Controller
      */
     public function show(League $league, LeaguePlayer $leaguePlayer): View
     {
-        $leaguePlayer->load(['leagueTeam.team', 'user', 'user.role']);
+        $leaguePlayer->load(['leagueTeam.team', 'user', 'user.position']);
 
         return view('league-players.show', compact('league', 'leaguePlayer'));
     }

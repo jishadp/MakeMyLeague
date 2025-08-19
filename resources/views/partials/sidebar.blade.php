@@ -12,7 +12,7 @@
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                     </svg>
                 </div>
-                <span class="text-xl font-bold text-white">Cricket League</span>
+                <span class="text-xl font-bold text-white">{{ config('app.name')}}</span>
             </div>
             <button id="close-sidebar" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -21,20 +21,7 @@
             </button>
         </div>
 
-        <!-- League Selector (Mobile) -->
-        @auth
-        <div class="px-6 pt-6">
-            <label for="mobile-league-selector" class="block text-sm font-medium text-white/80 mb-2">Select League</label>
-            <select id="mobile-league-selector" class="block w-full pl-4 pr-10 py-3 text-white border-white/20 bg-white/10 focus:outline-none focus:ring-white/30 focus:border-white/30 rounded-xl shadow-inner backdrop-blur-lg text-sm">
-                <option value="">Select League</option>
-                @foreach($navLeagues as $league)
-                    <option value="{{ $league->id }}" {{ $defaultLeague && $defaultLeague->id == $league->id ? 'selected' : '' }}>
-                        {{ $league->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        @endauth
+
 
         <!-- Sidebar Content -->
         <div class="p-4 space-y-1 flex-grow">
