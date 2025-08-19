@@ -12,12 +12,22 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             @foreach($featuredPlayers as $player)
                 <div class="group relative text-center rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 overflow-hidden border border-gray-100">
-                    <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-32 flex items-center justify-center">
-                        <div class="text-white text-center p-4">
-                            <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="text-sm font-medium">{{ $player->role->name ?? 'Player' }}</span>
+                    <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-32 flex items-center justify-center relative overflow-hidden">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                     alt="{{ $player->name }}" 
+                                     class="w-full h-full object-cover"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-full h-full flex items-center justify-center text-white font-bold text-sm" style="display: none;">
+                                    {{ strtoupper(substr($player->name, 0, 2)) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-2 left-2 right-2">
+                            <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-2 py-1 rounded-full">
+                                {{ $player->role->name ?? 'Player' }}
+                            </span>
                         </div>
                     </div>
                     <div class="p-6">
@@ -45,7 +55,7 @@
                                 Talented cricket player
                             @endif
                         </p>
-                        <a href="{{ route('players.show', $player->id) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                        <a href="{{ route('players.show', $player->slug) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
                             View Profile
                         </a>
                     </div>

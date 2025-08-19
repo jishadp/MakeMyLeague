@@ -36,13 +36,13 @@
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
                 <div class="flex items-center space-x-4">
                     <div class="bg-white bg-opacity-20 rounded-full p-4 overflow-hidden h-24 w-24 flex items-center justify-center">
-                        @if($player->photo)
-                            <img src="{{ asset($player->photo) }}" alt="{{ $player->name }}" class="h-full w-full object-cover rounded-full">
-                        @else
-                            <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                            </svg>
-                        @endif
+                        <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                             alt="{{ $player->name }}" 
+                             class="h-full w-full object-cover rounded-full"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="h-full w-full flex items-center justify-center text-white font-bold text-xl" style="display: none;">
+                            {{ strtoupper(substr($player->name, 0, 2)) }}
+                        </div>
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold">{{ $player->name }}</h1>

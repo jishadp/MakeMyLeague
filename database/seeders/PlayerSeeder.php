@@ -35,31 +35,31 @@ class PlayerSeeder extends Seeder
         $players = [
             // Batters
             ['name' => 'Virat Kohli', 'role' => 'Batter'],
-            // ['name' => 'Rohit Sharma', 'role' => 'Batter'],
-            // ['name' => 'KL Rahul', 'role' => 'Batter'],
-            // ['name' => 'Shubman Gill', 'role' => 'Batter'],
-            // ['name' => 'Shreyas Iyer', 'role' => 'Batter'],
+            ['name' => 'Rohit Sharma', 'role' => 'Batter'],
+            ['name' => 'KL Rahul', 'role' => 'Batter'],
+            ['name' => 'Shubman Gill', 'role' => 'Batter'],
+            ['name' => 'Shreyas Iyer', 'role' => 'Batter'],
 
-            // // Bowlers
-            // ['name' => 'Jasprit Bumrah', 'role' => 'Bowler'],
-            // ['name' => 'Mohammed Siraj', 'role' => 'Bowler'],
-            // ['name' => 'Yuzvendra Chahal', 'role' => 'Bowler'],
-            // ['name' => 'Ravichandran Ashwin', 'role' => 'Bowler'],
-            // ['name' => 'Kuldeep Yadav', 'role' => 'Bowler'],
+            // Bowlers
+            ['name' => 'Jasprit Bumrah', 'role' => 'Bowler'],
+            ['name' => 'Mohammed Siraj', 'role' => 'Bowler'],
+            ['name' => 'Yuzvendra Chahal', 'role' => 'Bowler'],
+            ['name' => 'Ravichandran Ashwin', 'role' => 'Bowler'],
+            ['name' => 'Kuldeep Yadav', 'role' => 'Bowler'],
 
-            // // All-Rounders
-            // ['name' => 'Hardik Pandya', 'role' => 'All-Rounder'],
-            // ['name' => 'Ravindra Jadeja', 'role' => 'All-Rounder'],
-            // ['name' => 'Axar Patel', 'role' => 'All-Rounder'],
-            // ['name' => 'Washington Sundar', 'role' => 'All-Rounder'],
-            // ['name' => 'Shardul Thakur', 'role' => 'All-Rounder'],
+            // All-Rounders
+            ['name' => 'Hardik Pandya', 'role' => 'All-Rounder'],
+            ['name' => 'Ravindra Jadeja', 'role' => 'All-Rounder'],
+            ['name' => 'Axar Patel', 'role' => 'All-Rounder'],
+            ['name' => 'Washington Sundar', 'role' => 'All-Rounder'],
+            ['name' => 'Shardul Thakur', 'role' => 'All-Rounder'],
 
-            // // Wicket-Keeper Batters
-            // ['name' => 'Rishabh Pant', 'role' => 'Wicket-Keeper Batter'],
-            // ['name' => 'MS Dhoni', 'role' => 'Wicket-Keeper Batter'],
-            // ['name' => 'Ishan Kishan', 'role' => 'Wicket-Keeper Batter'],
-            // ['name' => 'Sanju Samson', 'role' => 'Wicket-Keeper Batter'],
-            // ['name' => 'Dinesh Karthik', 'role' => 'Wicket-Keeper Batter'],
+            // Wicket-Keeper Batters
+            ['name' => 'Rishabh Pant', 'role' => 'Wicket-Keeper Batter'],
+            ['name' => 'MS Dhoni', 'role' => 'Wicket-Keeper Batter'],
+            ['name' => 'Ishan Kishan', 'role' => 'Wicket-Keeper Batter'],
+            ['name' => 'Sanju Samson', 'role' => 'Wicket-Keeper Batter'],
+            ['name' => 'Dinesh Karthik', 'role' => 'Wicket-Keeper Batter'],
         ];
 
         foreach ($players as $index => $playerData) {

@@ -18,11 +18,7 @@ class AuctionController extends Controller
     public function index(League $league)
     {
         // Get available players
-        $availablePlayers = LeaguePlayer::with(['user', 'leagueTeam.team'])
-            ->where('league_id', $league->id)
-            ->where('status', 'available')
-            ->orderBy('base_price', 'desc')
-            ->paginate(10);
+        $availablePlayers = $league->getAvailablePlayers()->paginate(10);
 
         // Get teams in the league
         $leagueTeams = LeagueTeam::with(['team'])
@@ -40,7 +36,95 @@ class AuctionController extends Controller
                 ->first();
         }
 
-        return view('auction.index', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league'));
+        // Get auction statistics
+        $auctionStats = $league->getAuctionStats();
+
+        return view('auction.index', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league', 'auctionStats'));
+    }
+
+    /**
+     * Start the auction.
+     */
+    public function startAuction(Request $request, League $league)
+    {
+        // Check if user is the league organizer
+        if ($league->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Only the league organizer can start the auction'], 403);
+        }
+
+        $league->startAuction();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction started successfully!',
+            'auction_status' => 'active'
+        ]);
+    }
+
+    /**
+     * Pause the auction.
+     */
+    public function pauseAuction(Request $request, League $league)
+    {
+        // Check if user is the league organizer
+        if ($league->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Only the league organizer can pause the auction'], 403);
+        }
+
+        $league->pauseAuction();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction paused successfully!',
+            'auction_status' => 'paused'
+        ]);
+    }
+
+    /**
+     * End the auction.
+     */
+    public function endAuction(Request $request, League $league)
+    {
+        // Check if user is the league organizer
+        if ($league->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Only the league organizer can end the auction'], 403);
+        }
+
+        $league->endAuction();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction ended successfully!',
+            'auction_status' => 'ended'
+        ]);
+    }
+
+    /**
+     * Update auction settings.
+     */
+    public function updateAuctionSettings(Request $request, League $league)
+    {
+        // Check if user is the league organizer
+        if ($league->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Only the league organizer can update auction settings'], 403);
+        }
+
+        $request->validate([
+            'bid_increment_type' => 'required|in:predefined,custom',
+            'custom_bid_increment' => 'nullable|numeric|min:1',
+            'predefined_increments' => 'nullable|array',
+        ]);
+
+        $league->update([
+            'bid_increment_type' => $request->bid_increment_type,
+            'custom_bid_increment' => $request->custom_bid_increment,
+            'predefined_increments' => $request->predefined_increments,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction settings updated successfully!'
+        ]);
     }
 
     /**
@@ -91,6 +175,12 @@ class AuctionController extends Controller
                 return response()->json(['error' => 'Bid amount must be higher than current highest bid'], 400);
             }
 
+            // Check if bid meets minimum increment requirement
+            $nextMinimumBid = $highestBid ? $league->getNextMinimumBid($highestBid->amount) : $leaguePlayer->base_price;
+            if ($request->amount < $nextMinimumBid) {
+                return response()->json(['error' => 'Bid amount must be at least ₹' . $nextMinimumBid], 400);
+            }
+
             // Create the bid
             $bid = Auction::create([
                 'league_player_id' => $request->league_player_id,
@@ -104,7 +194,8 @@ class AuctionController extends Controller
             return response()->json([
                 'success' => true,
                 'bid' => $bid->load(['leagueTeam.team']),
-                'message' => 'Bid placed successfully!'
+                'message' => 'Bid placed successfully!',
+                'next_minimum_bid' => $league->getNextMinimumBid($request->amount)
             ]);
 
         } catch (\Exception $e) {
@@ -133,7 +224,7 @@ class AuctionController extends Controller
             }
 
             // Get the highest bid
-            $winningBid = AuctionBid::where('league_player_id', $request->league_player_id)
+            $winningBid = Auction::where('league_player_id', $request->league_player_id)
                 ->where('status', 'ask')
                 ->orderBy('amount', 'desc')
                 ->first();
@@ -146,7 +237,7 @@ class AuctionController extends Controller
             $winningBid->update(['status' => 'won']);
 
             // Mark all other bids as lost (delete them)
-            AuctionBid::where('league_player_id', $request->league_player_id)
+            Auction::where('league_player_id', $request->league_player_id)
                 ->where('id', '!=', $winningBid->id)
                 ->where('status', 'ask')
                 ->delete();
@@ -155,14 +246,12 @@ class AuctionController extends Controller
             $leaguePlayer->update([
                 'league_team_id' => $winningBid->league_team_id,
                 'status' => 'sold',
+                'bid_price' => $winningBid->amount,
             ]);
 
             // Deduct amount from winning team's wallet
             $winningTeam = LeagueTeam::find($winningBid->league_team_id);
             $winningTeam->decrement('wallet_balance', $winningBid->amount);
-
-            // Update the winning bid status to 'won'
-            $winningBid->update(['status' => 'won']);
 
             DB::commit();
 
@@ -179,33 +268,7 @@ class AuctionController extends Controller
     }
 
     /**
-     * Get current bids for a player.
-     */
-    public function getCurrentBids(Request $request, League $league)
-    {
-        $request->validate([
-            'league_player_id' => 'required|exists:league_players,id',
-        ]);
-
-        $leaguePlayerId = $request->league_player_id;
-        $leaguePlayer = LeaguePlayer::find($leaguePlayerId);
-        
-        // Verify the player belongs to this league
-        if (!$leaguePlayer || $leaguePlayer->league_id !== $league->id) {
-            return response()->json(['error' => 'Invalid player for this league'], 400);
-        }
-
-                    $bids = Auction::with(['leagueTeam.team'])
-            ->where('league_player_id', $leaguePlayerId)
-            ->where('status', 'ask')
-            ->orderBy('amount', 'desc')
-            ->get();
-
-        return response()->json($bids);
-    }
-    
-    /**
-     * Mark a player as unsold (skip).
+     * Skip player (mark as unsold).
      */
     public function skipPlayer(Request $request, League $league)
     {
@@ -223,26 +286,55 @@ class AuctionController extends Controller
                 return response()->json(['error' => 'Invalid player for this league'], 400);
             }
 
-            // Delete all existing bids for this player
+            // Delete all bids for this player
             Auction::where('league_player_id', $request->league_player_id)
                 ->where('status', 'ask')
                 ->delete();
 
-            // Update player status to unsold
+            // Mark player as unsold
             $leaguePlayer->update([
                 'status' => 'unsold',
+                'league_team_id' => null,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Player marked as unsold'
+                'message' => 'Player marked as unsold successfully!'
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['error' => 'Failed to mark player as unsold: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to skip player: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Get current bids for a player.
+     */
+    public function getCurrentBids(Request $request, League $league)
+    {
+        $request->validate([
+            'league_player_id' => 'required|exists:league_players,id',
+        ]);
+
+        $bids = Auction::where('league_player_id', $request->league_player_id)
+            ->where('status', 'ask')
+            ->with(['leagueTeam.team'])
+            ->orderBy('amount', 'desc')
+            ->get();
+
+        return response()->json($bids);
+    }
+
+    /**
+     * Get auction statistics.
+     */
+    public function getAuctionStats(League $league)
+    {
+        $stats = $league->getAuctionStats();
+        
+        return response()->json($stats);
     }
 }

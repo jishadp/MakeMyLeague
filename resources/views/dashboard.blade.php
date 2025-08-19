@@ -350,13 +350,13 @@
                         <div class="p-6 lg:p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white relative">
                             <div class="flex flex-col items-center text-center">
                                 <div class="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-lg">
-                                    @if($playerInfo->photo)
-                                        <img src="{{ asset($playerInfo->photo) }}" 
-                                            alt="{{ $playerInfo->name }}" class="w-full h-full object-cover">
-                                    @else
-                                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
-                                            alt="Player Photo" class="w-full h-full object-cover">
-                                    @endif
+                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                         alt="{{ $playerInfo->name }}" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full flex items-center justify-center text-white font-bold text-2xl bg-gradient-to-br from-indigo-500 to-purple-600" style="display: none;">
+                                        {{ strtoupper(substr($playerInfo->name, 0, 2)) }}
+                                    </div>
                                 </div>
                                 <h3 class="text-2xl font-bold mb-1">{{ $playerInfo->name }}</h3>
                                 <p class="text-indigo-200 mb-4">{{ $playerInfo->role->name }}</p>
@@ -509,20 +509,25 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($recentPlayers as $player)
-                    <a href="{{ route('players.show', $player->id) }}" class="block">
+                    <a href="{{ route('players.show', $player->slug) }}" class="block">
                         <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
                                     hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-24 flex items-center justify-center">
-                            <div class="text-white text-center p-4">
-                                @if($player->photo)
-                                    <img src="{{ asset($player->photo) }}" 
-                                        alt="{{ $player->name }}" class="w-12 h-12 rounded-full mx-auto mb-2 object-cover border-2 border-white">
-                                @else
-                                    <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                    </svg>
-                                @endif
-                                <span class="text-sm font-medium">{{ $player->role->name ?? 'Player' }}</span>
+                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-24 flex items-center justify-center relative overflow-hidden">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
+                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                         alt="{{ $player->name }}" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="display: none;">
+                                        {{ strtoupper(substr($player->name, 0, 2)) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-1 left-1 right-1">
+                                <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-1 py-0.5 rounded-full">
+                                    {{ $player->role->name ?? 'Player' }}
+                                </span>
                             </div>
                         </div>
                         
