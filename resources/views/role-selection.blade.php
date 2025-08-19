@@ -54,7 +54,7 @@
                                 <input type="radio" id="role_{{ $role->id }}" name="role_id" value="{{ $role->id }}" 
                                        class="sr-only peer" required>
                                 <label for="role_{{ $role->id }}" 
-                                       class="flex flex-col items-center justify-center p-6 border-2 border-[#2c5aa0] rounded-lg cursor-pointer peer-checked:border-[#4a90e2] peer-checked:bg-gradient-to-br peer-checked:from-[#4a90e2] peer-checked:to-[#87ceeb] peer-checked:text-white hover:border-[#4a90e2] transition-all duration-200 glass-card">
+                                       class="role-card flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-[#4a90e2] peer-checked:bg-gradient-to-br peer-checked:from-[#4a90e2] peer-checked:to-[#87ceeb] peer-checked:text-white peer-checked:shadow-lg peer-checked:scale-105 hover:border-[#4a90e2] hover:shadow-md hover:scale-102 transition-all duration-300 glass-card">
                                     
                                     <!-- Role Icon -->
                                     <div class="mb-3">
@@ -102,7 +102,7 @@
                                     </div>
                                     
                                     <!-- Check Icon (hidden by default, shown when selected) -->
-                                    <svg class="absolute top-2 right-2 w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="absolute top-3 right-3 w-6 h-6 text-white opacity-0 peer-checked:opacity-100 transition-all duration-300 peer-checked:scale-110" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                     </svg>
                                 </label>
@@ -118,13 +118,6 @@
                             Continue to Dashboard
                         </button>
                     </div>
-
-                    <!-- Skip for now link -->
-                    <div class="text-center">
-                        <a href="{{ route('dashboard') }}" class="text-[#4a90e2] hover:text-[#3a80d2] font-medium">
-                            Skip for now
-                        </a>
-                    </div>
                 </form>
             </div>
         </div>
@@ -135,6 +128,34 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
         .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
+        
+        /* Custom scale classes */
+        .hover\:scale-102:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Enhanced role selection styling */
+        .role-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #4a90e2 0%, #87ceeb 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .peer:checked + .role-card::before {
+            opacity: 1;
+        }
     </style>
 </body>
 </html>
