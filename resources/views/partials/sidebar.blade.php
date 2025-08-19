@@ -2,7 +2,7 @@
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity duration-200 opacity-0 backdrop-blur-sm"></div>
 
 <!-- Sidebar Menu -->
-<div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#89a894] to-[#5c9c85] shadow-xl z-50 transform -translate-x-full transition-transform duration-200 ease-out overflow-y-auto max-h-screen pb-24 rounded-r-3xl">
+<div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#4a90e2] to-[#87ceeb] shadow-xl z-50 transform -translate-x-full transition-transform duration-200 ease-out overflow-y-auto max-h-screen pb-24 rounded-r-3xl">
     <div class="flex flex-col h-full">
         <!-- Sidebar Header -->
         <div class="p-6 border-b border-white/20 flex items-center justify-between">
@@ -137,7 +137,7 @@
                 </a>
             @else
                 <div class="flex flex-col space-y-2">
-                    <a href="{{ route('login') }}" class="w-full flex items-center justify-center space-x-2 p-2 bg-white text-[#5c9c85] hover:bg-white/90 rounded-lg transition-colors">
+                    <a href="{{ route('login') }}" class="w-full flex items-center justify-center space-x-2 p-2 bg-white text-[#4a90e2] hover:bg-white/90 rounded-lg transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                         </svg>

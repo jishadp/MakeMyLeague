@@ -7,7 +7,7 @@
                 @csrf
                 <button type="submit" 
                        class="flex items-center justify-center w-10 h-10 rounded-full 
-                              bg-gradient-to-r from-[#89a894] to-[#5c9c85]
+                              bg-gradient-to-r from-[#4a90e2] to-[#87ceeb]
                               text-white hover:text-white/90
                               shadow-md hover:shadow-lg transition-all duration-300 
                               active:scale-90">
@@ -20,7 +20,7 @@
             <!-- Menu Button -->
             <a href="#" 
                class="flex items-center justify-center w-10 h-10 rounded-full 
-                      bg-gradient-to-r from-[#89a894] to-[#5c9c85]
+                      bg-gradient-to-r from-[#4a90e2] to-[#87ceeb]
                       text-white hover:text-white/90
                       shadow-md hover:shadow-lg transition-all duration-300 
                       active:scale-90">

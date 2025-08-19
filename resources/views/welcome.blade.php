@@ -27,17 +27,7 @@
     <link rel="stylesheet" id="theme-css" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
 </head>
 <body class="bg-white text-gray-900 antialiased glacier-blue-theme" id="app-body">
-    <!-- Theme Switcher (Top Right Corner) -->
-    <div class="fixed top-4 right-4 z-50">
-        <button id="theme-switcher" type="button" 
-                class="flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 backdrop-blur-lg border border-white/20 text-white rounded-full transition-all duration-300 active:scale-95 shadow-lg" 
-                aria-label="Switch theme"
-                title="Switch theme (Ctrl+T)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5zM21 15a2 2 0 00-2-2h-4a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2v-2z"/>
-            </svg>
-        </button>
-    </div>
+
 
     @include('web.header')
 

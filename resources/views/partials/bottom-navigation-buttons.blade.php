@@ -1,7 +1,7 @@
 <div class="bottom-navigation-buttons fixed bottom-0 left-0 w-full z-[100]">
     <div class="max-w-md mx-auto px-4 sm:px-6 py-3">
         <div class="nav-container flex justify-between items-center 
-                    bg-gradient-to-r from-[#89a894]/85 via-[#7ea28b]/85 to-[#5c9c85]/85
+                    bg-gradient-to-r from-[#4a90e2]/85 via-[#6bb6ff]/85 to-[#87ceeb]/85
                     backdrop-blur-lg border border-white/20 rounded-full
                     shadow-[0_-4px_20px_rgba(0,0,0,0.15)] px-2 relative">
 
@@ -34,9 +34,9 @@
                 <button id="mobile-menu-toggle" 
                    class="home-button absolute bottom-1 left-1/2 transform -translate-x-1/2 translate-y-0
                           flex flex-col items-center justify-center rounded-full 
-                          bg-white text-[#5c9c85] w-16 h-16
+                          bg-white text-[#4a90e2] w-16 h-16
                           shadow-lg hover:shadow-xl transition-all duration-300
-                          active:scale-95 border-4 border-[#89a894]/30"
+                          active:scale-95 border-4 border-[#4a90e2]/30"
                    aria-label="Toggle menu">
                     <div class="hamburger-menu-small">
                         <span></span>

@@ -31,12 +31,12 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     
-    <!-- Theme CSS Files -->
-    <link rel="stylesheet" id="theme-css" href="{{ asset('css/deep-teal-theme.css') }}?v={{ time() }}">
+    <!-- Blue Theme CSS -->
+    <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
 
     @yield('styles')
 </head>
-<body class="bg-gray-50 antialiased min-h-screen flex flex-col deep-teal-theme" id="app-body">
+<body class="bg-gray-50 antialiased min-h-screen flex flex-col glacier-blue-theme" id="app-body">
     @include('partials.nav')
     
     <main class="flex-grow pb-28" id="top">

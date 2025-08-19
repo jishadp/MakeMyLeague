@@ -18,7 +18,7 @@
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Team Name <span class="text-red-600">*</span></label>
                 <input type="text" name="name" id="name" value="{{ old('name', $team->name) }}" required
-                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50"
+                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#4a90e2] focus:ring focus:ring-[#4a90e2] focus:ring-opacity-50"
                        placeholder="Enter team name">
                 @error('name')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -41,7 +41,7 @@
                         </span>
                     @endif
                     <input type="file" name="logo" id="logo"
-                           class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5c9c85]">
+                           class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4a90e2]">
                 </div>
                 <p class="mt-1 text-sm text-gray-500">
                     @if($team->logo)
@@ -59,7 +59,7 @@
                 <div>
                     <label for="home_ground_id" class="block text-sm font-medium text-gray-700 mb-1">Home Ground <span class="text-red-600">*</span></label>
                     <select name="home_ground_id" id="home_ground_id" required
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#4a90e2] focus:ring focus:ring-[#4a90e2] focus:ring-opacity-50">
                         <option value="">Select Home Ground</option>
                         @foreach($grounds as $ground)
                             <option value="{{ $ground->id }}" {{ old('home_ground_id', $team->home_ground_id) == $ground->id ? 'selected' : '' }}>
@@ -76,7 +76,7 @@
                 <div>
                     <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-1">Local Body <span class="text-red-600">*</span></label>
                     <select name="local_body_id" id="local_body_id" required
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#5c9c85] focus:ring focus:ring-[#5c9c85] focus:ring-opacity-50">
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#4a90e2] focus:ring focus:ring-[#4a90e2] focus:ring-opacity-50">
                         <option value="">Select Local Body</option>
                         @foreach($localBodies as $localBody)
                             <option value="{{ $localBody->id }}" {{ old('local_body_id', $team->local_body_id) == $localBody->id ? 'selected' : '' }}>
@@ -95,7 +95,7 @@
                 <a href="{{ route('teams.show', $team) }}" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                     Cancel
                 </a>
-                <button type="submit" class="bg-gradient-to-r from-[#89a894] to-[#5c9c85] text-white py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                <button type="submit" class="bg-gradient-to-r from-[#4a90e2] to-[#87ceeb] text-white py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                     Update Team
                 </button>
             </div>

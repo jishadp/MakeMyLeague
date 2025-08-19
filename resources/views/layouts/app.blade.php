@@ -31,8 +31,8 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     
-    <!-- Theme CSS Files -->
-    <link rel="stylesheet" id="theme-css" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
+    <!-- Blue Theme CSS -->
+    <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
     
     <!-- Include CDN Links for Select2 and Bootstrap Datepicker -->
     @include('partials.cdn-links')
