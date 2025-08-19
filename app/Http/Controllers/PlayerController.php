@@ -59,7 +59,7 @@ class PlayerController extends Controller
     public function create()
     {
         // Check if the current user has admin privileges
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isOrganizer()) {
             return redirect()->route('players.index')
                 ->with('error', 'You do not have permission to create players.');
         }
@@ -134,7 +134,7 @@ class PlayerController extends Controller
     public function edit(User $player)
     {
         // Only allow admin or the player themselves to edit
-        if (!Auth::user() || (Auth::id() !== $player->id && !Auth::user()->isAdmin())) {
+        if (!Auth::user() || (Auth::id() !== $player->id && !Auth::user()->isOrganizer())) {
             return redirect()->route('players.show', $player)
                 ->with('error', 'You do not have permission to edit this player.');
         }
@@ -150,7 +150,7 @@ class PlayerController extends Controller
     public function update(Request $request, User $player)
     {
         // Only allow admin or the player themselves to update
-        if (!Auth::user() || (Auth::id() !== $player->id && !Auth::user()->isAdmin())) {
+        if (!Auth::user() || (Auth::id() !== $player->id && !Auth::user()->isOrganizer())) {
             return redirect()->route('players.show', $player)
                 ->with('error', 'You do not have permission to update this player.');
         }
@@ -165,7 +165,7 @@ class PlayerController extends Controller
         ];
 
         // Only admin can change role
-        if (Auth::user()->isAdmin()) {
+        if (Auth::user()->isOrganizer()) {
             $rules['position_id'] = 'required|exists:game_positions,id';
         }
 
@@ -178,7 +178,7 @@ class PlayerController extends Controller
         $player->local_body_id = $validated['local_body_id'] ?? null;
         
         // Only admin can change role
-        if (Auth::user()->isAdmin() && isset($validated['position_id'])) {
+        if (Auth::user()->isOrganizer() && isset($validated['position_id'])) {
             $player->position_id = $validated['position_id'];
         }
 
@@ -200,7 +200,7 @@ class PlayerController extends Controller
     public function destroy(User $player)
     {
         // Only allow admin to delete
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isOrganizer()) {
             return redirect()->route('players.show', $player)
                 ->with('error', 'You do not have permission to delete this player.');
         }

@@ -124,11 +124,17 @@ class User extends Authenticatable
      *
      * @return bool
      */
-    public function isAdmin(): bool
+    public function isOrganizer(): bool
     {
-        // For now, let's assume users with ID 1 are admins
-        // In a production app, you would use a proper role system
         return $this->id === 1;
+    }
+    public function isOwner(): bool
+    {
+        return $this->roles->contains('role_id',2);
+    }
+    public function isPlayer(): bool
+    {
+         return $this->roles->contains('role_id',3);
     }
     
     /**
@@ -154,13 +160,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Team::class, 'owner_id');
     }
-    
+
     /**
-     * Get the roles assigned to this user.
+     * Get all of the comments for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function roles(): BelongsToMany
+    public function roles(): HasManyThrough
     {
-        return $this->belongsToMany(Role::class, 'user_roles');
+        return $this->hasManyThrough(UserRole::class,Role::class,'id','user_id');
     }
     
     /**

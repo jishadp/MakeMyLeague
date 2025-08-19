@@ -108,8 +108,8 @@
                         <!-- Player Role -->
                         <div>
                             <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
-                            <select name="position_id" id="position_id" required {{ auth()->user()->isAdmin() ? '' : 'disabled' }}
-                                    class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4 {{ !auth()->user()->isAdmin() ? 'bg-gray-100' : '' }}">
+                            <select name="position_id" id="position_id" required {{ auth()->user()->isOrganizer() ? '' : 'disabled' }}
+                                    class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4 {{ !auth()->user()->isOrganizer() ? 'bg-gray-100' : '' }}">
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->id }}" {{ old('position_id', $player->position_id) == $role->id ? 'selected' : '' }}>
@@ -117,7 +117,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @if(!auth()->user()->isAdmin())
+                            @if(!auth()->user()->isOrganizer())
                                 <p class="mt-1 text-sm text-gray-500">Only administrators can change player roles.</p>
                                 <input type="hidden" name="position_id" value="{{ $player->position_id }}">
                             @endif
@@ -178,7 +178,7 @@
         </div>
         
         <!-- Delete Player Section -->
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isOrganizer())
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8 animate-fadeInUp">
                 <div class="p-6 border-t border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Danger Zone</h2>

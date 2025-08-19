@@ -17,7 +17,7 @@ class DashboardController
     public function view()
     {
         $leagues = League::with('game', 'organizer')->latest()->take(5)->get();
-        $userLeagues = Auth::check() ? League::where('user_id', Auth::id())->get() : collect();
+        $userLeagues = auth()->user()->isOrganizer() ? League::where('user_id', Auth::id())->get() : League::get();
         $userOwnedTeams = Auth::check() ? Team::where('owner_id', Auth::id())->get() : collect();
         
         // Get player info if the current user has a position_id (is a player)

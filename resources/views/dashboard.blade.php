@@ -3,6 +3,7 @@
 @section('title', 'League Manager - Dashboard')
 
 @section('content')
+
     <!-- Hero Section -->
     <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-12 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
         <div class="max-w-7xl mx-auto">
@@ -15,17 +16,20 @@
                         Organize leagues, manage teams, track player stats, and run exciting tournaments.
                     </p>
                     <div class="flex flex-wrap gap-4">
+                        @if(auth()->user()->isOrganizer())
                         <a href="{{ route('leagues.index') }}"
                            class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
                                   hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg">
                             My Leagues
                         </a>
+                        
                         <a href="{{ route('leagues.create') }}"
                            class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
                                   active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create New League
                         </a>
-                        @if(auth()->user()->isAdmin())
+                        @endif
+                        @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                         <a href="{{ route('players.create') }}"
                            class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
                                   active:scale-95 transition-all shadow-md hover:shadow-lg">
@@ -44,6 +48,7 @@
     </section>
 
     <!-- My Leagues Section -->
+    @if(auth()->user()->isOrganizer())
     <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-8">
@@ -126,7 +131,82 @@
             @endif
         </div>
     </section>
+    @endif
 
+    <!-- Open Leagues Section -->
+    @if(auth()->user()->isPlayer())
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
+            </div>
+
+            @if($userLeagues->isEmpty())
+                <div class="bg-white rounded-xl shadow-lg p-6 text-center animate-fadeInUp">
+                    <div class="mb-4">
+                        <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5
+                                     a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3
+                                     m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">You haven't created any leagues yet</h3>
+                    <p class="text-gray-600 mb-6">Get started by creating your first cricket league.</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($userLeagues as $league)
+                        <a href="{{ route('leagues.show', $league) }}" class="block">
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
+                            <div class="h-40 overflow-hidden relative">
+                                <img src="{{ asset('images/league.jpg') }}" 
+                                     alt="{{ $league->name }}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                    <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                                </div>
+                                @if($league->is_default)
+                                    <span class="absolute top-3 right-3 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Default</span>
+                                @endif
+                            </div>
+                            <div class="p-6">
+                                <div class="mb-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm
+                                        {{ 
+                                            $league->status === 'active' ? 'bg-green-100 text-green-800' : 
+                                            ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                            ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')) 
+                                        }}">
+                                        {{ ucfirst($league->status) }}
+                                    </span>
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name }}</p>
+                                    <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
+                                    <p><span class="font-medium">⏳ Duration:</span> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</p>
+                                    @if($league->localbody_id)
+                                        <p><span class="font-medium">📍 Venue:</span> {{ $league->localBody->name }}</p>
+                                    @endif
+                                    @if($league->venue_details)
+                                        <p><span class="font-medium">🏟️ Details:</span> {{ $league->venue_details }}</p>
+                                    @endif
+                                </div>
+                                <div class="mt-6">
+                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                        View Details →
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </section>
+    @endif
+
+    @if(auth()->user()->isOwner())
     <!-- Owned Teams Section -->
     <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
@@ -204,6 +284,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <!-- My League Teams Section -->
     <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -509,7 +590,7 @@
                                     <span class="text-emerald-600 hover:text-emerald-800 font-medium">
                                         Browse Players →
                                     </span>
-                                    @if(auth()->user()->isAdmin())
+                                    @if(auth()->user()->isOrganizer())
                                     <span class="text-emerald-600 hover:text-emerald-800 font-medium">
                                         Add Player →
                                     </span>
