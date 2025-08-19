@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - League Manager</title>
+    <title>Register - {{config('app.name')}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
@@ -20,7 +20,7 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Create an Account</h2>
-                <p class="text-gray-600">Join League Manager and start managing your cricket leagues</p>
+                <p class="text-gray-600">Join {{config('app.name')}} and start managing your cricket leagues</p>
             </div>
 
             <!-- Register Form Card -->

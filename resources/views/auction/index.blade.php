@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Auction - CricBid')
+@section('title', 'Auction - '.config('app.name'))
 
 @section('styles')
 <style>

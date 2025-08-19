@@ -16,7 +16,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-[#023047] tracking-tight">CricBid</h3>
+                    <h3 class="text-2xl font-bold text-[#023047] tracking-tight">{{config('app.name')}}</h3>
                 </div>
                 <p class="text-slate-700 mb-8 max-w-md mx-auto md:mx-0 text-lg leading-relaxed">
                     The ultimate platform for cricket league management. Create leagues, manage teams, conduct auctions, and track player statistics with ease.
@@ -106,7 +106,7 @@
         <!-- Bottom Section -->
         <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p class="text-slate-700 text-sm mb-4 md:mb-0">
-                &copy; {{ date('Y') }} CricBid. Built with ❤️ using Laravel. All rights reserved.
+                &copy; {{ date('Y') }} {{config('app.name')}}. Built with ❤️ using Laravel. All rights reserved.
             </p>
             <div class="flex items-center space-x-6 text-sm text-slate-700">
                 <span class="flex items-center">

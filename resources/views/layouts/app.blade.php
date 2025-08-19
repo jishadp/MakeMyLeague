@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="League Manager - Register today to manage leagues, teams, and players seamlessly">
-    <meta name="keywords" content="league manager, sports management, team management, player registration">
+    <meta name="description" content="{{config('app.name')}} - Register today to manage leagues, teams, and players seamlessly">
+    <meta name="keywords" content="{{config('app.name')}}, sports management, team management, player registration">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'League Manager - Register Today')</title>
+    <title>@yield('title', config('app.name'). '- Register Today')</title>
 
     <!-- Preload critical CSS -->
     <link rel="preload" href="{{ asset('css/main.css') }}?v={{ time() }}" as="style">

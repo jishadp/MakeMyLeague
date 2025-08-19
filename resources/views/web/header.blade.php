@@ -5,7 +5,7 @@
             <!-- Logo / Brand -->
             <div class="flex items-center">
                 <a href="/" class="flex items-center space-x-2">
-                    <span class="text-2xl font-bold text-gray-900 tracking-tight">League Manager</span>
+                    <span class="text-2xl font-bold text-gray-900 tracking-tight">{{config('app.name')}}</span>
                 </a>
             </div>
 

@@ -5,7 +5,7 @@
                 Trusted by League Organizers
             </h2>
             <p class="text-xl text-gray-600">
-                See what our users say about League Manager
+                See what our users say about {{config('app.name')}}
             </p>
         </div>
         
@@ -30,7 +30,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-gray-600 mb-4">"Cricket League Manager made organizing our local IPL tournament so easy. The player stats and team management features are fantastic."</p>
+                <p class="text-gray-600 mb-4">"Cricket {{config('app.name')}} made organizing our local IPL tournament so easy. The player stats and team management features are fantastic."</p>
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
                     <div>
