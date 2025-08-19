@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class RoleSelectionController extends Controller
 {
@@ -23,8 +22,7 @@ class RoleSelectionController extends Controller
         $user = Auth::user();
         
         // Check if user already has a role assigned
-        $hasRole = DB::table('user_roles')->where('user_id', $user->id)->exists();
-        if ($hasRole) {
+        if ($user->roles()->exists()) {
             return redirect()->route('dashboard');
         }
 
@@ -45,8 +43,7 @@ class RoleSelectionController extends Controller
         $user = Auth::user();
         
         // Check if user already has a role assigned
-        $hasRole = DB::table('user_roles')->where('user_id', $user->id)->exists();
-        if ($hasRole) {
+        if ($user->roles()->exists()) {
             return redirect()->route('dashboard');
         }
 
@@ -54,13 +51,8 @@ class RoleSelectionController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        // Assign role to user
-        DB::table('user_roles')->insert([
-            'user_id' => $user->id,
-            'role_id' => $validated['role_id'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Assign role to user using the relationship
+        $user->roles()->attach($validated['role_id']);
 
         return redirect()->route('dashboard')->with('success', 'Role selected successfully!');
     }

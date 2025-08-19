@@ -60,6 +60,9 @@ class DatabaseSeeder extends Seeder
         // Run team seeder
         // $this->call(TeamSeeder::class);
 
+        // Run role seeder
+        $this->call(RoleSeeder::class);
+
         // Run game role seeder
         $this->call(GamePositionSeeder::class);
 
@@ -93,9 +96,5 @@ class DatabaseSeeder extends Seeder
         //         ]);
         //     }
         // }
-
-        Role::create(['name'=>'organizer']);
-        Role::create(['name'=>'owner']);
-        Role::create(['name'=>'player']);
     }
 }

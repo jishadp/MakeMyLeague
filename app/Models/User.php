@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -130,11 +129,16 @@ class User extends Authenticatable
     }
     public function isOwner(): bool
     {
-        return $this->roles->contains('role_id',2);
+        return $this->roles()->where('name', 'Owner')->exists();
     }
     public function isPlayer(): bool
     {
-         return $this->roles->contains('role_id',3);
+         return $this->roles()->where('name', 'Player')->exists();
+    }
+    
+    public function isOrganiser(): bool
+    {
+        return $this->roles()->where('name', 'Organiser')->exists();
     }
     
     /**
@@ -162,13 +166,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Get all of the comments for the User
+     * Get the roles assigned to the user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles(): HasManyThrough
+    public function roles(): BelongsToMany
     {
-        return $this->hasManyThrough(UserRole::class,Role::class,'id','user_id');
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
     
     /**
