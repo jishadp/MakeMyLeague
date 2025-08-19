@@ -79,23 +79,19 @@ class PlayerController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
             'mobile' => 'required|string|max:15',
-            'pin' => 'nullable|string|max:10',
+            'pin' => 'required|string|max:10',
             'role_id' => 'required|exists:game_roles,id',
-            'local_body_id' => 'required|exists:local_bodies,id',
+            'local_body_id' => 'nullable|exists:local_bodies,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $player = new User();
         $player->name = $validated['name'];
-        $player->email = $validated['email'];
-        $player->password = Hash::make($validated['password']);
         $player->mobile = $validated['mobile'];
-        $player->pin = $validated['pin'] ?? null;
+        $player->pin = $validated['pin'];
         $player->role_id = $validated['role_id'];
-        $player->local_body_id = $validated['local_body_id'];
+        $player->local_body_id = $validated['local_body_id'] ?? null;
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
