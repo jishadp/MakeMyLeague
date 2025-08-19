@@ -110,7 +110,7 @@
             
             <!-- Action buttons for team owner or admin -->
             @auth
-                @if(Auth::id() === $team->owner_id || Auth::user()->isAdmin())
+                @if(Auth::id() === $team->owner_id || Auth::user()->isOrganizer())
                 <div class="p-6 pt-0 flex justify-end space-x-3">
                     <a href="{{ route('teams.edit', $team) }}" 
                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#4a90e2] to-[#87ceeb] text-white rounded-md hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-300">

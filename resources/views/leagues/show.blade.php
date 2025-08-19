@@ -40,6 +40,7 @@
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <!-- Mobile: 2 buttons per row -->
                         <div class="grid grid-cols-2 gap-3 sm:hidden">
+                            @if(auth()->user()->isOrganizer())
                             <a href="{{ route('leagues.edit', $league) }}"
                                class="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors text-center text-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,6 +48,7 @@
                                 </svg>
                                 Edit League
                             </a>
+                            @endif
                             <a href="{{ route('leagues.index') }}"
                                class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center text-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,6 +59,7 @@
                         </div>
                         
                         <!-- Mobile: Add Player and Team buttons -->
+                         @if(auth()->user()->isOrganizer())
                         <div class="grid grid-cols-2 gap-3 sm:hidden">
                             <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                                class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-center text-sm">
@@ -73,10 +76,12 @@
                                 Add Team
                             </a>
                         </div>
+                        @endif
                         
                         <!-- Desktop: Original layout -->
                         <div class="hidden sm:flex flex-col gap-3">
                             <div class="flex gap-3">
+                                @if(auth()->user()->isOrganizer())
                                 <a href="{{ route('leagues.edit', $league) }}"
                                    class="inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors text-base">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,6 +89,7 @@
                                     </svg>
                                     Edit League
                                 </a>
+                                @endif
                                 <a href="{{ route('leagues.index') }}"
                                    class="inline-flex items-center justify-center px-6 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-base">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,6 +98,7 @@
                                     Back to Leagues
                                 </a>
                             </div>
+                            @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                             <div class="flex gap-3">
                                 <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                                    class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
@@ -108,10 +115,22 @@
                                     Create Team
                                 </a>
                             </div>
+                            @endif
+                            @if(auth()->user()->isPlayer())
+                            <div class="flex gap-3">
+                                <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
+                                   class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Register
+                                </a>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-
+                @if(auth()->user()->isOrganizer())
                 <!-- Quick Actions -->
                 <div class="mb-8 sm:mb-12">
                     <h3 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">Quick Actions</h3>
@@ -145,6 +164,7 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
                 <!-- League Summary -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">

@@ -146,7 +146,7 @@
             </a>
             
             @auth
-                @if(auth()->id() === $player->id || auth()->user()->isAdmin())
+                @if(auth()->id() === $player->id || auth()->user()->isOrganizer())
                 <div class="flex space-x-2">
                     <a href="{{ route('players.edit', $player) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <svg class="-ml-1 mr-2 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -155,7 +155,7 @@
                         Edit
                     </a>
                     
-                    @if(auth()->user()->isAdmin())
+                    @if(auth()->user()->isOrganizer())
                         <form action="{{ route('players.destroy', $player) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this player? This action cannot be undone.');">
                             @csrf
                             @method('DELETE')
