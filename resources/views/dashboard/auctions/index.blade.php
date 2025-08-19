@@ -142,8 +142,8 @@
                                                     @endif
                                                 </div>
                                                 <div class="text-sm text-gray-500">
-                                                    @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->role)
-                                                        {{ $auction->leaguePlayer->user->role->name }}
+                                                    @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->position)
+                                                        {{ $auction->leaguePlayer->user->position->name }}
                                                     @else
                                                         Role Unknown
                                                     @endif

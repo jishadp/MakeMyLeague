@@ -90,7 +90,7 @@
                                         </div>
                                         <div class="ml-4">
                                             <h4 class="text-md font-bold text-gray-900">{{ $player->user->name }}</h4>
-                                            <p class="text-xs text-gray-600">{{ $player->user->role->name ?? 'No Role' }}</p>
+                                            <p class="text-xs text-gray-600">{{ $player->user->position->name ?? 'No Role' }}</p>
                                             <div class="mt-1 flex items-center">
                                                 <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                                                     Retained
@@ -164,7 +164,7 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $player->user->name }}</div>
-                                            <div class="text-sm text-gray-500">{{ $player->user->role->name ?? 'No Role' }}</div>
+                                            <div class="text-sm text-gray-500">{{ $player->user->position->name ?? 'No Role' }}</div>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-4">
@@ -321,7 +321,7 @@
                                                 data-retention="{{ $player->retention ? 'true' : 'false' }}">
                                             <label for="player-{{ $player->id }}" class="ml-3 block">
                                                 <span class="text-sm font-medium text-gray-900">{{ $player->user->name }}</span>
-                                                <span class="text-sm text-gray-500 block">{{ $player->user->role->name ?? 'No Role' }}</span>
+                                                <span class="text-sm text-gray-500 block">{{ $player->user->position->name ?? 'No Role' }}</span>
                                             </label>
                                         </div>
                                         <div class="flex items-center">
@@ -357,7 +357,7 @@
                             <h5 class="font-medium text-sm text-gray-600 mb-2">Available Players for Auction</h5>
                             
                             @php
-                                $otherLeaguePlayers = \App\Models\LeaguePlayer::with(['user', 'user.role'])
+                                $otherLeaguePlayers = \App\Models\LeaguePlayer::with(['user', 'user.position'])
                                     ->whereNull('league_team_id')
                                     ->where('status', 'available')
                                     ->get();
@@ -376,7 +376,7 @@
                                                 data-retention="{{ $player->retention ? 'true' : 'false' }}">
                                             <label for="player-{{ $player->id }}" class="ml-3 block">
                                                 <span class="text-sm font-medium text-gray-900">{{ $player->user->name }}</span>
-                                                <span class="text-sm text-gray-500 block">{{ $player->user->role->name ?? 'No Role' }}</span>
+                                                <span class="text-sm text-gray-500 block">{{ $player->user->position->name ?? 'No Role' }}</span>
                                             </label>
                                         </div>
                                         <div class="flex items-center">

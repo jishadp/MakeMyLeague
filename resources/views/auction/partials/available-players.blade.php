@@ -104,7 +104,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex space-x-2">
-                        <button onclick="selectPlayerForBidding('{{ $player->id }}', '{{ $player->user->name }}', '{{ $player->base_price }}', '{{ $player->user->role->name ?? 'Unknown' }}')"
+                        <button onclick="selectPlayerForBidding('{{ $player->id }}', '{{ $player->user->name }}', '{{ $player->base_price }}', '{{ $player->user->position->name ?? 'Unknown' }}')"
                                 class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>

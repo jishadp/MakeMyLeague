@@ -61,7 +61,7 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                            <p class="text-gray-900">{{ $leaguePlayer->user->role->name ?? 'Not Set' }}</p>
+                            <p class="text-gray-900">{{ $leaguePlayer->user->position->name ?? 'Not Set' }}</p>
                         </div>
                         
                         <div>
