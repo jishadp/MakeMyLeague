@@ -38,6 +38,12 @@ Route::get('logout',[LoginController::class,'logout'])->name('logout');
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register'])->name('do.register');
 
+// Role selection routes
+Route::middleware('auth')->group(function(){
+    Route::get('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'show'])->name('role-selection.show');
+    Route::post('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'store'])->name('role-selection.store');
+});
+
 // Ground routes
 Route::get('grounds', [GroundController::class, 'index'])->name('grounds.index');
 Route::get('grounds/{ground}', [GroundController::class, 'show'])->name('grounds.show');
@@ -61,8 +67,8 @@ Route::put('players/{player}', [PlayerController::class, 'update'])->name('playe
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
 
 Route::middleware('auth')->group(function(){
-    Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard');
-    Route::get('dashboard/auctions',[DashboardController::class,'auctionsIndex'])->name('auctions.index');
+    Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard')->middleware('has.role');
+    Route::get('dashboard/auctions',[DashboardController::class,'auctionsIndex'])->name('auctions.index')->middleware('has.role');
     
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);

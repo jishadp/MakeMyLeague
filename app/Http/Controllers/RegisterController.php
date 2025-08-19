@@ -18,9 +18,7 @@ class RegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        $roles = GamePosition::all();
-        $localBodies = LocalBody::all();
-        return view('register', compact('roles', 'localBodies'));
+        return view('register');
     }
 
     /**
@@ -28,18 +26,17 @@ class RegisterController extends Controller
      */
     public function register(RegisterRequest $request)
     {
-        // dd($request->validated());
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'pin' => bcrypt($request->pin),
-            'position_id' => $request->position_id,
-            'local_body_id' => $request->local_body_id,
+            // Remove position_id and local_body_id from initial registration
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Registration successful!');
+        // Redirect to role selection instead of dashboard
+        return redirect()->route('role-selection.show')->with('success', 'Registration successful! Please select your role.');
     }
 }

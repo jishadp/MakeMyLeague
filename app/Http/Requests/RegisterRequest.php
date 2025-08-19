@@ -26,8 +26,7 @@ class RegisterRequest extends FormRequest
             'email' => 'nullable|email|max:100|unique:users',
             'mobile' => 'required|string|max:10|min:10|unique:users',
             'pin' => 'required|string|min:4|max:6',
-            'position_id' => 'nullable|exists:game_positions,id',
-            'local_body_id' => 'nullable|exists:local_bodies,id'
+            // Remove position_id and local_body_id validation
         ];
     }
 }
