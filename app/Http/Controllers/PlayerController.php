@@ -81,6 +81,7 @@ class PlayerController extends Controller
             'name' => 'required|string|max:255',
             'mobile' => 'required|string|max:15',
             'pin' => 'required|string|max:10',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'role_id' => 'required|exists:game_roles,id',
             'local_body_id' => 'nullable|exists:local_bodies,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -90,6 +91,7 @@ class PlayerController extends Controller
         $player->name = $validated['name'];
         $player->mobile = $validated['mobile'];
         $player->pin = $validated['pin'];
+        $player->email = $validated['email'] ?? null;
         $player->role_id = $validated['role_id'];
         $player->local_body_id = $validated['local_body_id'] ?? null;
 
@@ -143,10 +145,10 @@ class PlayerController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $player->id,
             'mobile' => 'required|string|max:15',
-            'pin' => 'nullable|string|max:10',
-            'local_body_id' => 'required|exists:local_bodies,id',
+            'pin' => 'required|string|max:10',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $player->id,
+            'local_body_id' => 'nullable|exists:local_bodies,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
@@ -155,27 +157,17 @@ class PlayerController extends Controller
             $rules['role_id'] = 'required|exists:game_roles,id';
         }
 
-        // Password is optional on update
-        if ($request->filled('password')) {
-            $rules['password'] = 'string|min:8|confirmed';
-        }
-
         $validated = $request->validate($rules);
 
         $player->name = $validated['name'];
-        $player->email = $validated['email'];
         $player->mobile = $validated['mobile'];
-        $player->pin = $validated['pin'] ?? null;
-        $player->local_body_id = $validated['local_body_id'];
+        $player->pin = $validated['pin'];
+        $player->email = $validated['email'] ?? null;
+        $player->local_body_id = $validated['local_body_id'] ?? null;
         
         // Only admin can change role
         if (Auth::user()->isAdmin() && isset($validated['role_id'])) {
             $player->role_id = $validated['role_id'];
-        }
-
-        // Update password if provided
-        if ($request->filled('password')) {
-            $player->password = Hash::make($validated['password']);
         }
 
         // Handle photo upload

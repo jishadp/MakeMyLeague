@@ -93,7 +93,14 @@
                             </select>
                         </div>
 
-                        <!-- Local Body -->
+                        <!-- Email (Optional) -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+                            <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                   class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
+                        </div>
+
+                        <!-- Local Body (Optional) -->
                         <div>
                             <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
                             <select name="local_body_id" id="local_body_id"
