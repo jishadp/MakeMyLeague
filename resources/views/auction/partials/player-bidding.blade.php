@@ -1,11 +1,11 @@
 <!-- Bidding Section -->
-<div class="lg:col-span-1" id="biddingSection">
+<div class="w-full" id="biddingSection">
 
     <!-- Player Bidding Card -->
-    <div class="bg-white rounded-lg shadow-lg mb-6">
-        <div class="px-3 py-3 sm:px-6 border-b border-gray-200">
+    <div class="glacier-card">
+        <div class="px-3 py-3 sm:px-6 border-b glacier-border">
             <div class="flex items-center justify-between">
-                <h2 class="text-base sm:text-lg font-semibold text-gray-900">Player Bidding</h2>
+                <h2 class="text-base sm:text-lg font-semibold glacier-text-primary">Player Bidding</h2>
                 <div class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium" id="biddingStatus">
                     Waiting
                 </div>
@@ -24,7 +24,7 @@
 
             <div id="biddingCard" class="hidden">
                 <!-- Selected Player Info -->
-                <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-3 sm:p-4 mb-4 text-white">
+                <div class="glacier-gradient rounded-lg p-3 sm:p-4 mb-4 text-white">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center space-x-3">
                             <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
@@ -82,16 +82,34 @@
                 <!-- Hidden Input for Selected Player -->
                 <input type="hidden" id="selectedLeaguePlayerId">
                 
+                <!-- Team Selection Info -->
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Selected Team:</span>
+                            <span id="selectedTeamName" class="text-gray-900">No team selected</span>
+                        </div>
+                        <button onclick="selectRandomTeamForTesting()" 
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200">
+                            🎲 Random Team
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <span class="font-medium">Team Balance:</span>
+                        <span id="selectedTeamBalance" class="text-gray-900">₹0</span>
+                    </div>
+                </div>
+                
                 <!-- Quick Bid Buttons -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Quick Bid Options</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="quickBidButtons">
+                    <label class="block text-sm font-medium glacier-text-secondary mb-2">Quick Bid Options</label>
+                    <div class="grid grid-cols-3 gap-3" id="quickBidButtons">
                         <!-- Quick bid buttons will be generated dynamically -->
                     </div>
                 </div>
                 
                 <!-- Admin Controls -->
-                <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t glacier-border">
                     <button id="acceptBidBtn" class="flex-1 bg-blue-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium mobile-button">
                         Mark as Sold
                     </button>
@@ -103,107 +121,4 @@
         </div>
     </div>
 
-    <!-- Recent Bids -->
-    <div class="bg-white rounded-lg shadow-lg">
-        <div class="px-3 py-3 sm:px-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h2 class="text-base sm:text-lg font-semibold text-gray-900">Recent Bids</h2>
-                <div class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium" id="bidCount">
-                    0 bids
-                </div>
-            </div>
-        </div>
-        <div class="p-3 sm:p-6">
-            <div id="biddingHistory" class="space-y-3 max-h-60 sm:max-h-80 overflow-y-auto">
-                <div class="text-center py-6 sm:py-8 text-gray-500">
-                    <div class="bg-gray-100 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                    </div>
-                    <p class="text-sm sm:text-base">No bids yet</p>
-                    <p class="text-xs sm:text-sm text-gray-400 mt-1">Bids will appear here</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- League Teams List -->
-    <div class="bg-white rounded-lg shadow-lg mt-6">
-        <div class="px-3 py-3 sm:px-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h2 class="text-base sm:text-lg font-semibold text-gray-900">League Teams</h2>
-                <div class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                    {{ $leagueTeams->count() }} Teams
-                </div>
-            </div>
-        </div>
-        <div class="p-3 sm:p-6">
-            <div class="space-y-3 max-h-60 sm:max-h-80 overflow-y-auto">
-                @foreach($leagueTeams as $leagueTeam)
-                <div class="border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors duration-200 team-card" 
-                     data-team-id="{{ $leagueTeam->id }}" 
-                     data-wallet="{{ $leagueTeam->wallet_balance }}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3 min-w-0 flex-1">
-                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                                {{ strtoupper(substr($leagueTeam->team->name, 0, 2)) }}
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <h3 class="font-medium text-gray-900 text-sm sm:text-base truncate">{{ $leagueTeam->team->name }}</h3>
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                        </svg>
-                                        ₹{{ number_format($leagueTeam->wallet_balance) }}
-                                    </span>
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                        </svg>
-                                        {{ $leagueTeam->players()->count() }} Players
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right ml-2">
-                            <div class="text-xs sm:text-sm font-medium text-gray-900" id="teamBidLimit_{{ $leagueTeam->id }}">
-                                Max Bid: ₹{{ number_format($leagueTeam->wallet_balance) }}
-                            </div>
-                            <div class="text-xs text-gray-500" id="teamStatus_{{ $leagueTeam->id }}">
-                                Available
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Team Bidding Status -->
-                    <div class="mt-2 pt-2 border-t border-gray-100">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-gray-500">Last Bid:</span>
-                            <span class="font-medium text-gray-900 truncate" id="teamLastBid_{{ $leagueTeam->id }}">None</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs mt-1">
-                            <span class="text-gray-500">Can Bid Up To:</span>
-                            <span class="font-medium text-green-600" id="teamCanBid_{{ $leagueTeam->id }}">₹{{ number_format($leagueTeam->wallet_balance) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs mt-1">
-                            <span class="text-gray-500">Next Min Bid:</span>
-                            <span class="font-medium text-blue-600" id="teamNextMinBid_{{ $leagueTeam->id }}">₹0</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Team Action Button -->
-                    <div class="mt-3 pt-2 border-t border-gray-100">
-                        <button onclick="selectTeamForBidding('{{ $leagueTeam->id }}', '{{ $leagueTeam->team->name }}')" 
-                                class="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 team-select-btn mobile-button"
-                                id="teamSelectBtn_{{ $leagueTeam->id }}">
-                            Select Team
-                        </button>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
 </div>

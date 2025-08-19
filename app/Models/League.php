@@ -269,6 +269,7 @@ class League extends Model
     {
         return $this->leaguePlayers()
             ->where('status', 'available')
+            ->where('retention', false) // Exclude retention players
             ->with(['user', 'user.position', 'user.localBody'])
             ->orderBy('base_price', 'desc');
     }

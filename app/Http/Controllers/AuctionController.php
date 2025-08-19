@@ -17,29 +17,23 @@ class AuctionController extends Controller
      */
     public function index(League $league)
     {
-        // Get available players
+        // Get available players (excluding retention players)
         $availablePlayers = $league->getAvailablePlayers()->paginate(10);
 
         // Get teams in the league
-        $leagueTeams = LeagueTeam::with(['team'])
+        $leagueTeams = LeagueTeam::with(['team', 'team.owner', 'team.homeGround'])
             ->where('league_id', $league->id)
             ->get();
 
-        // Get user's team if they have one
-        $userTeam = null;
-        if (Auth::check()) {
-            $userTeam = LeagueTeam::with(['team'])
-                ->whereHas('team', function ($query) {
-                    $query->where('owner_id', Auth::id());
-                })
-                ->where('league_id', $league->id)
-                ->first();
-        }
+        // Get sold players for highest bids section
+        $soldPlayers = $league->getSoldPlayers()
+            ->orderBy('bid_price', 'desc')
+            ->get();
 
         // Get auction statistics
         $auctionStats = $league->getAuctionStats();
 
-        return view('auction.index', compact('availablePlayers', 'leagueTeams', 'userTeam', 'league', 'auctionStats'));
+        return view('auction.index', compact('availablePlayers', 'leagueTeams', 'league', 'auctionStats', 'soldPlayers'));
     }
 
     /**

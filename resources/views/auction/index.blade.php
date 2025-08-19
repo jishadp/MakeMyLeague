@@ -29,7 +29,7 @@
     
     /* Improved focus states for better accessibility */
     .focus-ring:focus {
-        outline: 2px solid #3b82f6;
+        outline: 2px solid #4a90e2;
         outline-offset: 2px;
     }
     
@@ -38,26 +38,166 @@
         min-height: 44px;
         min-width: 44px;
     }
+
+    /* Enhanced Theme with Better Visual Appeal */
+    .auction-bg {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%, #f8fafc 100%);
+        position: relative;
+    }
+
+    .auction-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(74, 144, 226, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(107, 182, 255, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(135, 206, 235, 0.02) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .glacier-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glacier-card:hover {
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .glacier-gradient {
+        background: linear-gradient(135deg, 
+            rgba(74, 144, 226, 0.9) 0%, 
+            rgba(107, 182, 255, 0.85) 50%, 
+            rgba(135, 206, 235, 0.8) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(74, 144, 226, 0.2);
+        box-shadow: 
+            0 4px 6px -1px rgba(74, 144, 226, 0.2),
+            0 2px 4px -1px rgba(74, 144, 226, 0.1);
+    }
+
+    .glacier-border {
+        border-color: rgba(226, 232, 240, 0.8);
+    }
+
+    .glacier-text-primary {
+        color: #1e293b;
+    }
+
+    .glacier-text-secondary {
+        color: #475569;
+    }
+
+    /* Enhanced table styling */
+    .table-header {
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .table-row {
+        background: rgba(255, 255, 255, 0.7);
+        transition: all 0.2s ease;
+    }
+
+    .table-row:hover {
+        background: rgba(248, 250, 252, 0.9);
+        transform: scale(1.001);
+    }
+
+    /* Enhanced button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, #4a90e2, #6bb6ff);
+        border: 1px solid rgba(74, 144, 226, 0.2);
+        box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        transform: translateY(-1px);
+    }
+
+    /* Enhanced input styling */
+    .glass-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .glass-input:focus {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(74, 144, 226, 0.5);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    /* Enhanced badge styling */
+    .badge-primary {
+        background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(107, 182, 255, 0.1));
+        border: 1px solid rgba(74, 144, 226, 0.2);
+        color: #1e40af;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        color: #15803d;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: #a16207;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+
+    .badge-purple {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(168, 85, 247, 0.1));
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        color: #7c3aed;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
 </style>
 @endsection
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen auction-bg py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-4 py-4 sm:px-6 border-b border-gray-200">
+        <div class="glacier-card mb-6">
+            <div class="px-4 py-4 sm:px-6 border-b glacier-border">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Auction - {{ $league->name }}</h1>
+                        <h1 class="text-2xl font-bold glacier-text-primary">Auction - {{ $league->name }}</h1>
                         <p class="text-gray-600">Place bids on players through competitive bidding</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                        @if($userTeam)
-                        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg w-full sm:w-auto text-center">
-                            <strong>{{ $userTeam->team->name }}</strong> - ₹{{ number_format($userTeam->wallet_balance) }}
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -65,7 +205,7 @@
             <!-- Auction Statistics -->
             <div class="px-4 py-4 sm:px-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-green-100 rounded-full p-2 mr-3">
                                 <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +219,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-blue-100 rounded-full p-2 mr-3">
                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +233,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-purple-100 rounded-full p-2 mr-3">
                                 <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +247,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-yellow-100 rounded-full p-2 mr-3">
                                 <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,16 +276,135 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Available Players Section - Hidden on mobile when bidding is active -->
-            <div class="lg:col-span-2 transition-all duration-300" id="availablePlayersSection">
+        <!-- Available Players Section - Full Row -->
+        <div class="mb-8" id="availablePlayersSection">
                 @include('auction.partials.available-players')
             </div>
             
-            <!-- Bidding Section - Full width on mobile when active -->
-            <div class="lg:col-span-1 transition-all duration-300" id="biddingSection">
+        <!-- Player Bidding Section - Centered -->
+        <div class="flex justify-center mb-8" id="biddingSection">
+            <div class="w-full max-w-2xl">
                 @include('auction.partials.player-bidding')
             </div>
+            </div>
+            
+        <!-- Recent and Highest Bids Table - Full Width -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Recent Bids -->
+            <div class="glacier-card">
+                <div class="px-4 py-4 sm:px-6 border-b glacier-border">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold glacier-text-primary">Recent Bids</h2>
+                        <div class="badge-primary px-3 py-1 rounded-full text-sm font-medium">
+                            <span id="recentBidCount">0</span> Recent
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-6">
+                    <div id="recentBidsTable" class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Player</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Team</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Amount</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBidsTableBody">
+                                <tr class="table-row">
+                                    <td colspan="4" class="text-center py-8 text-gray-500">
+                                        <div class="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                        </div>
+                                        <p>No recent bids</p>
+                                        <p class="text-sm text-gray-400 mt-1">Recent bids will appear here</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Highest Bids -->
+            <div class="glacier-card">
+                <div class="px-4 py-4 sm:px-6 border-b glacier-border">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold glacier-text-primary">Highest Bids</h2>
+                        <div class="badge-purple px-3 py-1 rounded-full text-sm font-medium">
+                            {{ $soldPlayers->count() }} Sold
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-6">
+                    <div id="highestBidsTable" class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Player</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Team</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Sold Price</th>
+                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($soldPlayers as $player)
+                                <tr class="table-row border-b border-gray-100">
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                                     alt="{{ $player->user->name }}" 
+                                                     class="w-full h-full object-cover"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="display: none;">
+                                                    {{ strtoupper(substr($player->user->name, 0, 2)) }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium glacier-text-primary text-sm">{{ $player->user->name }}</p>
+                                                <p class="text-xs text-gray-500">{{ $player->user->position->name ?? 'Unknown' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="text-sm glacier-text-primary">{{ $player->leagueTeam->team->name ?? 'Unknown Team' }}</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="font-bold text-purple-600">₹{{ number_format($player->bid_price) }}</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="font-medium {{ ($player->bid_price - $player->base_price) >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            ₹{{ number_format($player->bid_price - $player->base_price) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr class="table-row">
+                                    <td colspan="4" class="text-center py-8 text-gray-500">
+                                        <div class="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <p>No players sold yet</p>
+                                        <p class="text-sm text-gray-400 mt-1">Sold players will appear here</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Teams Table - Full Width -->
+        <div class="glacier-card">
+            @include('auction.partials.teams-table')
         </div>
     </div>
 </div>
@@ -168,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeBiddingControls();
     initializeMobileView();
     restoreSelectedPlayer();
+    initializeTeamsTable();
 });
 
 // Restore selected player from localStorage
@@ -526,29 +786,35 @@ function filterPlayers() {
     });
 }
 
-// Select random team for testing
+// Select random team for testing (for quick bid buttons)
 function selectRandomTeam() {
     console.log('DEBUG: Selecting random team...');
     
-    // Get all team cards
-    const teamCards = document.querySelectorAll('.team-card');
-    console.log('DEBUG: Found', teamCards.length, 'team cards');
+    // Get all team cards from the teams table (these are already filtered by current league)
+    const teamCards = document.querySelectorAll('#teamsTableBody .team-row');
+    console.log('DEBUG: Found', teamCards.length, 'team cards in current league');
+    
+    if (teamCards.length === 0) {
+        showMessage('No teams found in the current league', 'error');
+        return;
+    }
     
     const availableTeams = Array.from(teamCards).filter(card => {
         const walletBalance = parseFloat(card.getAttribute('data-wallet'));
         const nextMinimumBid = getNextMinimumBid();
         const canBid = walletBalance >= nextMinimumBid;
-        console.log('DEBUG: Team', card.querySelector('h3').textContent, 'wallet:', walletBalance, 'min bid:', nextMinimumBid, 'can bid:', canBid);
+        const teamName = card.querySelector('.text-sm.font-medium.glacier-text-primary').textContent;
+        console.log('DEBUG: Team', teamName, 'wallet:', walletBalance, 'min bid:', nextMinimumBid, 'can bid:', canBid);
         return canBid;
     });
     
-    console.log('DEBUG: Available teams for bidding:', availableTeams.length);
+    console.log('DEBUG: Available teams for bidding in current league:', availableTeams.length);
     
     if (availableTeams.length > 0) {
         const randomIndex = Math.floor(Math.random() * availableTeams.length);
         const randomTeam = availableTeams[randomIndex];
         const teamId = randomTeam.getAttribute('data-team-id');
-        const teamName = randomTeam.querySelector('h3').textContent;
+        const teamName = randomTeam.querySelector('.text-sm.font-medium.glacier-text-primary').textContent;
         
         console.log('DEBUG: Selected random team:', teamName, 'with ID:', teamId);
         
@@ -557,8 +823,53 @@ function selectRandomTeam() {
         // Remove notification for random team selection
         // showMessage('Random team selected: ' + teamName, 'info');
     } else {
-        console.log('DEBUG: No teams available with sufficient funds');
-        showMessage('No teams available with sufficient funds', 'warning');
+        console.log('DEBUG: No teams available with sufficient funds in current league');
+        showMessage('No teams in the current league have sufficient funds to bid', 'warning');
+    }
+}
+
+// Select random team for testing (new function for the button)
+function selectRandomTeamForTesting() {
+    console.log('DEBUG: Selecting random team for testing...');
+    
+    // Get current league ID
+    const currentLeagueId = {{ $league->id }};
+    console.log('DEBUG: Current league ID:', currentLeagueId);
+    
+    // Get all team cards from the teams table (these are already filtered by current league)
+    const teamCards = document.querySelectorAll('#teamsTableBody .team-row');
+    console.log('DEBUG: Found', teamCards.length, 'team cards in current league');
+    
+    if (teamCards.length === 0) {
+        showMessage('No teams found in the current league', 'error');
+        return;
+    }
+    
+    const availableTeams = Array.from(teamCards).filter(card => {
+        const walletBalance = parseFloat(card.getAttribute('data-wallet'));
+        const nextMinimumBid = getNextMinimumBid();
+        const canBid = walletBalance >= nextMinimumBid;
+        const teamName = card.querySelector('.text-sm.font-medium.glacier-text-primary').textContent;
+        console.log('DEBUG: Team', teamName, 'wallet:', walletBalance, 'min bid:', nextMinimumBid, 'can bid:', canBid);
+        return canBid;
+    });
+    
+    console.log('DEBUG: Available teams for bidding in current league:', availableTeams.length);
+    
+    if (availableTeams.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableTeams.length);
+        const randomTeam = availableTeams[randomIndex];
+        const teamId = randomTeam.getAttribute('data-team-id');
+        const teamName = randomTeam.querySelector('.text-sm.font-medium.glacier-text-primary').textContent;
+        
+        console.log('DEBUG: Selected random team for testing:', teamName, 'with ID:', teamId);
+        
+        // Select the random team
+        selectTeamForBidding(teamId, teamName);
+        showMessage(`🎲 Random team selected: ${teamName}`, 'info');
+    } else {
+        console.log('DEBUG: No teams available with sufficient funds in current league');
+        showMessage('No teams in the current league have sufficient funds to bid', 'warning');
     }
 }
 
@@ -590,29 +901,101 @@ function getNextMinimumBid() {
     return nextBid;
 }
 
-// Generate quick bid buttons
+// Generate quick bid buttons with direct bid placement
 function generateQuickBidButtons() {
     const container = document.getElementById('quickBidButtons');
     const nextBid = getNextMinimumBid();
     
-    // Use league settings for bid increments
-    const league = @json($league);
-    const increments = league.bid_increment_type === 'custom' 
-        ? [league.custom_bid_increment || 10, (league.custom_bid_increment || 10) * 2, (league.custom_bid_increment || 10) * 3]
-        : [5, 10, 25];
+    // Check if team is selected
+    if (!window.selectedTeamId) {
+        container.innerHTML = `
+            <div class="col-span-3 text-center py-4 text-gray-500">
+                <p class="text-sm">Please select a team first to place bids</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate bid amounts: 1x, 5x, and 10x of base price
+    const basePrice = baseBidAmount || 0;
+    const bidAmounts = [
+        nextBid, // First bid (minimum required)
+        basePrice * 5, // 5x of base price
+        basePrice * 10 // 10x of base price
+    ];
+    
+    // Filter out amounts that are less than next minimum bid
+    const validBidAmounts = bidAmounts.filter(amount => amount >= nextBid);
+    
+    // If we don't have 3 valid amounts, add some increments
+    while (validBidAmounts.length < 3) {
+        const lastAmount = validBidAmounts[validBidAmounts.length - 1] || nextBid;
+        validBidAmounts.push(lastAmount + (basePrice || 10));
+    }
+    
+    // Take only the first 3 amounts
+    const finalBidAmounts = validBidAmounts.slice(0, 3);
+    
+    // Check team balance for each bid amount
+    const teamCard = document.querySelector(`[data-team-id="${window.selectedTeamId}"]`);
+    const teamBalance = teamCard ? parseFloat(teamCard.getAttribute('data-wallet')) : 0;
+    
+    // Define button colors and labels
+    const buttonConfigs = [
+        { amount: finalBidAmounts[0], color: 'bg-green-600 hover:bg-green-700', label: 'Bid', disabled: finalBidAmounts[0] > teamBalance },
+        { amount: finalBidAmounts[1], color: 'bg-orange-600 hover:bg-orange-700', label: 'Bid', disabled: finalBidAmounts[1] > teamBalance },
+        { amount: finalBidAmounts[2], color: 'bg-red-600 hover:bg-red-700', label: 'Bid', disabled: finalBidAmounts[2] > teamBalance }
+    ];
     
     let buttonsHTML = '';
-    increments.forEach(increment => {
-        const bidAmount = nextBid + increment;
+    buttonConfigs.forEach((config, index) => {
+        const disabledClass = config.disabled ? 'opacity-50 cursor-not-allowed' : '';
+        const disabledAttr = config.disabled ? 'disabled' : '';
+        const onClick = config.disabled ? '' : `onclick="placeQuickBid(${config.amount})"`;
+        
         buttonsHTML += `
-            <button onclick="setBidAmount(${bidAmount})" 
-                    class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 mobile-button">
-                ₹${bidAmount}
+            <button ${onClick} ${disabledAttr}
+                    class="${config.color} text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 mobile-button flex flex-col items-center justify-center ${disabledClass}">
+                <span class="font-bold">${config.label}</span>
+                <span class="text-xs opacity-90">₹${config.amount.toLocaleString()}</span>
+                ${config.disabled ? '<span class="text-xs text-red-200 mt-1">Insufficient Balance</span>' : ''}
             </button>
         `;
     });
     
     container.innerHTML = buttonsHTML;
+}
+
+// Place quick bid directly
+function placeQuickBid(amount) {
+    if (!currentSelectedPlayerId) {
+        showMessage('No player selected', 'error');
+        return;
+    }
+    
+    if (!window.selectedTeamId) {
+        showMessage('Please select a team first', 'error');
+        return;
+    }
+    
+    const nextMinimumBid = getNextMinimumBid();
+    if (amount < nextMinimumBid) {
+        showMessage(`Bid amount must be at least ₹${nextMinimumBid.toLocaleString()}`, 'error');
+        return;
+    }
+    
+    // Check if team has sufficient balance
+    const teamCard = document.querySelector(`[data-team-id="${window.selectedTeamId}"]`);
+    if (teamCard) {
+        const currentBalance = parseFloat(teamCard.getAttribute('data-wallet'));
+        if (currentBalance < amount) {
+            showMessage(`Team has insufficient balance. Required: ₹${amount.toLocaleString()}, Available: ₹${currentBalance.toLocaleString()}`, 'error');
+            return;
+        }
+    }
+    
+    // Place the bid directly
+    placeBid(currentSelectedPlayerId, window.selectedTeamId, amount);
 }
 
 // Set bid amount
@@ -623,10 +1006,16 @@ function setBidAmount(amount) {
     if (window.selectedTeamId && window.selectedTeamName) {
         const placeBidBtn = document.getElementById('placeBidBtn');
         placeBidBtn.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center">
+                <div class="absolute inset-0 bg-green-500 opacity-20 rounded-lg"></div>
+                <div class="relative z-10 flex items-center">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
             </svg>
-            Place Bid ₹${amount.toLocaleString()} for ${window.selectedTeamName}
+                    <span class="font-medium">Place Bid</span>
+                    <span class="ml-2 text-sm opacity-75">₹${amount.toLocaleString()}</span>
+                </div>
+            </div>
         `;
     }
     
@@ -706,6 +1095,16 @@ function placeBid(leaguePlayerId, leagueTeamId, amount) {
         amount: amount
     });
     
+    // Check if team has sufficient balance before placing bid
+    const teamCard = document.querySelector(`[data-team-id="${leagueTeamId}"]`);
+    if (teamCard) {
+        const currentBalance = parseFloat(teamCard.getAttribute('data-wallet'));
+        if (currentBalance < amount) {
+            showMessage(`Team has insufficient balance. Required: ₹${amount.toLocaleString()}, Available: ₹${currentBalance.toLocaleString()}`, 'error');
+            return;
+        }
+    }
+    
     fetch('{{ route("auction.place-bid", $league->slug) }}', {
         method: 'POST',
         headers: {
@@ -723,20 +1122,24 @@ function placeBid(leaguePlayerId, leagueTeamId, amount) {
         console.log('DEBUG: Bid response received:', data);
         
         if (data.success) {
-            // Remove success message popup for now
-            // showMessage(data.message, 'success');
+            showMessage(`Bid placed successfully: ₹${amount.toLocaleString()}`, 'success');
             currentHighestBid = amount;
             window.currentHighestBid = amount;
             document.getElementById('currentBidAmount').textContent = '₹' + amount.toLocaleString();
             document.getElementById('nextMinimumBid').textContent = '₹' + getNextMinimumBid().toLocaleString();
-            generateQuickBidButtons();
             
             // Update team information
             updateTeamLastBid(leagueTeamId, amount);
             updateTeamWalletAfterBid(leagueTeamId, amount);
             
-            // Don't reset team selection after successful bid (keep same player)
-            // resetTeamSelection();
+            // Update selected team balance display
+            if (window.selectedTeamId === leagueTeamId) {
+                const newBalance = parseFloat(teamCard.getAttribute('data-wallet')) - amount;
+                document.getElementById('selectedTeamBalance').textContent = '₹' + newBalance.toLocaleString();
+            }
+            
+            // Regenerate quick bid buttons with updated amounts
+            generateQuickBidButtons();
             
             fetchCurrentBids(leaguePlayerId);
         } else {
@@ -785,8 +1188,51 @@ function updateTeamWalletAfterBid(teamId, bidAmount) {
     }
 }
 
+// Check minimum players requirement
+function checkMinimumPlayersRequirement() {
+    const league = @json($league);
+    const maxTeamPlayers = league.max_team_players;
+    
+    // Get all teams and their current player counts
+    const teamCards = document.querySelectorAll('.team-card');
+    let teamsBelowMinimum = [];
+    
+    teamCards.forEach(card => {
+        const teamId = card.getAttribute('data-team-id');
+        const playerCount = parseInt(card.querySelector('.text-sm.glacier-text-primary').textContent);
+        
+        if (playerCount < maxTeamPlayers) {
+            const teamName = card.querySelector('h3').textContent;
+            teamsBelowMinimum.push({
+                teamId: teamId,
+                teamName: teamName,
+                currentPlayers: playerCount,
+                requiredPlayers: maxTeamPlayers
+            });
+        }
+    });
+    
+    return teamsBelowMinimum;
+}
+
 // Accept the highest bid (updated)
 function acceptBid(leaguePlayerId) {
+    // Check minimum players requirement before accepting bid
+    const teamsBelowMinimum = checkMinimumPlayersRequirement();
+    const league = @json($league);
+    
+    if (teamsBelowMinimum.length > 0) {
+        let warningMessage = `Warning: Some teams don't have the minimum required players (${league.max_team_players}):\n`;
+        teamsBelowMinimum.forEach(team => {
+            warningMessage += `- ${team.teamName}: ${team.currentPlayers}/${team.requiredPlayers} players\n`;
+        });
+        warningMessage += '\nDo you still want to accept this bid?';
+        
+        if (!confirm(warningMessage)) {
+            return;
+        }
+    }
+    
     fetch('{{ route("auction.accept-bid", $league->slug) }}', {
         method: 'POST',
         headers: {
@@ -944,53 +1390,65 @@ function fetchCurrentBids(leaguePlayerId) {
     });
 }
 
-// Update bidding history display (updated)
+// Update bidding history display (updated for table structure)
 function updateBiddingHistory(bids) {
-    const historyContainer = document.getElementById('biddingHistory');
-    const bidCount = document.getElementById('bidCount');
+    const recentBidsTableBody = document.getElementById('recentBidsTableBody');
+    const recentBidCount = document.getElementById('recentBidCount');
     
     if (!bids || bids.length === 0) {
-        historyContainer.innerHTML = `
-            <div class="text-center py-8 text-gray-500">
+        recentBidsTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-8 text-gray-500">
                 <div class="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
                     <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
                 </div>
-                <p>No bids yet</p>
-                <p class="text-sm text-gray-400 mt-1">Bids will appear here</p>
-            </div>
+                    <p>No recent bids</p>
+                    <p class="text-sm text-gray-400 mt-1">Recent bids will appear here</p>
+                </td>
+            </tr>
         `;
-        bidCount.textContent = '0 bids';
+        recentBidCount.textContent = '0';
         
         // Hide last bid team info
         document.getElementById('lastBidTeamInfo').style.display = 'none';
         return;
     }
     
-    let historyHTML = '';
+    let tableRows = '';
     bids.forEach((bid, index) => {
         const isHighest = index === 0;
-        historyHTML += `
-            <div class="border border-gray-200 rounded-lg p-3 ${isHighest ? 'bg-green-50 border-green-300' : ''}">
-                <div class="flex justify-between items-center">
+        const bidTime = new Date(bid.created_at).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+        
+        tableRows += `
+            <tr class="border-b border-gray-100 hover:bg-gray-50/70 transition-colors ${isHighest ? 'bg-green-50/50' : ''}">
+                <td class="py-3 px-4">
                     <div class="flex items-center space-x-3">
                         <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-white text-xs font-bold">
                             ${bid.league_team.team.name.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                            <p class="font-medium text-gray-900">${bid.league_team.team.name}</p>
-                            <p class="text-sm text-gray-600">${new Date(bid.created_at).toLocaleTimeString()}</p>
+                            <p class="font-medium glacier-text-primary text-sm">${bid.league_team.team.name}</p>
+                            <p class="text-xs text-gray-500">Team</p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold text-lg ${isHighest ? 'text-green-600' : 'text-gray-900'}">
-                            ₹${parseFloat(bid.amount).toLocaleString()}
-                        </p>
-                        ${isHighest ? '<p class="text-xs text-green-600 font-medium">Highest</p>' : ''}
-                    </div>
-                </div>
-            </div>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="text-sm glacier-text-primary">${bid.league_team.team.name}</span>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="font-bold ${isHighest ? 'text-green-600' : 'text-gray-900'}">₹${parseFloat(bid.amount).toLocaleString()}</span>
+                    ${isHighest ? '<span class="text-xs text-green-600 font-medium ml-1">(Highest)</span>' : ''}
+                </td>
+                <td class="py-3 px-4">
+                    <span class="text-sm text-gray-600">${bidTime}</span>
+                </td>
+            </tr>
         `;
         
         // Update last bid team info if this is the highest bid
@@ -999,8 +1457,8 @@ function updateBiddingHistory(bids) {
         }
     });
     
-    historyContainer.innerHTML = historyHTML;
-    bidCount.textContent = `${bids.length} bid${bids.length !== 1 ? 's' : ''}`;
+    recentBidsTableBody.innerHTML = tableRows;
+    recentBidCount.textContent = bids.length;
     
     // Save recent bids to localStorage
     saveRecentBids(bids);
@@ -1091,15 +1549,13 @@ function selectTeamForBidding(teamId, teamName) {
     const nextMinimumBid = getNextMinimumBid();
     
     if (walletBalance >= nextMinimumBid) {
-        // Only set the bid amount to next minimum bid if no amount is currently set
-        const currentAmount = parseFloat(document.getElementById('bidAmount').value);
-        if (!currentAmount || currentAmount <= 0) {
-            document.getElementById('bidAmount').value = nextMinimumBid;
-        }
-        
         // Store selected team info for bidding
         window.selectedTeamId = teamId;
         window.selectedTeamName = teamName;
+        
+        // Update selected team display
+        document.getElementById('selectedTeamName').textContent = teamName;
+        document.getElementById('selectedTeamBalance').textContent = '₹' + walletBalance.toLocaleString();
         
         showMessage(`Team ${teamName} selected for bidding`, 'success');
         
@@ -1109,26 +1565,10 @@ function selectTeamForBidding(teamId, teamName) {
         });
         teamCard.classList.add('border-blue-500', 'bg-blue-50');
         
-        // Update place bid button to show bid amount
-        const placeBidBtn = document.getElementById('placeBidBtn');
-        const bidAmount = document.getElementById('bidAmount').value || nextMinimumBid;
-        placeBidBtn.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center">
-                <div class="absolute inset-0 bg-green-500 opacity-20 rounded-lg"></div>
-                <div class="relative z-10 flex items-center">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                    <span class="font-medium">Place Bid</span>
-                    <span class="ml-2 text-sm opacity-75">₹${parseFloat(bidAmount).toLocaleString()}</span>
-                </div>
-            </div>
-        `;
-        placeBidBtn.onclick = function() {
-            placeBidWithSelectedTeam(teamId, teamName);
-        };
+        // Regenerate quick bid buttons with new team context
+        generateQuickBidButtons();
         
-        console.log('DEBUG: Team selected for bidding:', teamName, 'with amount: ₹' + parseFloat(bidAmount).toLocaleString());
+        console.log('DEBUG: Team selected for bidding:', teamName, 'with balance: ₹' + walletBalance.toLocaleString());
     } else {
         showMessage(`Team ${teamName} has insufficient funds to bid`, 'error');
     }
@@ -1206,19 +1646,9 @@ function resetTeamSelection() {
     window.selectedTeamId = null;
     window.selectedTeamName = null;
     
-    // Reset place bid button
-    const placeBidBtn = document.getElementById('placeBidBtn');
-    placeBidBtn.innerHTML = `
-        <div class="relative w-full h-full flex items-center justify-center">
-            <div class="absolute inset-0 bg-gray-500 opacity-20 rounded-lg"></div>
-            <div class="relative z-10 flex items-center">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                </svg>
-                <span class="font-medium">Place Bid</span>
-            </div>
-        </div>
-    `;
+    // Clear selected team display
+    document.getElementById('selectedTeamName').textContent = 'No team selected';
+    document.getElementById('selectedTeamBalance').textContent = '₹0';
     
     console.log('DEBUG: Team selection reset');
     
@@ -1227,8 +1657,8 @@ function resetTeamSelection() {
         card.classList.remove('border-blue-500', 'bg-blue-50');
     });
     
-    // Clear bid amount
-    document.getElementById('bidAmount').value = '';
+    // Regenerate quick bid buttons (they will be disabled without team selection)
+    generateQuickBidButtons();
 }
 
 // Calculate team's remaining budget after current bids
@@ -1413,6 +1843,82 @@ if (!document.querySelector('meta[name="csrf-token"]')) {
     csrfMeta.name = 'csrf-token';
     csrfMeta.content = '{{ csrf_token() }}';
     document.head.appendChild(csrfMeta);
+}
+
+// Teams Table Functions
+function initializeTeamsTable() {
+    // Update team balances and stats
+    updateTeamsTable();
+}
+
+function updateTeamsTable() {
+    // This function will be called after each bid to update team balances
+    // For now, we'll just ensure the table is properly initialized
+    console.log('Teams table initialized');
+}
+
+function updateTeamBalance(teamId, newBalance, bidAmount) {
+    // Update wallet balance
+    const walletElement = document.getElementById(`teamWallet_${teamId}`);
+    if (walletElement) {
+        walletElement.textContent = `₹${parseInt(newBalance).toLocaleString()}`;
+    }
+    
+    // Update total spent
+    const spentElement = document.getElementById(`teamSpent_${teamId}`);
+    if (spentElement) {
+        const currentSpent = parseInt(spentElement.textContent.replace(/[^\d]/g, ''));
+        const newSpent = currentSpent + parseInt(bidAmount);
+        spentElement.textContent = `₹${newSpent.toLocaleString()}`;
+    }
+    
+    // Update last bid info
+    const lastBidElement = document.getElementById(`teamLastBid_${teamId}`);
+    const lastBidAmountElement = document.getElementById(`teamLastBidAmount_${teamId}`);
+    if (lastBidElement && lastBidAmountElement) {
+        const now = new Date();
+        lastBidElement.innerHTML = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' + 
+                                 now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        lastBidAmountElement.textContent = `₹${parseInt(bidAmount).toLocaleString()}`;
+    }
+    
+    // Update summary row
+    updateSummaryRow();
+}
+
+function updateSummaryRow() {
+    // Calculate totals from all teams
+    let totalWallet = 0;
+    let totalSpent = 0;
+    let teamCount = 0;
+    
+    document.querySelectorAll('.team-row').forEach(row => {
+        const teamId = row.getAttribute('data-team-id');
+        const walletElement = document.getElementById(`teamWallet_${teamId}`);
+        const spentElement = document.getElementById(`teamSpent_${teamId}`);
+        
+        if (walletElement && spentElement) {
+            const wallet = parseInt(walletElement.textContent.replace(/[^\d]/g, ''));
+            const spent = parseInt(spentElement.textContent.replace(/[^\d]/g, ''));
+            
+            totalWallet += wallet;
+            totalSpent += spent;
+            teamCount++;
+        }
+    });
+    
+    // Update summary display (if summary elements exist)
+    const avgBalance = teamCount > 0 ? Math.round(totalWallet / teamCount) : 0;
+    
+    // You can add summary update logic here if needed
+    console.log(`Updated summary: ${teamCount} teams, ₹${totalWallet.toLocaleString()} total wallet, ₹${totalSpent.toLocaleString()} total spent`);
+}
+
+// Function to refresh teams table data from server
+function refreshTeamsTable() {
+    // This would make an AJAX call to get updated team data
+    // For now, we'll just log that it should be refreshed
+    console.log('Teams table should be refreshed from server');
 }
 </script>
 @endsection
