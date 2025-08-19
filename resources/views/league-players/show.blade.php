@@ -9,9 +9,20 @@
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $leaguePlayer->user->name }}</h1>
-                    <p class="text-gray-600 mt-2">{{ $league->name }} - {{ $leaguePlayer->leagueTeam->team->name }}</p>
+                <div class="flex items-center space-x-4">
+                    <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                             alt="{{ $leaguePlayer->user->name }}" 
+                             class="w-full h-full object-cover"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-full flex items-center justify-center text-white font-bold text-xl" style="display: none;">
+                            {{ strtoupper(substr($leaguePlayer->user->name, 0, 2)) }}
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $leaguePlayer->user->name }}</h1>
+                        <p class="text-gray-600 mt-2">{{ $league->name }} - {{ $leaguePlayer->leagueTeam->team->name }}</p>
+                    </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <a href="{{ route('league-players.edit', [$league, $leaguePlayer]) }}" 

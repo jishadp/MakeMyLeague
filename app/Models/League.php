@@ -40,6 +40,12 @@ class League extends Model
         'team_wallet_limit',
         'is_default',
         'status',
+        'bid_increment_type',
+        'custom_bid_increment',
+        'predefined_increments',
+        'auction_active',
+        'auction_started_at',
+        'auction_ended_at',
     ];
 
     /**
@@ -52,9 +58,14 @@ class League extends Model
         'end_date' => 'date',
         'retention' => 'boolean',
         'is_default' => 'boolean',
+        'auction_active' => 'boolean',
+        'auction_started_at' => 'datetime',
+        'auction_ended_at' => 'datetime',
         'team_reg_fee' => 'double',
         'player_reg_fee' => 'double',
         'team_wallet_limit' => 'double',
+        'custom_bid_increment' => 'decimal:2',
+        'predefined_increments' => 'array',
     ];
 
     /**
@@ -182,5 +193,115 @@ class League extends Model
         return $this->belongsToMany(Team::class, 'league_teams')
                     ->withPivot('status', 'wallet_balance')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the next minimum bid amount based on current bid and increment structure.
+     */
+    public function getNextMinimumBid($currentBid)
+    {
+        if ($this->bid_increment_type === 'custom') {
+            return $currentBid + ($this->custom_bid_increment ?? 10);
+        }
+
+        // Predefined structure
+        $increments = $this->predefined_increments ?? [
+            ['min' => 0, 'max' => 100, 'increment' => 5],
+            ['min' => 101, 'max' => 500, 'increment' => 10],
+            ['min' => 501, 'max' => 1000, 'increment' => 25],
+            ['min' => 1001, 'max' => null, 'increment' => 50],
+        ];
+
+        foreach ($increments as $rule) {
+            if ($currentBid >= $rule['min'] && ($rule['max'] === null || $currentBid <= $rule['max'])) {
+                return $currentBid + $rule['increment'];
+            }
+        }
+
+        return $currentBid + 50; // Default increment
+    }
+
+    /**
+     * Start the auction.
+     */
+    public function startAuction()
+    {
+        $this->update([
+            'auction_active' => true,
+            'auction_started_at' => now(),
+            'auction_ended_at' => null,
+        ]);
+    }
+
+    /**
+     * Pause the auction.
+     */
+    public function pauseAuction()
+    {
+        $this->update([
+            'auction_active' => false,
+        ]);
+    }
+
+    /**
+     * End the auction.
+     */
+    public function endAuction()
+    {
+        $this->update([
+            'auction_active' => false,
+            'auction_ended_at' => now(),
+        ]);
+    }
+
+    /**
+     * Check if auction is active.
+     */
+    public function isAuctionActive()
+    {
+        return $this->auction_active && $this->auction_started_at && !$this->auction_ended_at;
+    }
+
+    /**
+     * Get available players for auction.
+     */
+    public function getAvailablePlayers()
+    {
+        return $this->leaguePlayers()
+            ->where('status', 'available')
+            ->with(['user', 'user.role', 'user.localBody'])
+            ->orderBy('base_price', 'desc');
+    }
+
+    /**
+     * Get sold players.
+     */
+    public function getSoldPlayers()
+    {
+        return $this->leaguePlayers()
+            ->where('status', 'sold')
+            ->with(['user', 'user.role', 'leagueTeam.team']);
+    }
+
+    /**
+     * Get auction statistics.
+     */
+    public function getAuctionStats()
+    {
+        $totalPlayers = $this->leaguePlayers()->count();
+        $availablePlayers = $this->leaguePlayers()->where('status', 'available')->count();
+        $soldPlayers = $this->leaguePlayers()->where('status', 'sold')->count();
+        $totalRevenue = $this->leaguePlayers()
+            ->where('status', 'sold')
+            ->whereNotNull('bid_price')
+            ->sum('bid_price');
+
+        return [
+            'total_players' => $totalPlayers,
+            'available_players' => $availablePlayers,
+            'sold_players' => $soldPlayers,
+            'total_revenue' => $totalRevenue,
+            'completion_percentage' => $totalPlayers > 0 ? round(($soldPlayers / $totalPlayers) * 100, 2) : 0,
+        ];
     }
 }

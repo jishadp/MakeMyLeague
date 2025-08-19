@@ -92,12 +92,22 @@
                 @foreach($players as $player)
                     <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
                                 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
-                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-32 flex items-center justify-center">
-                            <div class="text-white text-center p-4">
-                                <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span class="text-sm font-medium">{{ $player->role->name ?? 'Player' }}</span>
+                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-32 flex items-center justify-center relative overflow-hidden">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <div class="w-20 h-20 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
+                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                         alt="{{ $player->name }}" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="display: none;">
+                                        {{ strtoupper(substr($player->name, 0, 2)) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-2 left-2 right-2">
+                                <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-2 py-1 rounded-full">
+                                    {{ $player->role->name ?? 'Player' }}
+                                </span>
                             </div>
                         </div>
                         
@@ -120,8 +130,12 @@
                             
                             <!-- View Details -->
                             <div class="mt-4 flex justify-end items-center">
-                                <a href="{{ route('players.show', $player->id) }}"
-                                   class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                                <a href="{{ route('players.show', $player->slug) }}"
+                                   class="inline-flex items-center px-3 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
                                     View Profile
                                 </a>
                             </div>

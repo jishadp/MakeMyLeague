@@ -106,6 +106,13 @@ Route::middleware('auth')->group(function(){
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
         Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
+        
+        // Organizer control routes
+        Route::post('start', [AuctionController::class, 'startAuction'])->name('start');
+        Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
+        Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
+        Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
+        Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
     });
 });
 

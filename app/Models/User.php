@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'slug',
         'email',
         'password',
         'mobile',
@@ -52,6 +54,51 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Boot the model and add event listeners.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->slug)) {
+                $user->slug = $user->generateUniqueSlug();
+            }
+        });
+
+        static::updating(function ($user) {
+            if ($user->isDirty('name') && empty($user->slug)) {
+                $user->slug = $user->generateUniqueSlug();
+            }
+        });
+    }
+
+    /**
+     * Generate unique slug for the user.
+     */
+    public function generateUniqueSlug()
+    {
+        $baseSlug = Str::slug($this->name);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->where('id', '!=', $this->id ?? 0)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
     
     /**
@@ -98,6 +145,22 @@ class User extends Authenticatable
      */
     public function auctions(): HasMany
     {
-        return $this->hasManyThrough(Auction::class, LeaguePlayer::class, 'user_id', 'league_player_id');
+        return $this->hasMany(Auction::class, 'player_id');
+    }
+    
+    /**
+     * Get the league players for this user.
+     */
+    public function leaguePlayers(): HasMany
+    {
+        return $this->hasMany(LeaguePlayer::class);
+    }
+    
+    /**
+     * Get the teams owned by this user.
+     */
+    public function ownedTeams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'owner_id');
     }
 }
