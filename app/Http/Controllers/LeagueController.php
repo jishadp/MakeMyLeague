@@ -143,4 +143,48 @@ class LeagueController
         return redirect()->route('leagues.index')
             ->with('success', 'Default league updated successfully!');
     }
+
+    /**
+     * Update bid increments for a league.
+     */
+    public function updateBidIncrements(Request $request, League $league): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $data = $request->json()->all();
+            
+            // Log the received data for debugging
+            \Log::info('Bid increment update request:', $data);
+            
+            $updateData = [
+                'bid_increment_type' => $data['bid_increment_type']
+            ];
+            
+            if ($data['bid_increment_type'] === 'custom') {
+                $updateData['custom_bid_increment'] = $data['custom_bid_increment'];
+            } else {
+                $updateData['predefined_increments'] = $data['predefined_increments'];
+            }
+            
+            // Log the update data
+            \Log::info('Updating league with data:', $updateData);
+            
+            $league->update($updateData);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Bid increments updated successfully!'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating bid increments:', [
+                'league_id' => $league->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating bid increments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

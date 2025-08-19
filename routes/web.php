@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function(){
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
     Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault');
+    Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments');
     
     // League Teams routes
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show']);

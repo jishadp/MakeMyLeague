@@ -3,6 +3,27 @@
 @section('title', 'League Manager - ' . $league->name)
 
 @section('content')
+<!-- Notification System -->
+<div id="notification" class="fixed top-4 right-4 z-50 hidden">
+    <div class="bg-white border-l-4 border-gray-400 shadow-lg rounded-lg p-4 max-w-sm">
+        <div class="flex items-center">
+            <div class="flex-shrink-0 mr-3">
+                <svg id="notification-icon" class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p id="notification-message" class="text-sm font-medium text-gray-900"></p>
+            </div>
+            <button onclick="hideNotification()" class="ml-3 text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -454,6 +475,32 @@
     </div>
 </div>
 
+<!-- Notification System -->
+<div id="notification" class="fixed top-4 right-4 z-50 hidden">
+    <div class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
+        <div class="p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg id="notification-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3 w-0 flex-1 pt-0.5">
+                    <p id="notification-message" class="text-sm font-medium text-gray-900"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button onclick="hideNotification()" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openAuctionRulesModal() {
     document.getElementById('auctionRulesModal').classList.remove('hidden');
@@ -490,23 +537,34 @@ function updateBidIncrements() {
     if (currentType === 'custom') {
         const customValue = document.getElementById('customIncrementValue').value;
         if (!customValue || customValue <= 0) {
-            alert('Please enter a valid custom increment amount');
+            showNotification('Please enter a valid custom increment amount', 'error');
             return;
         }
         data.custom_bid_increment = parseFloat(customValue);
-    } else {
-        // Collect predefined increments
-        const predefinedIncrements = [];
-        for (let i = 0; i < 4; i++) {
-            const value = document.getElementById(`increment_${i}`).value;
-            if (!value || value <= 0) {
-                alert('Please enter valid increment values for all ranges');
-                return;
+            } else {
+            // Collect predefined increments
+            const predefinedIncrements = [];
+            const ranges = [
+                { min: 0, max: 100 },
+                { min: 101, max: 500 },
+                { min: 501, max: 1000 },
+                { min: 1001, max: null }
+            ];
+            
+            for (let i = 0; i < 4; i++) {
+                const value = document.getElementById(`increment_${i}`).value;
+                if (!value || value <= 0) {
+                    showNotification('Please enter valid increment values for all ranges', 'error');
+                    return;
+                }
+                predefinedIncrements.push({
+                    min: ranges[i].min,
+                    max: ranges[i].max,
+                    increment: parseInt(value)
+                });
             }
-            predefinedIncrements.push(parseInt(value));
+            data.predefined_increments = predefinedIncrements;
         }
-        data.predefined_increments = predefinedIncrements;
-    }
     
     // Show loading state
     const updateBtn = document.querySelector('button[onclick="updateBidIncrements()"]');
@@ -519,8 +577,11 @@ function updateBidIncrements() {
     `;
     updateBtn.disabled = true;
     
+    // Log the data being sent
+    console.log('Sending bid increment data:', data);
+    
     // Send AJAX request
-    fetch(`/leagues/{{ $league->slug }}/bid-increments`, {
+    fetch('{{ route("leagues.update-bid-increments", $league) }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -528,19 +589,31 @@ function updateBidIncrements() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
-            alert('Bid increments updated successfully!');
+            showNotification('Bid increments updated successfully!', 'success');
             closeAuctionRulesModal();
-            location.reload(); // Refresh to show updated values
+            // Reload page to reflect changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
         } else {
-            alert('Failed to update bid increments: ' + (data.message || 'Unknown error'));
+            showNotification(data.message || 'Failed to update bid increments', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error updating bid increments. Please try again.');
+        showNotification(error.message || 'Error updating bid increments. Please try again.', 'error');
     })
     .finally(() => {
         // Restore button state
@@ -564,6 +637,50 @@ document.addEventListener('keydown', function(e) {
         closeAuctionRulesModal();
     }
 });
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    const messageEl = document.getElementById('notification-message');
+    const icon = document.getElementById('notification-icon');
+    
+    // Set message
+    messageEl.textContent = message;
+    
+    // Set icon and colors based on type
+    if (type === 'success') {
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        icon.classList.remove('text-red-600', 'text-yellow-600', 'text-blue-600');
+        icon.classList.add('text-green-600');
+        notification.querySelector('.bg-white').classList.add('border-l-4', 'border-green-500');
+    } else if (type === 'error') {
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        icon.classList.remove('text-green-600', 'text-yellow-600', 'text-blue-600');
+        icon.classList.add('text-red-600');
+        notification.querySelector('.bg-white').classList.add('border-l-4', 'border-red-500');
+    } else {
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        icon.classList.remove('text-green-600', 'text-red-600', 'text-yellow-600');
+        icon.classList.add('text-blue-600');
+        notification.querySelector('.bg-white').classList.add('border-l-4', 'border-blue-500');
+    }
+    
+    // Show notification
+    notification.classList.remove('hidden');
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        hideNotification();
+    }, 5000);
+}
+
+// Hide notification
+function hideNotification() {
+    const notification = document.getElementById('notification');
+    notification.classList.add('hidden');
+    // Remove border classes
+    notification.querySelector('.bg-white').classList.remove('border-l-4', 'border-green-500', 'border-red-500', 'border-blue-500');
+}
 
 // Initialize modal event listeners when modal opens
 function initializeModalEvents() {
