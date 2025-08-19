@@ -790,7 +790,7 @@ function generateQuickBidButtons() {
     
     const increments = bidIncrementStructure === 'custom' 
         ? [customIncrement, customIncrement * 2, customIncrement * 3]
-        : [5, 10, 25, 50];
+        : [5, 10, 25];
     
     let buttonsHTML = '';
     increments.forEach(increment => {

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('mobile',15)->unique();
             $table->string('pin');
             $table->string('photo')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use App\Models\LocalBody;
 use App\Models\User;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +18,7 @@ class RegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        $roles = GameRole::all();
+        $roles = GamePosition::all();
         $localBodies = LocalBody::all();
         return view('register', compact('roles', 'localBodies'));
     }
@@ -25,29 +26,15 @@ class RegisterController extends Controller
     /**
      * Handle the registration request.
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:100|unique:users',
-            'mobile' => 'required|string|max:15|unique:users',
-            'pin' => 'required|string|min:4|max:6',
-            'role_id' => 'nullable|exists:game_roles,id',
-            'local_body_id' => 'nullable|exists:local_bodies,id',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
+        // dd($request->validated());
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'pin' => bcrypt($request->pin),
-            'role_id' => $request->role_id,
+            'position_id' => $request->position_id,
             'local_body_id' => $request->local_body_id,
         ]);
 

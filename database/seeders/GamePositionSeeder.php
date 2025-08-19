@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Game;
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use Illuminate\Database\Seeder;
 
-class GameRoleSeeder extends Seeder
+class GamePositionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -31,7 +31,7 @@ class GameRoleSeeder extends Seeder
         
         // Create the roles
         foreach ($cricketRoles as $roleName) {
-            GameRole::create([
+            GamePosition::create([
                 'name' => $roleName,
                 'game_id' => $cricketGame->id
             ]);

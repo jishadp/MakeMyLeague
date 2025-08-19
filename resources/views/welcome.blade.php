@@ -49,7 +49,7 @@
 
     @include('web.teams')
 
-    @include('web.players')
+    {{-- @include('web.players') --}}
 
     @include('web.testimonials')
 

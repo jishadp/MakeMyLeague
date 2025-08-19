@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use App\Models\User;
 use App\Models\LocalBody;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class PlayerController extends Controller
     public function index(Request $request): View
     {
         $query = User::query()
-            ->with(['role', 'localBody'])
+            ->with(['position', 'localBody'])
             ->players();
         
         // Filter by role
@@ -42,7 +42,7 @@ class PlayerController extends Controller
         $players = $query->paginate(12)->withQueryString();
         
         // Get all roles for filtering
-        $roles = GameRole::orderBy('name')->get();
+        $roles = GamePosition::orderBy('name')->get();
         
         // Get all local bodies for filtering
         $localBodies = LocalBody::orderBy('name')->get();
@@ -61,7 +61,7 @@ class PlayerController extends Controller
                 ->with('error', 'You do not have permission to create players.');
         }
         
-        $roles = GameRole::orderBy('name')->get();
+        $roles = GamePosition::orderBy('name')->get();
         $localBodies = LocalBody::with('district')->get();
         return view('players.create', compact('roles', 'localBodies'));
     }
@@ -82,7 +82,7 @@ class PlayerController extends Controller
             'mobile' => 'required|string|max:15',
             'pin' => 'required|string|max:10',
             'email' => 'nullable|string|email|max:255|unique:users',
-            'role_id' => 'required|exists:game_roles,id',
+            'position_id' => 'required|exists:game_positions,id',
             'local_body_id' => 'nullable|exists:local_bodies,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -92,7 +92,7 @@ class PlayerController extends Controller
         $player->mobile = $validated['mobile'];
         $player->pin = $validated['pin'];
         $player->email = $validated['email'] ?? null;
-        $player->role_id = $validated['role_id'];
+        $player->position_id = $validated['position_id'];
         $player->local_body_id = $validated['local_body_id'] ?? null;
 
         // Handle photo upload
@@ -112,7 +112,7 @@ class PlayerController extends Controller
      */
     public function show(User $player): View
     {
-        $player->load(['role', 'localBody']);
+        $player->load(['position', 'localBody']);
         return view('players.show', compact('player'));
     }
 
@@ -127,7 +127,7 @@ class PlayerController extends Controller
                 ->with('error', 'You do not have permission to edit this player.');
         }
 
-        $roles = GameRole::orderBy('name')->get();
+        $roles = GamePosition::orderBy('name')->get();
         $localBodies = LocalBody::with('district')->get();
         return view('players.edit', compact('player', 'roles', 'localBodies'));
     }

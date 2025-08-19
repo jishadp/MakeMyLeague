@@ -81,8 +81,8 @@
 
                         <!-- Player Role -->
                         <div>
-                            <label for="role_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
-                            <select name="role_id" id="role_id" required
+                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
+                            <select name="position_id" id="position_id" required
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)

@@ -6,7 +6,7 @@ use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
 use App\Models\User;
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

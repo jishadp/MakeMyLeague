@@ -60,7 +60,7 @@ class AuctionsController extends Controller
         ];
 
         // Get featured players
-        $featuredPlayers = User::with(['role', 'localBody'])
+        $featuredPlayers = User::with(['position', 'localBody'])
             ->players()
             ->take(4)
             ->get();
@@ -169,7 +169,7 @@ class AuctionsController extends Controller
         ];
 
         // Get featured players
-        $availablePlayers = User::with(['role', 'localBody'])
+        $availablePlayers = User::with(['position', 'localBody'])
             ->players()
             ->take(8)
             ->get();

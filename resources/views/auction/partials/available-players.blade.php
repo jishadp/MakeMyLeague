@@ -52,7 +52,7 @@
                      data-player-name="{{ $player->user->name }}"
                      data-base-price="{{ $player->base_price }}"
                      data-league-player-id="{{ $player->id }}"
-                     data-player-role="{{ $player->user->role->name ?? 'Unknown' }}"
+                     data-player-role="{{ $player->user->position->name ?? 'Unknown' }}"
                      data-player-mobile="{{ $player->user->mobile }}">
                     
                     <!-- Player Header -->
@@ -71,7 +71,7 @@
                                 <h3 class="font-semibold text-gray-900 text-lg">{{ $player->user->name }}</h3>
                                 <div class="flex items-center space-x-2 text-sm text-gray-600">
                                     <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                        {{ $player->user->role->name ?? 'Unknown' }}
+                                        {{ $player->user->position->name ?? 'Unknown' }}
                                     </span>
                                     @if($player->retention)
                                         <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Retention</span>

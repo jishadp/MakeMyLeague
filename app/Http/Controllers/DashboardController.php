@@ -6,7 +6,7 @@ use App\Models\Auction;
 use App\Models\League;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use App\Models\LeagueTeam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,17 +23,10 @@ class DashboardController
         // Get player info if the current user has a role_id (is a player)
         $playerInfo = null;
         if (Auth::check() && Auth::user()->role_id) {
-            $playerInfo = Auth::user()->load(['role', 'localBody']);
+            $playerInfo = Auth::user()->load(['position', 'localBody']);
         }
         
-        // Get recent players
-        $recentPlayers = User::with(['role', 'localBody'])
-            ->players()
-            ->latest()
-            ->take(4)
-            ->get();
-        
-        return view('dashboard', compact('leagues', 'userLeagues', 'userOwnedTeams', 'playerInfo', 'recentPlayers'));
+        return view('dashboard', compact('leagues', 'userLeagues', 'userOwnedTeams', 'playerInfo'));
     }
     
     /**

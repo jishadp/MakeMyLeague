@@ -21,17 +21,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'slug',
-        'email',
-        'password',
-        'mobile',
-        'pin',
-        'role_id',
-        'local_body_id',
-        'photo',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -104,9 +94,9 @@ class User extends Authenticatable
     /**
      * Get the game role of the user.
      */
-    public function role(): BelongsTo
+    public function position(): BelongsTo
     {
-        return $this->belongsTo(GameRole::class, 'role_id');
+        return $this->belongsTo(GamePosition::class, 'position_id');
     }
     
     /**

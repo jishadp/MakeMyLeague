@@ -9,7 +9,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 drop-shadow">
-                        Welcome to Cricket League Manager
+                        Welcome to {{ config('app.name')}}
                     </h1>
                     <p class="text-lg sm:text-xl text-indigo-100 mb-8">
                         Organize leagues, manage teams, track player stats, and run exciting tournaments.
@@ -486,83 +486,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Recent Players Section -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Recent Players</h2>
-                    <p class="text-gray-600">Recently added cricket players</p>
-                </div>
-                <a href="{{ route('players.index') }}" 
-                   class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
-                    View All Players
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @forelse($recentPlayers as $player)
-                    <a href="{{ route('players.show', $player->slug) }}" class="block">
-                        <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
-                                    hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-24 flex items-center justify-center relative overflow-hidden">
-                            <div class="w-full h-full flex items-center justify-center">
-                                <div class="w-12 h-12 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
-                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                         alt="{{ $player->name }}" 
-                                         class="w-full h-full object-cover"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="display: none;">
-                                        {{ strtoupper(substr($player->name, 0, 2)) }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="absolute bottom-1 left-1 right-1">
-                                <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-1 py-0.5 rounded-full">
-                                    {{ $player->role->name ?? 'Player' }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="p-5">
-                            <!-- Name -->
-                            <div class="mb-4">
-                                <h3 class="text-lg font-bold text-gray-900">{{ $player->name }}</h3>
-                            </div>
-                            
-                            <!-- Details -->
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🏏 Role:</span> {{ $player->role->name ?? 'N/A' }}</p>
-                                @if($player->localBody)
-                                    <p><span class="font-medium">📍 Location:</span> {{ $player->localBody->name }}</p>
-                                @endif
-                            </div>
-                            
-                            <!-- View Details -->
-                            <div class="mt-4 flex justify-end items-center">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-                                    View Profile
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    </a>
-                @empty
-                    <div class="col-span-4 bg-white rounded-xl shadow-md p-6 text-center">
-                        <p class="text-gray-600">No players have been added recently.</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
     <!-- Become an Organizer Section -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 bg-indigo-50">
         <div class="max-w-5xl mx-auto">

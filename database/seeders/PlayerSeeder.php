@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\GameRole;
+use App\Models\GamePosition;
 use App\Models\LocalBody;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -16,10 +16,10 @@ class PlayerSeeder extends Seeder
     public function run(): void
     {
         // Get all game roles for cricket
-        $gameRoles = GameRole::all();
+        $GamePositions = GamePosition::all();
 
-        if ($gameRoles->isEmpty()) {
-            $this->command->error('No game roles found. Please run GameRoleSeeder first.');
+        if ($GamePositions->isEmpty()) {
+            $this->command->error('No game roles found. Please run GamePositionSeeder first.');
             return;
         }
 
@@ -34,40 +34,40 @@ class PlayerSeeder extends Seeder
         // Define player names and their roles
         $players = [
             // Batters
-            ['name' => 'Virat Kohli', 'role' => 'Batter'],
-            ['name' => 'Rohit Sharma', 'role' => 'Batter'],
-            ['name' => 'KL Rahul', 'role' => 'Batter'],
-            ['name' => 'Shubman Gill', 'role' => 'Batter'],
-            ['name' => 'Shreyas Iyer', 'role' => 'Batter'],
+            ['name' => 'Virat Kohli', 'position_id' => 'Batter'],
+            ['name' => 'Rohit Sharma', 'position_id' => 'Batter'],
+            ['name' => 'KL Rahul', 'position_id' => 'Batter'],
+            ['name' => 'Shubman Gill', 'position_id' => 'Batter'],
+            ['name' => 'Shreyas Iyer', 'position_id' => 'Batter'],
 
             // Bowlers
-            ['name' => 'Jasprit Bumrah', 'role' => 'Bowler'],
-            ['name' => 'Mohammed Siraj', 'role' => 'Bowler'],
-            ['name' => 'Yuzvendra Chahal', 'role' => 'Bowler'],
-            ['name' => 'Ravichandran Ashwin', 'role' => 'Bowler'],
-            ['name' => 'Kuldeep Yadav', 'role' => 'Bowler'],
+            ['name' => 'Jasprit Bumrah', 'position_id' => 'Bowler'],
+            ['name' => 'Mohammed Siraj', 'position_id' => 'Bowler'],
+            ['name' => 'Yuzvendra Chahal', 'position_id' => 'Bowler'],
+            ['name' => 'Ravichandran Ashwin', 'position_id' => 'Bowler'],
+            ['name' => 'Kuldeep Yadav', 'position_id' => 'Bowler'],
 
             // All-Rounders
-            ['name' => 'Hardik Pandya', 'role' => 'All-Rounder'],
-            ['name' => 'Ravindra Jadeja', 'role' => 'All-Rounder'],
-            ['name' => 'Axar Patel', 'role' => 'All-Rounder'],
-            ['name' => 'Washington Sundar', 'role' => 'All-Rounder'],
-            ['name' => 'Shardul Thakur', 'role' => 'All-Rounder'],
+            ['name' => 'Hardik Pandya', 'position_id' => 'All-Rounder'],
+            ['name' => 'Ravindra Jadeja', 'position_id' => 'All-Rounder'],
+            ['name' => 'Axar Patel', 'position_id' => 'All-Rounder'],
+            ['name' => 'Washington Sundar', 'position_id' => 'All-Rounder'],
+            ['name' => 'Shardul Thakur', 'position_id' => 'All-Rounder'],
 
             // Wicket-Keeper Batters
-            ['name' => 'Rishabh Pant', 'role' => 'Wicket-Keeper Batter'],
-            ['name' => 'MS Dhoni', 'role' => 'Wicket-Keeper Batter'],
-            ['name' => 'Ishan Kishan', 'role' => 'Wicket-Keeper Batter'],
-            ['name' => 'Sanju Samson', 'role' => 'Wicket-Keeper Batter'],
-            ['name' => 'Dinesh Karthik', 'role' => 'Wicket-Keeper Batter'],
+            ['name' => 'Rishabh Pant', 'position_id' => 'Wicket-Keeper Batter'],
+            ['name' => 'MS Dhoni', 'position_id' => 'Wicket-Keeper Batter'],
+            ['name' => 'Ishan Kishan', 'position_id' => 'Wicket-Keeper Batter'],
+            ['name' => 'Sanju Samson', 'position_id' => 'Wicket-Keeper Batter'],
+            ['name' => 'Dinesh Karthik', 'position_id' => 'Wicket-Keeper Batter'],
         ];
 
         foreach ($players as $index => $playerData) {
             // Find the role ID
-            $role = $gameRoles->where('name', $playerData['role'])->first();
+            $role = $GamePositions->where('name', $playerData['position_id'])->first();
 
             if (!$role) {
-                $this->command->error("Role {$playerData['role']} not found. Skipping player {$playerData['name']}.");
+                $this->command->error("Role {$playerData['position_id']} not found. Skipping player {$playerData['name']}.");
                 continue;
             }
 

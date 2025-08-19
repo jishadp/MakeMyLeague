@@ -25,14 +25,9 @@ Route::get('/', function () {
     $featuredTeams = \App\Models\Team::with(['homeGround', 'localBody'])
         ->take(3)
         ->get();
-        
-    // Get 3 featured players for the landing page
-    $featuredPlayers = \App\Models\User::with(['role', 'localBody'])
-        ->players()
-        ->take(3)
-        ->get();
+
     
-    return view('welcome', compact('featuredGrounds', 'featuredTeams', 'featuredPlayers'));
+    return view('welcome', compact('featuredGrounds', 'featuredTeams'));
 });
 
 Route::get('login',[LoginController::class,'login'])->name('login');

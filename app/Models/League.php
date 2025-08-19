@@ -269,7 +269,7 @@ class League extends Model
     {
         return $this->leaguePlayers()
             ->where('status', 'available')
-            ->with(['user', 'user.role', 'user.localBody'])
+            ->with(['user', 'user.position', 'user.localBody'])
             ->orderBy('base_price', 'desc');
     }
 

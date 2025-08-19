@@ -29,7 +29,7 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}"
                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
-                           required autofocus>
+                         autofocus>
                 </div>
 
                 <!-- Mobile -->
@@ -37,32 +37,32 @@
                     <label for="mobile" class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
                     <input id="mobile" type="tel" name="mobile" value="{{ old('mobile') }}"
                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
-                           required>
+                           >
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}"
+                    <input id="email" type="text" name="email" value="{{ old('email') }}"
                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
                 </div>
 
                 <!-- PIN -->
                 <div>
-                    <label for="pin" class="block text-sm font-medium text-gray-700 mb-2">PIN (4-6 digits)</label>
+                    <label for="pin" class="block text-sm font-medium text-gray-700 mb-2">PIN (4 digits)</label>
                     <input id="pin" type="password" name="pin" 
                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
-                           required minlength="4" maxlength="6">
+                         minlength="4" maxlength="4">
                 </div>
 
                 <!-- Game Role -->
                 <div>
-                    <label for="role_id" class="block text-sm font-medium text-gray-700 mb-2">Role (Optional)</label>
-                    <select id="role_id" name="role_id" 
+                    <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Role (Optional)</label>
+                    <select id="position_id" name="position_id" 
                             class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
                         <option value="">Select Role</option>
                         @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                            <option value="{{ $role->id }}" {{ old('position_id') == $role->id ? 'selected' : '' }}>
                                 {{ $role->name }}
                             </option>
                         @endforeach

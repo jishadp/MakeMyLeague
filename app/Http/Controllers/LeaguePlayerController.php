@@ -16,7 +16,7 @@ class LeaguePlayerController extends Controller
      */
     public function index(League $league): View
     {
-        $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.role'])
+        $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.position'])
             ->where('league_id', $league->id)
             ->when(request('status'), function($query, $status) {
                 $query->where('status', $status);
@@ -72,13 +72,13 @@ class LeaguePlayerController extends Controller
             ->get();
 
         // Get players not already in this league
-        $availablePlayers = User::whereNotNull('role_id')
+        $availablePlayers = User::whereNotNull('position_id')
             ->whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
                       ->from('league_players')
                       ->where('league_id', $league->id);
             })
-            ->with('role')
+            ->with('position')
             ->get();
 
         return view('league-players.create', compact('league', 'leagueTeams', 'availablePlayers'));
@@ -94,13 +94,13 @@ class LeaguePlayerController extends Controller
             ->get();
 
         // Get players not already in this league
-        $availablePlayers = User::whereNotNull('role_id')
+        $availablePlayers = User::whereNotNull('position_id')
             ->whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
                       ->from('league_players')
                       ->where('league_id', $league->id);
             })
-            ->with('role')
+            ->with('position')
             ->get();
 
         return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers'));

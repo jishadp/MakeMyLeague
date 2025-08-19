@@ -165,30 +165,11 @@
                         <!-- Quick bid buttons will be generated dynamically -->
                     </div>
                 </div>
-
-                <!-- Custom Bid Amount -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Custom Bid Amount</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-                        <input type="number" id="bidAmount" 
-                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm mobile-input mobile-button"
-                               placeholder="Enter amount" min="0" step="1">
-                    </div>
-                </div>
-                
-                <!-- Place Bid Button -->
-                <button id="placeBidBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors duration-200 text-base sm:text-lg font-medium mb-3 flex items-center justify-center mobile-button">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                    Place Bid
-                </button>
                 
                 <!-- Admin Controls -->
                 <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-200">
-                    <button id="acceptBidBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium mobile-button">
-                        Sell to Highest
+                    <button id="acceptBidBtn" class="flex-1 bg-blue-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium mobile-button">
+                        Mark as Sold
                     </button>
                     <button id="skipPlayerBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium mobile-button">
                         Skip Player

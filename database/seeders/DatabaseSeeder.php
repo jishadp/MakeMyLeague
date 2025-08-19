@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Game;
 use App\Models\League;
+use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -60,7 +61,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(TeamSeeder::class);
 
         // Run game role seeder
-        $this->call(GameRoleSeeder::class);
+        $this->call(GamePositionSeeder::class);
 
         // Run player seeder
         // $this->call(PlayerSeeder::class);   
@@ -92,5 +93,9 @@ class DatabaseSeeder extends Seeder
         //         ]);
         //     }
         // }
+
+        Role::create(['name'=>'organizer']);
+        Role::create(['name'=>'owner']);
+        Role::create(['name'=>'player']);
     }
 }

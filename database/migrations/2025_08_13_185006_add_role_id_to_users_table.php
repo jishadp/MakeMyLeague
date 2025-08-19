@@ -11,9 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('user_roles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('role_id')->constrained('roles');
+            $table->timestamps();
+        });
+
+
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->after('remember_token')->nullable()->constrained('game_roles');
-            $table->foreignId('local_body_id')->after('role_id')->nullable()->constrained('local_bodies');
+            $table->foreignId('position_id')->after('remember_token')->nullable()->constrained('game_positions');
+            $table->foreignId('local_body_id')->after('position_id')->nullable()->constrained('local_bodies');
         });
     }
 

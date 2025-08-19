@@ -54,7 +54,7 @@
                         <option value="">Choose a player...</option>
                         @foreach($availablePlayers as $player)
                             <option value="{{ $player->id }}" {{ old('user_id') == $player->id ? 'selected' : '' }}>
-                                {{ $player->name }} ({{ $player->role->name ?? 'No Role' }}) - {{ $player->email }}
+                                {{ $player->name }} ({{ $player->position->name ?? 'No Role' }})
                             </option>
                         @endforeach
                     </select>
