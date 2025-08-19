@@ -46,7 +46,7 @@ class RegisterController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
-            'pin' => $request->pin,
+            'pin' => bcrypt($request->pin),
             'role_id' => $request->role_id,
             'local_body_id' => $request->local_body_id,
         ]);

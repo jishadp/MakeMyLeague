@@ -20,7 +20,7 @@
             <!-- Mobile -->
             <div class="mb-6">
                 <label for="mobile" class="block text-sm font-medium text-gray-700 mb-2">Mobile</label>
-                <input id="mobile" type="tel" name="mobile" value="9876567876"
+                <input id="mobile" type="tel" name="mobile"
                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
                        required autofocus autocomplete="tel">
                 <p class="mt-2 text-sm text-red-600 hidden" id="mobile-error">Invalid mobile</p>
@@ -29,7 +29,7 @@
             <!-- PIN -->
             <div class="mb-6">
                 <label for="pin" class="block text-sm font-medium text-gray-700 mb-2">PIN</label>
-                <input id="pin" type="password" name="pin" value="4334"
+                <input id="pin" type="password" name="pin"
                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
                        required autocomplete="current-password">
                 <p class="mt-2 text-sm text-red-600 hidden" id="pin-error">PIN required</p>

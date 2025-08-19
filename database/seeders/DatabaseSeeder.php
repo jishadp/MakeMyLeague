@@ -16,12 +16,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create default user
-        $user = User::create([
-            'name'  => 'Niyas KM',
-            'email'  => 'niyas@gmail.com',
-            'mobile'  => '9876567876',
-            'pin'   => bcrypt('4334')
-        ]);
+        // $user = User::create([
+        //     'name'  => 'Niyas KM',
+        //     'email'  => 'niyas@gmail.com',
+        //     'mobile'  => '9876567876',
+        //     'pin'   => bcrypt('4334')
+        // ]);
 
         // Create default game (Cricket)
         $game = Game::create([
