@@ -138,7 +138,7 @@
     <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-2">
-                <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
+                <h2 class="text-2xl font-bold text-gray-900">Active Leagues</h2>
             </div>
 
             @if($userLeagues->isEmpty())

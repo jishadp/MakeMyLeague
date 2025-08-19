@@ -70,6 +70,18 @@
                                 Edit
                             </a>
                             @endif
+                            
+                            @if(auth()->user()->isPlayer())
+                            <div class="flex gap-3">
+                                <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
+                                   class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Register
+                                </a>
+                            </div>
+                            @endif
                             <a href="{{ route('leagues.index') }}"
                                class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center text-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
