@@ -111,8 +111,10 @@ class LeaguePlayerController extends Controller
      */
     public function store(Request $request, League $league)
     {
-        $request->validate([
-            'league_team_id' => 'nullable|exists:league_teams,id',
+        // Determine validation rules based on retention status
+        $isRetention = $request->has('retention') && $request->retention;
+        
+        $validationRules = [
             'user_id' => [
                 'required',
                 'exists:users,id',
@@ -128,20 +130,42 @@ class LeaguePlayerController extends Controller
             ],
             'retention' => 'boolean',
             'status' => 'required|in:pending,available,sold,unsold,skip',
-            'base_price' => 'required|numeric|min:0',
-        ]);
-
-        // Validate league team belongs to current league if provided
-        if ($request->league_team_id) {
-            $leagueTeam = LeagueTeam::findOrFail($request->league_team_id);
-            if ($leagueTeam->league_id !== $league->id) {
-                return back()->withErrors(['league_team_id' => 'Invalid team selected.']);
-            }
+        ];
+        
+        // Conditional validation rules
+        if ($isRetention) {
+            // For retention players: team is required, base price is not
+            $validationRules['league_team_id'] = [
+                'required',
+                'exists:league_teams,id',
+                function ($attribute, $value, $fail) use ($league) {
+                    $leagueTeam = LeagueTeam::find($value);
+                    if (!$leagueTeam || $leagueTeam->league_id !== $league->id) {
+                        $fail('Please select a valid team for retention player.');
+                    }
+                },
+            ];
+            $validationRules['base_price'] = 'nullable|numeric|min:0';
+        } else {
+            // For non-retention players: team is optional, base price is required
+            $validationRules['league_team_id'] = 'nullable|exists:league_teams,id';
+            $validationRules['base_price'] = 'required|numeric|min:0';
         }
+        
+        $request->validate($validationRules);
 
-        // Create league player with league_id
+        // Prepare data for creation
         $data = $request->all();
         $data['league_id'] = $league->id;
+        
+        // Handle retention player logic
+        if ($isRetention) {
+            $data['retention'] = true;
+            $data['base_price'] = 0; // Set base price to 0 for retention players
+        } else {
+            $data['retention'] = false;
+        }
+        
         LeaguePlayer::create($data);
 
         return redirect()
