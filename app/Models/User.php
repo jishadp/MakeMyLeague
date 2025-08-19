@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -152,5 +153,29 @@ class User extends Authenticatable
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'owner_id');
+    }
+    
+    /**
+     * Get the roles assigned to this user.
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+    
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole($roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+    
+    /**
+     * Check if the user has any of the specified roles.
+     */
+    public function hasAnyRole($roleNames): bool
+    {
+        return $this->roles()->whereIn('name', (array) $roleNames)->exists();
     }
 }
