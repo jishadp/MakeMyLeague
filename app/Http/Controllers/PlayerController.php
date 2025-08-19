@@ -64,9 +64,9 @@ class PlayerController extends Controller
                 ->with('error', 'You do not have permission to create players.');
         }
         
-        $roles = GamePosition::orderBy('name')->get();
+        $positions = GamePosition::orderBy('name')->get();
         $localBodies = LocalBody::with('district')->get();
-        return view('players.create', compact('roles', 'localBodies'));
+        return view('players.create', compact('positions', 'localBodies'));
     }
 
     /**

@@ -84,42 +84,21 @@
 
                         <!-- PIN -->
                         <div>
-                            <label for="pin" class="block text-sm font-medium text-gray-700 mb-2">PIN (4-6 digits) <span class="text-red-500">*</span></label>
+                            <label for="pin" class="block text-sm font-medium text-gray-700 mb-2">PIN (4 digits) <span class="text-red-500">*</span></label>
                             <input type="password" name="pin" id="pin" value="{{ old('pin') }}" required
                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4"
-                                   minlength="4" maxlength="6">
+                                   minlength="4" maxlength="4">
                         </div>
 
                         <!-- Player Role -->
                         <div>
-                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
+                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Position <span class="text-red-500">*</span></label>
                             <select name="position_id" id="position_id" required
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
-                                <option value="">Select Role</option>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('position_id') == $role->id ? 'selected' : '' }}>
-                                        {{ $role->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Email (Optional) -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
-                            <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                   class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
-                        </div>
-
-                        <!-- Local Body (Optional) -->
-                        <div>
-                            <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
-                            <select name="local_body_id" id="local_body_id"
-                                    class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
-                                <option value="">Select Location</option>
-                                @foreach($localBodies as $localBody)
-                                    <option value="{{ $localBody->id }}" {{ old('local_body_id') == $localBody->id ? 'selected' : '' }}>
-                                        {{ $localBody->name }} ({{ $localBody->district->name }})
+                                <option value="">Select Position</option>
+                                @foreach($positions as $position)
+                                    <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>
+                                        {{ $position->name }}
                                     </option>
                                 @endforeach
                             </select>
