@@ -137,12 +137,12 @@
                             <span class="text-xs sm:text-sm font-medium">Auction</span>
                         </a>
 
-                        <a href="#" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors shadow-sm">
+                        <button onclick="openAuctionRulesModal()" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors shadow-sm cursor-pointer">
                             <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span class="text-xs sm:text-sm font-medium">View Statistics</span>
-                        </a>
+                            <span class="text-xs sm:text-sm font-medium">Auction Rules</span>
+                        </button>
                     </div>
                 </div>
 
@@ -313,4 +313,256 @@
 
     </div>
 </div>
+
+<!-- Bid Increment Modal -->
+<div id="auctionRulesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-0">
+        <div class="mt-3">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Bid Increment</h3>
+                <button onclick="closeAuctionRulesModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Bid Increment Content -->
+            <div class="space-y-4 sm:space-y-6">
+                @if($league->bid_increment_type === 'custom')
+                    <!-- Custom Increment Section -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-900">Custom Increment</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-blue-800 mb-1">Increment Amount (₹)</label>
+                                <input type="number" id="customIncrementValue" 
+                                       value="{{ $league->custom_bid_increment ?? 10 }}" 
+                                       min="1" step="0.01"
+                                       class="w-full border border-blue-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-blue-800">₹<span id="customIncrementDisplay">{{ number_format($league->custom_bid_increment ?? 10, 2) }}</span></p>
+                                <p class="text-sm text-blue-600">Fixed increment for all bids</p>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <!-- Predefined Increments Section -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-green-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-green-900">Predefined Increments</h4>
+                        </div>
+                        <div class="space-y-3">
+                            @php
+                                $predefinedIncrements = $league->predefined_increments ?? [
+                                    ['min' => 0, 'max' => 100, 'increment' => 5],
+                                    ['min' => 101, 'max' => 500, 'increment' => 10],
+                                    ['min' => 501, 'max' => 1000, 'increment' => 25],
+                                    ['min' => 1001, 'max' => null, 'increment' => 50]
+                                ];
+                            @endphp
+                            @foreach($predefinedIncrements as $index => $rule)
+                                <div class="bg-white bg-opacity-50 rounded-lg p-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-green-800">
+                                            ₹{{ $rule['min'] }}{{ $rule['max'] ? '-'.$rule['max'] : '+' }}
+                                        </span>
+                                        <span class="text-xs text-green-600">Increment</span>
+                                    </div>
+                                    <input type="number" 
+                                           id="increment_{{ $index }}" 
+                                           value="{{ $rule['increment'] }}" 
+                                           min="1" step="1"
+                                           class="w-full border border-green-300 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500 text-lg font-bold text-green-900">
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Auction Status -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-gray-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Auction Status</span>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium 
+                            @if($league->auction_active) bg-green-100 text-green-800
+                            @elseif($league->auction_ended_at) bg-red-100 text-red-800
+                            @else bg-yellow-100 text-yellow-800 @endif">
+                            @if($league->auction_active)
+                                Active
+                            @elseif($league->auction_ended_at)
+                                Ended
+                            @else
+                                Ready
+                            @endif
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center gap-3 mt-6 pb-4">
+                <button onclick="updateBidIncrements()" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-lg">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openAuctionRulesModal() {
+    document.getElementById('auctionRulesModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Initialize modal events after a short delay to ensure DOM is ready
+    setTimeout(initializeModalEvents, 100);
+}
+
+function closeAuctionRulesModal() {
+    document.getElementById('auctionRulesModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+
+
+// Update custom increment display
+function updateCustomIncrementDisplay() {
+    const value = document.getElementById('customIncrementValue').value;
+    const display = document.getElementById('customIncrementDisplay');
+    display.textContent = parseFloat(value || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+// Update bid increments
+function updateBidIncrements() {
+    const currentType = '{{ $league->bid_increment_type }}';
+    let data = {
+        bid_increment_type: currentType
+    };
+    
+    if (currentType === 'custom') {
+        const customValue = document.getElementById('customIncrementValue').value;
+        if (!customValue || customValue <= 0) {
+            alert('Please enter a valid custom increment amount');
+            return;
+        }
+        data.custom_bid_increment = parseFloat(customValue);
+    } else {
+        // Collect predefined increments
+        const predefinedIncrements = [];
+        for (let i = 0; i < 4; i++) {
+            const value = document.getElementById(`increment_${i}`).value;
+            if (!value || value <= 0) {
+                alert('Please enter valid increment values for all ranges');
+                return;
+            }
+            predefinedIncrements.push(parseInt(value));
+        }
+        data.predefined_increments = predefinedIncrements;
+    }
+    
+    // Show loading state
+    const updateBtn = document.querySelector('button[onclick="updateBidIncrements()"]');
+    const originalText = updateBtn.innerHTML;
+    updateBtn.innerHTML = `
+        <svg class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Updating...
+    `;
+    updateBtn.disabled = true;
+    
+    // Send AJAX request
+    fetch(`/leagues/{{ $league->slug }}/bid-increments`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Bid increments updated successfully!');
+            closeAuctionRulesModal();
+            location.reload(); // Refresh to show updated values
+        } else {
+            alert('Failed to update bid increments: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating bid increments. Please try again.');
+    })
+    .finally(() => {
+        // Restore button state
+        updateBtn.innerHTML = originalText;
+        updateBtn.disabled = false;
+    });
+}
+
+
+
+// Close modal when clicking outside
+document.getElementById('auctionRulesModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAuctionRulesModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAuctionRulesModal();
+    }
+});
+
+// Initialize modal event listeners when modal opens
+function initializeModalEvents() {
+    // Custom increment value change
+    const customInput = document.getElementById('customIncrementValue');
+    if (customInput) {
+        customInput.addEventListener('input', updateCustomIncrementDisplay);
+    }
+    
+    // Predefined increment inputs
+    for (let i = 0; i < 4; i++) {
+        const input = document.getElementById(`increment_${i}`);
+        if (input) {
+            input.addEventListener('input', function() {
+                // Ensure positive values
+                if (this.value < 0) this.value = 0;
+            });
+        }
+    }
+}
+</script>
 @endsection

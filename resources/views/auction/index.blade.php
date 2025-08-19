@@ -158,25 +158,16 @@ let currentSelectedPlayerId = null;
 let baseBidAmount = 0;
 let currentHighestBid = 0;
 let auctionStatus = 'ready'; // ready, active, paused
-let bidIncrementStructure = 'predefined';
-let customIncrement = 10;
 
 // Make currentHighestBid globally accessible
 window.currentHighestBid = 0;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAuctionControls();
     initializePlayerSearch();
     initializeBiddingControls();
     initializeMobileView();
-    loadCurrentAuctionSettings();
     restoreSelectedPlayer();
-    
-    // Keep organizer controls visible (TEST/DEBUG)
-    // if (auctionStatus === 'active' || auctionStatus === 'paused') {
-    //     hideOrganizerControls();
-    // }
 });
 
 // Restore selected player from localStorage
@@ -372,202 +363,15 @@ function hideAvailablePlayers() {
     }
 }
 
-// Load current auction settings from backend
-function loadCurrentAuctionSettings() {
-    // Set initial values based on league settings
-    const league = @json($league);
-    
-    if (league.bid_increment_type) {
-        bidIncrementStructure = league.bid_increment_type;
-        document.getElementById('bidIncrementStructure').value = league.bid_increment_type;
-        
-        if (league.bid_increment_type === 'custom') {
-            customIncrement = league.custom_bid_increment || 10;
-            document.getElementById('customIncrement').value = customIncrement;
-            document.getElementById('predefinedIncrements').classList.add('hidden');
-            document.getElementById('customIncrements').classList.remove('hidden');
-        }
-    }
-    
-    // Set auction status
-    if (league.auction_active) {
-        auctionStatus = 'active';
-    } else if (league.auction_ended_at) {
-        auctionStatus = 'ended';
-    } else {
-        auctionStatus = 'ready';
-    }
-    updateAuctionStatus();
-    
-    // Update organizer controls display
-    updateOrganizerControlsDisplay();
-}
 
-// Update organizer controls display with current values
-function updateOrganizerControlsDisplay() {
-    const league = @json($league);
-    
-    // Update predefined increments display
-    const predefinedIncrements = league.predefined_increments || [
-        { min: 0, max: 100, increment: 5 },
-        { min: 101, max: 500, increment: 10 },
-        { min: 501, max: 1000, increment: 25 },
-        { min: 1001, max: null, increment: 50 }
-    ];
-    
-    const predefinedDiv = document.getElementById('predefinedIncrements');
-    if (predefinedDiv) {
-        let incrementsHTML = '<div class="grid grid-cols-2 gap-2 text-sm text-white">';
-        predefinedIncrements.forEach(rule => {
-            const range = rule.max === null ? `${rule.min}+` : `${rule.min}-${rule.max}`;
-            incrementsHTML += `
-                <div class="bg-white bg-opacity-20 p-2 rounded">
-                    <span class="font-medium">₹${range}:</span> ₹${rule.increment}
-                </div>
-            `;
-        });
-        incrementsHTML += '</div>';
-        predefinedDiv.innerHTML = incrementsHTML;
-    }
-    
-    // Update custom increment value
-    if (league.custom_bid_increment) {
-        document.getElementById('customIncrement').value = league.custom_bid_increment;
-        customIncrement = league.custom_bid_increment;
-    }
-}
 
-// Initialize auction organizer controls
-function initializeAuctionControls() {
-    // Bid increment structure toggle
-    document.getElementById('bidIncrementStructure').addEventListener('change', function() {
-        bidIncrementStructure = this.value;
-        const predefinedDiv = document.getElementById('predefinedIncrements');
-        const customDiv = document.getElementById('customIncrements');
-        
-        if (this.value === 'predefined') {
-            predefinedDiv.classList.remove('hidden');
-            customDiv.classList.add('hidden');
-        } else {
-            predefinedDiv.classList.add('hidden');
-            customDiv.classList.remove('hidden');
-        }
-        
-        // Update auction settings on backend
-        updateAuctionSettings();
-    });
 
-    // Custom increment input
-    document.getElementById('customIncrement').addEventListener('input', function() {
-        customIncrement = parseFloat(this.value) || 10;
-        updateAuctionSettings();
-    });
 
-    // Start auction button
-    document.getElementById('startAuctionBtn').addEventListener('click', function() {
-        if (auctionStatus === 'ready') {
-            startAuction();
-        }
-    });
 
-    // Pause auction button
-    document.getElementById('pauseAuctionBtn').addEventListener('click', function() {
-        if (auctionStatus === 'active') {
-            pauseAuction();
-        }
-    });
 
-    // Random team selection button removed - now handled automatically in placeBidBtn
-}
 
-// Start auction
-function startAuction() {
-    fetch('{{ route("auction.start", $league->slug) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            auctionStatus = 'active';
-            updateAuctionStatus();
-            showMessage(data.message, 'success');
-        } else {
-            showMessage(data.error, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error starting auction:', error);
-        showMessage('An error occurred while starting the auction', 'error');
-    });
-}
 
-// Pause auction
-function pauseAuction() {
-    fetch('{{ route("auction.pause", $league->slug) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            auctionStatus = 'paused';
-            updateAuctionStatus();
-            showMessage(data.message, 'warning');
-        } else {
-            showMessage(data.error, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error pausing auction:', error);
-        showMessage('An error occurred while pausing the auction', 'error');
-    });
-}
 
-// Update auction settings
-function updateAuctionSettings() {
-    const settings = {
-        bid_increment_type: bidIncrementStructure,
-        custom_bid_increment: customIncrement,
-        predefined_increments: [
-            { min: 0, max: 100, increment: 5 },
-            { min: 101, max: 500, increment: 10 },
-            { min: 501, max: 1000, increment: 25 },
-            { min: 1001, max: null, increment: 50 }
-        ]
-    };
-
-    fetch('{{ route("auction.settings", $league->slug) }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify(settings)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('Auction settings updated');
-            // Update the display to reflect changes
-            updateOrganizerControlsDisplay();
-            showMessage('Auction settings updated successfully!', 'success');
-        } else {
-            console.error('Failed to update auction settings:', data.error);
-            showMessage('Failed to update auction settings', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating auction settings:', error);
-        showMessage('Error updating auction settings', 'error');
-    });
-}
 
 // Initialize player search and filtering
 function initializePlayerSearch() {
@@ -768,9 +572,12 @@ function updateTeamWalletInfo() {
 function getNextMinimumBid() {
     const currentBid = window.currentHighestBid || currentHighestBid || baseBidAmount;
     
+    // Use league settings for bid increments
+    const league = @json($league);
     let nextBid;
-    if (bidIncrementStructure === 'custom') {
-        nextBid = currentBid + customIncrement;
+    
+    if (league.bid_increment_type === 'custom') {
+        nextBid = currentBid + (league.custom_bid_increment || 10);
     } else {
         // Predefined structure
         if (currentBid <= 100) nextBid = currentBid + 5;
@@ -779,7 +586,7 @@ function getNextMinimumBid() {
         else nextBid = currentBid + 50;
     }
     
-    console.log('DEBUG: getNextMinimumBid - Current:', currentBid, 'Next:', nextBid, 'Structure:', bidIncrementStructure);
+    console.log('DEBUG: getNextMinimumBid - Current:', currentBid, 'Next:', nextBid, 'Structure:', league.bid_increment_type);
     return nextBid;
 }
 
@@ -788,8 +595,10 @@ function generateQuickBidButtons() {
     const container = document.getElementById('quickBidButtons');
     const nextBid = getNextMinimumBid();
     
-    const increments = bidIncrementStructure === 'custom' 
-        ? [customIncrement, customIncrement * 2, customIncrement * 3]
+    // Use league settings for bid increments
+    const league = @json($league);
+    const increments = league.bid_increment_type === 'custom' 
+        ? [league.custom_bid_increment || 10, (league.custom_bid_increment || 10) * 2, (league.custom_bid_increment || 10) * 3]
         : [5, 10, 25];
     
     let buttonsHTML = '';
@@ -824,57 +633,7 @@ function setBidAmount(amount) {
     console.log('DEBUG: Bid amount set to ₹' + amount.toLocaleString());
 }
 
-// Update auction status display
-function updateAuctionStatus() {
-    const statusElement = document.getElementById('auctionStatus');
-    const startBtn = document.getElementById('startAuctionBtn');
-    const pauseBtn = document.getElementById('pauseAuctionBtn');
-    
-    statusElement.textContent = auctionStatus.charAt(0).toUpperCase() + auctionStatus.slice(1);
-    
-    if (auctionStatus === 'active') {
-        startBtn.classList.add('hidden');
-        pauseBtn.classList.remove('hidden');
-        statusElement.className = 'text-white text-sm font-medium bg-green-500 bg-opacity-20 px-3 py-1 rounded-full';
-        // Keep organizer controls visible
-        // hideOrganizerControls();
-    } else if (auctionStatus === 'paused') {
-        startBtn.classList.remove('hidden');
-        pauseBtn.classList.add('hidden');
-        statusElement.className = 'text-white text-sm font-medium bg-yellow-500 bg-opacity-20 px-3 py-1 rounded-full';
-        // Keep organizer controls visible
-        // hideOrganizerControls();
-    } else if (auctionStatus === 'ended') {
-        startBtn.classList.add('hidden');
-        pauseBtn.classList.add('hidden');
-        statusElement.className = 'text-white text-sm font-medium bg-red-500 bg-opacity-20 px-3 py-1 rounded-full';
-        // Keep organizer controls visible
-        // hideOrganizerControls();
-    } else {
-        startBtn.classList.remove('hidden');
-        pauseBtn.classList.add('hidden');
-        statusElement.className = 'text-white text-sm font-medium bg-white bg-opacity-20 px-3 py-1 rounded-full';
-        showOrganizerControls();
-    }
-}
 
-// Hide organizer controls
-function hideOrganizerControls() {
-    const organizerCard = document.querySelector('.bg-gradient-to-r.from-purple-600.to-indigo-700');
-    if (organizerCard) {
-        organizerCard.style.display = 'none';
-    }
-    console.log('DEBUG: Organizer controls hidden');
-}
-
-// Show organizer controls
-function showOrganizerControls() {
-    const organizerCard = document.querySelector('.bg-gradient-to-r.from-purple-600.to-indigo-700');
-    if (organizerCard) {
-        organizerCard.style.display = 'block';
-    }
-    console.log('DEBUG: Organizer controls shown');
-}
 
 // Select player for bidding (updated)
 function selectPlayerForBidding(playerId, playerName, basePrice, playerRole) {
