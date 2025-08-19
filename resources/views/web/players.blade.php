@@ -26,16 +26,16 @@
                         </div>
                         <div class="absolute bottom-2 left-2 right-2">
                             <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-2 py-1 rounded-full">
-                                {{ $player->role->name ?? 'Player' }}
+                                {{ $player->position->name ?? 'Player' }}
                             </span>
                         </div>
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $player->name }}</h3>
-                        <p class="text-gray-500 text-base mb-3">{{ $player->role->name ?? 'Cricket Player' }}</p>
+                        <p class="text-gray-500 text-base mb-3">{{ $player->position->name ?? 'Cricket Player' }}</p>
                         <p class="text-sm text-gray-600 mb-4">
-                            @if($player->role)
-                                @switch($player->role->name)
+                            @if($player->position)
+                                @switch($player->position->name)
                                     @case('Batter')
                                         Specialist in scoring runs and building innings
                                         @break

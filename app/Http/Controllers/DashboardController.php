@@ -20,9 +20,9 @@ class DashboardController
         $userLeagues = Auth::check() ? League::where('user_id', Auth::id())->get() : collect();
         $userOwnedTeams = Auth::check() ? Team::where('owner_id', Auth::id())->get() : collect();
         
-        // Get player info if the current user has a role_id (is a player)
+        // Get player info if the current user has a position_id (is a player)
         $playerInfo = null;
-        if (Auth::check() && Auth::user()->role_id) {
+        if (Auth::check() && Auth::user()->position_id) {
             $playerInfo = Auth::user()->load(['position', 'localBody']);
         }
         

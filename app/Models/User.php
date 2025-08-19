@@ -115,7 +115,7 @@ class User extends Authenticatable
      */
     public function scopePlayers($query)
     {
-        return $query->whereNotNull('role_id');
+        return $query->whereNotNull('position_id');
     }
     
     /**

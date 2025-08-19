@@ -46,7 +46,7 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold">{{ $player->name }}</h1>
-                        <p class="text-indigo-100 text-lg">{{ $player->role->name ?? 'Cricket Player' }}</p>
+                        <p class="text-indigo-100 text-lg">{{ $player->position->name ?? 'Cricket Player' }}</p>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                                 <h3 class="text-sm font-medium text-gray-500">Playing Role</h3>
                                 <p class="mt-1 text-gray-800">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                        {{ $player->role->name ?? 'N/A' }}
+                                        {{ $player->position->name ?? 'N/A' }}
                                     </span>
                                 </p>
                             </div>
@@ -110,11 +110,11 @@
                 </div>
                 
                 <!-- Role Description -->
-                @if($player->role)
+                @if($player->position)
                     <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">About {{ $player->role->name }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">About {{ $player->position->name }}</h3>
                         <p class="text-gray-600">
-                            @switch($player->role->name)
+                            @switch($player->position->name)
                                 @case('Batter')
                                     Specializes in scoring runs and building partnerships. Key responsibility is to face deliveries and accumulate runs for the team.
                                     @break

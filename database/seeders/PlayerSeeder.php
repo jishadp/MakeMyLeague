@@ -86,7 +86,7 @@ class PlayerSeeder extends Seeder
                 'email' => $email,
                 'mobile' => $mobile,
                 'pin' => Hash::make('1234'), // Simple PIN for all players
-                'role_id' => $role->id,
+                'position_id' => $role->id,
                 'local_body_id' => $localBody->id,
             ]);
 

@@ -86,7 +86,7 @@
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                    <option value="{{ $role->id }}" {{ old('position_id') == $role->id ? 'selected' : '' }}>
                                         {{ $role->name }}
                                     </option>
                                 @endforeach

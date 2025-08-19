@@ -107,19 +107,19 @@
 
                         <!-- Player Role -->
                         <div>
-                            <label for="role_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
-                            <select name="role_id" id="role_id" required {{ auth()->user()->isAdmin() ? '' : 'disabled' }}
+                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
+                            <select name="position_id" id="position_id" required {{ auth()->user()->isAdmin() ? '' : 'disabled' }}
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4 {{ !auth()->user()->isAdmin() ? 'bg-gray-100' : '' }}">
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('role_id', $player->role_id) == $role->id ? 'selected' : '' }}>
+                                    <option value="{{ $role->id }}" {{ old('position_id', $player->position_id) == $role->id ? 'selected' : '' }}>
                                         {{ $role->name }}
                                     </option>
                                 @endforeach
                             </select>
                             @if(!auth()->user()->isAdmin())
                                 <p class="mt-1 text-sm text-gray-500">Only administrators can change player roles.</p>
-                                <input type="hidden" name="role_id" value="{{ $player->role_id }}">
+                                <input type="hidden" name="position_id" value="{{ $player->position_id }}">
                             @endif
                         </div>
 

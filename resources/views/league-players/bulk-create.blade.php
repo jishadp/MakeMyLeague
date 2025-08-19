@@ -116,7 +116,7 @@
                                                class="player-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                         <label for="player-{{ $player->id }}" class="ml-3 flex flex-col cursor-pointer">
                                             <span class="text-sm font-medium text-gray-900">{{ $player->name }}</span>
-                                            <span class="text-xs text-gray-500">{{ $player->role->name ?? 'No Role' }} • {{ $player->email }}</span>
+                                            <span class="text-xs text-gray-500">{{ $player->position->name ?? 'No Role' }} • {{ $player->email }}</span>
                                         </label>
                                     </div>
                                 @endforeach

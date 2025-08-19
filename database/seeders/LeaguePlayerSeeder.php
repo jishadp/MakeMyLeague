@@ -25,8 +25,8 @@ class LeaguePlayerSeeder extends Seeder
             return;
         }
 
-        // Get all players (users with role_id not null)
-        $players = User::whereNotNull('role_id')->get();
+        // Get all players (users with position_id not null)
+        $players = User::whereNotNull('position_id')->get();
 
         if ($players->isEmpty()) {
             $this->command->error('No players found. Please run PlayerSeeder first.');

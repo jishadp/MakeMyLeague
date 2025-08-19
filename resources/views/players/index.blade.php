@@ -28,13 +28,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                     <!-- Role Filter -->
                     <div>
-                        <label for="role_id" class="block text-sm font-medium text-gray-700 mb-1">Playing Role</label>
-                        <select name="role_id" id="role_id" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 text-center"
+                        <label for="position_id" class="block text-sm font-medium text-gray-700 mb-1">Playing Role</label>
+                        <select name="position_id" id="position_id" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 text-center"
                                 onchange="this.form.submit()">
                             <option value="">All Roles</option>
-                            @foreach($roles as $role)
-                                <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>
-                                    {{ $role->name }}
+                            @foreach($positions as $position)
+                                <option value="{{ $position->id }}" {{ request('position_id') == $position->id ? 'selected' : '' }}>
+                                    {{ $position->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -106,7 +106,7 @@
                             </div>
                             <div class="absolute bottom-2 left-2 right-2">
                                 <span class="text-white text-xs font-medium bg-black bg-opacity-30 px-2 py-1 rounded-full">
-                                    {{ $player->role->name ?? 'Player' }}
+                                    {{ $player->position->name ?? 'Player' }}
                                 </span>
                             </div>
                         </div>
@@ -119,7 +119,7 @@
                             
                             <!-- Details -->
                             <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🏏 Role:</span> {{ $player->role->name ?? 'N/A' }}</p>
+                                <p><span class="font-medium">🏏 Role:</span> {{ $player->position->name ?? 'N/A' }}</p>
                                 @if($player->localBody)
                                     <p><span class="font-medium">📍 Location:</span> {{ $player->localBody->name }}</p>
                                 @endif

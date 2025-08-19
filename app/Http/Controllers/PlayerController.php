@@ -22,8 +22,8 @@ class PlayerController extends Controller
             ->players();
         
         // Filter by role
-        if ($request->has('role_id') && $request->role_id != '') {
-            $query->where('role_id', $request->role_id);
+        if ($request->has('position_id') && $request->position_id != '') {
+            $query->where('position_id', $request->position_id);
         }
         
         // Filter by local body
@@ -42,12 +42,12 @@ class PlayerController extends Controller
         $players = $query->paginate(12)->withQueryString();
         
         // Get all roles for filtering
-        $roles = GamePosition::orderBy('name')->get();
+        $positions = GamePosition::orderBy('name')->get();
         
         // Get all local bodies for filtering
         $localBodies = LocalBody::orderBy('name')->get();
         
-        return view('players.index', compact('players', 'roles', 'localBodies'));
+        return view('players.index', compact('players', 'positions', 'localBodies'));
     }
 
     /**
@@ -154,7 +154,7 @@ class PlayerController extends Controller
 
         // Only admin can change role
         if (Auth::user()->isAdmin()) {
-            $rules['role_id'] = 'required|exists:game_roles,id';
+            $rules['position_id'] = 'required|exists:game_positions,id';
         }
 
         $validated = $request->validate($rules);
@@ -166,8 +166,8 @@ class PlayerController extends Controller
         $player->local_body_id = $validated['local_body_id'] ?? null;
         
         // Only admin can change role
-        if (Auth::user()->isAdmin() && isset($validated['role_id'])) {
-            $player->role_id = $validated['role_id'];
+        if (Auth::user()->isAdmin() && isset($validated['position_id'])) {
+            $player->position_id = $validated['position_id'];
         }
 
         // Handle photo upload
