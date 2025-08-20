@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Team | '.config('app.name'))
+@section('title', 'Cricket Team | ' . config('app.name'))
 
 @section('content')
 <div class="py-12 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
