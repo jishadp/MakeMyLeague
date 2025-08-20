@@ -55,9 +55,9 @@
                                 </div>
                             </div>
                             <div class="text-center sm:text-left">
-                                <h3 class="text-xl sm:text-2xl font-bold mb-2">{{ $player->name ?? 'Player Name' }}</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold mb-2">Virat Kohli</h3>
                                 <div class="bg-gray-600 bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium inline-block text-gray-700">
-                                    {{ $player->role ?? 'Batsman' }}
+                                    Batsman
                                 </div>
                             </div>
                         </div>
@@ -66,7 +66,7 @@
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="bg-white bg-opacity-30 backdrop-blur-sm rounded-xl p-3 text-center border border-gray-400">
                                 <p class="text-gray-600 text-xs font-medium mb-1">Base Price</p>
-                                <p class="font-bold text-lg sm:text-xl text-gray-800">₹{{ $player->base_price ?? '1000' }}</p>
+                                <p class="font-bold text-lg sm:text-xl text-gray-800">₹50,000</p>
                             </div>
                             <div class="bg-white bg-opacity-30 backdrop-blur-sm rounded-xl p-3 text-center border border-gray-400">
                                 <p class="text-gray-600 text-xs font-medium mb-1">Current Bid</p>
@@ -137,75 +137,3 @@
     </div>
 </div>
 
-<style>
-/* From Uiverse.io by gharsh11032000 - Adapted for our card */
-.card-container {
-    position: relative;
-    width: 100%;
-    max-width: 4xl;
-}
-
-.card {
-    position: relative;
-    width: 100%;
-    background-color: #f3f4f6;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    padding: 0;
-    gap: 0;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    left: -5px;
-    margin: auto;
-    width: calc(100% + 10px);
-    height: calc(100% + 10px);
-    border-radius: 20px;
-    background: linear-gradient(-45deg, #0ea5e9 0%, #166534 100%);
-    z-index: -10;
-    pointer-events: none;
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card::after {
-    content: "";
-    z-index: -1;
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(-45deg, #0284c7 0%, #15803d 100%);
-    transform: translate3d(0, 0, 0) scale(0.95);
-    filter: blur(20px);
-    border-radius: 16px;
-}
-
-.card:hover::after {
-    filter: blur(30px);
-}
-
-.card:hover::before {
-    transform: scale(1.02);
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-}
-
-/* Enhanced button animations */
-.group:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-/* Smooth transitions for all interactive elements */
-* {
-    transition: all 0.3s ease;
-}
-</style>
