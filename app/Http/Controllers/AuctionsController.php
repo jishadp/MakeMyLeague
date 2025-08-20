@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auction;
-use App\Models\AuctionBid;
 use App\Models\League;
 use App\Models\LeagueTeam;
 use App\Models\User;

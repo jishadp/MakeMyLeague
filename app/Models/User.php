@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -146,7 +147,7 @@ class User extends Authenticatable
      */
     public function auctions(): HasMany
     {
-        return $this->hasMany(Auction::class, 'player_id');
+        return $this->hasManyThrough(Auction::class, LeaguePlayer::class, 'user_id', 'league_player_id');
     }
     
     /**
