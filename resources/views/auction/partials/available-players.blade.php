@@ -6,7 +6,6 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Available Players</h2>
-                    <p class="text-sm text-gray-600">Select players to auction by bidding (Retention players excluded)</p>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -21,7 +20,7 @@
 
         <div class="p-4 sm:p-6">
             <!-- Design Toggle -->
-            <div class="mb-6 flex justify-center">
+            <div class="mb-6 flex justify-center hidden sm:block">
                 <div class="bg-gray-100 rounded-lg p-1 flex">
                     <button id="cardViewBtn" class="px-4 py-2 rounded-md text-sm font-medium bg-white text-gray-900 shadow-sm transition-all duration-200 flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +38,7 @@
             </div>
 
             <!-- Search and Filter Bar -->
-            <div class="mb-6">
+            <div class="mb-6 hidden sm:block">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1">
                         <input type="text" id="playerSearch" placeholder="Search players by name, mobile, or role..." 

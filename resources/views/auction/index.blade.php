@@ -196,8 +196,7 @@
             <div class="px-4 py-4 sm:px-6 border-b glacier-border">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold glacier-text-primary">Auction - {{ $league->name }}</h1>
-                        <p class="text-gray-600">Place bids on players through competitive bidding</p>
+                        <h1 class="text-2xl font-bold glacier-text-primary">{{ $league->name }}</h1>
                     </div>
                 </div>
             </div>
@@ -290,44 +289,6 @@
             
         <!-- Recent and Highest Bids Table - Full Width -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Recent Bids -->
-            <div class="glacier-card">
-                <div class="px-4 py-4 sm:px-6 border-b glacier-border">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold glacier-text-primary">Recent Bids</h2>
-                        <div class="badge-primary px-3 py-1 rounded-full text-sm font-medium">
-                            <span id="recentBidCount">0</span> Recent
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 sm:p-6">
-                    <div id="recentBidsTable" class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="table-header">
-                                <tr>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Player</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Team</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Amount</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recentBidsTableBody">
-                                <tr class="table-row">
-                                    <td colspan="4" class="text-center py-8 text-gray-500">
-                                        <div class="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                            </svg>
-                                        </div>
-                                        <p>No recent bids</p>
-                                        <p class="text-sm text-gray-400 mt-1">Recent bids will appear here</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
             
             <!-- Highest Bids -->
             <div class="glacier-card">
@@ -400,12 +361,13 @@
                     </div>
                 </div>
             </div>
+
+            <div class="glacier-card">
+                @include('auction.partials.teams-table')
+            </div>
         </div>
         
         <!-- Teams Table - Full Width -->
-        <div class="glacier-card">
-            @include('auction.partials.teams-table')
-        </div>
     </div>
 </div>
 

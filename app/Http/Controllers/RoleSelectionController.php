@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,7 +53,10 @@ class RoleSelectionController extends Controller
         ]);
 
         // Assign role to user using the relationship
-        $user->roles()->attach($validated['role_id']);
+        UserRole::create([
+            'user_id'   => $user->id,
+            'role_id'   => $request->role_id,
+        ]);
 
         return redirect()->route('dashboard')->with('success', 'Role selected successfully!');
     }

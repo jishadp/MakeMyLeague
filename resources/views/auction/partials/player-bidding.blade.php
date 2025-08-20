@@ -76,39 +76,42 @@
                             <span class="text-blue-100">Team Balance:</span>
                             <span class="font-bold" id="lastBidTeamBalance">₹0</span>
                         </div>
+                        <div class="flex items-center justify-between text-xs mt-1">
+                            <span class="text-blue-100">Max Bid Balance:</span>
+                            <span class="font-bold" id="lastBidTeamBalance">₹0</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Hidden Input for Selected Player -->
                 <input type="hidden" id="selectedLeaguePlayerId">
                 
-                <!-- Team Selection Info -->
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="text-sm text-gray-600">
-                            <span class="font-medium">Selected Team:</span>
-                            <span id="selectedTeamName" class="text-gray-900">No team selected</span>
-                        </div>
-                        <button onclick="selectRandomTeamForTesting()" 
-                                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200">
-                            🎲 Random Team
-                        </button>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        <span class="font-medium">Team Balance:</span>
-                        <span id="selectedTeamBalance" class="text-gray-900">₹0</span>
-                    </div>
-                </div>
                 
                 <!-- Quick Bid Buttons -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium glacier-text-secondary mb-2">Quick Bid Options</label>
                     <div class="grid grid-cols-3 gap-3" id="quickBidButtons">
-                        <!-- Quick bid buttons will be generated dynamically -->
+                        <button onclick="placeQuickBid(210)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 mobile-button flex flex-col items-center justify-center ">
+                            <span class="font-bold">Bid</span>
+                            <span class="text-xs opacity-90">₹210</span>
+                            
+                        </button>
+                    
+                        <button onclick="placeQuickBid(1000)" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 mobile-button flex flex-col items-center justify-center ">
+                            <span class="font-bold">Bid</span>
+                            <span class="text-xs opacity-90">₹1,000</span>
+                            
+                        </button>
+                    
+                        <button onclick="placeQuickBid(2000)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 mobile-button flex flex-col items-center justify-center ">
+                            <span class="font-bold">Bid</span>
+                            <span class="text-xs opacity-90">₹2,000</span>
+                            
+                        </button>
                     </div>
                 </div>
                 
                 <!-- Admin Controls -->
+                 @if(auth()->user()->isOrganizer())
                 <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t glacier-border">
                     <button id="acceptBidBtn" class="flex-1 bg-blue-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm font-medium mobile-button">
                         Mark as Sold
@@ -117,6 +120,7 @@
                         Skip Player
                     </button>
                 </div>
+                @endif
             </div>
         </div>
     </div>
