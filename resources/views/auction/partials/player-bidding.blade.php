@@ -93,12 +93,28 @@
                     </div>
                 </div>
                 
-                <!-- 1. Current Bid Row -->
-                <div class="grid grid-cols-1 gap-3 sm:gap-6 mb-6">
-                    <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-blue-200 shadow-lg">
+                <!-- 1. Current Bid Row with Side Stats -->
+                <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg mb-6">
+                    <!-- Current Bid (Main Highlight) -->
+                    <div class="text-center mb-4">
                         <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Current Bid</p>
-                        <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-blue-600 mb-2">₹1,111</p>
+                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹1,111</p>
                         <p class="text-gray-600 text-sm font-medium">Team XYZ</p>
+                    </div>
+                    
+                    <!-- Bottom Stats Row -->
+                    <div class="grid grid-cols-2 gap-4 sm:gap-6 pt-3 border-t border-gray-200">
+                        <!-- Total Players (Small) -->
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs font-medium mb-1">Total Players</p>
+                            <p class="font-bold text-sm sm:text-base text-gray-700">24</p>
+                        </div>
+                        
+                        <!-- Team Balance (Small) -->
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs font-medium mb-1">Team Balance</p>
+                            <p class="font-bold text-sm sm:text-base text-gray-700">₹2.5L</p>
+                        </div>
                     </div>
                 </div>
 
@@ -109,10 +125,10 @@
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-gray-800">₹500</p>
                         </div>
                         <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">₹1K</p>
+                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">₹1000</p>
                         </div>
                         <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">₹2K</p>
+                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">₹2000</p>
                         </div>
                     </div>
                 </div>
