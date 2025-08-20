@@ -151,13 +151,43 @@
                             @endif
                             @if(auth()->user()->isPlayer())
                             <div class="flex gap-3">
-                                <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
-                                   class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    Register
-                                </a>
+                                @php
+                                    $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
+                                        ->where('league_id', $league->id)
+                                        ->first();
+                                @endphp
+                                
+                                @if(!$existingPlayer)
+                                    <button onclick="openRegistrationModal()"
+                                       class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        Register
+                                    </button>
+                                @elseif($existingPlayer->status === 'pending')
+                                    <button disabled
+                                       class="inline-flex items-center justify-center px-6 py-2.5 bg-yellow-600 text-white font-medium rounded-lg shadow-sm cursor-not-allowed text-base">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Requested
+                                    </button>
+                                @elseif($existingPlayer->status === 'available')
+                                    <span class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg text-base">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Approved
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center px-6 py-2.5 bg-gray-600 text-white font-medium rounded-lg text-base">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        {{ ucfirst($existingPlayer->status) }}
+                                    </span>
+                                @endif
                             </div>
                             @endif
                         </div>
@@ -367,6 +397,105 @@
     </div>
 </div>
 
+<!-- Player Registration Modal -->
+<div id="registrationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-0">
+        <div class="mt-3">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">League Registration</h3>
+                <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Registration Content -->
+            <div class="space-y-4 sm:space-y-6">
+                <!-- League Information -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-blue-100 rounded-full p-2 mr-3">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-blue-900">{{ $league->name }}</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-blue-700">Season:</span>
+                            <span class="text-sm font-medium text-blue-900">{{ $league->season }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-blue-700">Registration Fee:</span>
+                            <span class="text-sm font-medium text-blue-900">₹{{ number_format($league->player_reg_fee ?? 0, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-blue-700">Game:</span>
+                            <span class="text-sm font-medium text-blue-900">{{ $league->game->name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Position Selection -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-purple-100 rounded-full p-2 mr-3">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-purple-900">Select Your Position</h4>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="position_id" class="block text-sm font-medium text-purple-700 mb-2">Game Position *</label>
+                            <select id="position_id" name="position_id" class="w-full border border-purple-300 rounded-lg px-3 py-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Select a position</option>
+                                @foreach($league->game->roles as $position)
+                                    <option value="{{ $position->id }}" {{ auth()->user()->position_id == $position->id ? 'selected' : '' }}>
+                                        {{ $position->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="text-sm text-purple-600">
+                            <p>Please select your preferred position for this league. This helps organizers assign you to appropriate teams.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Notice -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-yellow-900">Important Notice</h4>
+                            <p class="text-sm text-yellow-700 mt-1">Your registration request will be reviewed by the league organizers. You will be notified once your request is approved or rejected.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center gap-3 mt-6 pb-4">
+                <button onclick="submitRegistration()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Bid Increment Modal -->
 <div id="auctionRulesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
     <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-0">
@@ -514,6 +643,16 @@
 </div>
 
 <script>
+function openRegistrationModal() {
+    document.getElementById('registrationModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRegistrationModal() {
+    document.getElementById('registrationModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
 function openAuctionRulesModal() {
     document.getElementById('auctionRulesModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -636,7 +775,80 @@ function updateBidIncrements() {
 
 
 
+// Submit registration request
+function submitRegistration() {
+    // Get position value
+    const positionId = document.getElementById('position_id').value;
+    
+    // Validate position selection
+    if (!positionId) {
+        showNotification('Please select a position before submitting your registration request.', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[onclick="submitRegistration()"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = `
+        <svg class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Submitting...
+    `;
+    submitBtn.disabled = true;
+    
+    // Prepare data
+    const formData = {
+        position_id: positionId
+    };
+    
+    // Send AJAX request
+    fetch('{{ route("league-players.request-registration", $league) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            closeRegistrationModal();
+            // Reload page to reflect changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(data.message || 'Failed to submit registration request', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(error.message || 'Error submitting registration request. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
 // Close modal when clicking outside
+document.getElementById('registrationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeRegistrationModal();
+    }
+});
+
 document.getElementById('auctionRulesModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeAuctionRulesModal();
@@ -646,6 +858,7 @@ document.getElementById('auctionRulesModal').addEventListener('click', function(
 // Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+        closeRegistrationModal();
         closeAuctionRulesModal();
     }
 });

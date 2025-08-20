@@ -44,7 +44,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Current Team</label>
-                                <p class="text-gray-900">{{ $leaguePlayer->leagueTeam->team->name }}</p>
+                                <p class="text-gray-900">{{ $leaguePlayer->leagueTeam->team->name ?? 'No Team Assigned' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -56,11 +56,11 @@
                     <!-- Team Selection -->
                     <div>
                         <label for="league_team_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            League Team <span class="text-red-500">*</span>
+                            League Team
                         </label>
-                        <select name="league_team_id" id="league_team_id" required
+                        <select name="league_team_id" id="league_team_id"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('league_team_id') border-red-300 @enderror">
-                            <option value="">Select Team</option>
+                            <option value="">No Team Assigned (Available for Auction)</option>
                             @foreach($leagueTeams as $team)
                                 <option value="{{ $team->id }}" {{ old('league_team_id', $leaguePlayer->league_team_id) == $team->id ? 'selected' : '' }}>
                                     {{ $team->team->name }}
@@ -81,9 +81,6 @@
                                name="base_price" 
                                id="base_price" 
                                value="{{ old('base_price', $leaguePlayer->base_price) }}"
-                               min="0" 
-                               step="1000"
-                               required
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('base_price') border-red-300 @enderror"
                                placeholder="Enter base price">
                         @error('base_price')

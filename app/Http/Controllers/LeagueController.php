@@ -71,7 +71,7 @@ class LeagueController
      */
     public function show(League $league): View
     {
-        $league->load(['game', 'organizer', 'localBody.district']);
+        $league->load(['game.roles', 'organizer', 'localBody.district']);
         return view('leagues.show', compact('league'));
     }
 

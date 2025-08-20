@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function(){
     Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy');
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus');
+    Route::post('leagues/{league}/players/request-registration', [LeaguePlayerController::class, 'requestRegistration'])->name('league-players.request-registration');
     
     // Auction routes
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {

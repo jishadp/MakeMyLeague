@@ -240,7 +240,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($leaguePlayer->leagueTeam)
-                                            <div class="text-sm text-gray-900">{{ $leaguePlayer->leagueTeam->team->name }}</div>
+                                            <div class="text-sm text-gray-900">{{ $leaguePlayer->leagueTeam->team->name ?? 'No Team Assigned' }}</div>
                                         @else
                                             <div class="text-sm text-indigo-600 font-medium">Available for Auction</div>
                                         @endif
@@ -279,6 +279,24 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                        @if($leaguePlayer->status === 'pending')
+                                            <form action="{{ route('league-players.updateStatus', [$league, $leaguePlayer]) }}" 
+                                                  method="POST" class="inline" 
+                                                  onsubmit="return confirm('Approve this player?')">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="available">
+                                                <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
+                                            </form>
+                                            <form action="{{ route('league-players.updateStatus', [$league, $leaguePlayer]) }}" 
+                                                  method="POST" class="inline" 
+                                                  onsubmit="return confirm('Reject this player?')">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="unsold">
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('league-players.show', [$league, $leaguePlayer]) }}" 
                                            class="text-indigo-600 hover:text-indigo-900">View</a>
                                         <a href="{{ route('league-players.edit', [$league, $leaguePlayer]) }}" 

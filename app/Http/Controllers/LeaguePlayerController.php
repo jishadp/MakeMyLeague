@@ -230,7 +230,7 @@ class LeaguePlayerController extends Controller
      */
     public function show(League $league, LeaguePlayer $leaguePlayer): View
     {
-        $leaguePlayer->load(['leagueTeam.team', 'user', 'user.role']);
+        $leaguePlayer->load(['leagueTeam.team', 'user', 'user.position']);
 
         return view('league-players.show', compact('league', 'leaguePlayer'));
     }
@@ -328,7 +328,24 @@ class LeaguePlayerController extends Controller
                 $successMessage = 'Player status updated successfully!';
             }
         } else {
-            $successMessage = 'Player status updated successfully!';
+            // Set specific messages for status changes
+            if (isset($validatedData['status'])) {
+                switch ($validatedData['status']) {
+                    case 'available':
+                        $successMessage = 'Player approved successfully!';
+                        break;
+                    case 'unsold':
+                        $successMessage = 'Player rejected successfully!';
+                        break;
+                    case 'sold':
+                        $successMessage = 'Player marked as sold successfully!';
+                        break;
+                    default:
+                        $successMessage = 'Player status updated successfully!';
+                }
+            } else {
+                $successMessage = 'Player status updated successfully!';
+            }
         }
 
         $leaguePlayer->update($updates);
@@ -340,6 +357,13 @@ class LeaguePlayerController extends Controller
         if ($referer && $leagueTeam && strpos($referer, 'teams/' . $leagueTeam->slug) !== false) {
             return redirect()
                 ->route('league-teams.show', [$league, $leagueTeam])
+                ->with('success', $successMessage);
+        }
+        
+        // Check if the request is coming from the players index page
+        if ($referer && strpos($referer, '/players') !== false && strpos($referer, '/players/' . $leaguePlayer->slug) === false) {
+            return redirect()
+                ->route('league-players.index', $league)
                 ->with('success', $successMessage);
         }
         
@@ -409,5 +433,58 @@ class LeaguePlayerController extends Controller
 
         $count = count($request->player_ids);
         return back()->with('success', "{$count} players updated successfully!");
+    }
+
+    /**
+     * Handle player registration request for a league.
+     */
+    public function requestRegistration(Request $request, League $league)
+    {
+        // Check if user is authenticated and is a player
+        if (!auth()->check() || !auth()->user()->isPlayer()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only players can register for leagues.'
+            ], 403);
+        }
+
+        $user = auth()->user();
+
+        // Validate position selection
+        $request->validate([
+            'position_id' => 'required|exists:game_positions,id'
+        ]);
+
+        // Check if player is already registered in this league
+        $existingPlayer = LeaguePlayer::where('user_id', $user->id)
+            ->where('league_id', $league->id)
+            ->first();
+
+        if ($existingPlayer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are already registered in this league.'
+            ], 400);
+        }
+
+        // Update user's position if different from current
+        if ($user->position_id != $request->position_id) {
+            $user->update(['position_id' => $request->position_id]);
+        }
+
+        // Create the league player with pending status
+        LeaguePlayer::create([
+            'league_id' => $league->id,
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'base_price' => $league->player_reg_fee ?? 0,
+            'retention' => false,
+            'created_by' => $user->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration request submitted successfully! Please wait for approval from the organizers.'
+        ]);
     }
 }

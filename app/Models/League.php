@@ -281,7 +281,7 @@ class League extends Model
     {
         return $this->leaguePlayers()
             ->where('status', 'sold')
-            ->with(['user', 'user.role', 'leagueTeam.team']);
+            ->with(['user', 'user.position', 'leagueTeam.team']);
     }
 
     /**

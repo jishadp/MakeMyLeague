@@ -21,7 +21,7 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">{{ $leaguePlayer->user->name }}</h1>
-                        <p class="text-gray-600 mt-2">{{ $league->name }} - {{ $leaguePlayer->leagueTeam->team->name }}</p>
+                        <p class="text-gray-600 mt-2">{{ $league->name }} - {{ $leaguePlayer->leagueTeam->team->name ?? 'No Team Assigned' }}</p>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -66,7 +66,7 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Team</label>
-                            <p class="text-gray-900">{{ $leaguePlayer->leagueTeam->team->name }}</p>
+                            <p class="text-gray-900">{{ $leaguePlayer->leagueTeam->team->name ?? 'No Team Assigned' }}</p>
                         </div>
                         
                         <div>
@@ -128,7 +128,7 @@
                                         {{ $bid->auction->title ?? 'Auction #' . $bid->auction_id }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $bid->leagueTeam->team->name }}
+                                        {{ $bid->leagueTeam->team->name ?? 'Unknown Team' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         ₹{{ number_format($bid->amount) }}
@@ -157,6 +157,39 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div class="space-y-3">
+                        @if($leaguePlayer->status === 'pending')
+                        <form action="{{ route('league-players.updateStatus', [$league, $leaguePlayer]) }}" 
+                              method="POST" 
+                              onsubmit="return confirm('Are you sure you want to approve this player? This will change their status from pending to available.')">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="available">
+                            <button type="submit" 
+                                    class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Approve Player
+                            </button>
+                        </form>
+                        
+                        <form action="{{ route('league-players.updateStatus', [$league, $leaguePlayer]) }}" 
+                              method="POST" 
+                              onsubmit="return confirm('Are you sure you want to reject this player? This will change their status from pending to unsold.')">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="unsold">
+                            <button type="submit" 
+                                    class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Reject Player
+                            </button>
+                        </form>
+                        @endif
+                        
+                        
                         <a href="{{ route('league-players.edit', [$league, $leaguePlayer]) }}" 
                            class="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700">
                             Edit Player
@@ -169,7 +202,7 @@
                             @method('DELETE')
                             <button type="submit" 
                                     class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700">
-                                Remove from Team
+                                Remove from League
                             </button>
                         </form>
                         
