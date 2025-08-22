@@ -1,8 +1,6 @@
 var pusher = new Pusher('a1afbae37f05666fb5b6', { cluster: 'ap2' });
 var channel = pusher.subscribe('auctions');
 channel.bind('new-player-started', function(data) {
-    console.log(data);
-
     $('.playerName').html(data.player.name);
     $('.position').html(data.player.position.name);
     $('.basePrice,.currentBid').html(data.league_player.base_price);
@@ -21,8 +19,6 @@ channel.bind('new-player-started', function(data) {
 });
 
 channel.bind('new-player-bid-call', function(data) {
-    console.log(data);
-
     $('.currentBid').html(data.new_bid);
     $('.bidStatus').html('Current Bid');
     $('.callBid').attr('base-price',data.new_bid);

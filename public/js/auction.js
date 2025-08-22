@@ -73,36 +73,14 @@ $(document).ready(function(){
                 console.log("Bidding started and broadcasted:", response);
             }
         });
+    });
 
+    $('.markSold').click(function(){
+        $(".bidMain").addClass('hidden');
+        $(".availPlayers").removeClass('hidden');
+    });
+    $('.markUnSold').click(function(){
+        $(".bidMain").addClass('hidden');
+        $(".availPlayers").removeClass('hidden');
     });
 });
-
-// Simple function to view player details
-function viewPlayerDetails(playerId) {
-    showMessage('Player details for ID: ' + playerId + ' - Feature coming soon!', 'info');
-}
-
-// Show message
-function showMessage(message, type = 'info') {
-    const messageContainer = document.getElementById('messageContainer');
-    if (!messageContainer) return;
-
-    const messageElement = document.createElement('div');
-    messageElement.className = `px-4 py-2 rounded-lg shadow-lg mb-2 transition-all duration-300 ${type === 'success' ? 'bg-green-500 text-white' :
-            type === 'error' ? 'bg-red-500 text-white' :
-                'bg-blue-500 text-white'
-        }`;
-    messageElement.textContent = message;
-
-    messageContainer.appendChild(messageElement);
-
-    // Remove message after 3 seconds
-    setTimeout(() => {
-        messageElement.style.opacity = '0';
-        setTimeout(() => {
-            if (messageElement.parentNode) {
-                messageElement.parentNode.removeChild(messageElement);
-            }
-        }, 300);
-    }, 3000);
-}

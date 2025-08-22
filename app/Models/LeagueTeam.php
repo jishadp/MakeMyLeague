@@ -64,23 +64,23 @@ class LeagueTeam extends Model
         if (!$this->relationLoaded('team')) {
             $this->load('team');
         }
-        
+
         $league = $this->league;
         $team = $this->team;
-        
+
         if (!$league || !$team) {
             // Fallback: load by IDs if relationships still aren't available
             $league = \App\Models\League::find($this->league_id);
             $team = \App\Models\Team::find($this->team_id);
         }
-        
+
         if (!$league || !$team) {
             // Final fallback slug if relationships aren't available
             $slug = 'league-team-' . ($this->id ?? uniqid());
         } else {
             $slug = Str::slug($league->name . '-' . $team->name);
         }
-        
+
         $count = static::where('league_id', $this->league_id)
                       ->whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
                       ->where('id', '!=', $this->id ?? 0)
@@ -167,9 +167,9 @@ class LeagueTeam extends Model
     {
         return $query->where('status', 'pending');
     }
-    
 
-    
+
+
     /**
      * Get the auction bids for this league team.
      */
@@ -177,7 +177,7 @@ class LeagueTeam extends Model
     {
         return $this->hasMany(\App\Models\Auction::class);
     }
-    
+
     /**
      * Get the user who created this league team.
      */

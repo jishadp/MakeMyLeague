@@ -19,23 +19,6 @@
         </div>
 
         <div class="p-4 sm:p-6">
-            <!-- Design Toggle -->
-            <div class="mb-6 flex justify-center hidden sm:block">
-                <div class="bg-gray-100 rounded-lg p-1 flex">
-                    <button id="cardViewBtn" class="px-4 py-2 rounded-md text-sm font-medium bg-white text-gray-900 shadow-sm transition-all duration-200 flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                        </svg>
-                        <span class="hidden sm:inline">Card View</span>
-                    </button>
-                    <button id="listViewBtn" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all duration-200 flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                        </svg>
-                        <span class="hidden sm:inline">List View</span>
-                    </button>
-                </div>
-            </div>
 
             <!-- Search and Filter Bar -->
             <div class="mb-6 hidden sm:block">
@@ -79,9 +62,6 @@
                                          alt="{{$leaguePlayer->player->name}}"
                                          class="w-full h-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="display: none;">
-                                        VK
-                                    </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-semibold text-gray-900 text-lg truncate">{{$leaguePlayer->player->name}}</h3>
