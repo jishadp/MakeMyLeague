@@ -134,7 +134,7 @@
     @endif
 
     <!-- Open Leagues Section -->
-    @if(auth()->user()->isPlayer())
+    @if(auth()->user()->isPlayer() || auth()->user()->isOwner())
     <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-2">

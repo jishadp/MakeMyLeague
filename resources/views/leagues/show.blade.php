@@ -193,10 +193,9 @@
                         </div>
                     </div>
                 </div>
-                @if(auth()->user()->isOrganizer())
+                @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                 <!-- Quick Actions -->
                 <div class="mb-8 sm:mb-12">
-                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">Quick Actions</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         <a href="{{ route('league-teams.index', $league) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
                             <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

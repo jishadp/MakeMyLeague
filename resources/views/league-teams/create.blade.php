@@ -42,6 +42,7 @@
                     @endif
                 </div>
 
+                @if(auth()->user()->isOrganizer())
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
                         Status <span class="text-red-500">*</span>
@@ -55,7 +56,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-
+                @endif
                 <div>
                     <label for="wallet_balance" class="block text-sm font-medium text-gray-700 mb-2">
                         Max Team Wallet Limit

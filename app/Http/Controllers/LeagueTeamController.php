@@ -44,17 +44,20 @@ class LeagueTeamController extends Controller
     {
         $request->validate([
             'team_id' => 'required|exists:teams,id|unique:league_teams,team_id,NULL,id,league_id,' . $league->id,
-            'status' => 'required|in:pending,available',
             'wallet_balance' => 'nullable|numeric|min:0|max:' . $league->team_wallet_limit,
         ]);
-
-        LeagueTeam::create([
+        $input = [
             'league_id' => $league->id,
             'team_id' => $request->team_id,
-            'status' => $request->status,
             'wallet_balance' => $request->wallet_balance ?? $league->team_wallet_limit,
             'created_by' => auth()->id(),
-        ]);
+        ];
+        if(auth()->user()->isOrganizer()){
+            $input['status'] = $request->status;
+        }
+        
+
+        LeagueTeam::create($input);
 
         return redirect()
             ->route('league-teams.index', $league)
