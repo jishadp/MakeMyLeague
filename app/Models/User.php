@@ -126,20 +126,15 @@ class User extends Authenticatable
      */
     public function isOrganizer(): bool
     {
-        return $this->id === 1;
+        return $this->roles->contains('role_id',1);
     }
     public function isOwner(): bool
     {
-        return $this->roles()->where('name', 'Owner')->exists();
+        return $this->roles->contains('role_id',2);
     }
     public function isPlayer(): bool
     {
-         return $this->roles()->where('name', 'Player')->exists();
-    }
-    
-    public function isOrganiser(): bool
-    {
-        return $this->roles()->where('name', 'Organiser')->exists();
+         return $this->roles->contains('role_id',3);
     }
     
     /**
@@ -174,21 +169,5 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
-    }
-    
-    /**
-     * Check if the user has a specific role.
-     */
-    public function hasRole($roleName): bool
-    {
-        return $this->roles()->where('name', $roleName)->exists();
-    }
-    
-    /**
-     * Check if the user has any of the specified roles.
-     */
-    public function hasAnyRole($roleNames): bool
-    {
-        return $this->roles()->whereIn('name', (array) $roleNames)->exists();
     }
 }

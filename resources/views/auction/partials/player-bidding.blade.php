@@ -1,5 +1,5 @@
 <!-- Player Bidding Section - Laravel Blade Partial -->
-<div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+<div class="bidMain w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 hidden">
     
     <!-- Header Card -->
     <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">

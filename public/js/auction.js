@@ -1,38 +1,4 @@
 // Minimal Auction JavaScript - Static Demo Version
-
-// Initialize page when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initializeViewToggle();
-});
-
-// Initialize view toggle functionality
-function initializeViewToggle() {
-    const cardViewBtn = document.getElementById('cardViewBtn');
-    const listViewBtn = document.getElementById('listViewBtn');
-    const cardView = document.getElementById('cardView');
-    const listView = document.getElementById('listView');
-
-    if (cardViewBtn && listViewBtn) {
-        cardViewBtn.addEventListener('click', () => {
-            cardView.classList.remove('hidden');
-            listView.classList.add('hidden');
-            cardViewBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-            cardViewBtn.classList.remove('text-gray-600');
-            listViewBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-            listViewBtn.classList.add('text-gray-600');
-        });
-
-        listViewBtn.addEventListener('click', () => {
-            listView.classList.remove('hidden');
-            cardView.classList.add('hidden');
-            listViewBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-            listViewBtn.classList.remove('text-gray-600');
-            cardViewBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-            cardViewBtn.classList.add('text-gray-600');
-        });
-    }
-}
-
 // Simple function to start bidding and show bidding section
 function startBidding(playerId, playerName, basePrice, playerRole) {
     // Show the bidding section
