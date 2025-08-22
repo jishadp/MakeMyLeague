@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AuctionPlayerBidCall;
+use App\Events\LeagueAuctionStarted;
+use App\Events\LeaguePlayerAuctionStarted;
 use App\Models\Auction;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -18,24 +22,54 @@ class AuctionController extends Controller
     public function index(League $league)
     {
         $leaguePlayers = LeaguePlayer::where('league_id',$league->id)->get();
-        return view('auction.index',compact('leaguePlayers'));
+        return view('auction.index',compact('leaguePlayers','league'));
     }
 
     /**
      * Start the auction.
      */
-    public function startAuction(Request $request, League $league)
+    public function start(Request $request)
     {
-        // Check if user is the league organizer
-        if ($league->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Only the league organizer can start the auction'], 403);
-        }
-
-        $league->startAuction();
+        LeaguePlayerAuctionStarted::dispatch($request->all());
+        $league = League::find($request->league_id);
+        $league->update([
+            'status'    => 'active'
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Auction started successfully!',
+            'auction_status' => 'active'
+        ]);
+    }
+    /**
+     * Call Bid auction.
+     */
+    public function call(Request $request)
+    {
+        $newBid =  $request->base_price + $request->increment;
+        $bidTeam = LeagueTeam::where('league_id',$request->league_id)->whereHas('team',function($query){
+            $query->where('owner_id',auth()->user()->id);
+        })->first();
+
+        $bidTeam->decrement('wallet_balance',$newBid);
+        if(Auction::where('league_player_id',$request->league_player_id)->count() != 0){
+            info($request->league_player_id);
+            $previousBid = Auction::where('league_player_id',$request->league_player_id)->latest('id')->first();
+            LeagueTeam::find($previousBid->league_team_id)->increment('wallet_balance',$previousBid->amount);
+        }
+
+        AuctionPlayerBidCall::dispatch($newBid,$bidTeam->id);
+
+        Auction::create([
+            'league_player_id'  => $request->league_player_id,
+            'league_team_id'  => $bidTeam->id,
+            'amount'    => $newBid
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction bid call success',
             'auction_status' => 'active'
         ]);
     }
@@ -313,7 +347,7 @@ class AuctionController extends Controller
     public function getAuctionStats(League $league)
     {
         $stats = $league->getAuctionStats();
-        
+
         return response()->json($stats);
     }
 }

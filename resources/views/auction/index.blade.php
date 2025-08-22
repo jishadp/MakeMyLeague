@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Auction Statistics -->
             <div class="px-4 py-4 sm:px-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-blue-100 rounded-full p-2 mr-3">
@@ -49,7 +49,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-purple-100 rounded-full p-2 mr-3">
@@ -63,7 +63,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-yellow-100 rounded-full p-2 mr-3">
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Progress Bar -->
                 <div class="mt-4">
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
@@ -93,20 +93,22 @@
         </div>
 
         <!-- Available Players Section -->
+        @if(auth()->user()->isOrganizer())
         <div class="mb-8" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>
-            
+        @endif
+
         <!-- Player Bidding Section -->
         <div class="flex justify-center mb-8" id="biddingSection">
             <div class="w-full max-w-2xl">
                 @include('auction.partials.player-bidding')
             </div>
         </div>
-            
+
         <!-- Recent and Highest Bids Table -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            
+
             <!-- Highest Bids -->
             <div class="glacier-card">
                 <div class="px-4 py-4 sm:px-6 border-b glacier-border">
@@ -133,8 +135,8 @@
                                     <td class="py-3 px-4">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                                     alt="Virat Kohli" 
+                                                <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                                     alt="Virat Kohli"
                                                      class="w-full h-full object-cover">
                                             </div>
                                             <div>
@@ -157,8 +159,8 @@
                                     <td class="py-3 px-4">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                                     alt="Rohit Sharma" 
+                                                <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                                     alt="Rohit Sharma"
                                                      class="w-full h-full object-cover">
                                             </div>
                                             <div>
@@ -236,5 +238,11 @@
 @endsection
 
 @section('scripts')
+<script
+  src="https://code.jquery.com/jquery-3.7.1.js"
+  integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+  crossorigin="anonymous"></script>
 <script src="{{ asset('js/auction.js') }}"></script>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script src="{{ asset('js/pusher-main.js') }}"></script>
 @endsection

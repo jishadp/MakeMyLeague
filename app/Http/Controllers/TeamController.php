@@ -23,17 +23,17 @@ class TeamController extends Controller
     {
         $query = Team::query()
             ->with(['owner', 'homeGround', 'localBody']);
-        
+
         // Filter by local body
         if ($request->has('local_body_id') && $request->local_body_id != '') {
             $query->where('local_body_id', $request->local_body_id);
         }
-        
+
         // Filter by home ground
         if ($request->has('home_ground_id') && $request->home_ground_id != '') {
             $query->where('home_ground_id', $request->home_ground_id);
         }
-        
+
         // Sort by name
         if ($request->has('sort_by') && $request->sort_by != '') {
             $sortDirection = $request->has('sort_dir') && $request->sort_dir == 'desc' ? 'desc' : 'asc';
@@ -41,12 +41,12 @@ class TeamController extends Controller
         } else {
             $query->orderBy('name', 'asc');
         }
-        
+
         $teams = $query->paginate(12)->withQueryString();
-        
+
         // Get all local bodies for filtering
         $localBodies = LocalBody::orderBy('name')->get();
-        
+
         return view('teams.index', compact('teams', 'localBodies'));
     }
 
@@ -85,21 +85,26 @@ class TeamController extends Controller
         // Check if there's a league context and add team to league
         if ($request->has('league_slug')) {
             $league = League::where('slug', $request->league_slug)->firstOrFail();
-            
+
             // Check if team is not already in this league
             $existingTeam = LeagueTeam::where('team_id', $team->id)
                 ->where('league_id', $league->id)
                 ->first();
-                
+
             if (!$existingTeam) {
-                LeagueTeam::create([
+                $input = [
                     'team_id' => $team->id,
                     'league_id' => $league->id,
-                    'status' => 'available',
                     'wallet_balance' => $league->team_wallet_limit,
                     'created_by' => Auth::id(),
-                ]);
-                
+                ];
+
+                if(auth()->user()->isOrganizer()){
+                    $input['status'] = 'available';
+                }
+
+                LeagueTeam::create($input);
+
                 return redirect()->route('league-teams.index', $league)
                     ->with('success', 'Team created and added to league successfully!');
             }

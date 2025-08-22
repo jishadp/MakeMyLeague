@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LeagueAuctionStarted;
 use App\Events\PlayerViewedBroadcastEvent;
 use App\Models\Game;
 use App\Models\Ground;
@@ -181,7 +182,7 @@ class LeagueController
     {
         $player_id = $request->player_id;
         $player = LeaguePlayer::find($player_id);
-        PlayerViewedBroadcastEvent::dispatch($player);
+
         return response()->json(['status' => 'success', 'data' => $player]);
     }
 }

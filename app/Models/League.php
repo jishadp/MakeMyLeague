@@ -152,7 +152,7 @@ class League extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     /**
      * Get the local body that the league is located in.
      */
@@ -160,7 +160,7 @@ class League extends Model
     {
         return $this->belongsTo(LocalBody::class, 'localbody_id');
     }
-    
+
     /**
      * Get the ground that hosts this league.
      */
@@ -176,7 +176,7 @@ class League extends Model
     {
         return $this->hasMany(LeagueTeam::class);
     }
-    
+
     /**
      * Get the league players for this league.
      */
@@ -219,39 +219,6 @@ class League extends Model
         }
 
         return $currentBid + 50; // Default increment
-    }
-
-    /**
-     * Start the auction.
-     */
-    public function startAuction()
-    {
-        $this->update([
-            'auction_active' => true,
-            'auction_started_at' => now(),
-            'auction_ended_at' => null,
-        ]);
-    }
-
-    /**
-     * Pause the auction.
-     */
-    public function pauseAuction()
-    {
-        $this->update([
-            'auction_active' => false,
-        ]);
-    }
-
-    /**
-     * End the auction.
-     */
-    public function endAuction()
-    {
-        $this->update([
-            'auction_active' => false,
-            'auction_ended_at' => now(),
-        ]);
     }
 
     /**

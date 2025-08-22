@@ -1,5 +1,5 @@
 <!-- Available Players Section -->
-<div class="lg:col-span-2">
+<div class="lg:col-span-2 availPlayers">
     <div class="glass-card">
         <!-- Header Section -->
         <div class="px-4 py-4 sm:px-6 border-b border-gray-200/30">
@@ -41,7 +41,7 @@
             <div class="mb-6 hidden sm:block">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1">
-                        <input type="text" id="playerSearch" placeholder="Search players by name, mobile, or role..." 
+                        <input type="text" id="playerSearch" placeholder="Search players by name, mobile, or role..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent glass-input">
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2">
@@ -69,20 +69,14 @@
                     <!-- Static Dummy Players -->
                     <!-- Player 1 -->
                      @foreach($leaguePlayers as $leaguePlayer)
-                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group" 
-                         data-player-id="1"
-                         data-player-name="{{$leaguePlayer->player->name}}"
-                         data-base-price="{{$leaguePlayer->base_price}}"
-                         data-league-player-id="{{$leaguePlayer->id}}"
-                         data-player-role="{{$leaguePlayer->player->position->name}}"
-                         data-player-mobile="{{ $leaguePlayer->player->mobile}}">
-                        
+                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group">
+
                         <!-- Player Header -->
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center space-x-3">
                                 <div class="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                         alt="{{$leaguePlayer->player->name}}" 
+                                    <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                         alt="{{$leaguePlayer->player->name}}"
                                          class="w-full h-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="w-full h-full flex items-center justify-center text-white font-bold text-lg" style="display: none;">
@@ -123,8 +117,14 @@
 
                         <!-- Action Buttons -->
                         <div class="flex space-x-2">
-                            <button onclick="startBidding({{$leaguePlayer->id}}, {{$leaguePlayer->player->name}}, {{$leaguePlayer->base_price}}, {{$leaguePlayer->player->position->name}})"
-                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center group-hover:shadow-md">
+                            <button player-id="{{$leaguePlayer->user_id}}"
+                                league-player-id="{{$leaguePlayer->id}}"
+                                player-name="{{$leaguePlayer->player->name}}"
+                                base-price="{{$leaguePlayer->base_price}}"
+                                position="{{$leaguePlayer->player->position->name}}"
+                                league-id="{{ $league->id}}"
+                                start-bid-action="{{ route('auction.start')}}"
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center startAuction justify-center group-hover:shadow-md">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                 </svg>

@@ -91,7 +91,7 @@ class User extends Authenticatable
     {
         return 'slug';
     }
-    
+
     /**
      * Get the game role of the user.
      */
@@ -99,7 +99,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(GamePosition::class, 'position_id');
     }
-    
+
     /**
      * Get the local body of the user.
      */
@@ -107,7 +107,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(LocalBody::class, 'local_body_id');
     }
-    
+
     /**
      * Scope a query to only include players.
      *
@@ -118,7 +118,7 @@ class User extends Authenticatable
     {
         return $query->whereNotNull('position_id');
     }
-    
+
     /**
      * Check if the user is an admin.
      *
@@ -136,15 +136,15 @@ class User extends Authenticatable
     {
          return $this->roles->contains('role_id',3);
     }
-    
+
     /**
      * Get the auction bids where this user is the player.
      */
-    public function auctions(): HasMany
+    public function auctions(): hasManyThrough
     {
         return $this->hasManyThrough(Auction::class, LeaguePlayer::class, 'user_id', 'league_player_id');
     }
-    
+
     /**
      * Get the league players for this user.
      */
@@ -152,7 +152,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(LeaguePlayer::class);
     }
-    
+
     /**
      * Get the teams owned by this user.
      */
@@ -166,8 +166,8 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles(): HasManyThrough
+    public function roles(): hasMany
     {
-        return $this->hasManyThrough(UserRole::class,Role::class,'id','user_id');
+        return $this->hasMany(UserRole::class);
     }
 }

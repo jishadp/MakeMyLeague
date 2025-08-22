@@ -2,24 +2,31 @@
 
 namespace App\Events;
 
+use App\Models\League;
+use App\Models\LeaguePlayer;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PlayerViewedBroadcastEvent implements ShouldBroadcast
+class LeaguePlayerAuctionStarted implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $player; 
+    public $player;
+    public $league;
+    public $leaguePlayer;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($player)
+    public function __construct($request)
     {
-        $this->player = $player;
+        $this->player = User::with('position')->find($request['player_id']);
+        $this->league = League::find($request['league_id']);
+        $this->leaguePlayer = LeaguePlayer::find($request['league_player_id']);
     }
 
     /**
@@ -27,7 +34,7 @@ class PlayerViewedBroadcastEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('order'); 
+        return new Channel('auctions');
     }
 
     /**
@@ -35,7 +42,7 @@ class PlayerViewedBroadcastEvent implements ShouldBroadcast
      */
     public function broadcastAs()
     {
-        return 'player-binding'; 
+        return 'new-player-started';
     }
 
     /**
@@ -45,7 +52,8 @@ class PlayerViewedBroadcastEvent implements ShouldBroadcast
     {
          return [
             'player' => $this->player,
-            'message' => "Player  was viewed",
+            'league' => $this->league,
+            'league_player' => $this->leaguePlayer
         ];
     }
 }
