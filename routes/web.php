@@ -20,26 +20,26 @@ Route::get('/', function () {
         ->orderBy('capacity', 'desc')
         ->take(3)
         ->get();
-    
+
     // Get 3 featured teams for the landing page
     $featuredTeams = \App\Models\Team::with(['homeGround', 'localBody'])
         ->take(3)
         ->get();
 
-    
+
     return view('welcome', compact('featuredGrounds', 'featuredTeams'));
 });
 
-Route::get('login',[LoginController::class,'login'])->name('login');
-Route::post('do-login',[LoginController::class,'doLogin'])->name('do.login');
-Route::get('logout',[LoginController::class,'logout'])->name('logout');
+Route::get('login', [LoginController::class, 'login'])->name('login');
+Route::post('do-login', [LoginController::class, 'doLogin'])->name('do.login');
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Registration routes
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register'])->name('do.register');
 
 // Role selection routes
-Route::middleware('auth')->group(function(){
+Route::middleware('auth')->group(function () {
     Route::get('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'show'])->name('role-selection.show');
     Route::post('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'store'])->name('role-selection.store');
 });
@@ -66,15 +66,16 @@ Route::get('players/{player}/edit', [PlayerController::class, 'edit'])->name('pl
 Route::put('players/{player}', [PlayerController::class, 'update'])->name('players.update')->middleware('auth');
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
 
-Route::middleware('auth')->group(function(){
-    Route::get('dashboard',[DashboardController::class,'view'])->name('dashboard')->middleware('has.role');
-    Route::get('dashboard/auctions',[DashboardController::class,'auctionsIndex'])->name('auctions.index')->middleware('has.role');
-    
+Route::middleware('auth')->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');
+    Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index')->middleware('has.role');
+
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
+    Route::get('leagues/player/broadcast', [LeagueController::class, 'playerBroadcast'])->name('leagues.player.broadcast');
     Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault');
     Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments');
-    
+
     // League Teams routes
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show']);
     Route::get('leagues/{league}/teams', [LeagueTeamController::class, 'index'])->name('league-teams.index');
@@ -86,7 +87,7 @@ Route::middleware('auth')->group(function(){
     Route::delete('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'destroy'])->name('league-teams.destroy');
     Route::patch('leagues/{league}/teams/{leagueTeam}/status', [LeagueTeamController::class, 'updateStatus'])->name('league-teams.updateStatus');
     Route::patch('leagues/{league}/teams/{leagueTeam}/wallet', [LeagueTeamController::class, 'updateWallet'])->name('league-teams.updateWallet');
-    
+
     // League Players routes
     Route::get('leagues/{league}/players', [LeaguePlayerController::class, 'index'])->name('league-players.index');
     Route::get('leagues/{league}/players/create', [LeaguePlayerController::class, 'create'])->name('league-players.create');
@@ -101,7 +102,7 @@ Route::middleware('auth')->group(function(){
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus');
     Route::post('leagues/{league}/players/request-registration', [LeaguePlayerController::class, 'requestRegistration'])->name('league-players.request-registration');
-    
+
     // Auction routes
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index');
@@ -109,7 +110,7 @@ Route::middleware('auth')->group(function(){
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
         Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
-        
+
         // Organizer control routes
         Route::post('start', [AuctionController::class, 'startAuction'])->name('start');
         Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
@@ -118,5 +119,3 @@ Route::middleware('auth')->group(function(){
         Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
     });
 });
-
-
