@@ -166,8 +166,8 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles(): BelongsToMany
+    public function roles(): HasManyThrough
     {
-        return $this->belongsToMany(Role::class, 'user_roles');
+        return $this->hasManyThrough(UserRole::class,Role::class,'id','user_id');
     }
 }
