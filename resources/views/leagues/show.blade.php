@@ -513,15 +513,23 @@
 
             <!-- Registration Content -->
             <div class="space-y-4 sm:space-y-6">
-                <!-- League Information -->
+                <!-- League Information with Submit Button -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-center mb-3">
-                        <div class="bg-blue-100 rounded-full p-2 mr-3">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-900">{{ $league->name }}</h4>
                         </div>
-                        <h4 class="text-lg font-semibold text-blue-900">{{ $league->name }}</h4>
+                        <button onclick="submitRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Request
+                        </button>
                     </div>
                     <div class="space-y-2">
                         <div class="flex justify-between">
@@ -583,15 +591,7 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex justify-center gap-3 mt-6 pb-4">
-                <button onclick="submitRegistration()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
-                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Submit Request
-                </button>
-            </div>
+
         </div>
     </div>
 </div>
