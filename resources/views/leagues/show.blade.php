@@ -195,39 +195,122 @@
                 </div>
                 @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                 <!-- Quick Actions -->
-                <div class="mb-8 sm:mb-12">
-                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        <a href="{{ route('league-teams.index', $league) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">League Teams</span>
-                        </a>
-
-                        <a href="{{ route('league-players.index', $league) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">League Players</span>
-                        </a>
-
-                        <a href="{{ route('auction.index', $league->slug) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">Auction</span>
-                        </a>
-
-                        <button onclick="openAuctionRulesModal()" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors shadow-sm cursor-pointer">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">Auction Rules</span>
-                        </button>
-                    </div>
+<div class="mb-8 sm:mb-12">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Teams Card -->
+        <a href="{{ route('league-teams.index', $league) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-indigo-50 via-indigo-50 to-indigo-100 text-indigo-700 rounded-xl hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-indigo-100 hover:border-indigo-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-600 rounded-full transform translate-x-8 -translate-y-8"></div>
+                <div class="absolute bottom-0 left-0 w-12 h-12 bg-indigo-400 rounded-full transform -translate-x-6 translate-y-6"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-6">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-indigo-800 mb-1">Teams</h3>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="text-xs text-indigo-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        {{ $leagueTeamsCount }} {{ Str::plural('Team', $leagueTeamsCount) }}
+                    </span>
                 </div>
-                @endif
+            </div>
+        </a>
 
+        <!-- Players Card -->
+        <a href="{{ route('league-players.index', $league) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 via-green-50 to-green-100 text-green-700 rounded-xl hover:from-green-100 hover:to-green-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-green-100 hover:border-green-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-0 left-0 w-14 h-14 bg-green-600 rounded-full transform -translate-x-7 -translate-y-7"></div>
+                <div class="absolute bottom-0 right-0 w-10 h-10 bg-green-400 rounded-full transform translate-x-5 translate-y-5"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-6">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">Players</h3>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="text-xs text-green-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        {{ $leaguePlayersCount }} {{ Str::plural('Player', $leaguePlayersCount) }}
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Auction Card -->
+        <a href="{{ route('auction.index', $league->slug) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-2 right-2 w-12 h-12 bg-amber-600 rounded-full transform translate-x-6 -translate-y-6"></div>
+                <div class="absolute bottom-2 left-2 w-8 h-8 bg-orange-400 rounded-full transform -translate-x-4 translate-y-4"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-amber-800 mb-1">Auction</h3>
+                <div class="flex items-center justify-center">
+                    <span class="text-xs text-amber-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        Live Bidding
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Auction Rules Card -->
+        <button onclick="openAuctionRulesModal()" 
+                class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 text-purple-700 rounded-xl hover:from-purple-100 hover:to-violet-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-purple-100 hover:border-purple-200 cursor-pointer overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-1 left-1 w-16 h-16 bg-purple-600 rounded-full transform -translate-x-8 -translate-y-8"></div>
+                <div class="absolute bottom-1 right-1 w-10 h-10 bg-violet-400 rounded-full transform translate-x-5 translate-y-5"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-12">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-purple-800 mb-1">Rules</h3>
+                <div class="flex items-center justify-center">
+                    <span class="text-xs text-purple-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        Guidelines
+                    </span>
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+@endif
                 <!-- League Summary -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
                     <!-- Card -->

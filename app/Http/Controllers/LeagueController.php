@@ -69,7 +69,12 @@ class LeagueController
     public function show(League $league): View
     {
         $league->with(['game.roles', 'organizer', 'localBody.district']);
-        return view('leagues.show', compact('league'));
+        
+        // Get counts for organizer role
+        $leagueTeamsCount = $league->leagueTeams()->count();
+        $leaguePlayersCount = $league->leaguePlayers()->count();
+        
+        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount'));
     }
 
     /**
