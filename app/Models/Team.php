@@ -18,15 +18,7 @@ class Team extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'slug',
-        'owner_id',
-        'logo',
-        'home_ground_id',
-        'local_body_id',
-        'created_by',
-    ];
+    protected $guarded = [];
     
     /**
      * The "booted" method of the model.

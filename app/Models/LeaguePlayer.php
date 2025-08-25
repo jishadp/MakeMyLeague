@@ -17,17 +17,7 @@ class LeaguePlayer extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'league_id',
-        'league_team_id',
-        'user_id',
-        'slug',
-        'retention',
-        'status',
-        'base_price',
-        'bid_price',
-        'created_by',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

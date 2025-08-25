@@ -17,14 +17,7 @@ class LeagueTeam extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'league_id',
-        'team_id',
-        'slug',
-        'status',
-        'wallet_balance',
-        'created_by',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

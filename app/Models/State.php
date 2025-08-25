@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class State extends Model
 {
-    protected $fillable = ['name'];
+    protected $guarded = [];
 
     /**
      * Get all districts for the state.
