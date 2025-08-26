@@ -15,12 +15,7 @@ class Game extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'description',
-        'image',
-        'active',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

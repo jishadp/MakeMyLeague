@@ -70,6 +70,15 @@
                                 Edit
                             </a>
                             @endif
+                            @if(auth()->user()->isOwner())
+                            <button onclick="openOwnershipModal()"
+                               class="inline-flex items-center justify-center px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg shadow-sm hover:bg-purple-700 transition-colors text-center text-sm">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                Ownership
+                            </button>
+                            @endif
                             
                             @if(auth()->user()->isPlayer())
                             <div class="flex gap-3">
@@ -122,6 +131,15 @@
                                     </svg>
                                     Edit League
                                 </a>
+                                @endif
+                                @if(auth()->user()->isOwner())
+                                <button onclick="openOwnershipModal()"
+                                   class="inline-flex items-center justify-center px-6 py-2.5 bg-purple-600 text-white font-medium rounded-lg shadow-sm hover:bg-purple-700 transition-colors text-base">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                    Ownership
+                                </button>
                                 @endif
                                 <a href="{{ route('leagues.index') }}"
                                    class="inline-flex items-center justify-center px-6 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-base">
@@ -195,39 +213,122 @@
                 </div>
                 @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                 <!-- Quick Actions -->
-                <div class="mb-8 sm:mb-12">
-                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        <a href="{{ route('league-teams.index', $league) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">League Teams</span>
-                        </a>
-
-                        <a href="{{ route('league-players.index', $league) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">League Players</span>
-                        </a>
-
-                        <a href="{{ route('auction.index', $league->slug) }}" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors shadow-sm">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">Auction</span>
-                        </a>
-
-                        <button onclick="openAuctionRulesModal()" class="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors shadow-sm cursor-pointer">
-                            <svg class="w-5 h-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-xs sm:text-sm font-medium">Auction Rules</span>
-                        </button>
-                    </div>
+<div class="mb-8 sm:mb-12">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Teams Card -->
+        <a href="{{ route('league-teams.index', $league) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-indigo-50 via-indigo-50 to-indigo-100 text-indigo-700 rounded-xl hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-indigo-100 hover:border-indigo-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-600 rounded-full transform translate-x-8 -translate-y-8"></div>
+                <div class="absolute bottom-0 left-0 w-12 h-12 bg-indigo-400 rounded-full transform -translate-x-6 translate-y-6"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-6">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-indigo-800 mb-1">Teams</h3>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="text-xs text-indigo-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        {{ $leagueTeamsCount }} {{ Str::plural('Team', $leagueTeamsCount) }}
+                    </span>
                 </div>
-                @endif
+            </div>
+        </a>
 
+        <!-- Players Card -->
+        <a href="{{ route('league-players.index', $league) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 via-green-50 to-green-100 text-green-700 rounded-xl hover:from-green-100 hover:to-green-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-green-100 hover:border-green-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-0 left-0 w-14 h-14 bg-green-600 rounded-full transform -translate-x-7 -translate-y-7"></div>
+                <div class="absolute bottom-0 right-0 w-10 h-10 bg-green-400 rounded-full transform translate-x-5 translate-y-5"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-6">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">Players</h3>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="text-xs text-green-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        {{ $leaguePlayersCount }} {{ Str::plural('Player', $leaguePlayersCount) }}
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Auction Card -->
+        <a href="{{ route('auction.index', $league->slug) }}" 
+           class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-2 right-2 w-12 h-12 bg-amber-600 rounded-full transform translate-x-6 -translate-y-6"></div>
+                <div class="absolute bottom-2 left-2 w-8 h-8 bg-orange-400 rounded-full transform -translate-x-4 translate-y-4"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-amber-800 mb-1">Auction</h3>
+                <div class="flex items-center justify-center">
+                    <span class="text-xs text-amber-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        Live Bidding
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Auction Rules Card -->
+        <button onclick="openAuctionRulesModal()" 
+                class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 text-purple-700 rounded-xl hover:from-purple-100 hover:to-violet-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-purple-100 hover:border-purple-200 cursor-pointer overflow-hidden">
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-1 left-1 w-16 h-16 bg-purple-600 rounded-full transform -translate-x-8 -translate-y-8"></div>
+                <div class="absolute bottom-1 right-1 w-10 h-10 bg-violet-400 rounded-full transform translate-x-5 translate-y-5"></div>
+            </div>
+            
+            <!-- Icon Container -->
+            <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-12">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <h3 class="text-sm sm:text-base font-semibold text-purple-800 mb-1">Rules</h3>
+                <div class="flex items-center justify-center">
+                    <span class="text-xs text-purple-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                        Guidelines
+                    </span>
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+@endif
                 <!-- League Summary -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
                     <!-- Card -->
@@ -412,15 +513,23 @@
 
             <!-- Registration Content -->
             <div class="space-y-4 sm:space-y-6">
-                <!-- League Information -->
+                <!-- League Information with Submit Button -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-center mb-3">
-                        <div class="bg-blue-100 rounded-full p-2 mr-3">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-900">{{ $league->name }}</h4>
                         </div>
-                        <h4 class="text-lg font-semibold text-blue-900">{{ $league->name }}</h4>
+                        <button onclick="submitRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Request
+                        </button>
                     </div>
                     <div class="space-y-2">
                         <div class="flex justify-between">
@@ -482,14 +591,197 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex justify-center gap-3 mt-6 pb-4">
-                <button onclick="submitRegistration()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
-                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+
+        </div>
+    </div>
+</div>
+
+<!-- Ownership Modal -->
+<div id="ownershipModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-4xl shadow-lg rounded-lg bg-white mb-20 sm:mb-0">
+        <div class="mt-3">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Team Ownership Request</h3>
+                <button onclick="closeOwnershipModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                    Submit Request
                 </button>
+            </div>
+
+            <!-- Ownership Content -->
+            <div class="space-y-6">
+                <!-- League Information -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-purple-100 rounded-full p-2 mr-3">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-purple-900">{{ $league->name }} - Team Ownership</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-purple-700">Season:</span>
+                            <span class="text-sm font-medium text-purple-900">{{ $league->season }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-purple-700">Available Teams:</span>
+                            <span class="text-sm font-medium text-purple-900">{{ $leagueTeamsCount }} / {{ $league->max_teams }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-purple-700">Game:</span>
+                            <span class="text-sm font-medium text-purple-900">{{ $league->game->name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teams List -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-900">Available Teams</h4>
+                        <p class="text-sm text-gray-600 mt-1">Select a team to request ownership</p>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200">
+                        <!-- Team 1 -->
+                        <div class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Mumbai Indians</h5>
+                                        <p class="text-sm text-gray-600">Available for ownership</p>
+                                        <div class="flex items-center mt-1 space-x-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Available
+                                            </span>
+                                            <span class="text-xs text-gray-500">Wallet: ₹{{ number_format(100000, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="requestOwnership('Mumbai Indians', 1)" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Request Ownership
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Team 2 -->
+                        <div class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Chennai Super Kings</h5>
+                                        <p class="text-sm text-gray-600">Available for ownership</p>
+                                        <div class="flex items-center mt-1 space-x-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Available
+                                            </span>
+                                            <span class="text-xs text-gray-500">Wallet: ₹{{ number_format(150000, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="requestOwnership('Chennai Super Kings', 2)" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Request Ownership
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Team 3 -->
+                        <div class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Royal Challengers Bangalore</h5>
+                                        <p class="text-sm text-gray-600">Available for ownership</p>
+                                        <div class="flex items-center mt-1 space-x-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Available
+                                            </span>
+                                            <span class="text-xs text-gray-500">Wallet: ₹{{ number_format(120000, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="requestOwnership('Royal Challengers Bangalore', 3)" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Request Ownership
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Team 4 -->
+                        <div class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Kolkata Knight Riders</h5>
+                                        <p class="text-sm text-gray-600">Available for ownership</p>
+                                        <div class="flex items-center mt-1 space-x-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Available
+                                            </span>
+                                            <span class="text-xs text-gray-500">Wallet: ₹{{ number_format(90000, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="requestOwnership('Kolkata Knight Riders', 4)" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Request Ownership
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Notice -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 rounded-full p-2 mr-3">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-blue-900">Ownership Request Process</h4>
+                            <p class="text-sm text-blue-700 mt-1">Your ownership request will be reviewed by the league organizers. You will be notified once your request is approved or rejected.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -652,6 +944,16 @@ function closeRegistrationModal() {
     document.body.style.overflow = 'auto';
 }
 
+function openOwnershipModal() {
+    document.getElementById('ownershipModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeOwnershipModal() {
+    document.getElementById('ownershipModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
 function openAuctionRulesModal() {
     document.getElementById('auctionRulesModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -663,6 +965,50 @@ function openAuctionRulesModal() {
 function closeAuctionRulesModal() {
     document.getElementById('auctionRulesModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+}
+
+function requestOwnership(teamName, teamId) {
+    // Show loading state on the button
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = `
+        <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Requesting...
+    `;
+    button.disabled = true;
+    
+    // Simulate API call delay
+    setTimeout(() => {
+        // Show success message
+        showNotification(`Ownership request submitted successfully for ${teamName}! Please wait for approval.`, 'success');
+        
+        // Change button to show requested state
+        button.innerHTML = `
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Requested
+        `;
+        button.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'focus:ring-purple-500');
+        button.classList.add('bg-yellow-600', 'cursor-not-allowed');
+        button.disabled = true;
+        
+        // Update team status
+        const teamDiv = button.closest('.p-6');
+        const statusBadge = teamDiv.querySelector('.bg-green-100');
+        if (statusBadge) {
+            statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+            statusBadge.textContent = 'Requested';
+        }
+        
+        // Update description
+        const description = teamDiv.querySelector('.text-gray-600');
+        if (description) {
+            description.textContent = 'Ownership request pending approval';
+        }
+    }, 1500);
 }
 
 
@@ -848,6 +1194,12 @@ document.getElementById('registrationModal').addEventListener('click', function(
     }
 });
 
+document.getElementById('ownershipModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeOwnershipModal();
+    }
+});
+
 document.getElementById('auctionRulesModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeAuctionRulesModal();
@@ -858,6 +1210,7 @@ document.getElementById('auctionRulesModal').addEventListener('click', function(
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeRegistrationModal();
+        closeOwnershipModal();
         closeAuctionRulesModal();
     }
 });

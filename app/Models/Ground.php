@@ -16,19 +16,7 @@ class Ground extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'address',
-        'localbody_id',
-        'district_id',
-        'state_id',
-        'capacity',
-        'description',
-        'contact_person',
-        'contact_phone',
-        'is_available',
-        'image',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

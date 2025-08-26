@@ -170,4 +170,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserRole::class);
     }
+
+    /**
+     * Get the full phone number with country code.
+     *
+     * @return string
+     */
+    public function getFullPhoneNumberAttribute(): string
+    {
+        return $this->country_code . $this->mobile;
+    }
+
+    /**
+     * Get the formatted phone number for display.
+     *
+     * @return string
+     */
+    public function getFormattedPhoneNumberAttribute(): string
+    {
+        return $this->country_code . ' ' . $this->mobile;
+    }
 }

@@ -23,10 +23,30 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:100|unique:users',
-            'mobile' => 'required|string|max:10|min:10|unique:users',
+            'country_code' => 'required|string|max:10',
+            'mobile' => 'required|string|max:10|min:10|unique:users|regex:/^[0-9]{10}$/',
             'pin' => 'required|string|min:4|max:6',
-            // Remove position_id and local_body_id validation
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Please enter your full name.',
+            'name.max' => 'Name cannot exceed 255 characters.',
+            'country_code.required' => 'Please select your country code.',
+            'mobile.required' => 'Please enter your mobile number.',
+            'mobile.min' => 'Mobile number must be exactly 10 digits.',
+            'mobile.max' => 'Mobile number must be exactly 10 digits.',
+            'mobile.unique' => 'This mobile number is already registered.',
+            'pin.required' => 'Please enter your PIN.',
+            'pin.min' => 'PIN must be at least 4 digits.',
+            'pin.max' => 'PIN cannot exceed 6 digits.',
         ];
     }
 }

@@ -20,33 +20,7 @@ class League extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'slug',
-        'game_id',
-        'user_id',
-        'ground_id',
-        'localbody_id',
-        'venue_details',
-        'season',
-        'start_date',
-        'end_date',
-        'max_teams',
-        'max_team_players',
-        'team_reg_fee',
-        'player_reg_fee',
-        'retention',
-        'retention_players',
-        'team_wallet_limit',
-        'is_default',
-        'status',
-        'bid_increment_type',
-        'custom_bid_increment',
-        'predefined_increments',
-        'auction_active',
-        'auction_started_at',
-        'auction_ended_at',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

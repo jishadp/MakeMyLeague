@@ -15,12 +15,7 @@ class Auction extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'league_player_id',
-        'league_team_id',
-        'amount',
-        'status',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

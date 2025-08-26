@@ -28,10 +28,9 @@ class RegisterController extends Controller
     {
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
             'mobile' => $request->mobile,
+            'country_code' => $request->country_code,
             'pin' => bcrypt($request->pin),
-            // Remove position_id and local_body_id from initial registration
         ]);
 
         Auth::login($user);
