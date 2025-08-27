@@ -25,7 +25,6 @@
     21 => 'Illuminate\\Validation\\ValidationServiceProvider',
     22 => 'Illuminate\\View\\ViewServiceProvider',
     23 => 'Laravel\\Breeze\\BreezeServiceProvider',
-    24 => 'Laravel\\Pail\\PailServiceProvider',
     25 => 'Laravel\\Sail\\SailServiceProvider',
     26 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     27 => 'Laravel\\Tinker\\TinkerServiceProvider',
