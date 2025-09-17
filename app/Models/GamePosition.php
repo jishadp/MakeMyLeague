@@ -15,10 +15,7 @@ class GamePosition extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'game_id',
-    ];
+    protected $guarded = [];
 
     /**
      * Get the game that this role belongs to.

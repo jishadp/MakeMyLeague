@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Auction Statistics -->
             <div class="px-4 py-4 sm:px-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -31,11 +31,11 @@
                             </div>
                             <div>
                                 <p class="text-sm text-green-600 font-medium">Total Players</p>
-                                <p class="text-lg font-bold text-green-800">150</p>
+                                <p class="text-lg font-bold text-green-800">{{ $leaguePlayers->count()}}</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-blue-100 rounded-full p-2 mr-3">
@@ -45,11 +45,11 @@
                             </div>
                             <div>
                                 <p class="text-sm text-blue-600 font-medium">Available</p>
-                                <p class="text-lg font-bold text-blue-800">45</p>
+                                <p class="text-lg font-bold text-blue-800">{{ $leaguePlayers->where('status','available')->count()}}</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-purple-100 rounded-full p-2 mr-3">
@@ -59,11 +59,11 @@
                             </div>
                             <div>
                                 <p class="text-sm text-purple-600 font-medium">Sold</p>
-                                <p class="text-lg font-bold text-purple-800">105</p>
+                                <p class="text-lg font-bold text-purple-800">{{ $leaguePlayers->where('status','sold')->count()}}</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="glacier-card p-3 border-0">
                         <div class="flex items-center">
                             <div class="bg-yellow-100 rounded-full p-2 mr-3">
@@ -72,13 +72,13 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm text-yellow-600 font-medium">Revenue</p>
-                                <p class="text-lg font-bold text-yellow-800">₹2,450,000</p>
+                                <p class="text-sm text-yellow-600 font-medium">Unsold</p>
+                                <p class="text-lg font-bold text-yellow-800">{{ $leaguePlayers->where('status','unsold')->count()}}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Progress Bar -->
                 <div class="mt-4">
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
@@ -93,139 +93,27 @@
         </div>
 
         <!-- Available Players Section -->
+        @if(auth()->user()->isOrganizer())
         <div class="mb-8" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>
-            
+        @endif
+
         <!-- Player Bidding Section -->
         <div class="flex justify-center mb-8" id="biddingSection">
             <div class="w-full max-w-2xl">
                 @include('auction.partials.player-bidding')
             </div>
         </div>
-            
+
         <!-- Recent and Highest Bids Table -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            
+
             <!-- Highest Bids -->
-            <div class="glacier-card">
-                <div class="px-4 py-4 sm:px-6 border-b glacier-border">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold glacier-text-primary">Highest Bids</h2>
-                        <div class="badge-purple px-3 py-1 rounded-full text-sm font-medium">
-                            105 Sold
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 sm:p-6">
-                    <div id="highestBidsTable" class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="table-header">
-                                <tr>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Player</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Team</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Sold Price</th>
-                                    <th class="text-left py-3 px-4 font-medium glacier-text-secondary">Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="table-row border-b border-gray-100">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                                     alt="Virat Kohli" 
-                                                     class="w-full h-full object-cover">
-                                            </div>
-                                            <div>
-                                                <p class="font-medium glacier-text-primary text-sm">Virat Kohli</p>
-                                                <p class="text-xs text-gray-500">Batsman</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="text-sm glacier-text-primary">Mumbai Indians</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-bold text-purple-600">₹85,000</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-medium text-green-600">₹35,000</span>
-                                    </td>
-                                </tr>
-                                <tr class="table-row border-b border-gray-100">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                                     alt="Rohit Sharma" 
-                                                     class="w-full h-full object-cover">
-                                            </div>
-                                            <div>
-                                                <p class="font-medium glacier-text-primary text-sm">Rohit Sharma</p>
-                                                <p class="text-xs text-gray-500">Batsman</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="text-sm glacier-text-primary">Chennai Super Kings</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-bold text-purple-600">₹75,000</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-medium text-green-600">₹25,000</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            @livewire('highest-bids', ['leagueId' => $league->id])
 
             <!-- Teams Table -->
-            <div class="glacier-card">
-                <div class="px-4 py-4 sm:px-6 border-b glacier-border">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold glacier-text-primary">Teams</h2>
-                        <div class="badge-blue px-3 py-1 rounded-full text-sm font-medium">
-                            8 Teams
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 sm:p-6">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                                    MI
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Mumbai Indians</p>
-                                    <p class="text-sm text-gray-500">₹125,000 remaining</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-medium text-green-600">15 Players</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
-                                    CSK
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Chennai Super Kings</p>
-                                    <p class="text-sm text-gray-500">₹95,000 remaining</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-medium text-green-600">14 Players</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @livewire('teams', ['leagueId' => $league->id])
         </div>
     </div>
 </div>
@@ -236,5 +124,11 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/auction.js') }}"></script>
+<script
+  src="https://code.jquery.com/jquery-3.7.1.js"
+  integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+  crossorigin="anonymous"></script>
+<script src="{{ asset('js/auction.js') }}?v=4"></script>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script src="{{ asset('js/pusher-main.js') }}?v=1"></script>
 @endsection

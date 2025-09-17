@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class District extends Model
 {
-    protected $fillable = ['state_id', 'name'];
+    protected $guarded = [];
 
     /**
      * Get the state that owns the district.

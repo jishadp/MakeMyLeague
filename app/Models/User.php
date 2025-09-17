@@ -91,7 +91,7 @@ class User extends Authenticatable
     {
         return 'slug';
     }
-    
+
     /**
      * Get the game role of the user.
      */
@@ -99,7 +99,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(GamePosition::class, 'position_id');
     }
-    
+
     /**
      * Get the local body of the user.
      */
@@ -107,7 +107,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(LocalBody::class, 'local_body_id');
     }
-    
+
     /**
      * Scope a query to only include players.
      *
@@ -118,7 +118,7 @@ class User extends Authenticatable
     {
         return $query->whereNotNull('position_id');
     }
-    
+
     /**
      * Check if the user is an admin.
      *
@@ -126,30 +126,25 @@ class User extends Authenticatable
      */
     public function isOrganizer(): bool
     {
-        return $this->id === 1;
+        return $this->roles->contains('role_id',1);
     }
     public function isOwner(): bool
     {
-        return $this->roles()->where('name', 'Owner')->exists();
+        return $this->roles->contains('role_id',2);
     }
     public function isPlayer(): bool
     {
-         return $this->roles()->where('name', 'Player')->exists();
+         return $this->roles->contains('role_id',3);
     }
-    
-    public function isOrganiser(): bool
-    {
-        return $this->roles()->where('name', 'Organiser')->exists();
-    }
-    
+
     /**
      * Get the auction bids where this user is the player.
      */
-    public function auctions(): HasMany
+    public function auctions(): hasManyThrough
     {
         return $this->hasManyThrough(Auction::class, LeaguePlayer::class, 'user_id', 'league_player_id');
     }
-    
+
     /**
      * Get the league players for this user.
      */
@@ -157,7 +152,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(LeaguePlayer::class);
     }
-    
+
     /**
      * Get the teams owned by this user.
      */
@@ -171,24 +166,28 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles(): BelongsToMany
+    public function roles(): hasMany
     {
-        return $this->belongsToMany(Role::class, 'user_roles');
+        return $this->hasMany(UserRole::class);
     }
-    
+
     /**
-     * Check if the user has a specific role.
+     * Get the full phone number with country code.
+     *
+     * @return string
      */
-    public function hasRole($roleName): bool
+    public function getFullPhoneNumberAttribute(): string
     {
-        return $this->roles()->where('name', $roleName)->exists();
+        return $this->country_code . $this->mobile;
     }
-    
+
     /**
-     * Check if the user has any of the specified roles.
+     * Get the formatted phone number for display.
+     *
+     * @return string
      */
-    public function hasAnyRole($roleNames): bool
+    public function getFormattedPhoneNumberAttribute(): string
     {
-        return $this->roles()->whereIn('name', (array) $roleNames)->exists();
+        return $this->country_code . ' ' . $this->mobile;
     }
 }

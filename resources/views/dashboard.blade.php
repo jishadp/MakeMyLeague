@@ -18,20 +18,20 @@
                     <div class="flex flex-wrap gap-4">
                         @if(auth()->user()->isOrganizer())
                         <a href="{{ route('leagues.index') }}"
-                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
+                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium
                                   hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg">
                             My Leagues
                         </a>
-                        
+
                         <a href="{{ route('leagues.create') }}"
-                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
+                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium
                                   active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create New League
                         </a>
                         @endif
                         @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
                         <a href="{{ route('players.create') }}"
-                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium 
+                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium
                                   active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create New Player
                         </a>
@@ -76,7 +76,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You haven't created any leagues yet</h3>
                     <p class="text-gray-600 mb-6">Get started by creating your first cricket league.</p>
                     <a href="{{ route('leagues.create') }}"
-                       class="inline-block bg-blue-700 hover:bg-blue-800 text-white py-2 px-6 rounded-lg font-medium 
+                       class="inline-block bg-blue-700 hover:bg-blue-800 text-white py-2 px-6 rounded-lg font-medium
                               active:scale-95 transition-all shadow-md hover:shadow-lg">
                         Create Your First League
                     </a>
@@ -87,7 +87,7 @@
                         <a href="{{ route('leagues.show', $league) }}" class="block">
                             <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                             <div class="h-40 overflow-hidden relative">
-                                <img src="{{ asset('images/league.jpg') }}" 
+                                <img src="{{ asset('images/league.jpg') }}"
                                      alt="{{ $league->name }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                                     <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
@@ -99,10 +99,10 @@
                             <div class="p-6">
                                 <div class="mb-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm
-                                        {{ 
-                                            $league->status === 'active' ? 'bg-green-100 text-green-800' : 
-                                            ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                            ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')) 
+                                        {{
+                                            $league->status === 'active' ? 'bg-green-100 text-green-800' :
+                                            ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'))
                                         }}">
                                         {{ ucfirst($league->status) }}
                                     </span>
@@ -134,7 +134,7 @@
     @endif
 
     <!-- Open Leagues Section -->
-    @if(auth()->user()->isPlayer())
+    @if(auth()->user()->isPlayer() || auth()->user()->isOwner())
     <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-2">
@@ -160,7 +160,7 @@
                         <a href="{{ route('leagues.show', $league) }}" class="block">
                             <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                             <div class="h-40 overflow-hidden relative">
-                                <img src="{{ asset('images/league.jpg') }}" 
+                                <img src="{{ asset('images/league.jpg') }}"
                                      alt="{{ $league->name }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                                     <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
@@ -172,10 +172,10 @@
                             <div class="p-6">
                                 <div class="mb-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm
-                                        {{ 
-                                            $league->status === 'active' ? 'bg-green-100 text-green-800' : 
-                                            ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                            ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')) 
+                                        {{
+                                            $league->status === 'active' ? 'bg-green-100 text-green-800' :
+                                            ($league->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            ($league->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'))
                                         }}">
                                         {{ ucfirst($league->status) }}
                                     </span>
@@ -215,7 +215,7 @@
                     <h2 class="text-2xl font-bold text-gray-900">Owned Teams</h2>
                     <p class="text-gray-600">Teams you own and manage</p>
                 </div>
-                <a href="{{ route('teams.create') }}" 
+                <a href="{{ route('teams.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -231,10 +231,10 @@
                     <div class="bg-gray-50 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-40 overflow-hidden relative">
                         @if($team->logo)
-                            <img src="{{ asset($team->logo) }}" 
+                            <img src="{{ asset($team->logo) }}"
                                  alt="{{ $team->name }}" class="w-full h-full object-cover">
                         @else
-                            <img src="{{ asset('images/owned.jpg') }}" 
+                            <img src="{{ asset('images/owned.jpg') }}"
                                  alt="{{ $team->name }}" class="w-full h-full object-cover">
                         @endif
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
@@ -272,7 +272,7 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You don't have any teams yet</h3>
                     <p class="text-gray-600 mb-6">Create your first team to get started</p>
-                    <a href="{{ route('teams.create') }}" 
+                    <a href="{{ route('teams.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -406,7 +406,7 @@
                     <p class="text-gray-600">Your cricket player information</p>
                 </div>
                 @if($playerInfo)
-                    <a href="{{ route('players.edit', $playerInfo) }}" 
+                    <a href="{{ route('players.edit', $playerInfo) }}"
                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -414,7 +414,7 @@
                         Edit Profile
                     </a>
                 @else
-                    <a href="{{ route('players.index') }}" 
+                    <a href="{{ route('players.index') }}"
                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -431,8 +431,8 @@
                         <div class="p-6 lg:p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white relative">
                             <div class="flex flex-col items-center text-center">
                                 <div class="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-lg">
-                                    <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                         alt="{{ $playerInfo->name }}" 
+                                    <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                         alt="{{ $playerInfo->name }}"
                                          class="w-full h-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="w-full h-full flex items-center justify-center text-white font-bold text-2xl bg-gradient-to-br from-indigo-500 to-purple-600" style="display: none;">
@@ -465,7 +465,7 @@
                                 </div>
                             </div>
                             <div class="absolute bottom-0 right-0 opacity-10">
-                                <img src="https://upload.wikimedia.org/wikipedia/en/8/8d/Cricket_India_Crest.svg" 
+                                <img src="https://upload.wikimedia.org/wikipedia/en/8/8d/Cricket_India_Crest.svg"
                                     alt="Cricket Logo" class="w-40 h-40 object-contain">
                             </div>
                         </div>
@@ -473,7 +473,7 @@
                         <!-- Statistics & Profile Content -->
                         <div class="lg:col-span-2 p-6 lg:p-8">
                             <h4 class="text-xl font-semibold text-gray-900 mb-6">Player Information</h4>
-                            
+
                             <!-- Role Description -->
                             <div class="bg-gray-50 rounded-lg p-4 mb-6">
                                 <div class="flex items-center mb-4">
@@ -502,7 +502,7 @@
                                     @endswitch
                                 </p>
                             </div>
-                            
+
                             <!-- Available for Leagues -->
                             <div class="mb-6">
                                 <h5 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
@@ -522,7 +522,7 @@
                                     </a>
                                 </div>
                             </div>
-                            
+
                             <!-- Action Buttons -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <a href="{{ route('players.show', $playerInfo) }}" class="flex items-center justify-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors">
@@ -546,7 +546,7 @@
                     <!-- No Player Profile -->
                     <div class="p-12 text-center">
                         <svg class="mx-auto h-20 w-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                         <h3 class="mt-4 text-xl font-semibold text-gray-900">You don't have a player profile yet</h3>
@@ -554,7 +554,7 @@
                             Contact an administrator to become a player and get assigned a role.
                         </p>
                         <div class="flex justify-center">
-                            <a href="{{ route('players.index') }}" 
+                            <a href="{{ route('players.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
@@ -576,7 +576,7 @@
                     <p class="text-lg text-gray-600 mb-6">
                         Manage your cricket league resources efficiently
                     </p>
-                    
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                         <!-- Player Management Card -->
                         <a href="{{ route('players.index') }}" class="block">
@@ -599,7 +599,7 @@
                             </div>
                         </div>
                         </a>
-                        
+
                         <!-- Team Management Card -->
                         <a href="{{ route('teams.index') }}" class="block">
                             <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer">
@@ -621,13 +621,13 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <a href="{{ route('leagues.create') }}" class="block">
                     <div class="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer hover:shadow-2xl transition-all">
                     <div class="p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
                         <h3 class="text-2xl font-semibold mb-4">Become a League Organizer</h3>
                         <p class="mb-6">Create and manage your own cricket leagues, set rules, schedule matches, and oversee competitions.</p>
-                        <span class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
+                        <span class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium
                                   hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg inline-block">
                             Create Your First League
                         </span>
@@ -660,7 +660,7 @@
                         <h3 class="text-2xl font-semibold mb-4">Ready to Get Started?</h3>
                         <p class="mb-6">Join today and create your first cricket league in minutes.</p>
                         <a href="{{ route('leagues.create') }}"
-                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium 
+                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium
                                   hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg">
                             Create Your First League
                         </a>

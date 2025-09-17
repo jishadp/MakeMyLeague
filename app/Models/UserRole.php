@@ -8,10 +8,7 @@ class UserRole extends Model
 {
     protected $table = 'user_roles';
     
-    protected $fillable = [
-        'user_id',
-        'role_id',
-    ];
+    protected $guarded = [];
     
     protected $casts = [
         'created_at' => 'datetime',

@@ -52,7 +52,9 @@
         @yield('content')
 
         @auth
+        @if(request()->route()->getName() !="auction.index")
             @include('partials.bottom-navigation-buttons')
+            @endif
         @endauth
     </main>
 

@@ -20,32 +20,7 @@ class League extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'slug',
-        'game_id',
-        'user_id',
-        'localbody_id',
-        'venue_details',
-        'season',
-        'start_date',
-        'end_date',
-        'max_teams',
-        'max_team_players',
-        'team_reg_fee',
-        'player_reg_fee',
-        'retention',
-        'retention_players',
-        'team_wallet_limit',
-        'is_default',
-        'status',
-        'bid_increment_type',
-        'custom_bid_increment',
-        'predefined_increments',
-        'auction_active',
-        'auction_started_at',
-        'auction_ended_at',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.
@@ -160,8 +135,6 @@ class League extends Model
         return $this->belongsTo(LocalBody::class, 'localbody_id');
     }
 
-    
-
     /**
      * Get all associated Ground models
      */
@@ -220,39 +193,6 @@ class League extends Model
         }
 
         return $currentBid + 50; // Default increment
-    }
-
-    /**
-     * Start the auction.
-     */
-    public function startAuction()
-    {
-        $this->update([
-            'auction_active' => true,
-            'auction_started_at' => now(),
-            'auction_ended_at' => null,
-        ]);
-    }
-
-    /**
-     * Pause the auction.
-     */
-    public function pauseAuction()
-    {
-        $this->update([
-            'auction_active' => false,
-        ]);
-    }
-
-    /**
-     * End the auction.
-     */
-    public function endAuction()
-    {
-        $this->update([
-            'auction_active' => false,
-            'auction_ended_at' => now(),
-        ]);
     }
 
     /**

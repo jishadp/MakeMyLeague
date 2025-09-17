@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LocalBody extends Model
 {
-    protected $fillable = ['district_id', 'name'];
+    protected $guarded = [];
 
     /**
      * Get the district that owns the local body.

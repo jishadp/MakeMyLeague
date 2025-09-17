@@ -1,8 +1,8 @@
 <!-- Player Bidding Section - Laravel Blade Partial -->
-<div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
-    
+<div class="bidMain w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 hidden">
+
     <!-- Header Card -->
-    <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">
+    {{-- <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">
         <div class="p-4 sm:p-6 lg:p-8">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
                 <!-- Title Section -->
@@ -23,16 +23,16 @@
                         <p class="text-sm sm:text-base text-gray-600 mt-1">Live Auction Interface</p>
                     </div>
                 </div>
-                
+
                 <!-- Status Section -->
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <!-- Countdown Timer -->
                     <div class="relative">
                         <svg class="w-16 h-16 sm:w-20 sm:h-20 countdown-ring" viewBox="0 0 36 36">
-                            <path class="text-gray-300" stroke="currentColor" stroke-width="3" fill="transparent" 
+                            <path class="text-gray-300" stroke="currentColor" stroke-width="3" fill="transparent"
                                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                             <path class="text-red-500" stroke="currentColor" stroke-width="3" fill="transparent" stroke-linecap="round"
-                                  stroke-dasharray="75, 100" 
+                                  stroke-dasharray="75, 100"
                                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
@@ -42,7 +42,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Status Badge -->
                     <div class="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-2xl font-semibold shadow-lg flex items-center space-x-2 animate-pulse-slow">
                         <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
@@ -51,7 +51,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Main Content - Full Width Player Card -->
     <div class="w-full">
@@ -63,15 +63,15 @@
                 <div class="blob absolute -left-10 top-32 sm:top-24 w-32 h-32 sm:w-48 sm:h-48 bg-pink-500 rounded-full opacity-60 animate-blob" style="animation-delay: 2s;"></div>
                 <div class="blob absolute right-8 sm:right-24 bottom-8 sm:top-44 w-32 h-32 sm:w-48 sm:h-48 bg-blue-500 rounded-full opacity-60 animate-blob" style="animation-delay: 3s;"></div>
             </div>
-            
+
             <!-- Glassmorphism Content -->
             <div class="card__content relative z-10 p-6 sm:p-8 lg:p-10">
                 <!-- Player Header -->
                 <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8">
                     <div class="relative flex-shrink-0">
                         <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
-                            <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                                 alt="Player" 
+                            <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                 alt="Player"
                                  class="w-full h-full object-cover rounded-3xl">
                         </div>
                         <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
@@ -81,73 +81,73 @@
                         </div>
                     </div>
                     <div class="text-center sm:text-left flex-grow">
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800">Virat Kohli</h2>
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">Virat Kohli</h2>
                         <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
-                            <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300">
-                                Batsman
-                            </span>
+                            <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position"></span>
                             <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
-                                Base Price ₹50,000
+                                Base Price ₹<span class="basePrice"></span>
                             </span>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- 1. Current Bid Row with Side Stats -->
                 <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg mb-6">
                     <!-- Current Bid (Main Highlight) -->
                     <div class="text-center mb-4">
-                        <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Current Bid</p>
-                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹1,111</p>
-                        <p class="text-gray-600 text-sm font-medium">Team XYZ</p>
+                        <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2 bidStatus"></p>
+                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹ <span class="currentBid"></span></p>
+                        <p class="text-gray-600 text-sm font-medium bidTeam"></p>
                     </div>
-                    
+
                     <!-- Bottom Stats Row -->
-                    <div class="grid grid-cols-2 gap-4 sm:gap-6 pt-3 border-t border-gray-200">
+                    <div class="grid grid-cols-2 gap-4 sm:gap-6 pt-3 border-t border-gray-200 hidden teamBidDetls">
                         <!-- Total Players (Small) -->
                         <div class="text-center">
                             <p class="text-gray-500 text-xs font-medium mb-1">Total Players</p>
-                            <p class="font-bold text-sm sm:text-base text-gray-700">24</p>
+                            <p class="font-bold text-sm sm:text-base text-gray-700 leageTeamPlayers"></p>
                         </div>
-                        
+
                         <!-- Team Balance (Small) -->
                         <div class="text-center">
                             <p class="text-gray-500 text-xs font-medium mb-1">Team Balance</p>
-                            <p class="font-bold text-sm sm:text-base text-gray-700">₹2.5L</p>
+                            <p class="font-bold text-sm sm:text-base text-gray-700 teamBalance"></p>
                         </div>
                     </div>
                 </div>
 
                 <!-- 3. Quick Bid Row -->
                 <div class="mb-6">
-                    <div class="grid grid-cols-3 gap-3 sm:gap-6">
-                        <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-gray-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-gray-800">₹500</p>
+                    <div class="grid grid-cols-3 gap-3 sm:gap-6" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-gray-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="25">
+                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-gray-800">+ ₹25</p>
                         </div>
-                        <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">₹1000</p>
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="50">
+                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">+ ₹50</p>
                         </div>
-                        <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">₹2000</p>
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="100">
+                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">+ ₹100</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- 4. Admin Controls Row -->
-                <div class="mb-6">
+                @if(auth()->user()->isOrganizer())
+                <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}" token="{{ csrf_token()}}">
                     <div class="grid grid-cols-2 gap-3 sm:gap-6">
-                        <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
+                        <div class="markSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">SOLD</p>
                         </div>
-                        <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
+                        <div class="markUnSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">UNSOLD</p>
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
-  
+
 </div>
 
 <style>
@@ -249,17 +249,17 @@
     .card__content {
         padding: 1.5rem !important;
     }
-    
+
     .bid-button {
         padding: 1rem !important;
         min-height: 60px;
     }
-    
+
     /* Ensure proper spacing on mobile */
     .grid-cols-3 .bid-button {
         font-size: 0.875rem;
     }
-    
+
     .grid-cols-2 button {
         font-size: 0.875rem;
     }
@@ -277,7 +277,7 @@
     .w-full.max-w-7xl {
         max-width: 90rem;
     }
-    
+
     .card__content {
         padding: 2.5rem !important;
     }
@@ -297,4 +297,4 @@
         -webkit-backdrop-filter: blur(30px);
     }
 }
-</style>                   
+</style>

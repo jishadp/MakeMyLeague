@@ -65,6 +65,8 @@ Route::get('players/{player}', [PlayerController::class, 'show'])->name('players
 Route::get('players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit')->middleware('auth');
 Route::put('players/{player}', [PlayerController::class, 'update'])->name('players.update')->middleware('auth');
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
+Route::post('leagues/{league}/players/register', [PlayerController::class, 'register'])
+    ->name('league-players.register');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');
@@ -110,12 +112,10 @@ Route::middleware('auth')->group(function () {
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
         Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
+    });
 
-        // Organizer control routes
-        Route::post('start', [AuctionController::class, 'startAuction'])->name('start');
-        Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
-        Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
-        Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
-        Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
+    Route::prefix('auction')->name('auction.')->group(function () {
+        Route::post('call', [AuctionController::class, 'call'])->name('call');
+        Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
 });

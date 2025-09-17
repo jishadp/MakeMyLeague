@@ -50,10 +50,23 @@
                         <!-- Mobile -->
                         <div>
                             <label for="mobile" class="block text-sm font-medium text-gray-700 mb-2">Mobile Number <span class="text-red-600">*</span></label>
-                            <input id="mobile" type="tel" name="mobile" value="{{ old('mobile') }}"
-                                   class="glass-input block w-full rounded-lg text-base py-3 px-4 border-2 border-[#2c5aa0] focus:border-[#4a90e2] focus:ring-2 focus:ring-[#4a90e2] focus:ring-opacity-50"
-                                   required
-                                   placeholder="Enter your mobile number">
+                            <div class="flex space-x-2">
+                                <!-- Country Code Dropdown -->
+                                <div class="w-1/3">
+                                    <select id="country_code" name="country_code" 
+                                            class="glass-input block w-full rounded-lg text-base py-3 px-3 border-2 border-[#2c5aa0] focus:border-[#4a90e2] focus:ring-2 focus:ring-[#4a90e2] focus:ring-opacity-50"
+                                            aria-label="Select country code">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <!-- Phone Number Input -->
+                                <div class="w-2/3">
+                                    <input id="mobile" type="tel" name="mobile" value="{{ old('mobile') }}"
+                                           class="glass-input block w-full rounded-lg text-base py-3 px-4 border-2 border-[#2c5aa0] focus:border-[#4a90e2] focus:ring-2 focus:ring-[#4a90e2] focus:ring-opacity-50"
+                                           required
+                                           placeholder="Enter your mobile number">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- PIN -->
@@ -88,13 +101,74 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('js/countries.js') }}?v={{ time() }}"></script>
     <script>
         $(document).ready(function() {
             $('.select2').select2({
                 theme: 'classic',
                 width: '100%'
             });
+
+            // Initialize country code dropdown
+            initializeCountryDropdown();
         });
+
+        function initializeCountryDropdown() {
+            const countrySelect = document.getElementById('country_code');
+            const mobileInput = document.getElementById('mobile');
+            
+            // Clear existing options
+            countrySelect.innerHTML = '';
+            
+            // Add countries to dropdown
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${country.flag} ${country.name} (${country.code})`;
+                
+                // Set India as default
+                if (country.name === 'India') {
+                    option.selected = true;
+                }
+                
+                countrySelect.appendChild(option);
+            });
+            
+            // Handle form validation errors - extract country code from old mobile value
+            const oldMobileValue = mobileInput.value;
+            if (oldMobileValue && oldMobileValue.length > 10) {
+                // Try to find matching country code
+                const matchingCountry = countries.find(country => 
+                    oldMobileValue.startsWith(country.code)
+                );
+                
+                if (matchingCountry) {
+                    countrySelect.value = matchingCountry.code;
+                    // Remove country code from mobile input
+                    mobileInput.value = oldMobileValue.substring(matchingCountry.code.length);
+                }
+            }
+            
+            // Handle country selection change
+            countrySelect.addEventListener('change', function() {
+                const selectedCountry = countries.find(country => country.code === this.value);
+                if (selectedCountry) {
+                    // Update placeholder with selected country code
+                    mobileInput.placeholder = `Enter your mobile number`;
+                    
+                    // Focus on mobile input for better UX
+                    mobileInput.focus();
+                }
+            });
+            
+            // Add keyboard navigation support
+            countrySelect.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.focus();
+                }
+            });
+        }
     </script>
 
     <style>
@@ -126,6 +200,45 @@
         .select2-container--classic.select2-container--focus .select2-selection--single {
             border-color: #4a90e2 !important;
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
+        }
+
+        /* Country Code Dropdown Styling */
+        #country_code {
+            font-size: 14px;
+            line-height: 1.2;
+        }
+
+        #country_code option {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 768px) {
+            .flex.space-x-2 {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .w-1\/3, .w-2\/3 {
+                width: 100% !important;
+            }
+            
+            #country_code {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
+
+        /* Focus states for better accessibility */
+        #country_code:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        /* Hover effect for dropdown options */
+        #country_code option:hover {
+            background-color: #f3f4f6;
         }
     </style>
 </body>
