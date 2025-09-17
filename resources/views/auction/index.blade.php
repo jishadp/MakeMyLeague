@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-green-600 font-medium">Total Players</p>
-                                <p class="text-lg font-bold text-green-800">150</p>
+                                <p class="text-lg font-bold text-green-800">{{ $leaguePlayers->count()}}</p>
                             </div>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-blue-600 font-medium">Available</p>
-                                <p class="text-lg font-bold text-blue-800">45</p>
+                                <p class="text-lg font-bold text-blue-800">{{ $leaguePlayers->where('status','available')->count()}}</p>
                             </div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-purple-600 font-medium">Sold</p>
-                                <p class="text-lg font-bold text-purple-800">105</p>
+                                <p class="text-lg font-bold text-purple-800">{{ $leaguePlayers->where('status','sold')->count()}}</p>
                             </div>
                         </div>
                     </div>
@@ -72,8 +72,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm text-yellow-600 font-medium">Revenue</p>
-                                <p class="text-lg font-bold text-yellow-800">₹2,450,000</p>
+                                <p class="text-sm text-yellow-600 font-medium">Unsold</p>
+                                <p class="text-lg font-bold text-yellow-800">{{ $leaguePlayers->where('status','unsold')->count()}}</p>
                             </div>
                         </div>
                     </div>
