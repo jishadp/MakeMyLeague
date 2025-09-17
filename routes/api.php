@@ -9,7 +9,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 Route::prefix('auction')->name('auction.')->group(function () {
     Route::post('start', [AuctionController::class, 'start'])->name('start');
-
     Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
     Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
     Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');

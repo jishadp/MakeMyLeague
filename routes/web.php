@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('auction')->name('auction.')->group(function () {
         Route::post('call', [AuctionController::class, 'call'])->name('call');
+        Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
 
 

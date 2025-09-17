@@ -71,13 +71,33 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bidding started and broadcasted:", response);
+                $('.markSold').attr('league-player-id',leaguePlayerId);
+                $('.markSold').attr('call-team-id',response.call_team_id);
             }
         });
     });
 
     $('.markSold').click(function(){
+        var token = $(this).closest('.grid').attr('token');
+        var markSoldAction = $(this).closest('.grid').attr('call-bid-action');
+        var leaguePlayerId = $(this).attr('league-player-id');
+        var callTeamId = $(this).attr('call-team-id');
+
         $(".bidMain").addClass('hidden');
         $(".availPlayers").removeClass('hidden');
+        $.ajax({
+            url: markSoldAction,   // Laravel route
+            type: "post",
+            headers: {'X-CSRF-TOKEN':token},
+            data: {
+                league_player_id: leaguePlayerId,
+                team_id: callTeamId,
+            },
+            success: function (response) {
+                console.log("Bidding started and broadcasted:", response);
+
+            }
+        });
     });
     $('.markUnSold').click(function(){
         $(".bidMain").addClass('hidden');
