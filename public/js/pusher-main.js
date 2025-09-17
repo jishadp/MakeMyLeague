@@ -26,5 +26,6 @@ channel.bind('new-player-bid-call', function(data) {
     $('.teamBidDetls').removeClass('hidden');
     $('.teamBalance').html(data.league_team.wallet_balance);
     $('.leageTeamPlayers').html(data.league_team.league_players_count);
+    $('.markSold').attr('call-team-id',data.league_team.id);
 
 });

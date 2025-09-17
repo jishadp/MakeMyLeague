@@ -76,8 +76,10 @@ class AuctionController extends Controller
     }
 
     public function sold(Request $request){
-        LeaguePlayer::where('league_player_id',$request->league_player_id)->update([
-            'league_team_id'    => $request->team_id
+        info($request->all());
+        LeaguePlayer::where('id',$request->league_player_id)->update([
+            'league_team_id'    => $request->team_id,
+            'status'    => 'sold'
         ]);
     }
 }

@@ -41,6 +41,7 @@ $(document).ready(function(){
                 league_player_id: leaguePlayerId
             },
             success: function (response) {
+                $('.markSold').attr('league-player-id',leaguePlayerId);
                 console.log("Bidding started and broadcasted:", response);
             },
             error: function (xhr) {
@@ -71,15 +72,13 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bidding started and broadcasted:", response);
-                $('.markSold').attr('league-player-id',leaguePlayerId);
-                $('.markSold').attr('call-team-id',response.call_team_id);
             }
         });
     });
 
     $('.markSold').click(function(){
-        var token = $(this).closest('.grid').attr('token');
-        var markSoldAction = $(this).closest('.grid').attr('call-bid-action');
+        var token = $(this).closest('.mb-6').attr('token');
+        var markSoldAction = $(this).closest('.mb-6').attr('mark-sold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
         var callTeamId = $(this).attr('call-team-id');
 

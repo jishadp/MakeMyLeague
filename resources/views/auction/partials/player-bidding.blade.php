@@ -133,7 +133,7 @@
 
                 <!-- 4. Admin Controls Row -->
                 @if(auth()->user()->isOrganizer())
-                <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}">
+                <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}" token="{{ csrf_token()}}">
                     <div class="grid grid-cols-2 gap-3 sm:gap-6">
                         <div class="markSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">SOLD</p>

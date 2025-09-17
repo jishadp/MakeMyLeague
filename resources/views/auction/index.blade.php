@@ -128,7 +128,7 @@
   src="https://code.jquery.com/jquery-3.7.1.js"
   integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
   crossorigin="anonymous"></script>
-<script src="{{ asset('js/auction.js') }}?v=1"></script>
+<script src="{{ asset('js/auction.js') }}?v=4"></script>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-<script src="{{ asset('js/pusher-main.js') }}"></script>
+<script src="{{ asset('js/pusher-main.js') }}?v=1"></script>
 @endsection

@@ -49,9 +49,9 @@ class LeagueController
         // Add the current authenticated user as the organizer
         $validated['user_id'] = Auth::id();
         // Process ground_ids (convert to JSON array)
-        if ($request->has('ground_ids')) {
-            $validated['ground_ids'] = $request->ground_ids;
-        }
+        // if ($request->has('ground_ids')) {
+        //     $validated['ground_ids'] = $request->ground_ids;
+        // }
         // If this is the first league or is_default is checked, make it default
         if ($request->has('is_default') || League::count() === 0) {
             // First, unset all other defaults
