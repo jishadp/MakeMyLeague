@@ -93,7 +93,7 @@
                                     @endif
 
                                     <!-- Ground Count -->
-                                    @if ($league->ground_id)
+                                    @if ($league->grounds->isNotEmpty())
                                         <p><span class="font-medium">🏏 Ground:</span> Assigned</p>
                                     @endif
                                 </div>

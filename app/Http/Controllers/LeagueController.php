@@ -47,10 +47,7 @@ class LeagueController
         $validated = $request->validate(League::rules());
         // Add the current authenticated user as the organizer
         $validated['user_id'] = Auth::id();
-        // Process ground_ids (convert to JSON array)
-        if ($request->has('ground_ids')) {
-            $validated['ground_ids'] = $request->ground_ids;
-        }
+
         // If this is the first league or is_default is checked, make it default
         if ($request->has('is_default') || League::count() === 0) {
             // First, unset all other defaults
@@ -58,6 +55,10 @@ class LeagueController
             $validated['is_default'] = true;
         }
         $league = League::create($validated);
+
+        if ($request->has('ground_ids') && is_array($request->ground_ids)) {
+            $league->grounds()->attach($request->ground_ids);
+        }
         return redirect()->route('leagues.index')
             ->with('success', 'League created successfully!');
     }
@@ -67,7 +68,7 @@ class LeagueController
      */
     public function show(League $league): View
     {
-        $league->load(['game.roles', 'organizer', 'localBody.district']);
+        $league->load(['game.roles', 'organizer','grounds', 'localBody.district']);
         return view('leagues.show', compact('league'));
     }
 
@@ -90,10 +91,7 @@ class LeagueController
     public function update(Request $request, League $league): RedirectResponse
     {
         $validated = $request->validate(League::rules());
-        // Process ground_ids (convert to JSON array)
-        if ($request->has('ground_ids')) {
-            $validated['ground_ids'] = $request->ground_ids;
-        }
+
         // Handle default league setting
         if ($request->has('is_default') && $request->is_default) {
             // First, unset all other defaults
@@ -105,6 +103,15 @@ class LeagueController
             $validated['is_default'] = true;
         }
         $league->update($validated);
+
+        // Sync selected grounds (many-to-many)
+        if ($request->has('ground_ids') && is_array($request->ground_ids)) {
+            $league->grounds()->sync($request->ground_ids);
+        } else {
+            // If no grounds selected, detach all
+            $league->grounds()->detach();
+        }
+
         return redirect()->route('leagues.index')
             ->with('success', 'League updated successfully!');
     }
