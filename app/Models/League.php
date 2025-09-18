@@ -40,6 +40,7 @@ class League extends Model
         'team_wallet_limit' => 'double',
         'custom_bid_increment' => 'decimal:2',
         'predefined_increments' => 'array',
+
     ];
 
     /**
@@ -94,7 +95,6 @@ class League extends Model
         return [
             'name' => 'required|string|max:255',
             'game_id' => 'required|exists:games,id',
-            'ground_id' => 'nullable|exists:grounds,id',
             'localbody_id' => 'nullable|exists:local_bodies,id',
             'venue_details' => 'nullable|string|max:255',
             'season' => 'required|integer|min:1|max:100',
@@ -136,11 +136,11 @@ class League extends Model
     }
 
     /**
-     * Get the ground that hosts this league.
+     * Get all associated Ground models
      */
-    public function ground(): BelongsTo
+     public function grounds()
     {
-        return $this->belongsTo(Ground::class);
+        return $this->belongsToMany(Ground::class, 'league_grounds');
     }
 
     /**
@@ -165,8 +165,8 @@ class League extends Model
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'league_teams')
-                    ->withPivot('status', 'wallet_balance')
-                    ->withTimestamps();
+            ->withPivot('status', 'wallet_balance')
+            ->withTimestamps();
     }
 
     /**

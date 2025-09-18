@@ -65,6 +65,8 @@ Route::get('players/{player}', [PlayerController::class, 'show'])->name('players
 Route::get('players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit')->middleware('auth');
 Route::put('players/{player}', [PlayerController::class, 'update'])->name('players.update')->middleware('auth');
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
+Route::post('leagues/{league}/players/register', [PlayerController::class, 'register'])
+    ->name('league-players.register');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');
@@ -116,6 +118,4 @@ Route::middleware('auth')->group(function () {
         Route::post('call', [AuctionController::class, 'call'])->name('call');
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
-
-
 });

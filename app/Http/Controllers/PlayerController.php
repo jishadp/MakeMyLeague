@@ -23,17 +23,17 @@ class PlayerController extends Controller
         $query = User::query()
             ->with(['position', 'localBody'])
             ->players();
-        
+
         // Filter by role
         if ($request->has('position_id') && $request->position_id != '') {
             $query->where('position_id', $request->position_id);
         }
-        
+
         // Filter by local body
         if ($request->has('local_body_id') && $request->local_body_id != '') {
             $query->where('local_body_id', $request->local_body_id);
         }
-        
+
         // Sort by name
         if ($request->has('sort_by') && $request->sort_by != '') {
             $sortDirection = $request->has('sort_dir') && $request->sort_dir == 'desc' ? 'desc' : 'asc';
@@ -41,15 +41,15 @@ class PlayerController extends Controller
         } else {
             $query->orderBy('name', 'asc');
         }
-        
+
         $players = $query->paginate(12)->withQueryString();
-        
+
         // Get all roles for filtering
         $positions = GamePosition::orderBy('name')->get();
-        
+
         // Get all local bodies for filtering
         $localBodies = LocalBody::orderBy('name')->get();
-        
+
         return view('players.index', compact('players', 'positions', 'localBodies'));
     }
 
@@ -63,7 +63,7 @@ class PlayerController extends Controller
             return redirect()->route('players.index')
                 ->with('error', 'You do not have permission to create players.');
         }
-        
+
         $positions = GamePosition::orderBy('name')->get();
         $localBodies = LocalBody::with('district')->get();
         return view('players.create', compact('positions', 'localBodies'));
@@ -95,12 +95,12 @@ class PlayerController extends Controller
         // Check if there's a league context and add player to league
         if ($request->has('league_slug')) {
             $league = League::where('slug', $request->league_slug)->firstOrFail();
-            
+
             // Check if player is not already in this league
             $existingPlayer = LeaguePlayer::where('user_id', $player->id)
                 ->where('league_id', $league->id)
                 ->first();
-                
+
             if (!$existingPlayer) {
                 LeaguePlayer::create([
                     'user_id' => $player->id,
@@ -109,7 +109,7 @@ class PlayerController extends Controller
                     'base_price' => $league->player_reg_fee,
                     'retention' => false,
                 ]);
-                
+
                 return redirect()->route('league-players.index', $league)
                     ->with('success', 'Player created and added to league successfully!');
             }
@@ -118,6 +118,32 @@ class PlayerController extends Controller
         return redirect()->route('players.show', $player)
             ->with('success', 'Player created successfully!');
     }
+
+    public function register(Request $request, League $league)
+    {
+        // Check if already registered
+        $existing = LeaguePlayer::where('user_id', auth()->id())
+            ->where('league_id', $league->id)
+            ->first();
+
+        if ($existing) {
+            return back()->with('info', 'You are already registered in this league.');
+        }
+
+        LeaguePlayer::create([
+            'user_id' => auth()->id(),
+            'league_id' => $league->id,
+            'status' => 'available',
+            'base_price' => $league->player_reg_fee,
+            'retention' => false,
+        ]);
+
+        return redirect()->route('league-players.index', $league)
+            ->with('success', 'You have registered for this league!');
+    }
+
+
+
 
     /**
      * Display the specified player.
@@ -176,7 +202,7 @@ class PlayerController extends Controller
         $player->pin = $validated['pin'];
         $player->email = $validated['email'] ?? null;
         $player->local_body_id = $validated['local_body_id'] ?? null;
-        
+
         // Only admin can change role
         if (Auth::user()->isOrganizer() && isset($validated['position_id'])) {
             $player->position_id = $validated['position_id'];
