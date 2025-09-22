@@ -67,6 +67,7 @@ Route::put('players/{player}', [PlayerController::class, 'update'])->name('playe
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
 Route::post('leagues/{league}/players/register', [PlayerController::class, 'register'])
     ->name('league-players.register');
+    
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');

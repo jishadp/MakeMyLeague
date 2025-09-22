@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LocalBody;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRole;
@@ -21,14 +22,15 @@ class RoleSelectionController extends Controller
         }
 
         $user = Auth::user();
-        
+
         // Check if user already has a role assigned
         if ($user->roles()->exists()) {
             return redirect()->route('dashboard');
         }
 
         $roles = Role::orderBy('name')->get();
-        return view('role-selection', compact('roles'));
+        $localBodies = LocalBody::all();
+        return view('role-selection', compact('roles', 'localBodies'));
     }
 
     /**
@@ -42,7 +44,7 @@ class RoleSelectionController extends Controller
         }
 
         $user = Auth::user();
-        
+
         // Check if user already has a role assigned
         if ($user->roles()->exists()) {
             return redirect()->route('dashboard');
@@ -56,6 +58,10 @@ class RoleSelectionController extends Controller
         UserRole::create([
             'user_id'   => $user->id,
             'role_id'   => $request->role_id,
+        ]);
+
+        $user->update([
+            'local_body_id' => $request->local_body_id ?? null,
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Role selected successfully!');

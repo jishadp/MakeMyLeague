@@ -71,6 +71,7 @@
 
                         </div>
 
+
                         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <!-- Mobile: 2 buttons per row -->
                             <div class="grid grid-cols-2 gap-3 sm:hidden">
@@ -104,8 +105,13 @@
                                         Ownership
                                     </button>
                                 @endif
-
+ @if (session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-800 p-4 mb-6 rounded-xl shadow-md animate-fadeInUp">
+                    {{ session('success') }}
+                </div>
+            @endif
                                 @if (auth()->user()->isPlayer())
+                                  
                                     <div class="flex gap-3">
                                         <button type="button" onclick="openConfirmModal()"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
@@ -219,6 +225,7 @@
                                         @endphp
 
                                         @if (!$existingPlayer)
+                                        
                                             <button onclick="openRegistrationModal()"
                                                 class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
@@ -260,6 +267,7 @@
                                             </span>
                                         @endif
                                     </div>
+
                                 @endif
                             </div>
                         </div>
@@ -954,7 +962,7 @@
                     class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                     Cancel
                 </button>
-                <form method="POST"  action="{{ route('league-players.register', ['league' => $league->slug]) }}">
+                <form method="POST" action="{{ route('league-players.register', ['league' => $league->slug]) }}">
                     @csrf
                     <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                         Yes, Register

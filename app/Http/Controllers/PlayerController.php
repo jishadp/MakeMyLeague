@@ -130,15 +130,14 @@ class PlayerController extends Controller
             return back()->with('info', 'You are already registered in this league.');
         }
 
-        LeaguePlayer::create([
+        $league=LeaguePlayer::create([
             'user_id' => auth()->id(),
             'league_id' => $league->id,
-            'status' => 'available',
+            'status' => 'pending',
             'base_price' => $league->player_reg_fee,
             'retention' => false,
         ]);
-
-        return redirect()->route('league-players.index', $league)
+        return view('players.registration-success')
             ->with('success', 'You have registered for this league!');
     }
 

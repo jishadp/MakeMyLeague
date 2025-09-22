@@ -81,7 +81,7 @@
 
                             <input type="text" name="start_date" id="start_date" value="{{ old('start_date') }}"
                                 required placeholder="Select start date" autocomplete="off"
-                                class="flatpickr w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
+                                class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -94,12 +94,13 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
                         <div class="relative">
                             <input type="text" name="end_date" id="end_date" value="{{ old('end_date') }}" required
-                                readonly placeholder="Select end date" autocomplete="off"
-                                class="flatpickr w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
+                                placeholder="Select end date" autocomplete="off"
+                                class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4 pr-10 cursor-pointer">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -378,17 +379,23 @@
     </div>
 @endsection
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/css/bootstrap-datepicker.min.css"
+        rel="stylesheet">
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/flatpickr/flatpickr.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            flatpickr('.flatpickr', {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                enableTime: false
+            $('#start_date, #end_date').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
             });
         });
     </script>
