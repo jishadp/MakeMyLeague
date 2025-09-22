@@ -170,6 +170,22 @@ class League extends Model
     }
 
     /**
+     * Get the league groups for this league.
+     */
+    public function leagueGroups(): HasMany
+    {
+        return $this->hasMany(\App\Models\LeagueGroup::class);
+    }
+
+    /**
+     * Get the fixtures for this league.
+     */
+    public function fixtures(): HasMany
+    {
+        return $this->hasMany(\App\Models\Fixture::class);
+    }
+
+    /**
      * Get the next minimum bid amount based on current bid and increment structure.
      */
     public function getNextMinimumBid($currentBid)

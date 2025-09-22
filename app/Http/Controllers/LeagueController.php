@@ -74,8 +74,9 @@ class LeagueController
         // Get counts for organizer role
         $leagueTeamsCount = $league->leagueTeams()->count();
         $leaguePlayersCount = $league->leaguePlayers()->count();
+        $fixturesCount = $league->fixtures()->count();
         
-        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount'));
+        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount'));
     }
 
     /**

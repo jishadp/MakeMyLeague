@@ -118,4 +118,12 @@ Route::middleware('auth')->group(function () {
         Route::post('call', [AuctionController::class, 'call'])->name('call');
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
+
+    // Tournament setup routes
+    Route::prefix('leagues/{league}')->name('leagues.')->group(function () {
+        Route::get('tournament-setup', [\App\Http\Controllers\TournamentSetupController::class, 'index'])->name('tournament-setup');
+        Route::post('tournament-setup/groups', [\App\Http\Controllers\TournamentSetupController::class, 'createGroups'])->name('tournament-setup.groups');
+        Route::post('tournament-setup/fixtures', [\App\Http\Controllers\TournamentSetupController::class, 'generateFixtures'])->name('tournament-setup.fixtures');
+        Route::get('fixtures', [\App\Http\Controllers\TournamentSetupController::class, 'fixtures'])->name('fixtures');
+    });
 });

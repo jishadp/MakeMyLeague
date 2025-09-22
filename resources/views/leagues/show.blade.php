@@ -342,7 +342,44 @@
                                     </div>
                                 </a>
 
-                                <!-- Auction Card -->
+                                <!-- Tournament Setup / Auction Card -->
+                                @if($league->status === 'auction_completed')
+                                <a href="{{ route('leagues.tournament-setup', $league->slug) }}"
+                                    class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 text-green-700 rounded-xl hover:from-green-100 hover:to-emerald-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-green-100 hover:border-green-200 overflow-hidden">
+
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 opacity-5">
+                                        <div
+                                            class="absolute top-2 right-2 w-12 h-12 bg-green-600 rounded-full transform translate-x-6 -translate-y-6">
+                                        </div>
+                                        <div
+                                            class="absolute bottom-2 left-2 w-8 h-8 bg-emerald-400 rounded-full transform -translate-x-4 translate-y-4">
+                                        </div>
+                                    </div>
+
+                                    <!-- Icon Container -->
+                                    <div
+                                        class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                            </path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="relative z-10 text-center">
+                                        <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">Tournament</h3>
+                                        <div class="flex items-center justify-center">
+                                            <span
+                                                class="text-xs text-green-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                Setup Groups
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                                @else
                                 <a href="{{ route('auction.index', $league->slug) }}"
                                     class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
 
@@ -378,7 +415,45 @@
                                         </div>
                                     </div>
                                 </a>
+                                @endif
 
+                                @if($fixturesCount > 0)
+                                <!-- Fixtures Card -->
+                                <a href="{{ route('leagues.fixtures', $league) }}"
+                                    class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 text-orange-700 rounded-xl hover:from-orange-100 hover:to-amber-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-orange-100 hover:border-orange-200 overflow-hidden">
+
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 opacity-5">
+                                        <div
+                                            class="absolute top-1 left-1 w-16 h-16 bg-orange-600 rounded-full transform -translate-x-8 -translate-y-8">
+                                        </div>
+                                        <div
+                                            class="absolute bottom-1 right-1 w-10 h-10 bg-amber-400 rounded-full transform translate-x-5 translate-y-5">
+                                        </div>
+                                    </div>
+
+                                    <!-- Icon Container -->
+                                    <div
+                                        class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-12">
+                                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="relative z-10 text-center">
+                                        <h3 class="text-sm sm:text-base font-semibold text-orange-800 mb-1">Fixtures</h3>
+                                        <div class="flex items-center justify-center">
+                                            <span
+                                                class="text-xs text-orange-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                {{ $fixturesCount }} {{ Str::plural('Match', $fixturesCount) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                                @else
                                 <!-- Auction Rules Card -->
                                 <button onclick="openAuctionRulesModal()"
                                     class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 text-purple-700 rounded-xl hover:from-purple-100 hover:to-violet-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-purple-100 hover:border-purple-200 cursor-pointer overflow-hidden">
@@ -414,6 +489,7 @@
                                         </div>
                                     </div>
                                 </button>
+                                @endif
                             </div>
                         </div>
                     @endif
