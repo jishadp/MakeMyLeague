@@ -98,26 +98,33 @@ class LeagueMatchController extends Controller
 
     private function generateGroupFixtures(LeagueGroup $group, string $format)
     {
-        $teams = $group->leagueTeams->toArray();
+        $teams = $group->leagueTeams->pluck('id')->toArray();
+        $teamCount = count($teams);
         $fixtures = [];
 
-        for ($i = 0; $i < count($teams); $i++) {
-            for ($j = $i + 1; $j < count($teams); $j++) {
+        if ($teamCount < 2) {
+            return; // Need at least 2 teams
+        }
+
+        // Single round-robin: each team plays every other team once
+        for ($i = 0; $i < $teamCount; $i++) {
+            for ($j = $i + 1; $j < $teamCount; $j++) {
                 $fixtures[] = [
                     'league_id' => $group->league_id,
                     'league_group_id' => $group->id,
-                    'home_team_id' => $teams[$i]['id'],
-                    'away_team_id' => $teams[$j]['id'],
+                    'home_team_id' => $teams[$i],
+                    'away_team_id' => $teams[$j],
                     'match_type' => 'group_stage',
                     'status' => 'unscheduled'
                 ];
 
+                // Double round-robin: add return fixture
                 if ($format === 'double_round_robin') {
                     $fixtures[] = [
                         'league_id' => $group->league_id,
                         'league_group_id' => $group->id,
-                        'home_team_id' => $teams[$j]['id'],
-                        'away_team_id' => $teams[$i]['id'],
+                        'home_team_id' => $teams[$j],
+                        'away_team_id' => $teams[$i],
                         'match_type' => 'group_stage',
                         'status' => 'unscheduled'
                     ];
@@ -125,13 +132,16 @@ class LeagueMatchController extends Controller
             }
         }
 
+        // Add slug and timestamps
         foreach ($fixtures as &$fixture) {
             $fixture['slug'] = Str::slug($group->league->slug . '-fixture-' . uniqid());
             $fixture['created_at'] = now();
             $fixture['updated_at'] = now();
         }
 
-        Fixture::insert($fixtures);
+        if (!empty($fixtures)) {
+            Fixture::insert($fixtures);
+        }
     }
 
     public function fixtures(League $league)
@@ -148,6 +158,43 @@ class LeagueMatchController extends Controller
             ->groupBy('leagueGroup.name');
 
         return view('leagues.fixtures.index', compact('league', 'fixtures'));
+    }
+
+    public function createFixture(Request $request, League $league)
+    {
+        if ($league->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'match_type' => 'required|in:group_stage,quarter_final,semi_final,final',
+            'league_group_id' => 'nullable|exists:league_groups,id',
+            'home_team_id' => 'required|exists:league_teams,id',
+            'away_team_id' => 'required|exists:league_teams,id|different:home_team_id',
+            'match_date' => 'nullable|date',
+            'match_time' => 'nullable|date_format:H:i',
+            'venue' => 'nullable|string|max:255'
+        ]);
+
+        $status = ($request->match_date && $request->match_time) ? 'scheduled' : 'unscheduled';
+
+        $fixture = $league->fixtures()->create([
+            'slug' => Str::slug($league->slug . '-fixture-' . uniqid()),
+            'match_type' => $request->match_type,
+            'league_group_id' => $request->league_group_id,
+            'home_team_id' => $request->home_team_id,
+            'away_team_id' => $request->away_team_id,
+            'match_date' => $request->match_date,
+            'match_time' => $request->match_time,
+            'venue' => $request->venue,
+            'status' => $status
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Fixture created successfully!',
+            'fixture' => $fixture
+        ]);
     }
 
     public function updateFixture(Request $request, League $league, Fixture $fixture)
@@ -173,5 +220,24 @@ class LeagueMatchController extends Controller
             'success' => true,
             'message' => 'Fixture updated successfully!'
         ]);
+    }
+
+    public function exportPdf(League $league)
+    {
+        if ($league->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to league');
+        }
+
+        $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
+        $fixtures = $league->fixtures()
+            ->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])
+            ->orderBy('match_type')
+            ->orderBy('league_group_id')
+            ->orderBy('match_date')
+            ->get();
+
+        $pdf = \PDF::loadView('leagues.fixtures.pdf', compact('league', 'groups', 'fixtures'));
+        
+        return $pdf->download($league->name . '_fixtures.pdf');
     }
 }

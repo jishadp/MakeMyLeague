@@ -47,7 +47,7 @@ class PostAuctionTestSeeder extends Seeder
             'season' => 1,
             'start_date' => now()->addDays(30),
             'end_date' => now()->addDays(60),
-            'max_teams' => 4,
+            'max_teams' => 8,
             'max_team_players' => 5,
             'team_reg_fee' => 1000,
             'player_reg_fee' => 500,
@@ -55,8 +55,11 @@ class PostAuctionTestSeeder extends Seeder
             'status' => 'auction_completed'
         ]);
 
-        // Create 4 teams
-        $teamNames = ['Mumbai Warriors', 'Delhi Capitals', 'Chennai Kings', 'Bangalore Royals'];
+        // Create 8 teams
+        $teamNames = [
+            'Mumbai Warriors', 'Delhi Capitals', 'Chennai Kings', 'Bangalore Royals',
+            'Kolkata Knights', 'Punjab Lions', 'Rajasthan Riders', 'Hyderabad Hunters'
+        ];
         $teams = [];
 
         foreach ($teamNames as $teamName) {
@@ -82,12 +85,16 @@ class PostAuctionTestSeeder extends Seeder
             $teams[] = $leagueTeam;
         }
 
-        // Create 20 players (5 per team)
+        // Create 40 players (5 per team)
         $playerNames = [
             'Virat Kohli', 'Rohit Sharma', 'MS Dhoni', 'Hardik Pandya', 'Jasprit Bumrah',
             'KL Rahul', 'Rishabh Pant', 'Shikhar Dhawan', 'Bhuvneshwar Kumar', 'Yuzvendra Chahal',
             'Ravindra Jadeja', 'Mohammed Shami', 'Shreyas Iyer', 'Suryakumar Yadav', 'Ishan Kishan',
-            'Axar Patel', 'Washington Sundar', 'Deepak Chahar', 'Prithvi Shaw', 'Devdutt Padikkal'
+            'Axar Patel', 'Washington Sundar', 'Deepak Chahar', 'Prithvi Shaw', 'Devdutt Padikkal',
+            'Sanju Samson', 'Quinton de Kock', 'David Warner', 'Kane Williamson', 'Trent Boult',
+            'Kagiso Rabada', 'Andre Russell', 'Sunil Narine', 'Eoin Morgan', 'Pat Cummins',
+            'Glenn Maxwell', 'AB de Villiers', 'Faf du Plessis', 'Dwayne Bravo', 'Ambati Rayudu',
+            'Chris Gayle', 'Nicholas Pooran', 'Mohammed Siraj', 'Rashid Khan', 'Jonny Bairstow'
         ];
 
         foreach ($teams as $index => $leagueTeam) {
@@ -120,7 +127,7 @@ class PostAuctionTestSeeder extends Seeder
 
         $this->command->info('Post-auction test data created successfully!');
         $this->command->info("League: {$league->name} (Status: {$league->status})");
-        $this->command->info("Teams: 4 teams with 5 players each");
+        $this->command->info("Teams: 8 teams with 5 players each");
         $this->command->info("Organizer: {$organizer->name} (ID: {$organizer->id})");
     }
 }

@@ -13,7 +13,14 @@
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Tournament Fixtures</h1>
                         <p class="text-gray-600">{{ $league->name }} - Season {{ $league->season }}</p>
                     </div>
-                    <div class="w-full sm:w-auto">
+                    <div class="w-full sm:w-auto flex gap-2">
+                        <a href="{{ route('leagues.fixtures.pdf', $league) }}" 
+                           class="inline-flex items-center justify-center px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg shadow-sm hover:bg-red-700 transition-colors text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Download PDF
+                        </a>
                         <a href="{{ route('leagues.show', $league) }}" 
                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
