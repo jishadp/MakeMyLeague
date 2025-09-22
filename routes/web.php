@@ -119,11 +119,13 @@ Route::middleware('auth')->group(function () {
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
 
-    // Tournament setup routes
+    // League match setup routes
     Route::prefix('leagues/{league}')->name('leagues.')->group(function () {
-        Route::get('tournament-setup', [\App\Http\Controllers\TournamentSetupController::class, 'index'])->name('tournament-setup');
-        Route::post('tournament-setup/groups', [\App\Http\Controllers\TournamentSetupController::class, 'createGroups'])->name('tournament-setup.groups');
-        Route::post('tournament-setup/fixtures', [\App\Http\Controllers\TournamentSetupController::class, 'generateFixtures'])->name('tournament-setup.fixtures');
-        Route::get('fixtures', [\App\Http\Controllers\TournamentSetupController::class, 'fixtures'])->name('fixtures');
+        Route::get('league-match', [\App\Http\Controllers\LeagueMatchController::class, 'index'])->name('league-match');
+        Route::post('league-match/groups', [\App\Http\Controllers\LeagueMatchController::class, 'createGroups'])->name('league-match.groups');
+        Route::post('league-match/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'generateFixtures'])->name('league-match.fixtures');
+        Route::get('league-match/fixture-setup', [\App\Http\Controllers\LeagueMatchController::class, 'fixtureSetup'])->name('league-match.fixture-setup');
+        Route::patch('fixtures/{fixture}/update', [\App\Http\Controllers\LeagueMatchController::class, 'updateFixture'])->name('fixtures.update');
+        Route::get('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('fixtures');
     });
 });

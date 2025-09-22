@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class TournamentSetupController extends Controller
+class LeagueMatchController extends Controller
 {
     public function index(League $league)
     {
@@ -21,13 +21,32 @@ class TournamentSetupController extends Controller
 
         if ($league->status !== 'auction_completed') {
             return redirect()->route('leagues.show', $league)
-                ->with('error', 'Tournament setup is only available after auction completion.');
+                ->with('error', 'League match setup is only available after auction completion.');
         }
 
         $leagueTeams = $league->leagueTeams()->with('team')->get();
         $existingGroups = $league->leagueGroups()->with('leagueTeams.team')->get();
+        
+        // Get teams that are not assigned to any group
+        $assignedTeamIds = $existingGroups->flatMap(function ($group) {
+            return $group->leagueTeams->pluck('id');
+        })->toArray();
+        
+        $availableTeams = $leagueTeams->whereNotIn('id', $assignedTeamIds);
 
-        return view('leagues.tournament-setup.index', compact('league', 'leagueTeams', 'existingGroups'));
+        return view('leagues.league-match.index', compact('league', 'leagueTeams', 'existingGroups', 'availableTeams'));
+    }
+
+    public function fixtureSetup(League $league)
+    {
+        if ($league->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to league');
+        }
+
+        $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
+        $fixtures = $league->fixtures()->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])->get();
+
+        return view('leagues.league-match.fixture-setup', compact('league', 'groups', 'fixtures'));
     }
 
     public function createGroups(CreateGroupsRequest $request, League $league)
@@ -129,5 +148,30 @@ class TournamentSetupController extends Controller
             ->groupBy('leagueGroup.name');
 
         return view('leagues.fixtures.index', compact('league', 'fixtures'));
+    }
+
+    public function updateFixture(Request $request, League $league, Fixture $fixture)
+    {
+        if ($league->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'match_date' => 'nullable|date',
+            'match_time' => 'nullable|date_format:H:i',
+            'venue' => 'nullable|string|max:255'
+        ]);
+
+        $fixture->update($request->only(['match_date', 'match_time', 'venue']));
+
+        // Update status to scheduled if date and time are set
+        if ($fixture->match_date && $fixture->match_time && $fixture->status === 'unscheduled') {
+            $fixture->update(['status' => 'scheduled']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Fixture updated successfully!'
+        ]);
     }
 }

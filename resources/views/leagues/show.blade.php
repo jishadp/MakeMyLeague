@@ -342,9 +342,9 @@
                                     </div>
                                 </a>
 
-                                <!-- Tournament Setup / Auction Card -->
+                                <!-- League Match Setup / Auction Card -->
                                 @if($league->status === 'auction_completed')
-                                <a href="{{ route('leagues.tournament-setup', $league->slug) }}"
+                                <a href="{{ route('leagues.league-match', $league->slug) }}"
                                     class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 text-green-700 rounded-xl hover:from-green-100 hover:to-emerald-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-green-100 hover:border-green-200 overflow-hidden">
 
                                     <!-- Background Pattern -->
@@ -370,7 +370,7 @@
 
                                     <!-- Content -->
                                     <div class="relative z-10 text-center">
-                                        <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">Tournament</h3>
+                                        <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">League Match</h3>
                                         <div class="flex items-center justify-center">
                                             <span
                                                 class="text-xs text-green-600 font-medium bg-white/60 px-2 py-1 rounded-full">

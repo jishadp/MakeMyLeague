@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tournament Setup - ' . $league->name)
+@section('title', 'League Match Setup - ' . $league->name)
 
 @section('content')
 <div class="py-2 bg-gray-50 min-h-screen">
@@ -10,7 +10,7 @@
                 <!-- Header Section -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                     <div class="mb-3 sm:mb-0">
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Tournament Setup</h1>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">League Match Setup</h1>
                         <p class="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">{{ $league->name }} - Season {{ $league->season }}</p>
                     </div>
                     <span class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-green-100 text-green-800 self-start">
@@ -37,13 +37,47 @@
                     <!-- Step 1: Create Groups -->
                     <div id="step-1" class="step-content">
                         <div class="bg-gray-50 p-3 sm:p-6 rounded-xl">
-                            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Create Tournament Groups</h3>
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Create League Match Groups</h3>
                             <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                                <span class="hidden sm:inline">Organize teams into groups for the tournament. Drag and drop teams to assign them to groups.</span>
+                                <span class="hidden sm:inline">Organize teams into groups for league matches. Drag and drop teams to assign them to groups.</span>
                                 <span class="sm:hidden">Organize teams into groups. Click "Add" button next to each team to assign them.</span>
                             </p>
                             
-                            <div class="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
+                            @if($existingGroups->count() > 0)
+                                <!-- Existing Groups Display -->
+                                <div id="existing-groups-display" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <h4 class="text-base font-semibold text-blue-900 mb-3">Current Groups</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        @foreach($existingGroups as $group)
+                                            <div class="bg-white p-3 rounded-lg border border-blue-100">
+                                                <h5 class="font-medium text-gray-900 mb-2">{{ $group->name }}</h5>
+                                                <div class="space-y-1">
+                                                    @foreach($group->leagueTeams as $leagueTeam)
+                                                        <div class="text-sm text-gray-600">• {{ $leagueTeam->team->name }}</div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                                        <a href="{{ route('leagues.league-match.fixture-setup', $league) }}" 
+                                           class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            Setup Fixtures
+                                        </a>
+                                        <button onclick="editGroups()" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            Edit Groups
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <div id="group-setup-section" class="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
                                 <!-- Available Teams Section -->
                                 <div class="bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
@@ -59,7 +93,7 @@
                                         </div>
                                     </div>
                                     <div id="available-teams" class="space-y-2 max-h-64 sm:max-h-80 overflow-y-auto">
-                                        @foreach($leagueTeams as $leagueTeam)
+                                        @foreach($availableTeams as $leagueTeam)
                                         <div class="team-card p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" 
                                              data-team-id="{{ $leagueTeam->id }}" 
                                              data-team-name="{{ $leagueTeam->team->name }}">
@@ -397,7 +431,7 @@ function saveGroups() {
         }
     }
     
-    fetch('{{ route("leagues.tournament-setup.groups", $league) }}', {
+    fetch('{{ route("leagues.league-match.groups", $league) }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -432,7 +466,7 @@ function generateFixtures() {
     `;
     generateBtn.disabled = true;
     
-    fetch('{{ route("leagues.tournament-setup.fixtures", $league) }}', {
+    fetch('{{ route("leagues.league-match.fixtures", $league) }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -448,14 +482,14 @@ function generateFixtures() {
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                Tournament Setup Complete!
+                Fixtures Generated Successfully!
             `;
             generateBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
             generateBtn.classList.add('bg-green-600');
             
-            // Redirect after showing success
+            // Redirect to fixture setup page
             setTimeout(() => {
-                window.location.href = '{{ route("leagues.show", $league) }}';
+                window.location.href = '{{ route("leagues.league-match.fixture-setup", $league) }}';
             }, 1500);
         } else {
             alert('Error: ' + data.message);
@@ -489,6 +523,88 @@ function showStep(stepNumber) {
     });
 }
 
+function editGroups() {
+    // Hide existing groups display
+    const existingGroupsDiv = document.getElementById('existing-groups-display');
+    if (existingGroupsDiv) {
+        existingGroupsDiv.style.display = 'none';
+    }
+    
+    // Load existing groups into the editor
+    loadExistingGroupsForEditing();
+}
+
+function loadExistingGroupsForEditing() {
+    const existingGroups = @json($existingGroups);
+    const groupsContainer = document.getElementById('groups-container');
+    
+    // Clear existing groups in editor
+    groupsContainer.innerHTML = '';
+    groupCount = 0;
+    
+    // Load each existing group
+    existingGroups.forEach((group, index) => {
+        groupCount++;
+        const groupHtml = `
+            <div class="group-container border border-gray-300 rounded-lg p-3 sm:p-4 bg-gray-50" data-group-id="${groupCount}">
+                <div class="flex items-center justify-between mb-3">
+                    <input type="text" placeholder="Group Name" class="group-name font-medium text-gray-900 border-0 bg-transparent focus:ring-0 p-0 text-sm sm:text-base flex-1 mr-2" value="${group.name}">
+                    <button onclick="removeGroup(${groupCount})" class="text-red-600 hover:text-red-800 flex-shrink-0 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="group-teams min-h-[80px] sm:min-h-[100px] border-2 border-dashed border-gray-300 rounded-lg p-2 sm:p-3 bg-white" ondrop="drop(event)" ondragover="allowDrop(event)">
+                </div>
+            </div>
+        `;
+        groupsContainer.insertAdjacentHTML('beforeend', groupHtml);
+        
+        // Create team elements for this group
+        const groupContainer = document.querySelector(`[data-group-id="${groupCount}"] .group-teams`);
+        group.league_teams.forEach(leagueTeam => {
+            // Create team element if it doesn't exist in available teams
+            let teamElement = document.querySelector(`[data-team-id="${leagueTeam.id}"]`);
+            if (!teamElement) {
+                const teamHtml = `
+                    <div class="team-card p-2.5 sm:p-3 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" 
+                         data-team-id="${leagueTeam.id}" 
+                         data-team-name="${leagueTeam.team.name}" 
+                         draggable="true" 
+                         id="team-existing-${leagueTeam.id}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center min-w-0 flex-1">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                                    <svg class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="font-medium text-gray-900 text-sm sm:text-base truncate">${leagueTeam.team.name}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                groupContainer.insertAdjacentHTML('beforeend', teamHtml);
+                teamElement = document.querySelector(`#team-existing-${leagueTeam.id}`);
+                
+                // Add drag event listener
+                teamElement.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                });
+            } else {
+                // Move existing team element
+                teamElement.className = 'team-card p-2.5 sm:p-3 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors';
+                const addButton = teamElement.querySelector('button');
+                if (addButton) addButton.remove();
+                groupContainer.appendChild(teamElement);
+            }
+        });
+    });
+    
+    updatePopupGroupOptions();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const teamCards = document.querySelectorAll('.team-card');
     teamCards.forEach((card, index) => {
@@ -502,8 +618,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('team-search').addEventListener('input', searchTeams);
     
-    addGroup();
-    addGroup();
+    // Only add default groups if no existing groups
+    const existingGroups = {{ $existingGroups->count() }};
+    if (existingGroups === 0) {
+        addGroup();
+        addGroup();
+    } else {
+        // Show existing groups display by default
+        const existingGroupsDiv = document.getElementById('existing-groups-display');
+        if (existingGroupsDiv) {
+            existingGroupsDiv.style.display = 'block';
+        }
+    }
 });
 </script>
 @endsection
