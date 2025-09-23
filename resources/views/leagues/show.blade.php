@@ -105,13 +105,13 @@
                                         Ownership
                                     </button>
                                 @endif
- @if (session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-800 p-4 mb-6 rounded-xl shadow-md animate-fadeInUp">
-                    {{ session('success') }}
-                </div>
-            @endif
+                                @if (session('success'))
+                                    <div
+                                        class="bg-green-50 border border-green-200 text-green-800 p-4 mb-6 rounded-xl shadow-md animate-fadeInUp">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
                                 @if (auth()->user()->isPlayer())
-                                  
                                     <div class="flex gap-3">
                                         <button type="button" onclick="openConfirmModal()"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
@@ -225,7 +225,6 @@
                                         @endphp
 
                                         @if (!$existingPlayer)
-                                        
                                             <button onclick="openRegistrationModal()"
                                                 class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"

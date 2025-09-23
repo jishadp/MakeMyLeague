@@ -213,6 +213,16 @@
                                         {{ $leagueTeam->players->count() }} / {{ $league->max_team_players }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                         @if($leagueTeam->status === 'pending')
+                                            <form action="{{ route('league-teams.updateStatus', [$league, $leagueTeam]) }}" 
+                                                  method="POST" class="inline" 
+                                                  onsubmit="return confirm('Approve this Team?')">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="available">
+                                                <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('league-teams.show', [$league, $leagueTeam]) }}"
                                            class="text-indigo-600 hover:text-indigo-900">View</a>
                                         <a href="{{ route('league-teams.edit', [$league, $leagueTeam]) }}"

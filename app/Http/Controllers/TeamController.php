@@ -96,6 +96,7 @@ class TeamController extends Controller
                     'team_id' => $team->id,
                     'league_id' => $league->id,
                     'wallet_balance' => $league->team_wallet_limit,
+                    'status'=> 'pending',
                     'created_by' => Auth::id(),
                 ];
 
