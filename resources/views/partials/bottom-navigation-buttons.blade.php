@@ -48,8 +48,8 @@
                 <div class="w-16 h-6 opacity-0">Spacer</div>
             </div>
 
-            <!-- Players Button -->
-            <a href="{{ route('players.index') }}"
+            <!-- Profile Button -->
+            <a href="{{ route('profile.show') }}"
                class="nav-item flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@
                      viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-xs mt-1">Players</span>
+                <span class="text-xs mt-1">Profile</span>
             </a>
 
             <!-- Auction Button -->

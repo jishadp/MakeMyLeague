@@ -71,6 +71,10 @@ Route::post('leagues/{league}/players/register', [PlayerController::class, 'regi
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');
     Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index')->middleware('has.role');
+    
+    // Profile routes
+    Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
