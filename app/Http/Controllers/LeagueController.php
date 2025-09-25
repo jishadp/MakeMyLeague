@@ -23,7 +23,7 @@ class LeagueController
      */
     public function index(): View
     {
-        $leagues = League::with(['game', 'organizer', 'localBody.district'])->get();
+        $leagues = League::with(['game', 'organizer', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->get();
         return view('leagues.index', compact('leagues'));
     }
 

@@ -77,8 +77,8 @@
                                     <p><span class="font-medium">⏳ Duration:</span>
                                         {{ $league->start_date->format('M d, Y') }} -
                                         {{ $league->end_date->format('M d, Y') }}</p>
-                                    <p><span class="font-medium">👥 Teams:</span> {{ $league->max_teams }} (max
-                                        {{ $league->max_team_players }} players each)</p>
+                                    <p><span class="font-medium">👥 Teams:</span> 0/{{ $league->max_teams }}</p>
+                                    <p><span class="font-medium">🏏 Players:</span> 0/{{ $league->max_teams * $league->max_team_players }} ({{ $league->max_team_players }} per team)</p>
 
                                     <!-- Venue Details -->
                                     @if ($league->localBody)

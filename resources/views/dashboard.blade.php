@@ -111,6 +111,8 @@
                                     <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name }}</p>
                                     <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
                                     <p><span class="font-medium">⏳ Duration:</span> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</p>
+                                    <p><span class="font-medium">👥 Teams:</span> 0/{{ $league->max_teams }}</p>
+                                    <p><span class="font-medium">🏏 Players:</span> 0/{{ $league->max_teams * $league->max_team_players }}</p>
                                     @if($league->localbody_id)
                                         <p><span class="font-medium">📍 Venue:</span> {{ $league->localBody->name }}</p>
                                     @endif
@@ -184,6 +186,8 @@
                                     <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name }}</p>
                                     <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
                                     <p><span class="font-medium">⏳ Duration:</span> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</p>
+                                    <p><span class="font-medium">👥 Teams:</span> 0/{{ $league->max_teams }}</p>
+                                    <p><span class="font-medium">🏏 Players:</span> 0/{{ $league->max_teams * $league->max_team_players }}</p>
                                     @if($league->localbody_id)
                                         <p><span class="font-medium">📍 Venue:</span> {{ $league->localBody->name }}</p>
                                     @endif
@@ -287,112 +291,99 @@
     @endif
 
     <!-- My League Teams Section -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900">My League Teams</h2>
-                <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                <a href="{{ route('teams.index') }}"
+                   class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Join a Team
+                    My Teams
                 </a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Team Card 1 -->
-                <a href="#" class="block">
+                @forelse($userLeagueTeams as $leaguePlayer)
+                @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->team)
+                @php $team = $leaguePlayer->leagueTeam->team; @endphp
+                <a href="{{ route('teams.show', $team) }}" class="block">
                     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                     <div class="h-48 overflow-hidden relative">
-                        <img src="{{ asset('images/leagueteams.jpg') }}" alt="Royal Challengers" class="w-full h-full object-cover">
+                        @if($team->logo)
+                            <img src="{{ asset($team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/leagueteams.jpg') }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        @endif
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                            <h3 class="text-xl font-bold text-white p-4">Royal Challengers</h3>
+                            <h3 class="text-xl font-bold text-white p-4">{{ $team->name }}</h3>
                         </div>
                         <div class="absolute top-3 right-3">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Royal_Challengers_Bangalore_2020.svg/220px-Royal_Challengers_Bangalore_2020.svg.png" alt="Team Logo" class="w-12 h-12 object-contain bg-white rounded-full p-1">
+                            @if($team->logo)
+                                <img src="{{ asset($team->logo) }}" alt="Team Logo" class="w-12 h-12 object-contain bg-white rounded-full p-1">
+                            @else
+                                <div class="w-12 h-12 bg-white rounded-full p-1 flex items-center justify-center">
+                                    <span class="text-xs font-bold text-gray-600">{{ strtoupper(substr($team->name, 0, 2)) }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Active</span>
-                            <span class="text-gray-600 text-sm">Since 2023</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm
+                                {{
+                                    $leaguePlayer->status === 'sold' ? 'bg-green-100 text-green-800' :
+                                    ($leaguePlayer->status === 'available' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800')
+                                }}">
+                                {{ ucfirst($leaguePlayer->status) }}
+                            </span>
+                            <span class="text-gray-600 text-sm">Since {{ $leaguePlayer->created_at->format('M Y') }}</span>
                         </div>
                         <div class="space-y-2 text-sm text-gray-600">
-                            <p><span class="font-medium">🏆 League:</span> Kochi Premier League</p>
-                            <p><span class="font-medium">👥 Players:</span> 11/15</p>
-                            <p><span class="font-medium">🏏 Role:</span> Batsman</p>
-                            <p><span class="font-medium">🏅 Position:</span> 2nd in league</p>
+                            @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league)
+                                <p><span class="font-medium">🏆 League:</span> {{ $leaguePlayer->leagueTeam->league->name }}</p>
+                            @endif
+                            <p><span class="font-medium">👥 Players:</span> {{ $leaguePlayer->leagueTeam ? $leaguePlayer->leagueTeam->leaguePlayers->where('status', 'sold')->count() : 0 }}/{{ $leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league ? $leaguePlayer->leagueTeam->league->max_team_players : 15 }}</p>
+                            @if($leaguePlayer->player && $leaguePlayer->player->position)
+                                <p><span class="font-medium">🏏 Role:</span> {{ $leaguePlayer->player->position->name }}</p>
+                            @endif
+                            <p><span class="font-medium">📍 Location:</span> {{ $team->localBody->name ?? 'Not specified' }}</p>
                         </div>
                         <div class="mt-6 flex justify-between">
                             <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
-                            <span class="text-gray-500 text-sm">Won 5/7 matches</span>
+                            @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league && $leaguePlayer->leagueTeam->league->status === 'active')
+                                <span class="text-gray-500 text-sm">Active League</span>
+                            @else
+                                <span class="text-gray-500 text-sm">{{ $leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league ? ucfirst($leaguePlayer->leagueTeam->league->status) : 'No League' }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
                 </a>
-
-                <!-- Team Card 2 -->
-                <a href="#" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="{{ asset('images/leagueteams.jpg') }}" alt="Chennai Kings" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                            <h3 class="text-xl font-bold text-white p-4">Chennai Kings</h3>
-                        </div>
-                        <div class="absolute top-3 right-3">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Chennai_Super_Kings_Logo.svg/220px-Chennai_Super_Kings_Logo.svg.png" alt="Team Logo" class="w-12 h-12 object-contain bg-white rounded-full p-1">
-                        </div>
+                @endif
+                @empty
+                <!-- No Teams Message -->
+                <div class="col-span-full bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="mb-4">
+                        <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
                     </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Pending</span>
-                            <span class="text-gray-600 text-sm">Since 2024</span>
-                        </div>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <p><span class="font-medium">🏆 League:</span> South India Tournament</p>
-                            <p><span class="font-medium">👥 Players:</span> 9/15</p>
-                            <p><span class="font-medium">🏏 Role:</span> All-rounder</p>
-                            <p><span class="font-medium">🏅 Position:</span> Registration Phase</p>
-                        </div>
-                        <div class="mt-6 flex justify-between">
-                            <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
-                            <span class="text-gray-500 text-sm">Upcoming season</span>
-                        </div>
-                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">You're not part of any league teams yet</h3>
+                    <p class="text-gray-600 mb-6">Join a league to get assigned to a team</p>
+                    <a href="{{ route('leagues.index') }}"
+                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                        </svg>
+                        Browse Leagues
+                    </a>
                 </div>
-                </a>
-
-                <!-- Team Card 3 -->
-                <a href="#" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="{{ asset('images/leagueteams.jpg') }}" alt="Mumbai Indians" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                            <h3 class="text-xl font-bold text-white p-4">Mumbai Indians</h3>
-                        </div>
-                        <div class="absolute top-3 right-3">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Mumbai_Indians_Logo.svg/220px-Mumbai_Indians_Logo.svg.png" alt="Team Logo" class="w-12 h-12 object-contain bg-white rounded-full p-1">
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">Completed</span>
-                            <span class="text-gray-600 text-sm">2022-2023</span>
-                        </div>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <p><span class="font-medium">🏆 League:</span> National Cricket Cup</p>
-                            <p><span class="font-medium">👥 Players:</span> 15/15</p>
-                            <p><span class="font-medium">🏏 Role:</span> Bowler</p>
-                            <p><span class="font-medium">🏅 Position:</span> Champions</p>
-                        </div>
-                        <div class="mt-6 flex justify-between">
-                            <span class="text-indigo-600 hover:text-indigo-800 font-medium">View Team →</span>
-                            <span class="text-gray-500 text-sm">Won 8/10 matches</span>
-                        </div>
-                    </div>
-                </div>
-                </a>
+                @endforelse
             </div>
         </div>
     </section>

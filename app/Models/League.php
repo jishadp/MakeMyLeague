@@ -262,4 +262,28 @@ class League extends Model
             'completion_percentage' => $totalPlayers > 0 ? round(($soldPlayers / $totalPlayers) * 100, 2) : 0,
         ];
     }
+
+    /**
+     * Get total teams count for this league.
+     */
+    public function getTeamsCount()
+    {
+        return $this->leagueTeams()->count();
+    }
+
+    /**
+     * Get total players count for this league.
+     */
+    public function getPlayersCount()
+    {
+        return $this->leaguePlayers()->count();
+    }
+
+    /**
+     * Get total players capacity (teams × max_team_players).
+     */
+    public function getTotalPlayersCapacity()
+    {
+        return $this->getTeamsCount() * $this->max_team_players;
+    }
 }

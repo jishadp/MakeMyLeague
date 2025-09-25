@@ -16,8 +16,8 @@ class MyLeaguesController extends Controller
             \App\Models\League::where('user_id', $user->id)->with(['game', 'leagueTeams.team'])->get() : 
             collect();
         
-        // Get leagues where user is a player (approved/sold)
-        $playingLeagues = $user->leaguePlayers()->whereIn('status', ['approved', 'sold', 'active'])->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
+        // Get leagues where user is a player (sold/available)
+        $playingLeagues = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
         
         // Get leagues where user has requested to join (pending)
         $requestedLeagues = $user->leaguePlayers()->where('status', 'pending')->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');

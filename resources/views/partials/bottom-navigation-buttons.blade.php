@@ -61,16 +61,16 @@
                 <span class="text-xs mt-1">Profile</span>
             </a>
 
-            <!-- Auction Button -->
-            <a href="{{ route('auctions.index') }}"
+            <!-- My Teams Button -->
+            <a href="{{ route('my-teams') }}"
                class="nav-item flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6 drop-shadow"
                      viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                 </svg>
-                <span class="text-xs mt-1">Auction</span>
+                <span class="text-xs mt-1">My Teams</span>
             </a>
         </div>
     </div>
