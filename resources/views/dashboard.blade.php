@@ -422,10 +422,17 @@
                         <div class="p-6 lg:p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white relative">
                             <div class="flex flex-col items-center text-center">
                                 <div class="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-lg">
-                                    <img src="{{ asset('images/defaultplayer.jpeg') }}"
-                                         alt="{{ $playerInfo->name }}"
-                                         class="w-full h-full object-cover"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @if($playerInfo->photo)
+                                        <img src="{{ asset($playerInfo->photo) }}"
+                                             alt="{{ $playerInfo->name }}"
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @else
+                                        <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                             alt="{{ $playerInfo->name }}"
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @endif
                                     <div class="w-full h-full flex items-center justify-center text-white font-bold text-2xl bg-gradient-to-br from-indigo-500 to-purple-600" style="display: none;">
                                         {{ strtoupper(substr($playerInfo->name, 0, 2)) }}
                                     </div>

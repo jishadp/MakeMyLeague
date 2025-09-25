@@ -36,10 +36,17 @@
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
                 <div class="flex items-center space-x-4">
                     <div class="bg-white bg-opacity-20 rounded-full p-4 overflow-hidden h-24 w-24 flex items-center justify-center">
-                        <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                             alt="{{ $player->name }}" 
-                             class="h-full w-full object-cover rounded-full"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @if($player->photo)
+                            <img src="{{ asset($player->photo) }}" 
+                                 alt="{{ $player->name }}" 
+                                 class="h-full w-full object-cover rounded-full"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @else
+                            <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                 alt="{{ $player->name }}" 
+                                 class="h-full w-full object-cover rounded-full"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @endif
                         <div class="h-full w-full flex items-center justify-center text-white font-bold text-xl" style="display: none;">
                             {{ strtoupper(substr($player->name, 0, 2)) }}
                         </div>

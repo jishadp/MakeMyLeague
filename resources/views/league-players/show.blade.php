@@ -11,10 +11,17 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div class="flex items-center space-x-4">
                     <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <img src="{{ asset('images/defaultplayer.jpeg') }}" 
-                             alt="{{ $leaguePlayer->user->name }}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @if($leaguePlayer->user->photo)
+                            <img src="{{ asset($leaguePlayer->user->photo) }}" 
+                                 alt="{{ $leaguePlayer->user->name }}" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @else
+                            <img src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                 alt="{{ $leaguePlayer->user->name }}" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        @endif
                         <div class="w-full h-full flex items-center justify-center text-white font-bold text-xl" style="display: none;">
                             {{ strtoupper(substr($leaguePlayer->user->name, 0, 2)) }}
                         </div>
