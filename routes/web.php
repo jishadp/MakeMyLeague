@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
     // Profile routes
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    
+    // My Leagues route
+    Route::get('my-leagues', [\App\Http\Controllers\MyLeaguesController::class, 'index'])->name('my-leagues');
 
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
