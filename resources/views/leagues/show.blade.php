@@ -106,9 +106,15 @@
                                 @endif
 
                                 @if (auth()->user()->isPlayer())
-                                    <div class="flex gap-3">
-                                        <button type="button" onclick="openConfirmModal()"
-                                            class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
+                                    @php
+                                        $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
+                                            ->where('league_id', $league->id)
+                                            ->first();
+                                    @endphp
+
+                                    @if (!$existingPlayer)
+                                        <button onclick="openRegistrationModal()"
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-center text-sm">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -116,7 +122,37 @@
                                             </svg>
                                             Register
                                         </button>
-                                    </div>
+                                    @elseif($existingPlayer->status === 'pending')
+                                        <button disabled
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-600 text-white font-medium rounded-lg shadow-sm cursor-not-allowed text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Pending
+                                        </button>
+                                    @elseif(in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
+                                        <span
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Approved
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-600 text-white font-medium rounded-lg text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            {{ ucfirst($existingPlayer->status) }}
+                                        </span>
+                                    @endif
                                 @endif
                                 <a href="{{ route('leagues.index') }}"
                                     class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center text-sm">
@@ -236,11 +272,11 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
-                                                Requested
+                                                Pending
                                             </button>
-                                        @elseif($existingPlayer->status === 'available')
+                                        @elseif(in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
                                             <span
-                                                class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg text-base">
+                                                class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg text-base">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

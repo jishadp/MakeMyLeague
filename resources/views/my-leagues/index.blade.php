@@ -88,7 +88,7 @@
         </div>
         @endif
 
-        @if($playerLeagues->isNotEmpty())
+        @if($playingLeagues->isNotEmpty())
         <div class="mb-12">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 flex items-center">
@@ -100,7 +100,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($playerLeagues as $league)
+                @foreach($playingLeagues as $league)
                 <a href="{{ route('leagues.show', $league) }}" class="block">
                     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
                         <div class="h-40 overflow-hidden relative">
@@ -131,6 +131,59 @@
                                 @if($userPlayer && $userPlayer->leagueTeam)
                                 <p><span class="font-medium">🏏 My Team:</span> {{ $userPlayer->leagueTeam->team->name ?? 'N/A' }}</p>
                                 @endif
+                                <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
+                            </div>
+                            <div class="mt-6">
+                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                    View League →
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($requestedLeagues->isNotEmpty())
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <svg class="w-6 h-6 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                    </svg>
+                    Registration Requested
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($requestedLeagues as $league)
+                <a href="{{ route('leagues.show', $league) }}" class="block">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
+                        <div class="h-40 overflow-hidden relative">
+                            <img src="{{ asset('images/league.jpg') }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                                <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                            </div>
+                            <span class="absolute top-3 right-3 bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                                Pending Approval
+                            </span>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leagueTeams->count() }}</p>
+                                    <p class="text-xs text-gray-600">Teams</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leaguePlayers->count() }}</p>
+                                    <p class="text-xs text-gray-600">Players</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-gray-600">
+                                <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name ?? 'N/A' }}</p>
+                                <p><span class="font-medium">⏳ Status:</span> <span class="text-yellow-600">Awaiting Approval</span></p>
                                 <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
                             </div>
                             <div class="mt-6">
@@ -206,7 +259,7 @@
         </div>
         @endif
 
-        @if($organizedLeagues->isEmpty() && $playerLeagues->isEmpty() && $teamOwnerLeagues->isEmpty())
+        @if($organizedLeagues->isEmpty() && $playingLeagues->isEmpty() && $requestedLeagues->isEmpty() && $teamOwnerLeagues->isEmpty())
         <div class="bg-white rounded-xl shadow-lg p-12 text-center animate-fadeInUp">
             <div class="mb-4">
                 <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
