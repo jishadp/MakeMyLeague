@@ -23,6 +23,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $guarded = [];
+    
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.

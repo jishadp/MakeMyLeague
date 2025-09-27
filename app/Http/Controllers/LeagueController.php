@@ -23,7 +23,7 @@ class LeagueController
      */
     public function index(): View
     {
-        $leagues = League::with(['game', 'organizer', 'localBody.district'])->get();
+        $leagues = League::with(['game', 'organizer', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->get();
         return view('leagues.index', compact('leagues'));
     }
 
@@ -74,8 +74,9 @@ class LeagueController
         // Get counts for organizer role
         $leagueTeamsCount = $league->leagueTeams()->count();
         $leaguePlayersCount = $league->leaguePlayers()->count();
+        $fixturesCount = $league->fixtures()->count();
         
-        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount'));
+        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount'));
     }
 
     /**

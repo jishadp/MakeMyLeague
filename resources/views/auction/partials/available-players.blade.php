@@ -58,10 +58,17 @@
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center space-x-3">
                                 <div class="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                                    <img src="{{ asset('images/defaultplayer.jpeg') }}"
-                                         alt="{{$leaguePlayer->player->name}}"
-                                         class="w-full h-full object-cover"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @if($leaguePlayer->player->photo)
+                                        <img src="{{ asset($leaguePlayer->player->photo) }}"
+                                             alt="{{$leaguePlayer->player->name}}"
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @else
+                                        <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                             alt="{{$leaguePlayer->player->name}}"
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    @endif
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-semibold text-gray-900 text-lg truncate">{{$leaguePlayer->player->name}}</h3>

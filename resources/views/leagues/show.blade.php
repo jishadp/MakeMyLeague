@@ -106,9 +106,15 @@
                                 @endif
 
                                 @if (auth()->user()->isPlayer())
-                                    <div class="flex gap-3">
-                                        <button type="button" onclick="openConfirmModal()"
-                                            class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
+                                    @php
+                                        $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
+                                            ->where('league_id', $league->id)
+                                            ->first();
+                                    @endphp
+
+                                    @if (!$existingPlayer)
+                                        <button onclick="openRegistrationModal()"
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-center text-sm">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -116,7 +122,37 @@
                                             </svg>
                                             Register
                                         </button>
-                                    </div>
+                                    @elseif($existingPlayer->status === 'pending')
+                                        <button disabled
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-yellow-600 text-white font-medium rounded-lg shadow-sm cursor-not-allowed text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Pending
+                                        </button>
+                                    @elseif(in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
+                                        <span
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Approved
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-600 text-white font-medium rounded-lg text-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            {{ ucfirst($existingPlayer->status) }}
+                                        </span>
+                                    @endif
                                 @endif
                                 <a href="{{ route('leagues.index') }}"
                                     class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center text-sm">
@@ -236,11 +272,11 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
-                                                Requested
+                                                Pending
                                             </button>
-                                        @elseif($existingPlayer->status === 'available')
+                                        @elseif(in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
                                             <span
-                                                class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg text-base">
+                                                class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg text-base">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -342,7 +378,44 @@
                                     </div>
                                 </a>
 
-                                <!-- Auction Card -->
+                                <!-- League Match Setup / Auction Card -->
+                                @if($league->status === 'auction_completed')
+                                <a href="{{ route('leagues.league-match', $league->slug) }}"
+                                    class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 text-green-700 rounded-xl hover:from-green-100 hover:to-emerald-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-green-100 hover:border-green-200 overflow-hidden">
+
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 opacity-5">
+                                        <div
+                                            class="absolute top-2 right-2 w-12 h-12 bg-green-600 rounded-full transform translate-x-6 -translate-y-6">
+                                        </div>
+                                        <div
+                                            class="absolute bottom-2 left-2 w-8 h-8 bg-emerald-400 rounded-full transform -translate-x-4 translate-y-4">
+                                        </div>
+                                    </div>
+
+                                    <!-- Icon Container -->
+                                    <div
+                                        class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                            </path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="relative z-10 text-center">
+                                        <h3 class="text-sm sm:text-base font-semibold text-green-800 mb-1">League Match</h3>
+                                        <div class="flex items-center justify-center">
+                                            <span
+                                                class="text-xs text-green-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                Setup Groups
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                                @else
                                 <a href="{{ route('auction.index', $league->slug) }}"
                                     class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
 
@@ -378,7 +451,45 @@
                                         </div>
                                     </div>
                                 </a>
+                                @endif
 
+                                @if($fixturesCount > 0)
+                                <!-- Fixtures Card -->
+                                <a href="{{ route('leagues.fixtures', $league) }}"
+                                    class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 text-orange-700 rounded-xl hover:from-orange-100 hover:to-amber-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-orange-100 hover:border-orange-200 overflow-hidden">
+
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 opacity-5">
+                                        <div
+                                            class="absolute top-1 left-1 w-16 h-16 bg-orange-600 rounded-full transform -translate-x-8 -translate-y-8">
+                                        </div>
+                                        <div
+                                            class="absolute bottom-1 right-1 w-10 h-10 bg-amber-400 rounded-full transform translate-x-5 translate-y-5">
+                                        </div>
+                                    </div>
+
+                                    <!-- Icon Container -->
+                                    <div
+                                        class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:-rotate-12">
+                                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="relative z-10 text-center">
+                                        <h3 class="text-sm sm:text-base font-semibold text-orange-800 mb-1">Fixtures</h3>
+                                        <div class="flex items-center justify-center">
+                                            <span
+                                                class="text-xs text-orange-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                {{ $fixturesCount }} {{ Str::plural('Match', $fixturesCount) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                                @else
                                 <!-- Auction Rules Card -->
                                 <button onclick="openAuctionRulesModal()"
                                     class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 text-purple-700 rounded-xl hover:from-purple-100 hover:to-violet-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-purple-100 hover:border-purple-200 cursor-pointer overflow-hidden">
@@ -414,6 +525,7 @@
                                         </div>
                                     </div>
                                 </button>
+                                @endif
                             </div>
                         </div>
                     @endif

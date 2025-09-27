@@ -70,9 +70,15 @@
                 <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8">
                     <div class="relative flex-shrink-0">
                         <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
-                            <img src="{{ asset('images/defaultplayer.jpeg') }}"
-                                 alt="Player"
-                                 class="w-full h-full object-cover rounded-3xl">
+                            @if(isset($player) && $player->photo)
+                                <img src="{{ asset($player->photo) }}"
+                                     alt="Player"
+                                     class="w-full h-full object-cover rounded-3xl">
+                            @else
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                     alt="Player"
+                                     class="w-full h-full object-cover rounded-3xl">
+                            @endif
                         </div>
                         <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
                             <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">

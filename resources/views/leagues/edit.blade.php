@@ -192,7 +192,8 @@
                             *</label>
                         <input type="number" id="max_teams" name="max_teams"
                             value="{{ old('max_teams', $league->max_teams) }}" min="2" required
-                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4"
+                            onchange="updateTotalPlayers()">
                         @error('max_teams')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -202,7 +203,9 @@
                             Team *</label>
                         <input type="number" id="max_team_players" name="max_team_players"
                             value="{{ old('max_team_players', $league->max_team_players) }}" min="1" required
-                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4"
+                            onchange="updateTotalPlayers()">
+                        <p class="text-sm text-gray-500 mt-1">Total players capacity: <span id="total-players">{{ $league->max_teams * $league->max_team_players }}</span></p>
                         @error('max_team_players')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -393,6 +396,18 @@
                 allowInput: true,
                 enableTime: false
             });
+        });
+        
+        function updateTotalPlayers() {
+            const maxTeams = document.getElementById('max_teams').value || 0;
+            const maxTeamPlayers = document.getElementById('max_team_players').value || 0;
+            const totalPlayers = maxTeams * maxTeamPlayers;
+            document.getElementById('total-players').textContent = totalPlayers;
+        }
+        
+        // Add event listener to max_teams as well
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('max_teams').addEventListener('change', updateTotalPlayers);
         });
     </script>
 @endsection

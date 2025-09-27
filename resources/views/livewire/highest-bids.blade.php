@@ -23,9 +23,15 @@
                                     <td class="py-3 px-4">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}"
-                                                     alt="Virat Kohli"
-                                                     class="w-full h-full object-cover">
+                                                @if($bid->leaguePlayer->player->photo)
+                                                    <img src="{{ asset($bid->leaguePlayer->player->photo) }}"
+                                                         alt="{{ $bid->leaguePlayer->player->name }}"
+                                                         class="w-full h-full object-cover">
+                                                @else
+                                                    <img src="{{ asset('images/defaultplayer.jpeg') }}"
+                                                         alt="{{ $bid->leaguePlayer->player->name }}"
+                                                         class="w-full h-full object-cover">
+                                                @endif
                                             </div>
                                             <div>
                                                 <p class="font-medium glacier-text-primary text-sm">{{ $bid->leaguePlayer->player->name}}</p>
