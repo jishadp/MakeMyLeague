@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -16,6 +17,14 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Role constants for better maintainability
+     */
+    public const ROLE_ADMIN = 'Admin';
+    public const ROLE_ORGANISER = 'Organiser';
+    public const ROLE_OWNER = 'Owner';
+    public const ROLE_PLAYER = 'Player';
 
     /**
      * The attributes that are mass assignable.
@@ -108,6 +117,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all game roles for the user.
+     */
+    public function gameRoles(): HasMany
+    {
+        return $this->hasMany(UserGameRole::class);
+    }
+
+    /**
+     * Get the primary game role for the user.
+     */
+    public function primaryGameRole(): HasOne
+    {
+        return $this->hasOne(UserGameRole::class)->where('is_primary', true);
+    }
+
+    /**
      * Get the local body of the user.
      */
     public function localBody(): BelongsTo
@@ -127,21 +152,130 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin.
+     * Check if the user is an organizer for a specific league.
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function isOrganizerForLeague($leagueId): bool
+    {
+        return $this->organizedLeagues()
+            ->where('league_id', $leagueId)
+            ->wherePivot('status', 'approved')
+            ->exists();
+    }
+
+    /**
+     * Check if the user is an owner of a specific team.
+     *
+     * @param int $teamId
+     * @return bool
+     */
+    public function isOwnerOfTeam($teamId): bool
+    {
+        return $this->ownedTeams()
+            ->where('team_id', $teamId)
+            ->wherePivot('role', 'owner')
+            ->exists();
+    }
+
+    /**
+     * Check if the user is a co-owner of a specific team.
+     *
+     * @param int $teamId
+     * @return bool
+     */
+    public function isCoOwnerOfTeam($teamId): bool
+    {
+        return $this->ownedTeams()
+            ->where('team_id', $teamId)
+            ->wherePivot('role', 'co_owner')
+            ->exists();
+    }
+
+    /**
+     * Check if the user has any ownership (owner or co-owner) of a specific team.
+     *
+     * @param int $teamId
+     * @return bool
+     */
+    public function hasOwnershipOfTeam($teamId): bool
+    {
+        return $this->ownedTeams()->where('team_id', $teamId)->exists();
+    }
+
+    /**
+     * Check if the user is a player (has Player role).
+     *
+     * @return bool
+     */
+    public function isPlayer(): bool
+    {
+        return $this->hasRole(self::ROLE_PLAYER);
+    }
+
+    /**
+     * Check if the user is a team owner (has Owner role).
+     *
+     * @return bool
+     */
+    public function isTeamOwner(): bool
+    {
+        return $this->hasRole(self::ROLE_OWNER);
+    }
+
+    /**
+     * Check if the user is an organizer (has Organiser role).
      *
      * @return bool
      */
     public function isOrganizer(): bool
     {
-        return $this->roles->contains('role_id',1);
+        return $this->hasRole(self::ROLE_ORGANISER);
     }
-    public function isOwner(): bool
+
+    /**
+     * Check if the user is an admin (has Admin role).
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
     {
-        return $this->roles->contains('role_id',2);
+        return $this->hasRole(self::ROLE_ADMIN);
     }
-    public function isPlayer(): bool
+
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param string $roleName
+     * @return bool
+     */
+    public function hasRole(string $roleName): bool
     {
-         return $this->roles->contains('role_id',3);
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    /**
+     * Check if the user has any of the given roles.
+     *
+     * @param array $roleNames
+     * @return bool
+     */
+    public function hasAnyRole(array $roleNames): bool
+    {
+        return $this->roles()->whereIn('name', $roleNames)->exists();
+    }
+
+    /**
+     * Check if the user has all of the given roles.
+     *
+     * @param array $roleNames
+     * @return bool
+     */
+    public function hasAllRoles(array $roleNames): bool
+    {
+        $userRoles = $this->roles()->pluck('name')->toArray();
+        return count(array_intersect($roleNames, $userRoles)) === count($roleNames);
     }
 
     /**
@@ -161,11 +295,63 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the teams owned by this user.
+     * Get the leagues organized by this user.
      */
-    public function ownedTeams(): HasMany
+    public function organizedLeagues(): BelongsToMany
     {
-        return $this->hasMany(Team::class, 'owner_id');
+        return $this->belongsToMany(League::class, 'league_organizers')
+            ->withPivot('status', 'message', 'admin_notes')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get only approved organized leagues.
+     */
+    public function approvedOrganizedLeagues(): BelongsToMany
+    {
+        return $this->organizedLeagues()->wherePivot('status', 'approved');
+    }
+
+    /**
+     * Get the teams owned by this user (including co-owned).
+     */
+    public function ownedTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_owners')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get only primary owned teams.
+     */
+    public function primaryOwnedTeams(): BelongsToMany
+    {
+        return $this->ownedTeams()->wherePivot('role', 'owner');
+    }
+
+    /**
+     * Get only co-owned teams.
+     */
+    public function coOwnedTeams(): BelongsToMany
+    {
+        return $this->ownedTeams()->wherePivot('role', 'co_owner');
+    }
+
+    /**
+     * Get organizer requests made by this user.
+     */
+    public function organizerRequests(): HasMany
+    {
+        return $this->hasMany(OrganizerRequest::class);
+    }
+
+    /**
+     * Get organizer requests reviewed by this user (admin).
+     */
+    public function reviewedOrganizerRequests(): HasMany
+    {
+        return $this->hasMany(OrganizerRequest::class, 'reviewed_by');
     }
 
     /**
@@ -173,7 +359,17 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles(): hasMany
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    /**
+     * Get the user roles pivot records.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function userRoles(): HasMany
     {
         return $this->hasMany(UserRole::class);
     }

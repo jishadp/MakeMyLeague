@@ -6,8 +6,6 @@
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const closeButton = document.getElementById('close-sidebar');
-    const desktopLeagueSelector = document.getElementById('header-league-selector');
-    const mobileLeagueSelector = document.getElementById('mobile-league-selector');
     const loadingOverlay = document.getElementById('loading-overlay');
 
     /** Loading Overlay functionality */
@@ -89,19 +87,6 @@
         document.addEventListener('keydown', e => e.key === 'Escape' && closeSidebar());
     }
 
-    /** Sync League Selectors */
-    if (desktopLeagueSelector && mobileLeagueSelector) {
-        const syncAndNavigate = (source, target) => {
-            target.value = source.value;
-            if (source.value) {
-                loadingOverlay.classList.add('active');
-                window.location.href = `/leagues/${source.value}`;
-            }
-        };
-        desktopLeagueSelector.value = mobileLeagueSelector.value;
-        desktopLeagueSelector.addEventListener('change', () => syncAndNavigate(desktopLeagueSelector, mobileLeagueSelector));
-        mobileLeagueSelector.addEventListener('change', () => syncAndNavigate(mobileLeagueSelector, desktopLeagueSelector));
-    }
 
     // Set up loading animation for all navigation links
     if (loadingOverlay) {

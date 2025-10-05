@@ -22,19 +22,13 @@
     <div class="max-w-7xl mx-auto">
         @if($ownedTeams->isNotEmpty())
         <div class="mb-12">
-            <div class="flex justify-between items-center mb-8">
+            <div class="mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 flex items-center">
                     <svg class="w-6 h-6 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     Owned by Me
                 </h2>
-                <a href="{{ route('teams.create') }}" class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Create New Team
-                </a>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -191,6 +185,31 @@
             </a>
         </div>
         @endif
+
+        <!-- Create Your Team Card -->
+        <div class="mt-8">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-lg overflow-hidden animate-fadeInUp">
+                <div class="p-6 text-center text-black">
+                    <div class="mb-4">
+                        <div class="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                            <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-black">Create Your Team</h3>
+                        <p class="text-black/90 text-sm mb-4">Start your own cricket team and compete in leagues</p>
+                    </div>
+                    
+                    <a href="{{ route('teams.create') }}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-md hover:shadow-lg active:scale-95">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Create Your Team
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 

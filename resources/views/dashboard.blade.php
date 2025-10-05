@@ -5,38 +5,16 @@
 @section('content')
 
     <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-4 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
+    <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-8 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 drop-shadow">
                         Hello {{auth()->user()->name}}
                     </h1>
-                    <p class="text-lg sm:text-xl text-white-100">
+                    <p class="text-lg sm:text-xl text-white/90">
                         Organize leagues, manage teams, track player stats, and run exciting tournaments.
                     </p>
-                    <div class="flex flex-wrap gap-4">
-                        @if(auth()->user()->isOrganizer())
-                        <a href="{{ route('leagues.index') }}"
-                           class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium
-                                  hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg">
-                            My Leagues
-                        </a>
-
-                        <a href="{{ route('leagues.create') }}"
-                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium
-                                  active:scale-95 transition-all shadow-md hover:shadow-lg">
-                            Create New League
-                        </a>
-                        @endif
-                        @if(auth()->user()->isOrganizer() || auth()->user()->isOwner())
-                        <a href="{{ route('players.create') }}"
-                           class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium
-                                  active:scale-95 transition-all shadow-md hover:shadow-lg">
-                            Create New Player
-                        </a>
-                        @endif
-                    </div>
                 </div>
                 <div class="hidden lg:block">
                     <img src="{{ asset('images/hero.jpg') }}"
@@ -49,13 +27,16 @@
 
     <!-- My Leagues Section -->
     @if(auth()->user()->isOrganizer())
-    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900">My Leagues</h2>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">My Leagues</h2>
+                    <p class="text-gray-600 mt-1">Manage your cricket leagues</p>
+                </div>
                 <a href="{{ route('leagues.create') }}"
-                   class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-blue-900 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
@@ -76,7 +57,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You haven't created any leagues yet</h3>
                     <p class="text-gray-600 mb-6">Get started by creating your first cricket league.</p>
                     <a href="{{ route('leagues.create') }}"
-                       class="inline-block bg-blue-700 hover:bg-blue-800 text-white py-2 px-6 rounded-lg font-medium
+                       class="inline-block bg-blue-700 hover:bg-blue-800 text-blue-900 py-2 px-6 rounded-lg font-medium
                               active:scale-95 transition-all shadow-md hover:shadow-lg">
                         Create Your First League
                     </a>
@@ -136,11 +117,12 @@
     @endif
 
     <!-- Open Leagues Section -->
-    @if(auth()->user()->isPlayer() || auth()->user()->isOwner())
-    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    @if(auth()->user()->isPlayer() || auth()->user()->isTeamOwner())
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-2xl font-bold text-gray-900">Active Leagues</h2>
+            <div class="mb-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Active Leagues</h2>
+                <p class="text-gray-600 mt-1">Join exciting cricket tournaments</p>
             </div>
 
             @if($userLeagues->isEmpty())
@@ -210,17 +192,17 @@
     </section>
     @endif
 
-    @if(auth()->user()->isOwner())
+    @if(auth()->user()->isTeamOwner())
     <!-- Owned Teams Section -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Owned Teams</h2>
-                    <p class="text-gray-600">Teams you own and manage</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Owned Teams</h2>
+                    <p class="text-gray-600 mt-1">Teams you own and manage</p>
                 </div>
                 <a href="{{ route('teams.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-blue-900 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
@@ -277,7 +259,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You don't have any teams yet</h3>
                     <p class="text-gray-600 mb-6">Create your first team to get started</p>
                     <a href="{{ route('teams.create') }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-blue-900 rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
@@ -291,13 +273,16 @@
     @endif
 
     <!-- My League Teams Section -->
-    <section class="py-4 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900">My League Teams</h2>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">My League Teams</h2>
+                    <p class="text-gray-600 mt-1">Teams you're part of in leagues</p>
+                </div>
                 <a href="{{ route('teams.index') }}"
-                   class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-blue-900 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
@@ -376,7 +361,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">You're not part of any league teams yet</h3>
                     <p class="text-gray-600 mb-6">Join a league to get assigned to a team</p>
                     <a href="{{ route('leagues.index') }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                       class="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-blue-900 rounded-md shadow-md hover:shadow-lg transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                         </svg>
@@ -389,16 +374,16 @@
     </section>
 
     <!-- My Player Profile Section -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">My Player Profile</h2>
-                    <p class="text-gray-600">Your cricket player information</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">My Player Profile</h2>
+                    <p class="text-gray-600 mt-1">Your cricket player information</p>
                 </div>
                 @if($playerInfo)
                     <a href="{{ route('players.edit', $playerInfo) }}"
-                       class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-blue-900 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                         </svg>
@@ -406,7 +391,7 @@
                     </a>
                 @else
                     <a href="{{ route('players.index') }}"
-                       class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-blue-900 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
@@ -515,7 +500,7 @@
                                         <p class="font-medium text-green-800">Available for New Leagues</p>
                                         <p class="text-sm text-green-600 mt-1">You can join upcoming cricket leagues and tournaments</p>
                                     </div>
-                                    <a href="{{ route('leagues.index') }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                    <a href="{{ route('leagues.index') }}" class="px-4 py-2 bg-green-600 text-blue-900 rounded-md hover:bg-green-700 transition-colors">
                                         Browse Leagues
                                     </a>
                                 </div>
@@ -553,7 +538,7 @@
                         </p>
                         <div class="flex justify-center">
                             <a href="{{ route('players.index') }}"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-blue-900 uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                                 </svg>
@@ -562,76 +547,6 @@
                         </div>
                     </div>
                 @endif
-            </div>
-        </div>
-    </section>
-    <!-- Become an Organizer Section -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-indigo-50">
-        <div class="max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Quick Access</h2>
-                    <p class="text-lg text-gray-600 mb-6">
-                        Manage your cricket league resources efficiently
-                    </p>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                        <!-- Player Management Card -->
-                        <a href="{{ route('players.index') }}" class="block">
-                            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer">
-                            <div class="p-5 bg-gradient-to-r from-emerald-500 to-green-500">
-                                <h3 class="text-xl font-bold text-white">Player Management</h3>
-                            </div>
-                            <div class="p-5">
-                                <p class="text-gray-600 mb-4">View, create, and manage cricket players</p>
-                                <div class="flex justify-between">
-                                    <span class="text-emerald-600 hover:text-emerald-800 font-medium">
-                                        Browse Players →
-                                    </span>
-                                    @if(auth()->user()->isOrganizer())
-                                    <span class="text-emerald-600 hover:text-emerald-800 font-medium">
-                                        Add Player →
-                                    </span>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                        </a>
-
-                        <!-- Team Management Card -->
-                        <a href="{{ route('teams.index') }}" class="block">
-                            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer">
-                            <div class="p-5 bg-gradient-to-r from-blue-500 to-indigo-500">
-                                <h3 class="text-xl font-bold text-white">Team Management</h3>
-                            </div>
-                            <div class="p-5">
-                                <p class="text-gray-600 mb-4">Create and manage cricket teams</p>
-                                <div class="flex justify-between">
-                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                        Browse Teams →
-                                    </span>
-                                    <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                        Create Team →
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        </a>
-                    </div>
-                </div>
-
-                <a href="{{ route('leagues.create') }}" class="block">
-                    <div class="bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer hover:shadow-2xl transition-all">
-                    <div class="p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                        <h3 class="text-2xl font-semibold mb-4">Become a League Organizer</h3>
-                        <p class="mb-6">Create and manage your own cricket leagues, set rules, schedule matches, and oversee competitions.</p>
-                        <span class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-medium
-                                  hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg inline-block">
-                            Create Your First League
-                        </span>
-                    </div>
-                </div>
-                </a>
             </div>
         </div>
     </section>

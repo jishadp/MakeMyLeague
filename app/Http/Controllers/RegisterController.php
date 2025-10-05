@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\GamePosition;
 use App\Models\LocalBody;
+use App\Models\District;
 use App\Models\User;
+use App\Models\UserRole;
+use App\Models\Role;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +21,9 @@ class RegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        return view('register');
+        $districts = District::with('state')->orderBy('name')->get();
+        $localBodies = LocalBody::with('district')->orderBy('name')->get();
+        return view('register', compact('districts', 'localBodies'));
     }
 
     /**
@@ -31,11 +36,39 @@ class RegisterController extends Controller
             'mobile' => $request->mobile,
             'country_code' => $request->country_code,
             'pin' => bcrypt($request->pin),
+            'local_body_id' => $request->local_body_id,
         ]);
+
+        // Automatically assign Player role to new users
+        $playerRole = Role::where('name', User::ROLE_PLAYER)->first();
+        if ($playerRole) {
+            UserRole::create([
+                'user_id' => $user->id,
+                'role_id' => $playerRole->id,
+            ]);
+        }
 
         Auth::login($user);
 
-        // Redirect to role selection instead of dashboard
-        return redirect()->route('role-selection.show')->with('success', 'Registration successful! Please select your role.');
+        // Redirect to dashboard after successful registration
+        return redirect()->route('dashboard')->with('success', 'Registration successful! Welcome to MakeMyLeague.');
+    }
+
+    /**
+     * Get local bodies by district ID.
+     */
+    public function getLocalBodiesByDistrict(Request $request)
+    {
+        $districtId = $request->get('district_id');
+        
+        if (!$districtId) {
+            return response()->json([]);
+        }
+        
+        $localBodies = LocalBody::where('district_id', $districtId)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+            
+        return response()->json($localBodies);
     }
 }

@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'has.role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'league.organizer' => \App\Http\Middleware\CheckLeagueOrganizer::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

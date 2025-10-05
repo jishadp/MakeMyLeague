@@ -17,12 +17,11 @@
 
 
 
-            <!-- User Name and Role -->
+            <!-- User Name -->
             <div class="flex items-center space-x-3">
                 @auth
                     <div class="flex items-center space-x-2">
                         <span class="text-white font-medium drop-shadow">{{ Auth::user()->name }}</span>
-                        <x-role-badge :user="Auth::user()" variant="dark" />
                     </div>
                 @endauth
             </div>

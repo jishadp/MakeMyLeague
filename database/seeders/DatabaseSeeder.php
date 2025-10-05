@@ -24,10 +24,28 @@ class DatabaseSeeder extends Seeder
         //     'pin'   => bcrypt('4334')
         // ]);
 
-        // Create default game (Cricket)
-        $game = Game::create([
+        // Create games
+        $cricketGame = Game::create([
             'name' => 'Cricket',
             'description' => 'Twenty20 cricket leagues with auction-based team formation',
+            'active' => true
+        ]);
+
+        $footballGame = Game::create([
+            'name' => 'Football',
+            'description' => 'Football leagues with auction-based team formation',
+            'active' => true
+        ]);
+
+        $badmintonGame = Game::create([
+            'name' => 'Badminton',
+            'description' => 'Badminton leagues with auction-based team formation',
+            'active' => true
+        ]);
+
+        $tableTennisGame = Game::create([
+            'name' => 'Table Tennis',
+            'description' => 'Table Tennis leagues with auction-based team formation',
             'active' => true
         ]);
 
@@ -63,6 +81,12 @@ class DatabaseSeeder extends Seeder
         // Run role seeder
         $this->call(RoleSeeder::class);
 
+        // Run admin user seeder
+        $this->call(AdminUserSeeder::class);
+        
+        // Run expense categories seeder
+        $this->call(ExpenseCategorySeeder::class);
+
         // Run game role seeder
         $this->call(GamePositionSeeder::class);
 
@@ -75,26 +99,5 @@ class DatabaseSeeder extends Seeder
         // Run league player seeder
         // $this->call(LeaguePlayerSeeder::class);
 
-        // Add grounds to the default league (after grounds are seeded)
-        // $defaultLeague = League::where('is_default', true)->first();
-        // if ($defaultLeague) {
-        //     // Get some random Wayanad grounds
-        //     $groundIds = \App\Models\Ground::where('district_id', function($query) {
-        //         $query->select('id')
-        //             ->from('districts')
-        //             ->where('name', 'Wayanad')
-        //             ->first();
-        //     })->take(3)->pluck('id')->toArray();
-
-        //     // Update the league with ground_ids and local body
-        //     if (!empty($groundIds)) {
-        //         $firstGround = \App\Models\Ground::find($groundIds[0]);
-        //         $defaultLeague->update([
-        //             'ground_ids' => $groundIds,
-        //             'localbody_id' => $firstGround->localbody_id,
-        //             'venue_details' => 'Main Stadium Area, Near Bus Stand'
-        //         ]);
-        //     }
-        // }
     }
 }

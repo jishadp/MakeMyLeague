@@ -11,10 +11,8 @@ class MyLeaguesController extends Controller
     {
         $user = Auth::user();
         
-        // Get leagues where user is organizer
-        $organizedLeagues = $user->isOrganizer() ? 
-            \App\Models\League::where('user_id', $user->id)->with(['game', 'leagueTeams.team'])->get() : 
-            collect();
+        // Get leagues where user is organizer (both approved and pending)
+        $organizedLeagues = $user->organizedLeagues()->with(['game', 'leagueTeams.team', 'organizers'])->get();
         
         // Get leagues where user is a player (sold/available)
         $playingLeagues = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
@@ -23,7 +21,7 @@ class MyLeaguesController extends Controller
         $requestedLeagues = $user->leaguePlayers()->where('status', 'pending')->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
         
         // Get leagues where user owns a team
-        $teamOwnerLeagues = $user->isOwner() ? 
+        $teamOwnerLeagues = $user->isTeamOwner() ? 
             \App\Models\League::whereHas('leagueTeams.team', function($query) use ($user) {
                 $query->where('owner_id', $user->id);
             })->with(['game', 'leagueTeams.team'])->get() : 

@@ -22,19 +22,13 @@
     <div class="max-w-7xl mx-auto">
         @if($organizedLeagues->isNotEmpty())
         <div class="mb-12">
-            <div class="flex justify-between items-center mb-8">
+            <div class="mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 flex items-center">
                     <svg class="w-6 h-6 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     Organized by Me
                 </h2>
-                <a href="{{ route('leagues.create') }}" class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Create New League
-                </a>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -46,8 +40,16 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                                 <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
                             </div>
-                            <span class="absolute top-3 right-3 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
-                                {{ ucfirst($league->status) }}
+                            @php
+                                $organizerStatus = $league->organizers->where('id', auth()->id())->first()->pivot->status ?? 'pending';
+                            @endphp
+                            <span class="absolute top-3 right-3 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm
+                                @if($organizerStatus === 'approved') bg-green-100 text-green-800
+                                @elseif($organizerStatus === 'pending') bg-yellow-100 text-yellow-800
+                                @else bg-red-100 text-red-800 @endif">
+                                @if($organizerStatus === 'approved') {{ ucfirst($league->status) }}
+                                @elseif($organizerStatus === 'pending') Pending Approval
+                                @else Rejected @endif
                             </span>
                         </div>
                         <div class="p-6">
@@ -273,6 +275,63 @@
             </a>
         </div>
         @endif
+
+        <!-- Create New League Card -->
+        <div class="mt-12">
+            <div class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-xl overflow-hidden animate-fadeInUp">
+                <div class="p-8 text-center text-white">
+                    <div class="mb-6">
+                        <div class="w-20 h-20 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-2">Create New League</h2>
+                        <p class="text-white/90 text-lg mb-6">Start organizing your own cricket league and bring teams together</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                            <div class="w-12 h-12 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Easy Setup</h3>
+                            <p class="text-white/80 text-sm">Quick and simple league creation process</p>
+                        </div>
+                        
+                        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                            <div class="w-12 h-12 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Full Control</h3>
+                            <p class="text-white/80 text-sm">Manage teams, players, and fixtures</p>
+                        </div>
+                        
+                        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                            <div class="w-12 h-12 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Professional</h3>
+                            <p class="text-white/80 text-sm">Organize tournaments like a pro</p>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ route('leagues.create') }}" 
+                       class="inline-flex items-center justify-center px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Create New League As Organizer
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
