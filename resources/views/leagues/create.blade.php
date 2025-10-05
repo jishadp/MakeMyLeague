@@ -381,12 +381,25 @@
 @endsection
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection
 
 @section('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('assets/flatpickr/flatpickr.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Initialize Select2 for all select elements
+            $('.select2').select2({
+                theme: 'default',
+                width: '100%',
+                placeholder: function() {
+                    return $(this).find('option:first').text();
+                }
+            });
+            
+            // Initialize Flatpickr
             flatpickr('.flatpickr', {
                 dateFormat: "Y-m-d",
                 allowInput: true,
@@ -407,4 +420,82 @@
         // Add event listener to max_teams as well
         document.getElementById('max_teams').addEventListener('change', updateTotalPlayers);
     </script>
+    
+    <style>
+        /* Select2 Custom Styling to Match Theme */
+        .select2-container--default .select2-selection--single {
+            background-color: white !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            height: 48px !important;
+            padding: 0 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #374151 !important;
+            line-height: 46px !important;
+            padding-left: 16px !important;
+            padding-right: 20px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #9ca3af !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+            right: 8px !important;
+            top: 1px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 12px 16px !important;
+            color: #374151 !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #6366f1 !important;
+            color: white !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #e5e7eb !important;
+            color: #374151 !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            padding: 8px 12px !important;
+            margin: 8px !important;
+        }
+
+        /* Disabled state styling */
+        .select2-container--default .select2-selection--single[aria-disabled=true] {
+            background-color: #f9fafb !important;
+            border-color: #d1d5db !important;
+            color: #9ca3af !important;
+        }
+
+        .select2-container--default .select2-selection--single[aria-disabled=true] .select2-selection__rendered {
+            color: #9ca3af !important;
+        }
+    </style>
 @endsection

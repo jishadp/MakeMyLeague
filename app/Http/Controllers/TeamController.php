@@ -8,6 +8,9 @@ use App\Models\LocalBody;
 use App\Models\Team;
 use App\Models\League;
 use App\Models\LeagueTeam;
+use App\Models\User;
+use App\Models\UserRole;
+use App\Models\Role;
 use App\Http\Requests\StoreTeamRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +25,7 @@ class TeamController extends Controller
     public function index(Request $request): View
     {
         $query = Team::query()
-            ->with(['owner', 'homeGround', 'localBody']);
+            ->with(['primaryOwners', 'homeGround', 'localBody']);
 
         // Filter by local body
         if ($request->has('local_body_id') && $request->local_body_id != '') {
@@ -69,11 +72,32 @@ class TeamController extends Controller
 
         $team = Team::create([
             'name' => $validated['name'],
-            'owner_id' => Auth::id(),
+            'owner_id' => Auth::id(), // Keep for backward compatibility
             'home_ground_id' => $validated['home_ground_id'],
             'local_body_id' => $validated['local_body_id'],
             'created_by' => Auth::id(),
         ]);
+
+        // Add the current user as the primary owner
+        $team->owners()->attach(Auth::id(), [
+            'role' => 'owner'
+        ]);
+
+        // Automatically assign Team Owner role to the user
+        $ownerRole = Role::where('name', User::ROLE_OWNER)->first();
+        if ($ownerRole) {
+            // Check if user already has this role
+            $existingRole = UserRole::where('user_id', Auth::id())
+                ->where('role_id', $ownerRole->id)
+                ->first();
+            
+            if (!$existingRole) {
+                UserRole::create([
+                    'user_id' => Auth::id(),
+                    'role_id' => $ownerRole->id,
+                ]);
+            }
+        }
 
         // Handle logo upload
         if ($request->hasFile('logo')) {

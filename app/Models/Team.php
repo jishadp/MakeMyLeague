@@ -83,7 +83,33 @@ class Team extends Model
     }
 
     /**
-     * Get the owner of the team.
+     * Get all owners of the team.
+     */
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'team_owners')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get only primary owners of the team.
+     */
+    public function primaryOwners(): BelongsToMany
+    {
+        return $this->owners()->wherePivot('role', 'owner');
+    }
+
+    /**
+     * Get only co-owners of the team.
+     */
+    public function coOwners(): BelongsToMany
+    {
+        return $this->owners()->wherePivot('role', 'co_owner');
+    }
+
+    /**
+     * Get the primary owner of the team (for backward compatibility).
      */
     public function owner(): BelongsTo
     {

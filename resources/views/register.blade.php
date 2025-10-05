@@ -78,6 +78,31 @@
                                    placeholder="Enter 4-digit PIN">
                         </div>
 
+                        <!-- District -->
+                        <div>
+                            <label for="district_id" class="block text-sm font-medium text-gray-700 mb-2">District <span class="text-red-600">*</span></label>
+                            <select id="district_id" name="district_id" 
+                                    class="glass-input block w-full rounded-lg text-base py-3 px-4 border-2 border-[#2c5aa0] focus:border-[#4a90e2] focus:ring-2 focus:ring-[#4a90e2] focus:ring-opacity-50 select2"
+                                    required>
+                                <option value="">Select your district</option>
+                                @foreach($districts as $district)
+                                    <option value="{{ $district->id }}" {{ old('district_id') == $district->id ? 'selected' : '' }}>
+                                        {{ $district->name }} - {{ $district->state->name ?? '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Location (Local Body) -->
+                        <div>
+                            <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-2">Location <span class="text-red-600">*</span></label>
+                            <select id="local_body_id" name="local_body_id" 
+                                    class="glass-input block w-full rounded-lg text-base py-3 px-4 border-2 border-[#2c5aa0] focus:border-[#4a90e2] focus:ring-2 focus:ring-[#4a90e2] focus:ring-opacity-50 select2"
+                                    required disabled>
+                                <option value="">First select a district</option>
+                            </select>
+                        </div>
+
                     </div>
 
                     <!-- Register Button -->
@@ -104,13 +129,20 @@
     <script src="{{ asset('js/countries.js') }}?v={{ time() }}"></script>
     <script>
         $(document).ready(function() {
+            // Initialize Select2 for all select elements
             $('.select2').select2({
-                theme: 'classic',
-                width: '100%'
+                theme: 'default',
+                width: '100%',
+                placeholder: function() {
+                    return $(this).find('option:first').text();
+                }
             });
 
             // Initialize country code dropdown
             initializeCountryDropdown();
+            
+            // Initialize cascade select functionality
+            initializeCascadeSelect();
         });
 
         function initializeCountryDropdown() {
@@ -169,6 +201,59 @@
                 }
             });
         }
+
+        function initializeCascadeSelect() {
+            const districtSelect = $('#district_id');
+            const localBodySelect = $('#local_body_id');
+            
+            // Handle district selection change
+            districtSelect.on('change', function() {
+                const districtId = this.value;
+                
+                // Clear local body options
+                localBodySelect.empty().append('<option value="">Select your location</option>');
+                
+                if (districtId) {
+                    // Enable local body select
+                    localBodySelect.prop('disabled', false);
+                    
+                    // Fetch local bodies for selected district
+                    fetch(`{{ route('api.local-bodies') }}?district_id=${districtId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Populate local body options
+                            data.forEach(localBody => {
+                                localBodySelect.append(new Option(localBody.name, localBody.id));
+                            });
+                            
+                            // Set old value if exists (for form validation errors)
+                            const oldValue = '{{ old("local_body_id") }}';
+                            if (oldValue) {
+                                localBodySelect.val(oldValue).trigger('change');
+                            }
+                            
+                            // Refresh Select2
+                            localBodySelect.trigger('change');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching local bodies:', error);
+                            localBodySelect.empty().append('<option value="">Error loading locations</option>');
+                            localBodySelect.trigger('change');
+                        });
+                } else {
+                    // Disable local body select
+                    localBodySelect.prop('disabled', true);
+                    localBodySelect.empty().append('<option value="">First select a district</option>');
+                    localBodySelect.trigger('change');
+                }
+            });
+            
+            // Handle form validation errors - restore previous selections
+            const oldDistrictId = '{{ old("district_id") }}';
+            if (oldDistrictId) {
+                districtSelect.val(oldDistrictId).trigger('change');
+            }
+        }
     </script>
 
     <style>
@@ -177,29 +262,80 @@
         .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
         .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
         
-        /* Select2 Custom Styling */
-        .select2-container--classic .select2-selection--single {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        /* Select2 Custom Styling to Match Theme */
+        .select2-container--default .select2-selection--single {
+            background-color: white !important;
             border: 2px solid #2c5aa0 !important;
             border-radius: 0.5rem !important;
             height: 48px !important;
+            padding: 0 !important;
         }
-        
-        .select2-container--classic .select2-selection--single .select2-selection__rendered {
-            line-height: 48px !important;
-            padding-left: 16px !important;
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
             color: #374151 !important;
+            line-height: 44px !important;
+            padding-left: 16px !important;
+            padding-right: 20px !important;
         }
-        
-        .select2-container--classic .select2-selection--single .select2-selection__arrow {
-            height: 46px !important;
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #9ca3af !important;
         }
-        
-        .select2-container--classic.select2-container--focus .select2-selection--single {
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px !important;
+            right: 8px !important;
+            top: 2px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
             border-color: #4a90e2 !important;
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            border-color: #4a90e2 !important;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            border: 2px solid #2c5aa0 !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 12px 16px !important;
+            color: #374151 !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #4a90e2 !important;
+            color: white !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #e5e7eb !important;
+            color: #374151 !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            padding: 8px 12px !important;
+            margin: 8px !important;
+        }
+
+        /* Disabled state styling */
+        .select2-container--default .select2-selection--single[aria-disabled=true] {
+            background-color: #f9fafb !important;
+            border-color: #d1d5db !important;
+            color: #9ca3af !important;
+        }
+
+        .select2-container--default .select2-selection--single[aria-disabled=true] .select2-selection__rendered {
+            color: #9ca3af !important;
         }
 
         /* Country Code Dropdown Styling */

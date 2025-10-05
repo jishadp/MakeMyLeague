@@ -7,6 +7,9 @@ use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\LeaguePlayerController;
 use App\Http\Controllers\LeagueTeamController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LeagueFinanceController;
+use App\Http\Controllers\OrganizerRequestController;
+use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
 
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PlayerController;
@@ -37,12 +40,7 @@ Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 // Registration routes
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register'])->name('do.register');
-
-// Role selection routes
-Route::middleware('auth')->group(function () {
-    Route::get('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'show'])->name('role-selection.show');
-    Route::post('role-selection', [App\Http\Controllers\RoleSelectionController::class, 'store'])->name('role-selection.store');
-});
+Route::get('api/local-bodies', [RegisterController::class, 'getLocalBodiesByDistrict'])->name('api.local-bodies');
 
 // Ground routes
 Route::get('grounds', [GroundController::class, 'index'])->name('grounds.index');
@@ -69,8 +67,8 @@ Route::post('leagues/{league}/players/register', [PlayerController::class, 'regi
     ->name('league-players.register');
 
 Route::middleware('auth')->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard')->middleware('has.role');
-    Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index')->middleware('has.role');
+    Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');
+    Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index');
     
     // Profile routes
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
@@ -82,41 +80,56 @@ Route::middleware('auth')->group(function () {
     // My Teams route
     Route::get('my-teams', [\App\Http\Controllers\MyTeamsController::class, 'index'])->name('my-teams');
 
+    // Organizer Request routes
+    Route::resource('organizer-requests', OrganizerRequestController::class)->except(['edit', 'update']);
+    Route::delete('organizer-requests/{organizerRequest}/cancel', [OrganizerRequestController::class, 'cancel'])->name('organizer-requests.cancel');
+
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+        Route::get('organizer-requests', [AdminOrganizerRequestController::class, 'index'])->name('organizer-requests.index');
+        Route::get('organizer-requests/pending', [AdminOrganizerRequestController::class, 'pending'])->name('organizer-requests.pending');
+        Route::get('organizer-requests/{organizerRequest}', [AdminOrganizerRequestController::class, 'show'])->name('organizer-requests.show');
+        Route::post('organizer-requests/{organizerRequest}/approve', [AdminOrganizerRequestController::class, 'approve'])->name('organizer-requests.approve');
+        Route::post('organizer-requests/{organizerRequest}/reject', [AdminOrganizerRequestController::class, 'reject'])->name('organizer-requests.reject');
+        Route::post('organizer-requests/{organizerRequest}/change-league-status', [AdminOrganizerRequestController::class, 'changeLeagueStatus'])->name('organizer-requests.change-league-status');
+        Route::get('organizer-requests-stats', [AdminOrganizerRequestController::class, 'stats'])->name('organizer-requests.stats');
+    });
+
     // Leagues resource routes
     Route::resource('leagues', LeagueController::class);
     Route::get('leagues/player/broadcast', [LeagueController::class, 'playerBroadcast'])->name('leagues.player.broadcast');
-    Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault');
-    Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments');
+    Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault')->middleware('league.organizer');
+    Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments')->middleware('league.organizer');
 
     // League Teams routes
-    Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show']);
+    Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show'])->middleware('league.organizer');
     Route::get('leagues/{league}/teams', [LeagueTeamController::class, 'index'])->name('league-teams.index');
-    Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create');
-    Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store');
+    Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create')->middleware('league.organizer');
+    Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store')->middleware('league.organizer');
     Route::get('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'show'])->name('league-teams.show');
-    Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit');
-    Route::put('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'update'])->name('league-teams.update');
-    Route::delete('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'destroy'])->name('league-teams.destroy');
-    Route::patch('leagues/{league}/teams/{leagueTeam}/status', [LeagueTeamController::class, 'updateStatus'])->name('league-teams.updateStatus');
-    Route::patch('leagues/{league}/teams/{leagueTeam}/wallet', [LeagueTeamController::class, 'updateWallet'])->name('league-teams.updateWallet');
+    Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit')->middleware('league.organizer');
+    Route::put('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'update'])->name('league-teams.update')->middleware('league.organizer');
+    Route::delete('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'destroy'])->name('league-teams.destroy')->middleware('league.organizer');
+    Route::patch('leagues/{league}/teams/{leagueTeam}/status', [LeagueTeamController::class, 'updateStatus'])->name('league-teams.updateStatus')->middleware('league.organizer');
+    Route::patch('leagues/{league}/teams/{leagueTeam}/wallet', [LeagueTeamController::class, 'updateWallet'])->name('league-teams.updateWallet')->middleware('league.organizer');
 
     // League Players routes
     Route::get('leagues/{league}/players', [LeaguePlayerController::class, 'index'])->name('league-players.index');
-    Route::get('leagues/{league}/players/create', [LeaguePlayerController::class, 'create'])->name('league-players.create');
-    Route::get('leagues/{league}/players/bulk-create', [LeaguePlayerController::class, 'bulkCreate'])->name('league-players.bulk-create');
-    Route::post('leagues/{league}/players/bulk-store', [LeaguePlayerController::class, 'bulkStore'])->name('league-players.bulk-store');
-    Route::post('leagues/{league}/players', [LeaguePlayerController::class, 'store'])->name('league-players.store');
+    Route::get('leagues/{league}/players/create', [LeaguePlayerController::class, 'create'])->name('league-players.create')->middleware('league.organizer');
+    Route::get('leagues/{league}/players/bulk-create', [LeaguePlayerController::class, 'bulkCreate'])->name('league-players.bulk-create')->middleware('league.organizer');
+    Route::post('leagues/{league}/players/bulk-store', [LeaguePlayerController::class, 'bulkStore'])->name('league-players.bulk-store')->middleware('league.organizer');
+    Route::post('leagues/{league}/players', [LeaguePlayerController::class, 'store'])->name('league-players.store')->middleware('league.organizer');
     Route::get('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'show'])->name('league-players.show');
-    Route::get('leagues/{league}/players/{leaguePlayer}/edit', [LeaguePlayerController::class, 'edit'])->name('league-players.edit');
-    Route::put('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'update'])->name('league-players.update');
-    Route::patch('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'update'])->name('league-players.patch');
-    Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy');
-    Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus');
-    Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus');
+    Route::get('leagues/{league}/players/{leaguePlayer}/edit', [LeaguePlayerController::class, 'edit'])->name('league-players.edit')->middleware('league.organizer');
+    Route::put('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'update'])->name('league-players.update')->middleware('league.organizer');
+    Route::patch('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'update'])->name('league-players.patch')->middleware('league.organizer');
+    Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy')->middleware('league.organizer');
+    Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus')->middleware('league.organizer');
+    Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus')->middleware('league.organizer');
     Route::post('leagues/{league}/players/request-registration', [LeaguePlayerController::class, 'requestRegistration'])->name('league-players.request-registration');
 
     // Auction routes
-    Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
+    Route::prefix('leagues/{league}/auction')->name('auction.')->middleware('league.organizer')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index');
         Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
@@ -140,4 +153,20 @@ Route::middleware('auth')->group(function () {
         Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
         Route::get('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('fixtures');
     });
+    
+    // League Finance routes
+    Route::prefix('leagues/{league}')->name('league-finances.')->group(function () {
+        Route::get('finances', [LeagueFinanceController::class, 'index'])->name('index');
+        Route::get('finances/create', [LeagueFinanceController::class, 'create'])->name('create');
+        Route::post('finances', [LeagueFinanceController::class, 'store'])->name('store');
+        Route::post('finances/quick-income', [LeagueFinanceController::class, 'quickIncome'])->name('quick-income');
+        Route::get('finances/{finance}', [LeagueFinanceController::class, 'show'])->name('show');
+        Route::get('finances/{finance}/edit', [LeagueFinanceController::class, 'edit'])->name('edit');
+        Route::put('finances/{finance}', [LeagueFinanceController::class, 'update'])->name('update');
+        Route::delete('finances/{finance}', [LeagueFinanceController::class, 'destroy'])->name('destroy');
+        Route::get('finances-report', [LeagueFinanceController::class, 'report'])->name('report');
+    });
 });
+
+// API route for local bodies by district
+Route::get('api/local-bodies', [RegisterController::class, 'getLocalBodiesByDistrict'])->name('api.local-bodies');

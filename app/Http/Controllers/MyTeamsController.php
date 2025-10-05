@@ -12,7 +12,7 @@ class MyTeamsController extends Controller
         $user = Auth::user();
         
         // Get teams owned by user
-        $ownedTeams = $user->isOwner() ? 
+        $ownedTeams = $user->isTeamOwner() ? 
             \App\Models\Team::where('owner_id', $user->id)->with(['homeGround', 'localBody'])->get() : 
             collect();
         

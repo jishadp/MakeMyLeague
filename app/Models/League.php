@@ -44,6 +44,54 @@ class League extends Model
     ];
 
     /**
+     * Get the finance records for this league.
+     */
+    public function finances(): HasMany
+    {
+        return $this->hasMany(LeagueFinance::class);
+    }
+
+    /**
+     * Get the income records for this league.
+     */
+    public function incomes(): HasMany
+    {
+        return $this->hasMany(LeagueFinance::class)->where('type', 'income');
+    }
+
+    /**
+     * Get the expense records for this league.
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(LeagueFinance::class)->where('type', 'expense');
+    }
+
+    /**
+     * Get total income for this league.
+     */
+    public function getTotalIncomeAttribute()
+    {
+        return $this->incomes()->sum('amount');
+    }
+
+    /**
+     * Get total expenses for this league.
+     */
+    public function getTotalExpensesAttribute()
+    {
+        return $this->expenses()->sum('amount');
+    }
+
+    /**
+     * Get net profit/loss for this league.
+     */
+    public function getNetProfitAttribute()
+    {
+        return $this->total_income - $this->total_expenses;
+    }
+
+    /**
      * Get the route key for the model.
      *
      * @return string
@@ -120,11 +168,29 @@ class League extends Model
     }
 
     /**
-     * Get the organizer who created the league.
+     * Get all organizers for this league.
      */
-    public function organizer(): BelongsTo
+    public function organizers(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsToMany(User::class, 'league_organizers')
+            ->withPivot('status', 'message', 'admin_notes')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get only approved organizers for this league.
+     */
+    public function approvedOrganizers(): BelongsToMany
+    {
+        return $this->organizers()->wherePivot('status', 'approved');
+    }
+
+    /**
+     * Get organizer requests for this league.
+     */
+    public function organizerRequests(): HasMany
+    {
+        return $this->hasMany(OrganizerRequest::class);
     }
 
     /**

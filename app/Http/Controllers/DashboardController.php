@@ -16,8 +16,10 @@ class DashboardController
 {
     public function view()
     {
-        $leagues = League::with('game', 'organizer')->latest()->take(5)->get();
-        $userLeagues = auth()->user()->isOrganizer() ? League::where('user_id', Auth::id())->with(['game', 'organizer', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get() : League::with(['game', 'organizer', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get();
+        $leagues = League::with(['game', 'approvedOrganizers'])->latest()->take(5)->get();
+        $userLeagues = auth()->user()->isOrganizer() ? 
+            auth()->user()->organizedLeagues()->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get() : 
+            League::with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get();
         $userOwnedTeams = Auth::check() ? Team::where('owner_id', Auth::id())->get() : collect();
         
         // Get league teams where user is a player

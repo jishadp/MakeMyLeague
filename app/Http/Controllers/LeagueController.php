@@ -23,7 +23,7 @@ class LeagueController
      */
     public function index(): View
     {
-        $leagues = League::with(['game', 'organizer', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->get();
+        $leagues = League::with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->get();
         return view('leagues.index', compact('leagues'));
     }
 
@@ -46,8 +46,6 @@ class LeagueController
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate(League::rules());
-        // Add the current authenticated user as the organizer
-        $validated['user_id'] = Auth::id();
 
         // If this is the first league or is_default is checked, make it default
         if ($request->has('is_default') || League::count() === 0) {
@@ -57,11 +55,26 @@ class LeagueController
         }
         $league = League::create($validated);
 
+        // Add the current user as a pending organizer (requires approval)
+        $league->organizers()->attach(Auth::id(), [
+            'status' => 'pending',
+            'message' => 'League creator requesting organizer role',
+            'admin_notes' => null
+        ]);
+
+        // Also create an organizer request for admin review
+        \App\Models\OrganizerRequest::create([
+            'user_id' => Auth::id(),
+            'league_id' => $league->id,
+            'message' => 'I created this league and would like to organize it.',
+            'status' => 'pending',
+        ]);
+
         if ($request->has('ground_ids') && is_array($request->ground_ids)) {
             $league->grounds()->attach($request->ground_ids);
         }
         return redirect()->route('leagues.index')
-            ->with('success', 'League created successfully!');
+            ->with('success', 'League created successfully! Your organizer request is pending admin approval.');
     }
 
     /**
@@ -69,14 +82,19 @@ class LeagueController
      */
     public function show(League $league): View
     {
-        $league->with(['game.roles', 'organizer','grounds' ,'localBody.district']);
+        $league->load(['game.roles', 'approvedOrganizers', 'organizers', 'grounds', 'localBody.district', 'leagueTeams.team', 'finances']);
         
         // Get counts for organizer role
         $leagueTeamsCount = $league->leagueTeams()->count();
         $leaguePlayersCount = $league->leaguePlayers()->count();
         $fixturesCount = $league->fixtures()->count();
         
-        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount'));
+        // Get available teams for ownership (teams not yet in this league)
+        $availableTeams = \App\Models\Team::whereDoesntHave('leagueTeams', function($query) use ($league) {
+            $query->where('league_id', $league->id);
+        })->with(['homeGround', 'localBody', 'primaryOwners'])->get();
+        
+        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount', 'availableTeams'));
     }
 
     /**

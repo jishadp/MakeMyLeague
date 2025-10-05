@@ -448,6 +448,14 @@ class LeaguePlayerController extends Controller
             ], 403);
         }
 
+        // Check if league is active or pending (both allow player registration)
+        if (!in_array($league->status, ['active', 'pending'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Player registration is only available for active or pending leagues.'
+            ], 400);
+        }
+
         $user = auth()->user();
 
         // Validate position selection

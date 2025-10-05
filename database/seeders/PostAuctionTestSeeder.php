@@ -27,10 +27,13 @@ class PostAuctionTestSeeder extends Seeder
         );
 
         // Assign organizer role
-        \App\Models\UserRole::firstOrCreate([
-            'user_id' => $organizer->id,
-            'role_id' => 1
-        ]);
+        $organizerRole = \App\Models\Role::where('name', User::ROLE_ORGANISER)->first();
+        if ($organizerRole) {
+            \App\Models\UserRole::firstOrCreate([
+                'user_id' => $organizer->id,
+                'role_id' => $organizerRole->id
+            ]);
+        }
 
         // Get or create game
         $game = Game::first() ?? Game::create([

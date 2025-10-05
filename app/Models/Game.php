@@ -41,4 +41,12 @@ class Game extends Model
     {
         return $this->hasMany(GamePosition::class);
     }
+
+    /**
+     * Get the user game roles for this game.
+     */
+    public function userGameRoles(): HasMany
+    {
+        return $this->hasMany(UserGameRole::class);
+    }
 }

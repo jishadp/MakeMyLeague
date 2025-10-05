@@ -13,10 +13,10 @@ class ProfileController extends Controller
 {
     public function show()
     {
-        $user = Auth::user()->load(['position', 'localBody.district']);
-        $positions = \App\Models\GamePosition::all();
+        $user = Auth::user()->load(['position.game', 'localBody.district', 'gameRoles.game', 'gameRoles.gamePosition']);
+        $games = \App\Models\Game::with('roles')->where('active', true)->get();
         $localBodies = \App\Models\LocalBody::with('district')->get();
-        return view('profile.show', compact('user', 'positions', 'localBodies'));
+        return view('profile.show', compact('user', 'games', 'localBodies'));
     }
 
     public function update(Request $request)
@@ -31,10 +31,13 @@ class ProfileController extends Controller
             } else {
                 $request->validate([
                     'name' => 'required|string|max:255',
-                    'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+                    'email' => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
                     'mobile' => ['required', 'string', Rule::unique('users')->ignore($user->id)],
                     'country_code' => 'required|string',
-                    'position_id' => 'nullable|exists:game_positions,id',
+                    'game_roles' => 'nullable|array',
+                    'game_roles.*' => 'nullable|array',
+                    'game_roles.*.position_id' => 'nullable|exists:game_positions,id',
+                    'primary_game_id' => 'nullable|exists:games,id',
                     'local_body_id' => 'nullable|exists:local_bodies,id',
                     'pin' => 'nullable|string|min:4|max:6'
                 ]);
@@ -42,8 +45,30 @@ class ProfileController extends Controller
 
             $data = [];
             
+            // Handle game roles for both AJAX and non-AJAX requests
+            if ($request->has('game_roles')) {
+                // Delete existing game roles
+                $user->gameRoles()->delete();
+                
+                // Create new game roles
+                foreach ($request->game_roles as $gameId => $gameRole) {
+                    if (isset($gameRole['position_id']) && $gameRole['position_id']) {
+                        $user->gameRoles()->create([
+                            'game_id' => $gameId,
+                            'game_position_id' => $gameRole['position_id'],
+                            'is_primary' => $request->primary_game_id == $gameId
+                        ]);
+                    }
+                }
+            }
+            
             if (!$request->ajax()) {
-                $data = $request->only(['name', 'email', 'mobile', 'country_code', 'position_id', 'local_body_id']);
+                $data = $request->only(['name', 'mobile', 'country_code', 'local_body_id']);
+                
+                // Only update email if it's provided and not empty
+                if ($request->filled('email')) {
+                    $data['email'] = $request->email;
+                }
             }
             
             $pinChanged = false;
