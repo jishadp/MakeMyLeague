@@ -50,6 +50,17 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
+        // Check if user was trying to join a league before registration
+        if (session()->has('join_league_after_registration')) {
+            $leagueSlug = session()->pull('join_league_after_registration');
+            $league = \App\Models\League::where('slug', $leagueSlug)->first();
+            
+            if ($league) {
+                return redirect()->route('leagues.join-link', $league)
+                    ->with('success', 'Registration successful! You can now join the league.');
+            }
+        }
+
         // Redirect to dashboard after successful registration
         return redirect()->route('dashboard')->with('success', 'Registration successful! Welcome to MakeMyLeague.');
     }
