@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('league_organizers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('league_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->text('message')->nullable();
+            $table->text('admin_notes')->nullable();
             $table->timestamps();
+            
+            // Ensure unique combination of user and league
+            $table->unique(['user_id', 'league_id']);
         });
     }
 
