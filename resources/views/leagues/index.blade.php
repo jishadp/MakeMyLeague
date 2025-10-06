@@ -11,11 +11,23 @@
                 <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
                     My Leagues
                 </h1>
-                <a href="{{ route('leagues.create') }}"
-                    class="bg-blue-700 hover:bg-blue-800 active:scale-95 transition-all duration-200
-                      text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
-                    + Create New League
-                </a>
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    @if (auth()->user()->isPlayer())
+                        <button onclick="openPlayerRegistrationModal()"
+                            class="bg-green-600 hover:bg-green-700 active:scale-95 transition-all duration-200
+                              text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Register as Player
+                        </button>
+                    @endif
+                    <a href="{{ route('leagues.create') }}"
+                        class="bg-blue-700 hover:bg-blue-800 active:scale-95 transition-all duration-200
+                          text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
+                        + Create New League
+                    </a>
+                </div>
             </div>
 
             <!-- Success Message -->
@@ -187,9 +199,52 @@
                                 <!-- Action Buttons -->
                                 <div class="flex gap-2">
                                     <a href="{{ route('leagues.show', $league) }}"
-                                        class="flex-1 bg-indigo-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
+                                        class="flex-1 bg-indigo-600 text-white text-center py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
                                         View Details
                                     </a>
+                                    
+                                    <!-- Player Register Button -->
+                                    @if (auth()->user()->isPlayer())
+                                        @php
+                                            $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
+                                                ->where('league_id', $league->id)
+                                                ->first();
+                                        @endphp
+                                        
+                                        @if (!$existingPlayer && in_array($league->status, ['active', 'pending']))
+                                            <button onclick="openLeagueRegistrationModal({{ $league->id }}, '{{ addslashes($league->name) }}', {{ $league->player_reg_fee ?? 0 }}, '{{ addslashes($league->game->name) }}')"
+                                                class="bg-green-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
+                                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                Register
+                                            </button>
+                                        @elseif($existingPlayer && $existingPlayer->status === 'pending')
+                                            <button disabled
+                                                class="bg-yellow-600 text-white px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
+                                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                Pending
+                                            </button>
+                                        @elseif($existingPlayer && in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
+                                            <span class="bg-green-600 text-white px-4 py-3 rounded-xl font-semibold shadow-lg">
+                                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                Approved
+                                            </span>
+                                        @elseif(!in_array($league->status, ['active', 'pending']))
+                                            <button disabled
+                                                class="bg-gray-400 text-white px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
+                                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                Closed
+                                            </button>
+                                        @endif
+                                    @endif
+                                    
                                     <div class="flex gap-1">
                                         <!-- Edit -->
                                         <a href="{{ route('leagues.edit', $league) }}"
@@ -230,6 +285,219 @@
                     @endforeach
                 </div>
             @endif
+        </div>
+    </div>
+
+    <!-- Player Registration Modal -->
+    <div id="playerRegistrationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-24 lg:mb-32">
+            <div class="mt-3">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Register as Player</h3>
+                    <button onclick="closePlayerRegistrationModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Registration Content -->
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- League Selection -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-900">Select League</h4>
+                        </div>
+                        <div>
+                            <label for="league_id" class="block text-sm font-medium text-blue-700 mb-2">Available Leagues *</label>
+                            <select id="league_id" name="league_id" class="w-full border border-blue-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select a league</option>
+                                @foreach ($leagues as $league)
+                                    @if (in_array($league->status, ['active', 'pending']))
+                                        @php
+                                            $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
+                                                ->where('league_id', $league->id)
+                                                ->first();
+                                        @endphp
+                                        @if (!$existingPlayer)
+                                            <option value="{{ $league->id }}" data-reg-fee="{{ $league->player_reg_fee ?? 0 }}" data-game="{{ $league->game->name }}">
+                                                {{ $league->name }} ({{ $league->game->name }}) - ₹{{ number_format($league->player_reg_fee ?? 0, 2) }}
+                                            </option>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Position Selection -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-purple-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-purple-900">Select Your Position</h4>
+                        </div>
+                        <div>
+                            <label for="position_id" class="block text-sm font-medium text-purple-700 mb-2">Game Position *</label>
+                            <select id="position_id" name="position_id" class="w-full border border-purple-300 rounded-lg px-3 py-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Select a position</option>
+                                <!-- Options will be populated dynamically based on selected league -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Registration Info -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 rounded-full p-2 mr-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-green-900">Registration Details</h4>
+                                    <p class="text-sm text-green-700">Registration fee will be displayed after selecting a league</p>
+                                </div>
+                            </div>
+                            <button onclick="submitPlayerRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Register
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Registration Notice -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-yellow-900">Important Notice</h4>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    Your registration request will be reviewed by the league organizer. You'll be notified once approved.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual League Registration Modal -->
+    <div id="leagueRegistrationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-24 lg:mb-32">
+            <div class="mt-3">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Register for League</h3>
+                    <button onclick="closeLeagueRegistrationModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Registration Content -->
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- League Information -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-blue-900" id="leagueModalName">League Name</h4>
+                                    <p class="text-sm text-blue-700" id="leagueModalGame">Game Type</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-blue-700">Registration Fee:</span>
+                                <span class="text-sm font-medium text-blue-900" id="leagueModalFee">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Position Selection -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-purple-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-purple-900">Select Your Position</h4>
+                        </div>
+                        <div>
+                            <label for="league_position_id" class="block text-sm font-medium text-purple-700 mb-2">Game Position *</label>
+                            <select id="league_position_id" name="position_id" class="w-full border border-purple-300 rounded-lg px-3 py-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Select a position</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Registration Action -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 rounded-full p-2 mr-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-green-900">Ready to Register?</h4>
+                                    <p class="text-sm text-green-700">Click register to submit your request</p>
+                                </div>
+                            </div>
+                            <button onclick="submitLeagueRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Register
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Registration Notice -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-yellow-900">Important Notice</h4>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    Your registration request will be reviewed by the league organizer. You'll be notified once approved.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -298,6 +566,246 @@
         var channel = pusher.subscribe('order');
         channel.bind('player-binding', function(data) {
             $('#broadcastModal').modal('show');
+        });
+
+        // Player Registration Modal Functions
+        function openPlayerRegistrationModal() {
+            document.getElementById('playerRegistrationModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePlayerRegistrationModal() {
+            document.getElementById('playerRegistrationModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            // Reset form
+            document.getElementById('league_id').value = '';
+            document.getElementById('position_id').innerHTML = '<option value="">Select a position</option>';
+        }
+
+        // Handle league selection change
+        document.getElementById('league_id').addEventListener('change', function() {
+            const leagueId = this.value;
+            const positionSelect = document.getElementById('position_id');
+            
+            if (leagueId) {
+                // Fetch positions for the selected league
+                fetch(`/api/leagues/${leagueId}/positions`)
+                    .then(response => response.json())
+                    .then(data => {
+                        positionSelect.innerHTML = '<option value="">Select a position</option>';
+                        data.positions.forEach(position => {
+                            const option = document.createElement('option');
+                            option.value = position.id;
+                            option.textContent = position.name;
+                            if (position.id == {{ auth()->user()->position_id ?? 'null' }}) {
+                                option.selected = true;
+                            }
+                            positionSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching positions:', error);
+                        positionSelect.innerHTML = '<option value="">Error loading positions</option>';
+                    });
+            } else {
+                positionSelect.innerHTML = '<option value="">Select a position</option>';
+            }
+        });
+
+        // Submit player registration
+        function submitPlayerRegistration() {
+            const leagueId = document.getElementById('league_id').value;
+            const positionId = document.getElementById('position_id').value;
+
+            // Validate selections
+            if (!leagueId) {
+                alert('Please select a league');
+                return;
+            }
+            if (!positionId) {
+                alert('Please select a position');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[onclick="submitPlayerRegistration()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `
+                <svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Submitting...
+            `;
+            submitBtn.disabled = true;
+
+            // Prepare data
+            const formData = {
+                position_id: positionId
+            };
+
+            // Send AJAX request
+            fetch(`/leagues/${leagueId}/players/request-registration`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Registration request submitted successfully! You will be notified once approved.');
+                        closePlayerRegistrationModal();
+                        // Reload page to update the UI
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error occurred'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('playerRegistrationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePlayerRegistrationModal();
+            }
+        });
+
+        // League-specific registration modal functions
+        let currentLeagueId = null;
+
+        function openLeagueRegistrationModal(leagueId, leagueName, regFee, gameName) {
+            currentLeagueId = leagueId;
+            
+            // Update modal content
+            document.getElementById('leagueModalName').textContent = leagueName;
+            document.getElementById('leagueModalGame').textContent = gameName;
+            document.getElementById('leagueModalFee').textContent = `₹${parseFloat(regFee).toFixed(2)}`;
+            
+            // Fetch positions for this league
+            fetch(`/api/leagues/${leagueId}/positions`)
+                .then(response => response.json())
+                .then(data => {
+                    const positionSelect = document.getElementById('league_position_id');
+                    positionSelect.innerHTML = '<option value="">Select a position</option>';
+                    data.positions.forEach(position => {
+                        const option = document.createElement('option');
+                        option.value = position.id;
+                        option.textContent = position.name;
+                        if (position.id == {{ auth()->user()->position_id ?? 'null' }}) {
+                            option.selected = true;
+                        }
+                        positionSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching positions:', error);
+                    document.getElementById('league_position_id').innerHTML = '<option value="">Error loading positions</option>';
+                });
+            
+            // Show modal
+            document.getElementById('leagueRegistrationModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLeagueRegistrationModal() {
+            document.getElementById('leagueRegistrationModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentLeagueId = null;
+            // Reset form
+            document.getElementById('league_position_id').innerHTML = '<option value="">Select a position</option>';
+        }
+
+        function submitLeagueRegistration() {
+            const positionId = document.getElementById('league_position_id').value;
+
+            // Validate position selection
+            if (!positionId) {
+                alert('Please select a position');
+                return;
+            }
+
+            if (!currentLeagueId) {
+                alert('League not selected');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[onclick="submitLeagueRegistration()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `
+                <svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Submitting...
+            `;
+            submitBtn.disabled = true;
+
+            // Prepare data
+            const formData = {
+                position_id: positionId
+            };
+
+            // Send AJAX request
+            fetch(`/leagues/${currentLeagueId}/players/request-registration`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Registration request submitted successfully! You will be notified once approved.');
+                        closeLeagueRegistrationModal();
+                        // Reload page to update the UI
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error occurred'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Close league modal when clicking outside
+        document.getElementById('leagueRegistrationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLeagueRegistrationModal();
+            }
         });
     </script>
 @endsection

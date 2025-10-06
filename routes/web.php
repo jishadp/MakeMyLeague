@@ -184,3 +184,15 @@ Route::middleware('auth')->group(function () {
 
 // API route for local bodies by district
 Route::get('api/local-bodies', [RegisterController::class, 'getLocalBodiesByDistrict'])->name('api.local-bodies');
+
+// API route for league positions
+Route::get('api/leagues/{league}/positions', function(\App\Models\League $league) {
+    return response()->json([
+        'positions' => $league->game->roles->map(function($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name
+            ];
+        })
+    ]);
+})->name('api.league-positions');
