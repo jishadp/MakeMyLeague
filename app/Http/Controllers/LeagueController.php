@@ -11,6 +11,8 @@ use App\Models\LocalBody;
 use App\Models\State;
 use App\Models\District;
 use App\Models\LeaguePlayer;
+use App\Models\LeagueFinance;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +158,10 @@ class LeagueController
             // unless another one is made default
             $validated['is_default'] = true;
         }
+        // Store old values for comparison
+        $oldWinnerPrize = $league->winner_prize;
+        $oldRunnerPrize = $league->runner_prize;
+
         $league->update($validated);
 
         // Sync selected grounds (many-to-many)
@@ -165,6 +171,9 @@ class LeagueController
             // If no grounds selected, detach all
             $league->grounds()->detach();
         }
+
+        // Handle automatic expense creation for cash prizes
+        $this->handleCashPrizeExpenses($league, $oldWinnerPrize, $oldRunnerPrize);
 
         return redirect()->route('leagues.index')
             ->with('success', 'League updated successfully!');
@@ -513,5 +522,78 @@ class LeagueController
 
         return redirect()->route('leagues.show', $league)
             ->with('success', 'Auction reset successfully! All auction data has been cleared and league is ready for a fresh auction.');
+    }
+
+    /**
+     * Handle automatic expense creation for cash prizes when they are updated.
+     */
+    private function handleCashPrizeExpenses(League $league, $oldWinnerPrize, $oldRunnerPrize)
+    {
+        // Get the "Trophies and Awards" expense category
+        $awardsCategory = ExpenseCategory::where('type', 'expense')
+            ->where('name', 'Trophies and Awards')
+            ->first();
+
+        if (!$awardsCategory) {
+            // Fallback to any expense category if "Trophies and Awards" doesn't exist
+            $awardsCategory = ExpenseCategory::where('type', 'expense')->first();
+        }
+
+        if (!$awardsCategory) {
+            return; // No expense category available
+        }
+
+        // Handle winner prize changes
+        if ($league->winner_prize && $league->winner_prize != $oldWinnerPrize) {
+            $this->createOrUpdateCashPrizeExpense(
+                $league,
+                $awardsCategory,
+                'Winner Prize',
+                $league->winner_prize,
+                'Cash prize for the winning team'
+            );
+        }
+
+        // Handle runner prize changes
+        if ($league->runner_prize && $league->runner_prize != $oldRunnerPrize) {
+            $this->createOrUpdateCashPrizeExpense(
+                $league,
+                $awardsCategory,
+                'Runner-up Prize',
+                $league->runner_prize,
+                'Cash prize for the runner-up team'
+            );
+        }
+    }
+
+    /**
+     * Create or update a cash prize expense record.
+     */
+    private function createOrUpdateCashPrizeExpense(League $league, ExpenseCategory $category, $title, $amount, $description)
+    {
+        // Check if an expense record already exists for this prize type
+        $existingExpense = LeagueFinance::where('league_id', $league->id)
+            ->where('type', 'expense')
+            ->where('title', 'like', '%' . $title . '%')
+            ->first();
+
+        $data = [
+            'league_id' => $league->id,
+            'user_id' => Auth::id(),
+            'expense_category_id' => $category->id,
+            'title' => $title . ' - ' . $league->name,
+            'description' => $description,
+            'amount' => $amount,
+            'type' => 'expense',
+            'transaction_date' => now(),
+        ];
+
+        if ($existingExpense) {
+            // Update existing expense
+            $existingExpense->update($data);
+        } else {
+            // Create new expense
+            LeagueFinance::create($data);
+        }
     }
 }

@@ -114,10 +114,6 @@
                                 <span>By {{ $finance->user->name }}</span>
                             </div>
                             <div class="flex space-x-3 mt-3">
-                                <a href="{{ route('league-finances.show', [$league, $finance]) }}" 
-                                   class="text-blue-600 hover:text-blue-900 text-xs font-medium">View</a>
-                                <a href="{{ route('league-finances.edit', [$league, $finance]) }}" 
-                                   class="text-indigo-600 hover:text-indigo-900 text-xs font-medium">Edit</a>
                                 <form method="POST" action="{{ route('league-finances.destroy', [$league, $finance]) }}" 
                                       class="inline" onsubmit="return confirm('Are you sure you want to delete this transaction?')">
                                     @csrf
@@ -170,18 +166,12 @@
                                         {{ $finance->user->name }}
                                     </td>
                                     <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('league-finances.show', [$league, $finance]) }}" 
-                                               class="text-blue-600 hover:text-blue-900">View</a>
-                                            <a href="{{ route('league-finances.edit', [$league, $finance]) }}" 
-                                               class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            <form method="POST" action="{{ route('league-finances.destroy', [$league, $finance]) }}" 
-                                                  class="inline" onsubmit="return confirm('Are you sure you want to delete this transaction?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                            </form>
-                                        </div>
+                                        <form method="POST" action="{{ route('league-finances.destroy', [$league, $finance]) }}" 
+                                              class="inline" onsubmit="return confirm('Are you sure you want to delete this transaction?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach

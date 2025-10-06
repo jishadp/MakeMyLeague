@@ -434,6 +434,13 @@ class LeagueFinanceController extends Controller
             'endDate'
         ));
 
+        // Configure PDF options for better Unicode support
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'DejaVu Sans'
+        ]);
+
         return $pdf->download("league-finances-{$league->slug}-{$startDate}-to-{$endDate}.pdf");
     }
 

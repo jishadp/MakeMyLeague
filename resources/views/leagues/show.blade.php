@@ -474,39 +474,6 @@
                                 </a>
                                 @endif
 
-                                <!-- Complete Auction Button (only show if auction is active and user is organizer) -->
-                                @if($league->status === 'active' && (Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin()))
-                                <form action="{{ route('auction.complete', $league) }}" method="POST" class="w-full">
-                                    @csrf
-                                    <button type="submit" 
-                                            onclick="return confirm('Are you sure you want to complete the auction? This action cannot be undone.')"
-                                            class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-red-50 via-pink-50 to-red-100 text-red-700 rounded-xl hover:from-red-100 hover:to-pink-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-red-100 hover:border-red-200 overflow-hidden w-full">
-
-                                        <!-- Background Pattern -->
-                                        <div class="absolute inset-0 opacity-5">
-                                            <div class="absolute top-2 right-2 w-12 h-12 bg-red-600 rounded-full transform translate-x-6 -translate-y-6"></div>
-                                            <div class="absolute bottom-2 left-2 w-8 h-8 bg-pink-400 rounded-full transform -translate-x-4 translate-y-4"></div>
-                                        </div>
-
-                                        <!-- Icon Container -->
-                                        <div class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
-                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-
-                                        <!-- Content -->
-                                        <div class="relative z-10 text-center">
-                                            <h3 class="text-sm sm:text-base font-semibold text-red-800 mb-1">Complete Auction</h3>
-                                            <div class="flex items-center justify-center">
-                                                <span class="text-xs text-red-600 font-medium bg-white/60 px-2 py-1 rounded-full">
-                                                    Finalize Bidding
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </button>
-                                </form>
-                                @endif
 
                                 @if($fixturesCount > 0)
                                 <!-- Fixtures Card -->
@@ -1499,9 +1466,82 @@
         </div>
     </div>
 
-    <!-- Reset Auction Section (only show for organizers/admins when auction is completed or active) -->
-    @if(in_array($league->status, ['auction_completed', 'active']) && (Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin()))
+    <!-- Auction Management Section -->
+    @if((Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin()))
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Complete Auction Section (only show if auction is active) -->
+        @if($league->status === 'active')
+        <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium text-green-800">Complete Auction</h3>
+                        <p class="text-sm text-green-600 mt-1">
+                            Finalize the auction and mark all unsold players as unsold. This will change the league status to "Auction Completed".
+                        </p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <form action="{{ route('auction.complete', $league) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to complete the auction? This action cannot be undone.')"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Complete Auction
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Completed Auction Information (only show if auction is completed) -->
+        @if($league->status === 'auction_completed')
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium text-blue-800">Auction Completed</h3>
+                        <p class="text-sm text-blue-600 mt-1">
+                            @if($league->auction_ended_at)
+                                Auction completed on {{ $league->auction_ended_at->format('F j, Y \a\t g:i A') }}
+                            @else
+                                Auction has been completed successfully
+                            @endif
+                        </p>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <span class="font-medium">Status:</span> All players have been assigned to teams or marked as unsold
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Completed
+                    </span>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Reset Auction Section (only show when auction is completed or active) -->
+        @if(in_array($league->status, ['auction_completed', 'active']))
         <div class="bg-red-50 border border-red-200 rounded-xl p-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1533,6 +1573,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
     @endif
 

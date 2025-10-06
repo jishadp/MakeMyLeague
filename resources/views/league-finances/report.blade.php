@@ -12,13 +12,18 @@
         }
         
         body {
-            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-family: 'DejaVu Sans', 'Arial Unicode MS', 'Arial', sans-serif;
             font-size: 14px;
             line-height: 1.6;
             color: #000;
             background: #fff;
             margin: 0;
             padding: 0;
+        }
+        
+        @font-face {
+            font-family: 'DejaVu Sans';
+            src: url('https://fonts.gstatic.com/s/dejavu/v1/DejaVuSans.ttf') format('truetype');
         }
         
         .invoice-container {
@@ -368,15 +373,15 @@
                     <div class="payment-method">
                         <div class="payment-row">
                             <span><strong>Total Income:</strong></span>
-                            <span class="amount-income">₹{{ number_format($totalIncome, 2) }}</span>
+                            <span class="amount-income">Rs. {{ number_format($totalIncome, 2) }}</span>
                         </div>
                         <div class="payment-row">
                             <span><strong>Total Expenses:</strong></span>
-                            <span class="amount-expense">₹{{ number_format($totalExpenses, 2) }}</span>
+                            <span class="amount-expense">Rs. {{ number_format($totalExpenses, 2) }}</span>
                         </div>
                         <div class="payment-row">
                             <span><strong>Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}:</strong></span>
-                            <span class="{{ $netProfit >= 0 ? 'amount-income' : 'amount-expense' }}">₹{{ number_format(abs($netProfit), 2) }}</span>
+                            <span class="{{ $netProfit >= 0 ? 'amount-income' : 'amount-expense' }}">Rs. {{ number_format(abs($netProfit), 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -407,7 +412,7 @@
                                     </span>
                                 </td>
                                 <td class="amount-{{ $finance->type }}">
-                                    ₹{{ number_format($finance->amount, 2) }}
+                                    Rs. {{ number_format($finance->amount, 2) }}
                                 </td>
                                 <td>{{ $finance->transaction_date->format('M d, Y') }}</td>
                             </tr>
@@ -433,11 +438,11 @@
                     <div class="section-title">Summary</div>
                     <div class="summary-row">
                         <span>Total Income:</span>
-                        <span class="amount-income">₹{{ number_format($totalIncome, 2) }}</span>
+                        <span class="amount-income">Rs. {{ number_format($totalIncome, 2) }}</span>
                     </div>
                     <div class="summary-row">
                         <span>Total Expenses:</span>
-                        <span class="amount-expense">₹{{ number_format($totalExpenses, 2) }}</span>
+                        <span class="amount-expense">Rs. {{ number_format($totalExpenses, 2) }}</span>
                     </div>
                     <div class="summary-row">
                         <span>Transactions Count:</span>
@@ -446,7 +451,7 @@
                     <div class="summary-total">
                         <div class="summary-total-row">
                             <span>Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}:</span>
-                            <span>₹{{ number_format(abs($netProfit), 2) }}</span>
+                            <span>Rs. {{ number_format(abs($netProfit), 2) }}</span>
                         </div>
                     </div>
                 </div>
