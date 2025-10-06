@@ -190,7 +190,17 @@ class PlayerController extends Controller
             ->whereNotNull('league_team_id')
             ->get();
             
-        return view('players.show', compact('player', 'recentAuctions', 'leagueTeams'));
+        // Get registered leagues with active and pending status
+        $registeredLeagues = $player->leaguePlayers()
+            ->with(['league.game', 'league.localBody.district'])
+            ->whereIn('status', ['pending', 'available', 'sold', 'active'])
+            ->whereHas('league', function($query) {
+                $query->whereIn('status', ['active', 'pending']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return view('players.show', compact('player', 'recentAuctions', 'leagueTeams', 'registeredLeagues'));
     }
 
     /**
