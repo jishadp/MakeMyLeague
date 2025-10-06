@@ -244,26 +244,67 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-3">Select Grounds for this League</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    {{-- Search Input --}}
+                    <div class="relative mb-4">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" id="ground-search" placeholder="Search grounds by name, location, or capacity..."
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
+                    </div>
+
+                    {{-- Selected Grounds Tags --}}
+                    <div id="selected-grounds" class="mb-4 min-h-[50px] p-3 border border-gray-200 rounded-lg bg-gray-50">
+                        <div class="flex flex-wrap gap-2" id="ground-tags">
+                            <!-- Selected ground tags will appear here -->
+                        </div>
+                        <div id="no-grounds-selected" class="text-gray-500 text-sm italic">
+                            No grounds selected yet. Search and select from the list below.
+                        </div>
+                    </div>
+
+                    {{-- Grounds List --}}
+                    <div id="grounds-list" class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
                         @foreach ($grounds as $ground)
-                            <div
-                                class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                <input type="checkbox" name="ground_ids[]" id="ground_{{ $ground->id }}"
-                                    value="{{ $ground->id }}"
-                                    {{ in_array($ground->id, old('ground_ids', $league->grounds->pluck('id')->toArray())) ? 'checked' : '' }}
-                                class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-0.5">
-                                <label for="ground_{{ $ground->id }}" class="text-sm cursor-pointer">
-                                    <span class="font-medium block text-gray-800">{{ $ground->name }}</span>
-                                    <span class="text-gray-500 text-xs block">{{ $ground->localBody->name }},
-                                        {{ $ground->district->name }}</span>
-                                    @if ($ground->capacity)
-                                        <span class="text-gray-500 text-xs block">Capacity:
-                                            {{ number_format($ground->capacity) }}</span>
-                                    @endif
-                                </label>
+                            <div class="ground-item p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors"
+                                data-ground-id="{{ $ground->id }}"
+                                data-ground-name="{{ $ground->name }}"
+                                data-ground-location="{{ $ground->localBody->name }}, {{ $ground->district->name }}"
+                                data-ground-capacity="{{ $ground->capacity ? number_format($ground->capacity) : 'N/A' }}"
+                                data-search-text="{{ strtolower($ground->name . ' ' . $ground->localBody->name . ' ' . $ground->district->name . ' ' . ($ground->capacity ? number_format($ground->capacity) : '')) }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-gray-800">{{ $ground->name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $ground->localBody->name }}, {{ $ground->district->name }}</div>
+                                        @if ($ground->capacity)
+                                            <div class="text-xs text-gray-400">Capacity: {{ number_format($ground->capacity) }}</div>
+                                        @endif
+                                    </div>
+                                    <div class="ml-3">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
+
+                    {{-- Hidden inputs for form submission --}}
+                    <div id="ground-inputs">
+                        @php
+                            $selectedGroundIds = old('ground_ids', $league->grounds->pluck('id')->toArray());
+                        @endphp
+                        @if(is_array($selectedGroundIds))
+                            @foreach($selectedGroundIds as $groundId)
+                                <input type="hidden" name="ground_ids[]" value="{{ $groundId }}">
+                            @endforeach
+                        @endif
+                    </div>
+
                     @error('ground_ids')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -416,6 +457,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Flatpickr is now initialized in app.js via Vite
+            
+            // Initialize ground selection functionality
+            initializeGroundSelection();
         });
         
         function updateTotalPlayers() {
@@ -429,6 +473,131 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('max_teams').addEventListener('change', updateTotalPlayers);
         });
+        
+        // Ground Selection Functionality
+        function initializeGroundSelection() {
+            const searchInput = document.getElementById('ground-search');
+            const groundsList = document.getElementById('grounds-list');
+            const groundItems = groundsList.querySelectorAll('.ground-item');
+            const selectedGrounds = new Set();
+            const groundInputs = document.getElementById('ground-inputs');
+            const groundTags = document.getElementById('ground-tags');
+            const noGroundsSelected = document.getElementById('no-grounds-selected');
+            
+            // Load previously selected grounds from old input
+            const oldInputs = groundInputs.querySelectorAll('input[name="ground_ids[]"]');
+            oldInputs.forEach(input => {
+                const groundId = input.value;
+                selectedGrounds.add(groundId);
+                const groundItem = groundsList.querySelector(`[data-ground-id="${groundId}"]`);
+                if (groundItem) {
+                    addGroundTag(groundItem);
+                    groundItem.classList.add('bg-indigo-50', 'border-indigo-200');
+                }
+            });
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                groundItems.forEach(item => {
+                    const searchText = item.getAttribute('data-search-text');
+                    if (searchText.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Ground selection
+            groundItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const groundId = this.getAttribute('data-ground-id');
+                    
+                    if (selectedGrounds.has(groundId)) {
+                        // Remove ground
+                        selectedGrounds.delete(groundId);
+                        this.classList.remove('bg-indigo-50', 'border-indigo-200');
+                        removeGroundTag(groundId);
+                        removeGroundInput(groundId);
+                    } else {
+                        // Add ground
+                        selectedGrounds.add(groundId);
+                        this.classList.add('bg-indigo-50', 'border-indigo-200');
+                        addGroundTag(this);
+                        addGroundInput(groundId);
+                    }
+                    
+                    updateNoGroundsMessage();
+                });
+            });
+            
+            function addGroundTag(groundItem) {
+                const groundId = groundItem.getAttribute('data-ground-id');
+                const groundName = groundItem.getAttribute('data-ground-name');
+                const groundLocation = groundItem.getAttribute('data-ground-location');
+                const groundCapacity = groundItem.getAttribute('data-ground-capacity');
+                
+                const tag = document.createElement('div');
+                tag.className = 'inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium';
+                tag.innerHTML = `
+                    <span>${groundName}</span>
+                    <span class="text-xs text-indigo-600">(${groundLocation})</span>
+                    <button type="button" onclick="removeGround('${groundId}')" class="ml-1 text-indigo-600 hover:text-indigo-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+                tag.setAttribute('data-ground-id', groundId);
+                groundTags.appendChild(tag);
+            }
+            
+            function removeGroundTag(groundId) {
+                const tag = groundTags.querySelector(`[data-ground-id="${groundId}"]`);
+                if (tag) {
+                    tag.remove();
+                }
+            }
+            
+            function addGroundInput(groundId) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ground_ids[]';
+                input.value = groundId;
+                groundInputs.appendChild(input);
+            }
+            
+            function removeGroundInput(groundId) {
+                const input = groundInputs.querySelector(`input[value="${groundId}"]`);
+                if (input) {
+                    input.remove();
+                }
+            }
+            
+            function updateNoGroundsMessage() {
+                if (selectedGrounds.size === 0) {
+                    noGroundsSelected.style.display = 'block';
+                } else {
+                    noGroundsSelected.style.display = 'none';
+                }
+            }
+            
+            // Global function for removing grounds from tags
+            window.removeGround = function(groundId) {
+                selectedGrounds.delete(groundId);
+                const groundItem = groundsList.querySelector(`[data-ground-id="${groundId}"]`);
+                if (groundItem) {
+                    groundItem.classList.remove('bg-indigo-50', 'border-indigo-200');
+                }
+                removeGroundTag(groundId);
+                removeGroundInput(groundId);
+                updateNoGroundsMessage();
+            };
+            
+            // Initialize no grounds message
+            updateNoGroundsMessage();
+        }
 
         // Image Upload and Cropper.js functionality
         let logoCropper, bannerCropper;
