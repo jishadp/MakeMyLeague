@@ -46,6 +46,15 @@
                         Edit Profile
                     </a>
                     
+                    @if(auth()->id() === $player->id)
+                        <a href="{{ route('profile.show') }}" class="inline-flex items-center px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl backdrop-blur-sm border border-blue-500/20">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            User Profile
+                        </a>
+                    @endif
+                    
                     @if(auth()->user()->isOrganizer())
                         <form action="{{ route('players.destroy', $player) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this player? This action cannot be undone.');">
                             @csrf

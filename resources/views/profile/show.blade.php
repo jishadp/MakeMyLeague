@@ -32,7 +32,7 @@
         </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             <!-- Profile Photo Section -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeInUp">
                 <div class="bg-gradient-to-br from-indigo-600 to-purple-600 px-6 py-8 text-center">
@@ -97,6 +97,18 @@
                             </div>
                         </div>
                         @endif
+                        
+                        @if($user->isPlayer())
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Player Profile</span>
+                            <a href="{{ route('players.show', $user) }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                View Player Profile
+                            </a>
+                        </div>
+                        @endif
                         @if($user->gameRoles->isNotEmpty())
                         <div class="flex justify-between items-center py-3 border-b border-gray-100">
                             <span class="text-gray-600 font-medium">Game Roles</span>
@@ -129,13 +141,13 @@
             </div>
 
             <!-- Profile Form -->
-            <div class="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+            <div class="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-12">
                 <form action="{{ route('profile.update') }}" method="POST">
                     @csrf
                     @method('PUT')
                     
                     <!-- Basic Information -->
-                    <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 animate-fadeInUp">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 animate-fadeInUp">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
@@ -182,7 +194,7 @@
                     </div>
 
                     <!-- Game Information -->
-                    <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 animate-fadeInUp">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 animate-fadeInUp">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-xl font-bold text-gray-900 flex items-center">
                             <svg class="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -302,7 +314,7 @@
                                                    {{ $userGameRole && $userGameRole->is_primary ? 'checked' : '' }}>
                                             <span class="text-sm font-semibold text-yellow-800 flex items-center">
                                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" clip-rule="evenodd"/>
+                                                    <path fill-rule="evenodd" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" clip-rule="evenodd"/>
                                                 </svg>
                                                 Set as Primary Game
                                             </span>
@@ -321,7 +333,7 @@
                     </div>
 
                     <!-- Location Information -->
-                    <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 animate-fadeInUp">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 animate-fadeInUp">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                             <svg class="w-6 h-6 text-purple-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
@@ -346,7 +358,7 @@
                     </div>
 
                     <!-- Security -->
-                    <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 animate-fadeInUp">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 mb-6 sm:mb-8 animate-fadeInUp">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                             <svg class="w-6 h-6 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
@@ -365,7 +377,7 @@
                     </div>
 
                     <button type="submit" 
-                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-blue-900 py-3 sm:py-4 px-6 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 mt-4 sm:mt-6">
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 sm:py-4 px-6 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
                         <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
@@ -393,7 +405,7 @@
             </div>
             <div class="flex gap-4">
                 <button onclick="closeCropModal()" class="flex-1 px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 font-medium transition-colors">Cancel</button>
-                <button onclick="cropAndUpload()" class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-blue-900 rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium transition-all duration-200 shadow-lg hover:shadow-xl">Upload</button>
+                <button onclick="cropAndUpload()" class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium transition-all duration-200 shadow-lg hover:shadow-xl">Upload</button>
             </div>
         </div>
     </div>
