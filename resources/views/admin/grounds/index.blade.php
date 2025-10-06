@@ -131,7 +131,7 @@
                                         <svg class="w-16 h-16 mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h4a2 2 0 012 2v2H6v-2z" clip-rule="evenodd"></path>
                                         </svg>
-                                        <h3 class="text-xl font-bold drop-shadow-lg">{{ $ground->name }}</h3>
+                                        <!-- <h3 class="text-xl font-bold drop-shadow-lg">{{ $ground->name }}</h3> -->
                                     </div>
                                 </div>
                             @endif

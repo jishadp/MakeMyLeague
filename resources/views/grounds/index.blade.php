@@ -149,7 +149,7 @@
                                 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
                         <div class="bg-gray-200 h-48 flex items-center justify-center">
                             @if($ground->image)
-                                <img src="{{ asset($ground->image) }}" alt="{{ $ground->name }}" class="w-full h-full object-cover">
+                                <img src="{{ asset($ground->image) }}" alt="" class="w-full h-full object-cover">
                             @else
                                 <div class="text-gray-500 text-center p-4">
                                     <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
