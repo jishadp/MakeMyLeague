@@ -17,6 +17,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
-        "cropperjs": "^2.0.1"
+        "cropperjs": "^2.0.1",
+        "flatpickr": "^4.6.13"
     }
 }

@@ -381,32 +381,14 @@
 
 @endsection
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* Simple responsive date picker styling */
-        .flatpickr-calendar {
-            z-index: 9999 !important;
-        }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 640px) {
-            .flatpickr-calendar {
-                font-size: 14px !important;
-                width: 280px !important;
-            }
-            
-            .flatpickr-day {
-                height: 36px !important;
-                line-height: 36px !important;
-            }
-        }
+        /* Additional custom styles if needed */
     </style>
 @endsection
 
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ asset('assets/flatpickr/flatpickr.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -419,16 +401,7 @@
                 }
             });
             
-            // Initialize Flatpickr with standard options
-            flatpickr('.flatpickr', {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                enableTime: false,
-                minDate: "today",
-                disableMobile: false, // Enable on mobile devices
-                clickOpens: true,
-                monthSelectorType: "static" // Fix month navigation
-            });
+            // Flatpickr is now initialized in app.js via Vite
             
             // Initialize total players calculation
             updateTotalPlayers();

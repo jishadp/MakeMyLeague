@@ -407,42 +407,15 @@
 
 @endsection
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.css') }}" />
     <style>
-        /* Simple responsive date picker styling */
-        .flatpickr-calendar {
-            z-index: 9999 !important;
-        }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 640px) {
-            .flatpickr-calendar {
-                font-size: 14px !important;
-                width: 280px !important;
-            }
-            
-            .flatpickr-day {
-                height: 36px !important;
-                line-height: 36px !important;
-            }
-        }
+        /* Additional custom styles if needed */
     </style>
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/flatpickr/flatpickr.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Initialize Flatpickr with standard options
-            flatpickr('.flatpickr', {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                enableTime: false,
-                minDate: "today",
-                disableMobile: false, // Enable on mobile devices
-                clickOpens: true,
-                monthSelectorType: "static" // Fix month navigation
-            });
+            // Flatpickr is now initialized in app.js via Vite
         });
         
         function updateTotalPlayers() {
