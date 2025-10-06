@@ -66,6 +66,10 @@ Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('p
 Route::post('leagues/{league}/players/register', [PlayerController::class, 'register'])
     ->name('league-players.register');
 
+// League join link routes
+Route::get('join-league/{league}', [LeagueController::class, 'showJoinLink'])->name('leagues.join-link');
+Route::post('join-league/{league}', [LeagueController::class, 'processJoinLink'])->name('leagues.process-join');
+
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');
     Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index');
@@ -160,6 +164,8 @@ Route::middleware('auth')->group(function () {
         Route::get('finances/create', [LeagueFinanceController::class, 'create'])->name('create');
         Route::post('finances', [LeagueFinanceController::class, 'store'])->name('store');
         Route::post('finances/quick-income', [LeagueFinanceController::class, 'quickIncome'])->name('quick-income');
+        Route::post('finances/individual-team-income', [LeagueFinanceController::class, 'individualTeamIncome'])->name('individual-team-income');
+        Route::get('team-payment-status/{teamId}', [LeagueFinanceController::class, 'getTeamPaymentStatus'])->name('team-payment-status');
         Route::get('finances/{finance}', [LeagueFinanceController::class, 'show'])->name('show');
         Route::get('finances/{finance}/edit', [LeagueFinanceController::class, 'edit'])->name('edit');
         Route::put('finances/{finance}', [LeagueFinanceController::class, 'update'])->name('update');

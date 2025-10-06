@@ -67,82 +67,18 @@ class LeagueFinanceController extends Controller
             ->where('title', 'like', '%Player Registration%')
             ->first();
 
-        // Get individual team registration records first
-        $individualTeamRegistrations = LeagueFinance::where('league_id', $league->id)
+        // Check for existing team registration income records
+        $existingTeamRegistration = LeagueFinance::where('league_id', $league->id)
             ->where('type', 'income')
-            ->where(function($query) {
-                $query->where('title', 'like', '%Team Registration Fee -%')
-                      ->orWhere('title', 'like', '%Team Registration -%')
-                      ->orWhere('title', 'like', '%Registration Fee -%');
-            })
-            ->get();
-            
-        // Debug: Log what we found
-        \Log::info('Team Registration Debug', [
-            'league_id' => $league->id,
-            'individual_records_count' => $individualTeamRegistrations->count(),
-            'individual_records' => $individualTeamRegistrations->pluck('title', 'amount'),
-            'all_team_records' => LeagueFinance::where('league_id', $league->id)
-                ->where('type', 'income')
-                ->where('title', 'like', '%Team Registration%')
-                ->pluck('title', 'amount')
-        ]);
-            
-        // Check for existing combined team registration income records (only if no individual records)
-        $existingTeamRegistration = null;
-        if ($individualTeamRegistrations->count() == 0) {
-            $existingTeamRegistration = LeagueFinance::where('league_id', $league->id)
-                ->where('type', 'income')
-                ->where('title', 'like', '%Team Registration%')
-                ->where('title', 'not like', '%Team Registration Fee -%') // Exclude individual team records
-                ->first();
-        }
+            ->where('title', 'like', '%Team Registration%')
+            ->first();
 
         // Calculate expected amounts and balances
         $expectedPlayerAmount = $totalPotentialPlayers * $league->player_reg_fee;
         $expectedTeamAmount = $teamCount * $league->team_reg_fee;
         
         $playerBalance = $existingPlayerRegistration ? ($expectedPlayerAmount - $existingPlayerRegistration->amount) : 0;
-        
-        // For team balance, check if we have individual team fees
-        $teamBalance = 0;
-        $individualTeamFees = [];
-        
-        if ($individualTeamRegistrations->count() > 0) {
-            // We have individual team records - prioritize these
-            $actualTeamTotal = 0;
-            foreach ($individualTeamRegistrations as $record) {
-                // Extract team name from title - handle multiple patterns
-                $teamName = $record->title;
-                if (strpos($teamName, 'Team Registration Fee - ') !== false) {
-                    $teamName = str_replace('Team Registration Fee - ', '', $teamName);
-                } elseif (strpos($teamName, 'Team Registration - ') !== false) {
-                    $teamName = str_replace('Team Registration - ', '', $teamName);
-                } elseif (strpos($teamName, 'Registration Fee - ') !== false) {
-                    $teamName = str_replace('Registration Fee - ', '', $teamName);
-                }
-                $individualTeamFees[trim($teamName)] = $record->amount;
-                $actualTeamTotal += $record->amount;
-            }
-            $teamBalance = $expectedTeamAmount - $actualTeamTotal;
-        } elseif ($existingTeamRegistration) {
-            // We have a combined record, try to extract individual team fees from description
-            $description = $existingTeamRegistration->description;
-            $actualTeamTotal = 0;
-            
-            // Look for pattern like "Team Name: ₹amount"
-            if (preg_match_all('/([^:]+):\s*₹([0-9,]+\.?[0-9]*)/', $description, $matches)) {
-                foreach ($matches[1] as $index => $teamName) {
-                    $amount = (float) str_replace(',', '', $matches[2][$index]);
-                    $individualTeamFees[trim($teamName)] = $amount;
-                    $actualTeamTotal += $amount;
-                }
-                $teamBalance = $expectedTeamAmount - $actualTeamTotal;
-            } else {
-                // Fallback to original calculation
-                $teamBalance = $expectedTeamAmount - $existingTeamRegistration->amount;
-            }
-        }
+        $teamBalance = $existingTeamRegistration ? ($expectedTeamAmount - $existingTeamRegistration->amount) : 0;
 
         $incomeCategories = ExpenseCategory::income()->active()->get();
         $expenseCategories = ExpenseCategory::expense()->active()->get();
@@ -155,12 +91,10 @@ class LeagueFinanceController extends Controller
             'totalPotentialPlayers',
             'existingPlayerRegistration',
             'existingTeamRegistration',
-            'individualTeamRegistrations',
             'expectedPlayerAmount',
             'expectedTeamAmount',
             'playerBalance',
-            'teamBalance',
-            'individualTeamFees'
+            'teamBalance'
         ));
     }
 
@@ -501,6 +435,126 @@ class LeagueFinanceController extends Controller
         ));
 
         return $pdf->download("league-finances-{$league->slug}-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    /**
+     * Get team payment status for AJAX request.
+     */
+    public function getTeamPaymentStatus(League $league, $teamId)
+    {
+        \Log::info('getTeamPaymentStatus called', ['league_id' => $league->id, 'team_id' => $teamId]);
+        
+        if (!$this->isLeagueOrganizer($league)) {
+            \Log::warning('Unauthorized access to team payment status', ['league_id' => $league->id, 'team_id' => $teamId]);
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Find the league team
+        $leagueTeam = $league->leagueTeams()->where('id', $teamId)->with('team')->first();
+        
+        if (!$leagueTeam) {
+            \Log::warning('Team not found', ['league_id' => $league->id, 'team_id' => $teamId]);
+            return response()->json(['error' => 'Team not found'], 404);
+        }
+
+        // Get individual team registration fee records
+        $teamFinanceRecords = LeagueFinance::where('league_id', $league->id)
+            ->where('type', 'income')
+            ->where('title', 'like', '%Team Registration Fee - ' . $leagueTeam->team->name . '%')
+            ->get();
+
+        $expectedAmount = $league->team_reg_fee;
+        $paidAmount = $teamFinanceRecords->sum('amount');
+        $balance = $expectedAmount - $paidAmount;
+
+        // Determine status
+        $status = 'pending';
+        if ($paidAmount >= $expectedAmount) {
+            $status = 'paid';
+        } elseif ($paidAmount > 0) {
+            $status = 'partial';
+        }
+
+        // Get last payment date
+        $lastPayment = $teamFinanceRecords->sortByDesc('transaction_date')->first();
+        $paymentDate = $lastPayment ? $lastPayment->transaction_date->format('M d, Y') : null;
+
+        $responseData = [
+            'team_id' => $teamId,
+            'team_name' => $leagueTeam->team->name,
+            'expected_amount' => $expectedAmount,
+            'paid_amount' => $paidAmount,
+            'balance' => $balance,
+            'status' => $status,
+            'payment_date' => $paymentDate,
+            'payment_count' => $teamFinanceRecords->count()
+        ];
+        
+        \Log::info('Team payment status response', $responseData);
+        
+        return response()->json($responseData);
+    }
+
+    /**
+     * Record individual team registration fee payment.
+     */
+    public function individualTeamIncome(Request $request, League $league)
+    {
+        if (!$this->isLeagueOrganizer($league)) {
+            abort(403, 'You are not authorized to access this league\'s finances.');
+        }
+
+        $request->validate([
+            'team_id' => 'required|exists:league_teams,id',
+            'amount' => 'required|numeric|min:0.01|max:' . $league->team_reg_fee,
+        ], [
+            'team_id.required' => 'Please select a team.',
+            'team_id.exists' => 'Selected team is not valid.',
+            'amount.required' => 'Please enter an amount.',
+            'amount.numeric' => 'Amount must be a valid number.',
+            'amount.min' => 'Amount must be greater than 0.',
+            'amount.max' => 'Amount cannot exceed the team registration fee of ₹' . number_format($league->team_reg_fee, 2) . '.',
+        ]);
+
+        // Find the league team
+        $leagueTeam = $league->leagueTeams()->where('id', $request->team_id)->with('team')->first();
+        
+        if (!$leagueTeam) {
+            return redirect()->back()->with('error', 'Team not found.');
+        }
+
+        // Get the appropriate income category
+        $incomeCategory = ExpenseCategory::where('type', 'income')
+            ->where('name', 'like', '%registration%')
+            ->first();
+
+        if (!$incomeCategory) {
+            $incomeCategory = ExpenseCategory::where('type', 'income')->first();
+        }
+
+        // Create individual team registration fee record
+        $financeRecord = LeagueFinance::create([
+            'league_id' => $league->id,
+            'user_id' => Auth::id(),
+            'expense_category_id' => $incomeCategory->id,
+            'title' => 'Team Registration Fee - ' . $leagueTeam->team->name,
+            'description' => "Registration fee collected from {$leagueTeam->team->name} for {$league->name}",
+            'amount' => $request->amount,
+            'type' => 'income',
+            'transaction_date' => now(),
+        ]);
+
+        \Log::info('Team registration fee recorded', [
+            'league_id' => $league->id,
+            'team_id' => $request->team_id,
+            'team_name' => $leagueTeam->team->name,
+            'amount' => $request->amount,
+            'finance_id' => $financeRecord->id,
+            'user_id' => Auth::id()
+        ]);
+
+        return redirect()->route('league-finances.create', $league)
+            ->with('success', "Registration fee of ₹" . number_format($request->amount, 2) . " recorded for {$leagueTeam->team->name}!");
     }
 
     /**

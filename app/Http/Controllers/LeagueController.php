@@ -94,7 +94,16 @@ class LeagueController
             $query->where('league_id', $league->id);
         })->with(['homeGround', 'localBody', 'primaryOwners'])->get();
         
-        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount', 'availableTeams'));
+        // Get player status counts for join link card
+        $playerStatusCounts = [
+            'total' => $league->leaguePlayers()->count(),
+            'available' => $league->leaguePlayers()->where('status', 'available')->count(),
+            'sold' => $league->leaguePlayers()->where('status', 'sold')->count(),
+            'pending' => $league->leaguePlayers()->where('status', 'pending')->count(),
+            'unsold' => $league->leaguePlayers()->where('status', 'unsold')->count(),
+        ];
+        
+        return view('leagues.show', compact('league', 'leagueTeamsCount', 'leaguePlayersCount', 'fixturesCount', 'availableTeams', 'playerStatusCounts'));
     }
 
     /**
@@ -215,5 +224,66 @@ class LeagueController
         $player = LeaguePlayer::find($player_id);
 
         return response()->json(['status' => 'success', 'data' => $player]);
+    }
+
+    /**
+     * Show the join link page for a league.
+     */
+    public function showJoinLink(League $league): View
+    {
+        $league->load(['game', 'localBody.district', 'approvedOrganizers']);
+        
+        // Check if user is already registered in this league
+        $isAlreadyRegistered = false;
+        $playerStatus = null;
+        
+        if (Auth::check()) {
+            $existingPlayer = LeaguePlayer::where('user_id', Auth::id())
+                ->where('league_id', $league->id)
+                ->first();
+            
+            if ($existingPlayer) {
+                $isAlreadyRegistered = true;
+                $playerStatus = $existingPlayer->status;
+            }
+        }
+        
+        return view('leagues.join-link', compact('league', 'isAlreadyRegistered', 'playerStatus'));
+    }
+
+    /**
+     * Process the join link request.
+     */
+    public function processJoinLink(Request $request, League $league): RedirectResponse
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            // Store the league info in session for after registration
+            session(['join_league_after_registration' => $league->slug]);
+            return redirect()->route('register')
+                ->with('info', 'Please register first to join the league.');
+        }
+
+        // Check if already registered
+        $existingPlayer = LeaguePlayer::where('user_id', Auth::id())
+            ->where('league_id', $league->id)
+            ->first();
+
+        if ($existingPlayer) {
+            return redirect()->route('leagues.join-link', $league)
+                ->with('info', 'You are already registered in this league.');
+        }
+
+        // Register the player in the league
+        LeaguePlayer::create([
+            'user_id' => Auth::id(),
+            'league_id' => $league->id,
+            'status' => 'available',
+            'base_price' => $league->player_reg_fee,
+            'retention' => false,
+        ]);
+
+        return redirect()->route('leagues.join-link', $league)
+            ->with('success', 'You have successfully joined the league!');
     }
 }
