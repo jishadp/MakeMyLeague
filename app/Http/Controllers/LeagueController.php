@@ -13,8 +13,10 @@ use App\Models\District;
 use App\Models\LeaguePlayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 
 class LeagueController
 {
@@ -53,6 +55,23 @@ class LeagueController
             League::where('is_default', true)->update(['is_default' => false]);
             $validated['is_default'] = true;
         }
+        
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
+            $logoFilename = 'league_logo_' . time() . '.' . $logo->getClientOriginalExtension();
+            $logoPath = $logo->storeAs('leagues/logos', $logoFilename, 'public');
+            $validated['logo'] = $logoPath;
+        }
+        
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            $banner = $request->file('banner');
+            $bannerFilename = 'league_banner_' . time() . '.' . $banner->getClientOriginalExtension();
+            $bannerPath = $banner->storeAs('leagues/banners', $bannerFilename, 'public');
+            $validated['banner'] = $bannerPath;
+        }
+        
         $league = League::create($validated);
 
         // Add the current user as a pending organizer (requires approval)
@@ -285,5 +304,129 @@ class LeagueController
 
         return redirect()->route('leagues.join-link', $league)
             ->with('success', 'You have successfully joined the league!');
+    }
+
+    /**
+     * Upload and crop league logo
+     */
+    public function uploadLogo(Request $request, League $league): JsonResponse
+    {
+        // Log the request for debugging
+        \Log::info('Logo upload request', [
+            'league_id' => $league->id,
+            'user_id' => auth()->id(),
+            'has_file' => $request->hasFile('logo')
+        ]);
+
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
+        ]);
+
+        try {
+            $image = $request->file('logo');
+            $filename = 'league_logo_' . $league->id . '_' . time() . '.' . $image->getClientOriginalExtension();
+            
+            // Store the image
+            $path = $image->storeAs('leagues/logos', $filename, 'public');
+            
+            // Update league with logo path
+            $league->update(['logo' => $path]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logo uploaded successfully',
+                'logo_url' => Storage::url($path)
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Logo upload failed', [
+                'error' => $e->getMessage(),
+                'league_id' => $league->id
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload logo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload and crop league banner
+     */
+    public function uploadBanner(Request $request, League $league): JsonResponse
+    {
+        $request->validate([
+            'banner' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ]);
+
+        try {
+            $image = $request->file('banner');
+            $filename = 'league_banner_' . $league->id . '_' . time() . '.' . $image->getClientOriginalExtension();
+            
+            // Store the image
+            $path = $image->storeAs('leagues/banners', $filename, 'public');
+            
+            // Update league with banner path
+            $league->update(['banner' => $path]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Banner uploaded successfully',
+                'banner_url' => Storage::url($path)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload banner: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove league logo
+     */
+    public function removeLogo(League $league): JsonResponse
+    {
+        try {
+            if ($league->logo && Storage::disk('public')->exists($league->logo)) {
+                Storage::disk('public')->delete($league->logo);
+            }
+            
+            $league->update(['logo' => null]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logo removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove logo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove league banner
+     */
+    public function removeBanner(League $league): JsonResponse
+    {
+        try {
+            if ($league->banner && Storage::disk('public')->exists($league->banner)) {
+                Storage::disk('public')->delete($league->banner);
+            }
+            
+            $league->update(['banner' => null]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Banner removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove banner: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

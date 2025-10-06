@@ -24,6 +24,7 @@ class StoreTeamRequest extends FormRequest
             'home_ground_id' => 'nullable|exists:grounds,id',
             'local_body_id' => 'required|exists:local_bodies,id',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'league_slug' => 'nullable|exists:leagues,slug',
         ];
     }
@@ -42,6 +43,9 @@ class StoreTeamRequest extends FormRequest
             'logo.image' => 'The logo must be an image file.',
             'logo.mimes' => 'The logo must be a JPEG, PNG, JPG, or GIF file.',
             'logo.max' => 'The logo size must not exceed 2MB.',
+            'banner.image' => 'The banner must be an image file.',
+            'banner.mimes' => 'The banner must be a JPEG, PNG, JPG, or GIF file.',
+            'banner.max' => 'The banner size must not exceed 5MB.',
         ];
     }
 }

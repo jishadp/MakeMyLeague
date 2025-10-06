@@ -118,6 +118,95 @@
                 </div>
             </div>
 
+            {{-- Logo & Banner --}}
+            <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
+                <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">
+                    <span class="text-purple-500">🖼️</span> Logo & Banner
+                </h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {{-- Logo Upload --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">League Logo</label>
+                        <div class="space-y-4">
+                            @if($league->logo)
+                                <div class="flex items-center space-x-4">
+                                    <img src="{{ Storage::url($league->logo) }}" alt="Current Logo" class="w-16 h-16 object-cover rounded-lg border">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Current Logo</p>
+                                        <button type="button" onclick="removeLogo()" class="text-red-600 text-sm hover:text-red-800">Remove</button>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" id="logo-upload" accept="image/*" class="hidden">
+                                <button type="button" onclick="document.getElementById('logo-upload').click()" class="text-indigo-600 hover:text-indigo-800">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">Click to upload logo</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB (1:1 ratio recommended)</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Banner Upload --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">League Banner</label>
+                        <div class="space-y-4">
+                            @if($league->banner)
+                                <div class="flex items-center space-x-4">
+                                    <img src="{{ Storage::url($league->banner) }}" alt="Current Banner" class="w-24 h-16 object-cover rounded-lg border">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Current Banner</p>
+                                        <button type="button" onclick="removeBanner()" class="text-red-600 text-sm hover:text-red-800">Remove</button>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" id="banner-upload" accept="image/*" class="hidden">
+                                <button type="button" onclick="document.getElementById('banner-upload').click()" class="text-indigo-600 hover:text-indigo-800">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">Click to upload banner</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB (wide format recommended)</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Prize Information --}}
+            <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
+                <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">
+                    <span class="text-yellow-500">🏆</span> Prize Information
+                </h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <label for="winner_prize" class="block text-sm font-medium text-gray-700 mb-1">Winner Prize (₹)</label>
+                        <input type="number" name="winner_prize" id="winner_prize"
+                            value="{{ old('winner_prize', $league->winner_prize) }}" min="0" step="0.01"
+                            placeholder="Enter winner prize amount"
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        @error('winner_prize')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="runner_prize" class="block text-sm font-medium text-gray-700 mb-1">Runner-up Prize (₹)</label>
+                        <input type="number" name="runner_prize" id="runner_prize"
+                            value="{{ old('runner_prize', $league->runner_prize) }}" min="0" step="0.01"
+                            placeholder="Enter runner-up prize amount"
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
+                        @error('runner_prize')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
             {{-- Ground & Venue --}}
             <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
                 <h2 class="text-lg font-semibold mb-8 flex items-center gap-2">
@@ -409,5 +498,233 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('max_teams').addEventListener('change', updateTotalPlayers);
         });
+
+        // Image Upload and Cropper.js functionality
+        let logoCropper, bannerCropper;
+        let currentUploadType = '';
+
+        // Logo upload handler
+        document.getElementById('logo-upload').addEventListener('change', function(e) {
+            handleImageUpload(e, 'logo');
+        });
+
+        // Banner upload handler
+        document.getElementById('banner-upload').addEventListener('change', function(e) {
+            handleImageUpload(e, 'banner');
+        });
+
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size
+            const maxSize = type === 'logo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 2MB for logo, 5MB for banner
+            if (file.size > maxSize) {
+                alert(`File size must be less than ${type === 'logo' ? '2MB' : '5MB'}`);
+                return;
+            }
+
+            currentUploadType = type;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showCropperModal(e.target.result, type);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showCropperModal(imageSrc, type) {
+            // Create modal HTML
+            const modalHtml = `
+                <div id="cropper-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                        <div class="flex items-center justify-between p-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">Crop ${type === 'logo' ? 'Logo' : 'Banner'}</h3>
+                            <button type="button" onclick="closeCropperModal()" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div class="mb-4">
+                                <img id="cropper-image" src="${imageSrc}" style="max-width: 100%; max-height: 400px;">
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="closeCropperModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                                <button type="button" onclick="cropAndUpload()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                    Crop & Upload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Initialize cropper
+            const image = document.getElementById('cropper-image');
+            const aspectRatio = type === 'logo' ? 1 : 16/9; // 1:1 for logo, 16:9 for banner
+            
+            if (type === 'logo') {
+                logoCropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.8,
+                    restore: false,
+                    guides: false,
+                    center: false,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            } else {
+                bannerCropper = new Cropper(image, {
+                    aspectRatio: 16/9,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.8,
+                    restore: false,
+                    guides: false,
+                    center: false,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            }
+        }
+
+        function closeCropperModal() {
+            const modal = document.getElementById('cropper-modal');
+            if (modal) {
+                modal.remove();
+            }
+            if (logoCropper) {
+                logoCropper.destroy();
+                logoCropper = null;
+            }
+            if (bannerCropper) {
+                bannerCropper.destroy();
+                bannerCropper = null;
+            }
+            currentUploadType = '';
+        }
+
+        function cropAndUpload() {
+            const cropper = currentUploadType === 'logo' ? logoCropper : bannerCropper;
+            if (!cropper) return;
+
+            // Get cropped canvas
+            const canvas = cropper.getCroppedCanvas({
+                width: currentUploadType === 'logo' ? 300 : 800,
+                height: currentUploadType === 'logo' ? 300 : 450,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            // Convert to blob
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append(currentUploadType, blob, `${currentUploadType}.jpg`);
+
+                // Show loading
+                const uploadBtn = document.querySelector('#cropper-modal button:last-child');
+                const originalText = uploadBtn.textContent;
+                uploadBtn.textContent = 'Uploading...';
+                uploadBtn.disabled = true;
+
+                // Upload to server
+                fetch(`/leagues/{{ $league->slug }}/upload-${currentUploadType}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Response is not JSON:', text);
+                            throw new Error('Server returned non-JSON response');
+                        }
+                    });
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to show new image
+                        location.reload();
+                    } else {
+                        alert('Upload failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Upload failed: ' + error.message);
+                })
+                .finally(() => {
+                    uploadBtn.textContent = originalText;
+                    uploadBtn.disabled = false;
+                });
+            }, 'image/jpeg', 0.8);
+        }
+
+        function removeLogo() {
+            if (confirm('Are you sure you want to remove the logo?')) {
+                // Add logic to remove logo from server
+                fetch(`/leagues/{{ $league->slug }}/remove-logo`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove logo');
+                    }
+                });
+            }
+        }
+
+        function removeBanner() {
+            if (confirm('Are you sure you want to remove the banner?')) {
+                // Add logic to remove banner from server
+                fetch(`/leagues/{{ $league->slug }}/remove-banner`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove banner');
+                    }
+                });
+            }
+        }
     </script>
+
+    <!-- Include Cropper.js CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 @endsection

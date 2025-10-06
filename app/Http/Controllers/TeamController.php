@@ -14,8 +14,10 @@ use App\Models\Role;
 use App\Http\Requests\StoreTeamRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 class TeamController extends Controller
 {
@@ -101,8 +103,19 @@ class TeamController extends Controller
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('team-logos', 'public');
-            $team->logo = 'storage/' . $logoPath;
+            $logo = $request->file('logo');
+            $logoFilename = 'team_logo_' . $team->id . '_' . time() . '.' . $logo->getClientOriginalExtension();
+            $logoPath = $logo->storeAs('teams/logos', $logoFilename, 'public');
+            $team->logo = $logoPath;
+            $team->save();
+        }
+        
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            $banner = $request->file('banner');
+            $bannerFilename = 'team_banner_' . $team->id . '_' . time() . '.' . $banner->getClientOriginalExtension();
+            $bannerPath = $banner->storeAs('teams/banners', $bannerFilename, 'public');
+            $team->banner = $bannerPath;
             $team->save();
         }
 
@@ -218,5 +231,117 @@ class TeamController extends Controller
 
         return redirect()->route('teams.index')
             ->with('success', 'Team deleted successfully!');
+    }
+
+    /**
+     * Upload and crop team logo
+     */
+    public function uploadLogo(Request $request, Team $team): JsonResponse
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
+        ]);
+
+        try {
+            $image = $request->file('logo');
+            $filename = 'team_logo_' . $team->id . '_' . time() . '.' . $image->getClientOriginalExtension();
+            
+            // Store the image
+            $path = $image->storeAs('teams/logos', $filename, 'public');
+            
+            // Update team with logo path
+            $team->update(['logo' => $path]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logo uploaded successfully',
+                'logo_url' => Storage::url($path)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload logo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload and crop team banner
+     */
+    public function uploadBanner(Request $request, Team $team): JsonResponse
+    {
+        $request->validate([
+            'banner' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ]);
+
+        try {
+            $image = $request->file('banner');
+            $filename = 'team_banner_' . $team->id . '_' . time() . '.' . $image->getClientOriginalExtension();
+            
+            // Store the image
+            $path = $image->storeAs('teams/banners', $filename, 'public');
+            
+            // Update team with banner path
+            $team->update(['banner' => $path]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Banner uploaded successfully',
+                'banner_url' => Storage::url($path)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload banner: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove team logo
+     */
+    public function removeLogo(Team $team): JsonResponse
+    {
+        try {
+            if ($team->logo && Storage::disk('public')->exists($team->logo)) {
+                Storage::disk('public')->delete($team->logo);
+            }
+            
+            $team->update(['logo' => null]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logo removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove logo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove team banner
+     */
+    public function removeBanner(Team $team): JsonResponse
+    {
+        try {
+            if ($team->banner && Storage::disk('public')->exists($team->banner)) {
+                Storage::disk('public')->delete($team->banner);
+            }
+            
+            $team->update(['banner' => null]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Banner removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove banner: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

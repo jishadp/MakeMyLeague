@@ -100,41 +100,90 @@
             <!-- Team Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($teams as $team)
-                    <div class="bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden 
-                                hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
-                        <div class="bg-gray-200 h-48 flex items-center justify-center">
-                            @if($team->logo)
-                                <img src="{{ asset($team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                        
+                        <!-- Hero Image Section -->
+                        <div class="relative h-48 overflow-hidden">
+                            @if($team->banner)
+                                <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }} Banner" 
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                            @elseif($team->logo)
+                                <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                             @else
-                                <div class="text-gray-500 text-center p-4">
-                                    <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    <span>Team Logo</span>
+                                <div class="w-full h-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($team->name, 0, 1) }}</span>
+                                        </div>
+                                        <h3 class="text-2xl font-bold drop-shadow-lg">{{ $team->name }}</h3>
+                                        <p class="text-sm opacity-90 drop-shadow">Cricket Team</p>
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <!-- Team Name Overlay (if banner/logo exists) -->
+                            @if($team->banner || $team->logo)
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="flex items-center space-x-3">
+                                        @if($team->logo)
+                                            <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                                 class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                        @endif
+                                        <div>
+                                            <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $team->name }}</h3>
+                                            <p class="text-sm text-white/90 drop-shadow">Cricket Team</p>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>
                         
-                        <div class="p-5">
-                            <!-- Title -->
-                            <div class="mb-4">
-                                <h3 class="text-xl font-bold text-gray-900">{{ $team->name }}</h3>
+                        <!-- Content Section -->
+                        <div class="p-6">
+                            <!-- Quick Stats -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                    <div class="text-2xl font-bold text-blue-600">{{ $team->leagueTeams->count() }}</div>
+                                    <div class="text-xs text-gray-600">Leagues</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                    <div class="text-2xl font-bold text-indigo-600">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->count(); }) }}</div>
+                                    <div class="text-xs text-gray-600">Players</div>
+                                </div>
                             </div>
                             
-                            <!-- Details -->
-                            <div class="space-y-3 text-sm text-gray-600">
-                                <p><span class="font-medium">📍 Location:</span> {{ $team->localBody->name }}</p>
-                                <p><span class="font-medium">🏟️ Home Ground:</span> {{ $team->homeGround->name }}</p>
-                                <p><span class="font-medium">👤 Owner:</span> {{ $team->owner->name }}</p>
+                            <!-- Team Details -->
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>{{ $team->localBody->name }}</span>
+                                </div>
+                                @if($team->homeGround)
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>{{ $team->homeGround->name }}</span>
+                                    </div>
+                                @endif
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                    </svg>
+                                    <span>{{ $team->owner->name }}</span>
+                                </div>
                             </div>
                             
-                            <!-- View Details -->
-                            <div class="mt-6 flex justify-end items-center">
-                                <a href="{{ route('teams.show', $team->slug) }}"
-                                   class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    View Details
-                                </a>
-                            </div>
+                            <!-- Action Button -->
+                            <a href="{{ route('teams.show', $team->slug) }}"
+                                class="w-full bg-blue-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
+                                View Details
+                            </a>
                         </div>
                     </div>
                 @endforeach

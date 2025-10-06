@@ -33,58 +33,140 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($organizedLeagues as $league)
-                <a href="{{ route('leagues.show', $league) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="{{ asset('images/league.jpg') }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-16 h-16 rounded-full object-cover border-4 border-white/30 mx-auto mb-3">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($league->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $league->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                </div>
                             </div>
-                            @php
-                                $organizerStatus = $league->organizers->where('id', auth()->id())->first()->pivot->status ?? 'pending';
-                            @endphp
-                            <span class="absolute top-3 right-3 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm
-                                @if($organizerStatus === 'approved') bg-green-100 text-green-800
-                                @elseif($organizerStatus === 'pending') bg-yellow-100 text-yellow-800
-                                @else bg-red-100 text-red-800 @endif">
+                        @endif
+                        
+                        <!-- Organizer Status Badge -->
+                        @php
+                            $organizerStatus = $league->organizers->where('id', auth()->id())->first()->pivot->status ?? 'pending';
+                        @endphp
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg
+                                @if($organizerStatus === 'approved') bg-green-500 text-white
+                                @elseif($organizerStatus === 'pending') bg-yellow-500 text-white
+                                @else bg-red-500 text-white @endif">
                                 @if($organizerStatus === 'approved') {{ ucfirst($league->status) }}
                                 @elseif($organizerStatus === 'pending') Pending Approval
                                 @else Rejected @endif
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leagueTeams->count() }}</p>
-                                    <p class="text-xs text-gray-600">Teams</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leaguePlayers->count() }}</p>
-                                    <p class="text-xs text-gray-600">Players</p>
+                        
+                        <!-- League Name Overlay (if banner exists) -->
+                        @if($league->banner)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $league->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name ?? 'N/A' }}</p>
-                                <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
-                                @php
-                                    $startDate = \Carbon\Carbon::parse($league->start_date);
-                                    $now = \Carbon\Carbon::now();
-                                    $diff = $startDate->diff($now);
-                                @endphp
-                                @if($startDate->isPast())
-                                    <p><span class="font-medium">🏁 Status:</span> <span class="text-emerald-500">Started</span></p>
-                                @else
-                                    <p><span class="font-medium">⏰ Starts in:</span> {{ $diff->days }}d {{ $diff->h }}h</p>
-                                @endif
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-blue-600">{{ $league->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-600">Teams</div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    Manage League →
-                                </span>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-indigo-600">{{ $league->leaguePlayers->count() }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
                             </div>
                         </div>
+                        
+                        <!-- Season & Duration -->
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">Season {{ $league->season }}</span>
+                            </div>
+                            @php
+                                $startDate = \Carbon\Carbon::parse($league->start_date);
+                                $now = \Carbon\Carbon::now();
+                                $diff = $startDate->diff($now);
+                            @endphp
+                            @if($startDate->isPast())
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-green-600 font-medium">League Started</span>
+                                </div>
+                            @else
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Starts in {{ $diff->days }}d {{ $diff->h }}h</span>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Prize Pool (if available) -->
+                        @if ($league->winner_prize || $league->runner_prize)
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
+                                <div class="flex items-center mb-2">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-bold text-sm">Prize Pool</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1">
+                                    @if ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                    @if ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('leagues.show', $league) }}"
+                            class="w-full bg-blue-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
+                            Manage League
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endforeach
             </div>
         </div>
@@ -103,46 +185,126 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($playingLeagues as $league)
-                <a href="{{ route('leagues.show', $league) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="{{ asset('images/league.jpg') }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-16 h-16 rounded-full object-cover border-4 border-white/30 mx-auto mb-3">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($league->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $league->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                </div>
                             </div>
-                            <span class="absolute top-3 right-3 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                        @endif
+                        
+                        <!-- Player Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-green-500 text-white">
                                 {{ ucfirst($league->status) }}
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leagueTeams->count() }}</p>
-                                    <p class="text-xs text-gray-600">Teams</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leaguePlayers->count() }}</p>
-                                    <p class="text-xs text-gray-600">Players</p>
+                        
+                        <!-- League Name Overlay (if banner exists) -->
+                        @if($league->banner)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $league->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                    </div>
                                 </div>
                             </div>
-                            @php
-                                $userPlayer = auth()->user()->leaguePlayers()->where('league_id', $league->id)->first();
-                            @endphp
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name ?? 'N/A' }}</p>
-                                @if($userPlayer && $userPlayer->leagueTeam)
-                                <p><span class="font-medium">🏏 My Team:</span> {{ $userPlayer->leagueTeam->team->name ?? 'N/A' }}</p>
-                                @endif
-                                <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-green-600">{{ $league->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-600">Teams</div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    View League →
-                                </span>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-emerald-600">{{ $league->leaguePlayers->count() }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
                             </div>
                         </div>
+                        
+                        <!-- My Team Info -->
+                        @php
+                            $userPlayer = auth()->user()->leaguePlayers()->where('league_id', $league->id)->first();
+                        @endphp
+                        @if($userPlayer && $userPlayer->leagueTeam)
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-green-800">My Team</span>
+                                </div>
+                                <div class="text-lg font-bold text-green-900 mt-1">{{ $userPlayer->leagueTeam->team->name ?? 'N/A' }}</div>
+                            </div>
+                        @endif
+                        
+                        <!-- Season Info -->
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">Season {{ $league->season }}</span>
+                        </div>
+                        
+                        <!-- Prize Pool (if available) -->
+                        @if ($league->winner_prize || $league->runner_prize)
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
+                                <div class="flex items-center mb-2">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-bold text-sm">Prize Pool</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1">
+                                    @if ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                    @if ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('leagues.show', $league) }}"
+                            class="w-full bg-green-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl block">
+                            View League
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endforeach
             </div>
         </div>
@@ -161,41 +323,121 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($requestedLeagues as $league)
-                <a href="{{ route('leagues.show', $league) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="{{ asset('images/league.jpg') }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-16 h-16 rounded-full object-cover border-4 border-white/30 mx-auto mb-3">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($league->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $league->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                </div>
                             </div>
-                            <span class="absolute top-3 right-3 bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                        @endif
+                        
+                        <!-- Pending Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-yellow-500 text-white">
                                 Pending Approval
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leagueTeams->count() }}</p>
-                                    <p class="text-xs text-gray-600">Teams</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leaguePlayers->count() }}</p>
-                                    <p class="text-xs text-gray-600">Players</p>
+                        
+                        <!-- League Name Overlay (if banner exists) -->
+                        @if($league->banner)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $league->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name ?? 'N/A' }}</p>
-                                <p><span class="font-medium">⏳ Status:</span> <span class="text-yellow-600">Awaiting Approval</span></p>
-                                <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-yellow-600">{{ $league->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-600">Teams</div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    View League →
-                                </span>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-orange-600">{{ $league->leaguePlayers->count() }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
                             </div>
                         </div>
+                        
+                        <!-- Status Info -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4">
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm font-medium text-yellow-800">Awaiting Approval</span>
+                            </div>
+                            <div class="text-sm text-yellow-700 mt-1">Your registration is being reviewed by the organizer</div>
+                        </div>
+                        
+                        <!-- Season Info -->
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">Season {{ $league->season }}</span>
+                        </div>
+                        
+                        <!-- Prize Pool (if available) -->
+                        @if ($league->winner_prize || $league->runner_prize)
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
+                                <div class="flex items-center mb-2">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-bold text-sm">Prize Pool</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1">
+                                    @if ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                    @if ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('leagues.show', $league) }}"
+                            class="w-full bg-yellow-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-lg hover:shadow-xl block">
+                            View League
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endforeach
             </div>
         </div>
@@ -214,48 +456,128 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($teamOwnerLeagues as $league)
-                <a href="{{ route('leagues.show', $league) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="{{ asset('images/league.jpg') }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $league->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-16 h-16 rounded-full object-cover border-4 border-white/30 mx-auto mb-3">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($league->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $league->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                </div>
                             </div>
-                            <span class="absolute top-3 right-3 bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                        @endif
+                        
+                        <!-- Team Owner Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-purple-500 text-white">
                                 {{ ucfirst($league->status) }}
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leagueTeams->count() }}</p>
-                                    <p class="text-xs text-gray-600">Teams</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ $league->leaguePlayers->count() }}</p>
-                                    <p class="text-xs text-gray-600">Players</p>
+                        
+                        <!-- League Name Overlay (if banner exists) -->
+                        @if($league->banner)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $league->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                    </div>
                                 </div>
                             </div>
-                            @php
-                                $userTeams = $league->leagueTeams->filter(function($lt) {
-                                    return $lt->team && $lt->team->owner_id == auth()->id();
-                                });
-                            @endphp
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <p><span class="font-medium">🎮 Game:</span> {{ $league->game->name ?? 'N/A' }}</p>
-                                @if($userTeams->isNotEmpty())
-                                <p><span class="font-medium">🏏 My Teams:</span> {{ $userTeams->pluck('team.name')->join(', ') }}</p>
-                                @endif
-                                <p><span class="font-medium">📅 Season:</span> {{ $league->season }}</p>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-purple-600">{{ $league->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-600">Teams</div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    Manage Teams →
-                                </span>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-pink-600">{{ $league->leaguePlayers->count() }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
                             </div>
                         </div>
+                        
+                        <!-- My Teams Info -->
+                        @php
+                            $userTeams = $league->leagueTeams->filter(function($lt) {
+                                return $lt->team && $lt->team->owner_id == auth()->id();
+                            });
+                        @endphp
+                        @if($userTeams->isNotEmpty())
+                            <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-purple-800">My Teams</span>
+                                </div>
+                                <div class="text-sm font-bold text-purple-900 mt-1">{{ $userTeams->pluck('team.name')->join(', ') }}</div>
+                            </div>
+                        @endif
+                        
+                        <!-- Season Info -->
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">Season {{ $league->season }}</span>
+                        </div>
+                        
+                        <!-- Prize Pool (if available) -->
+                        @if ($league->winner_prize || $league->runner_prize)
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
+                                <div class="flex items-center mb-2">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-bold text-sm">Prize Pool</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1">
+                                    @if ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                    @if ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('leagues.show', $league) }}"
+                            class="w-full bg-purple-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-lg hover:shadow-xl block">
+                            Manage Teams
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endforeach
             </div>
         </div>

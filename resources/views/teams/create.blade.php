@@ -68,22 +68,37 @@
                         @enderror
                     </div>
 
-                    <!-- Logo Upload -->
-                    <div>
-                        <label for="logo" class="block text-sm font-medium text-gray-700 mb-2">Team Logo</label>
-                        <div class="mt-1 flex items-center">
-                            <span class="inline-block h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                                <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </span>
-                            <input type="file" name="logo" id="logo"
-                                   class="ml-5 bg-white py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <!-- Logo & Banner Upload -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Logo Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Team Logo</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" id="create-team-logo-upload" accept="image/*" class="hidden">
+                                <button type="button" onclick="document.getElementById('create-team-logo-upload').click()" class="text-indigo-600 hover:text-indigo-800">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">Click to upload logo</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB (1:1 ratio recommended)</p>
+                                </button>
+                            </div>
                         </div>
-                        <p class="mt-2 text-sm text-gray-500">PNG, JPG, GIF up to 2MB</p>
-                        @error('logo')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+
+                        <!-- Banner Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Team Banner</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" id="create-team-banner-upload" accept="image/*" class="hidden">
+                                <button type="button" onclick="document.getElementById('create-team-banner-upload').click()" class="text-indigo-600 hover:text-indigo-800">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">Click to upload banner</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB (wide format recommended)</p>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -156,5 +171,245 @@
             allowClear: true
         });
     });
+
+    // Team Create Image Upload and Cropper.js functionality
+    let createTeamLogoCropper, createTeamBannerCropper;
+    let currentCreateTeamUploadType = '';
+    let createTeamLogoFile = null, createTeamBannerFile = null;
+
+    // Create team logo upload handler
+    document.getElementById('create-team-logo-upload').addEventListener('change', function(e) {
+        handleCreateTeamImageUpload(e, 'logo');
+    });
+
+    // Create team banner upload handler
+    document.getElementById('create-team-banner-upload').addEventListener('change', function(e) {
+        handleCreateTeamImageUpload(e, 'banner');
+    });
+
+    function handleCreateTeamImageUpload(event, type) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file size
+        const maxSize = type === 'logo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 2MB for logo, 5MB for banner
+        if (file.size > maxSize) {
+            alert(`File size must be less than ${type === 'logo' ? '2MB' : '5MB'}`);
+            return;
+        }
+
+        currentCreateTeamUploadType = type;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            showCreateTeamCropperModal(e.target.result, type);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function showCreateTeamCropperModal(imageSrc, type) {
+        // Create modal HTML
+        const modalHtml = `
+            <div id="create-team-cropper-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div class="flex items-center justify-between p-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Crop Team ${type === 'logo' ? 'Logo' : 'Banner'}</h3>
+                        <button type="button" onclick="closeCreateTeamCropperModal()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <img id="create-team-cropper-image" src="${imageSrc}" style="max-width: 100%; max-height: 400px;">
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeCreateTeamCropperModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="button" onclick="cropAndSaveCreateTeam()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                Crop & Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Initialize cropper
+        const image = document.getElementById('create-team-cropper-image');
+        
+        if (type === 'logo') {
+            createTeamLogoCropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                restore: false,
+                guides: false,
+                center: false,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        } else {
+            createTeamBannerCropper = new Cropper(image, {
+                aspectRatio: 16/9,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                restore: false,
+                guides: false,
+                center: false,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        }
+    }
+
+    function closeCreateTeamCropperModal() {
+        const modal = document.getElementById('create-team-cropper-modal');
+        if (modal) {
+            modal.remove();
+        }
+        if (createTeamLogoCropper) {
+            createTeamLogoCropper.destroy();
+            createTeamLogoCropper = null;
+        }
+        if (createTeamBannerCropper) {
+            createTeamBannerCropper.destroy();
+            createTeamBannerCropper = null;
+        }
+        currentCreateTeamUploadType = '';
+    }
+
+    function cropAndSaveCreateTeam() {
+        const cropper = currentCreateTeamUploadType === 'logo' ? createTeamLogoCropper : createTeamBannerCropper;
+        if (!cropper) return;
+
+        // Get cropped canvas
+        const canvas = cropper.getCroppedCanvas({
+            width: currentCreateTeamUploadType === 'logo' ? 300 : 800,
+            height: currentCreateTeamUploadType === 'logo' ? 300 : 450,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        // Convert to blob and store for form submission
+        canvas.toBlob(function(blob) {
+            if (currentCreateTeamUploadType === 'logo') {
+                createTeamLogoFile = blob;
+            } else {
+                createTeamBannerFile = blob;
+            }
+            
+            // Update the UI to show the cropped image
+            const uploadArea = document.querySelector(`#create-team-${currentCreateTeamUploadType}-upload`).parentElement;
+            uploadArea.innerHTML = `
+                <div class="text-center">
+                    <div class="inline-block p-2 bg-green-100 rounded-lg">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <p class="mt-2 text-sm text-green-600 font-medium">${currentCreateTeamUploadType === 'logo' ? 'Logo' : 'Banner'} ready for upload</p>
+                    <button type="button" onclick="removeCreateTeamImage('${currentCreateTeamUploadType}')" class="text-red-600 text-xs hover:text-red-800 mt-1">
+                        Remove
+                    </button>
+                </div>
+            `;
+            
+            closeCreateTeamCropperModal();
+        }, 'image/jpeg', 0.8);
+    }
+
+    function removeCreateTeamImage(type) {
+        if (type === 'logo') {
+            createTeamLogoFile = null;
+        } else {
+            createTeamBannerFile = null;
+        }
+        
+        // Reset the upload area
+        const uploadArea = document.querySelector(`#create-team-${type}-upload`).parentElement;
+        uploadArea.innerHTML = `
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <input type="file" id="create-team-${type}-upload" accept="image/*" class="hidden">
+                <button type="button" onclick="document.getElementById('create-team-${type}-upload').click()" class="text-indigo-600 hover:text-indigo-800">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600">Click to upload ${type}</p>
+                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to ${type === 'logo' ? '2MB' : '5MB'} (${type === 'logo' ? '1:1 ratio' : 'wide format'} recommended)</p>
+                </button>
+            </div>
+        `;
+        
+        // Re-attach event listener
+        document.getElementById(`create-team-${type}-upload`).addEventListener('change', function(e) {
+            handleCreateTeamImageUpload(e, type);
+        });
+    }
+
+    // Modify form submission to include cropped images
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Create a new FormData object
+        const formData = new FormData(this);
+        
+        // Add cropped images if they exist
+        if (createTeamLogoFile) {
+            formData.append('logo', createTeamLogoFile, 'logo.jpg');
+        }
+        
+        if (createTeamBannerFile) {
+            formData.append('banner', createTeamBannerFile, 'banner.jpg');
+        }
+        
+        // Prevent default form submission
+        e.preventDefault();
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Creating Team...';
+        submitBtn.disabled = true;
+        
+        // Submit via fetch
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(html => {
+            // If successful, redirect to teams index
+            window.location.href = '{{ route("teams.index") }}';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to create team. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+    });
 </script>
+
+<!-- Include Cropper.js CSS and JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 @endsection

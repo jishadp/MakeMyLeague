@@ -38,6 +38,8 @@ class League extends Model
         'team_reg_fee' => 'double',
         'player_reg_fee' => 'double',
         'team_wallet_limit' => 'double',
+        'winner_prize' => 'decimal:2',
+        'runner_prize' => 'decimal:2',
         'custom_bid_increment' => 'decimal:2',
         'predefined_increments' => 'array',
 
@@ -155,6 +157,10 @@ class League extends Model
             'retention' => 'boolean',
             'retention_players' => 'integer|min:0',
             'team_wallet_limit' => 'required|numeric|min:0',
+            'winner_prize' => 'nullable|numeric|min:0',
+            'runner_prize' => 'nullable|numeric|min:0',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'status' => 'required|in:pending,active,completed,cancelled',
         ];
     }

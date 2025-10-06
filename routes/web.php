@@ -54,6 +54,10 @@ Route::get('teams/{team}', [TeamController::class, 'show'])->name('teams.show');
 Route::get('teams/{team}/edit', [TeamController::class, 'edit'])->name('teams.edit')->middleware('auth');
 Route::put('teams/{team}', [TeamController::class, 'update'])->name('teams.update')->middleware('auth');
 Route::delete('teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy')->middleware('auth');
+Route::post('teams/{team}/upload-logo', [TeamController::class, 'uploadLogo'])->name('teams.upload-logo')->middleware('auth');
+Route::post('teams/{team}/upload-banner', [TeamController::class, 'uploadBanner'])->name('teams.upload-banner')->middleware('auth');
+Route::delete('teams/{team}/remove-logo', [TeamController::class, 'removeLogo'])->name('teams.remove-logo')->middleware('auth');
+Route::delete('teams/{team}/remove-banner', [TeamController::class, 'removeBanner'])->name('teams.remove-banner')->middleware('auth');
 
 // Player routes
 Route::get('players', [PlayerController::class, 'index'])->name('players.index');
@@ -100,10 +104,14 @@ Route::middleware('auth')->group(function () {
     });
 
     // Leagues resource routes
-    Route::resource('leagues', LeagueController::class);
+    Route::resource('leagues', LeagueController::class)->middleware('league.organizer');
     Route::get('leagues/player/broadcast', [LeagueController::class, 'playerBroadcast'])->name('leagues.player.broadcast');
     Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault')->middleware('league.organizer');
     Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments')->middleware('league.organizer');
+    Route::post('leagues/{league}/upload-logo', [LeagueController::class, 'uploadLogo'])->name('leagues.upload-logo')->middleware('league.organizer');
+    Route::post('leagues/{league}/upload-banner', [LeagueController::class, 'uploadBanner'])->name('leagues.upload-banner')->middleware('league.organizer');
+    Route::delete('leagues/{league}/remove-logo', [LeagueController::class, 'removeLogo'])->name('leagues.remove-logo')->middleware('league.organizer');
+    Route::delete('leagues/{league}/remove-banner', [LeagueController::class, 'removeBanner'])->name('leagues.remove-banner')->middleware('league.organizer');
 
     // League Teams routes
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show'])->middleware('league.organizer');

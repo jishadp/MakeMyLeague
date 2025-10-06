@@ -161,7 +161,7 @@ class User extends Authenticatable
     {
         return $this->organizedLeagues()
             ->where('league_id', $leagueId)
-            ->wherePivot('status', 'approved')
+            ->wherePivotIn('status', ['approved', 'pending'])
             ->exists();
     }
 

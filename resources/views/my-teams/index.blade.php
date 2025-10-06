@@ -33,35 +33,99 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($ownedTeams as $team)
-                <a href="{{ route('teams.show', $team) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            @if($team->logo)
-                                <img src="{{ asset($team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
-                            @else
-                                <img src="{{ asset('images/owned.jpg') }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
-                            @endif
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $team->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($team->banner)
+                            <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @elseif($team->logo)
+                            <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                        <span class="text-white font-bold text-2xl">{{ substr($team->name, 0, 1) }}</span>
+                                    </div>
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $team->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">Cricket Team</p>
+                                </div>
                             </div>
-                            <span class="absolute top-3 right-3 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                        @endif
+                        
+                        <!-- Owner Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-blue-500 text-white">
                                 Owner
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="space-y-2 text-sm text-gray-600 mb-4">
-                                <p><span class="font-medium">🏟️ Home Ground:</span> {{ $team->homeGround->name ?? 'Not specified' }}</p>
-                                <p><span class="font-medium">📍 Location:</span> {{ $team->localBody->name ?? 'Not specified' }}</p>
-                                <p><span class="font-medium">📅 Created:</span> {{ $team->created_at->format('M Y') }}</p>
+                        
+                        <!-- Team Name Overlay (if banner/logo exists) -->
+                        @if($team->banner || $team->logo)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($team->logo)
+                                        <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $team->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">Cricket Team</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    Manage Team →
-                                </span>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-blue-600">{{ $team->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-600">Leagues</div>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-indigo-600">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->count(); }) }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
                             </div>
                         </div>
+                        
+                        <!-- Team Details -->
+                        <div class="space-y-2 mb-4">
+                            @if($team->homeGround)
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>{{ $team->homeGround->name ?? 'Not specified' }}</span>
+                                </div>
+                            @endif
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>{{ $team->localBody->name ?? 'Not specified' }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Created {{ $team->created_at->format('M Y') }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('teams.show', $team) }}"
+                            class="w-full bg-blue-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
+                            Manage Team
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endforeach
             </div>
         </div>
@@ -82,37 +146,94 @@
                 @foreach($playerTeams as $leaguePlayer)
                 @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->team)
                 @php $team = $leaguePlayer->leagueTeam->team; @endphp
-                <a href="{{ route('teams.show', $team) }}" class="block">
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp cursor-pointer">
-                        <div class="h-40 overflow-hidden relative">
-                            @if($team->logo)
-                                <img src="{{ asset($team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
-                            @else
-                                <img src="{{ asset('images/leagueteams.jpg') }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
-                            @endif
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                                <h3 class="text-xl font-semibold text-white p-4">{{ $team->name }}</h3>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($team->banner)
+                            <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @elseif($team->logo)
+                            <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                        <span class="text-white font-bold text-2xl">{{ substr($team->name, 0, 1) }}</span>
+                                    </div>
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $team->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">Cricket Team</p>
+                                </div>
                             </div>
-                            <span class="absolute top-3 right-3 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                        @endif
+                        
+                        <!-- Player Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-green-500 text-white">
                                 {{ ucfirst($leaguePlayer->status) }}
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="space-y-2 text-sm text-gray-600 mb-4">
-                                @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league)
-                                <p><span class="font-medium">🏆 League:</span> {{ $leaguePlayer->leagueTeam->league->name }}</p>
-                                @endif
-                                <p><span class="font-medium">🏟️ Home Ground:</span> {{ $team->homeGround->name ?? 'Not specified' }}</p>
-                                <p><span class="font-medium">📍 Location:</span> {{ $team->localBody->name ?? 'Not specified' }}</p>
+                        
+                        <!-- Team Name Overlay (if banner/logo exists) -->
+                        @if($team->banner || $team->logo)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($team->logo)
+                                        <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $team->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">Cricket Team</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mt-6">
-                                <span class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                    View Team →
-                                </span>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- League Info -->
+                        @if($leaguePlayer->leagueTeam && $leaguePlayer->leagueTeam->league)
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-green-800">League</span>
+                                </div>
+                                <div class="text-lg font-bold text-green-900 mt-1">{{ $leaguePlayer->leagueTeam->league->name }}</div>
+                            </div>
+                        @endif
+                        
+                        <!-- Team Details -->
+                        <div class="space-y-2 mb-4">
+                            @if($team->homeGround)
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>{{ $team->homeGround->name ?? 'Not specified' }}</span>
+                                </div>
+                            @endif
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>{{ $team->localBody->name ?? 'Not specified' }}</span>
                             </div>
                         </div>
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('teams.show', $team) }}"
+                            class="w-full bg-green-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl block">
+                            View Team
+                        </a>
                     </div>
-                </a>
+                </div>
                 @endif
                 @endforeach
             </div>

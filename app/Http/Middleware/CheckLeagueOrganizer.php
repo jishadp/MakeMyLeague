@@ -30,9 +30,9 @@ class CheckLeagueOrganizer
             abort(404, 'League not found');
         }
 
-        // Check if user is an organizer for this league
-        if (!$user->isOrganizerForLeague($league->id)) {
-            abort(403, 'You are not authorized to perform this action. Only league organizers can access this page.');
+        // Check if user is an organizer for this league or is an admin
+        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
+            abort(403, 'You are not authorized to perform this action. Only league organizers or admins can access this page.');
         }
 
         return $next($request);
