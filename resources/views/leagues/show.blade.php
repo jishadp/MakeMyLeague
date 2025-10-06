@@ -1806,7 +1806,7 @@
             };
 
             // Send AJAX request
-            fetch('{{ route('league-players.request-registration', $league) }}', {
+            fetch('/register-player/{{ $league->id }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

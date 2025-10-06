@@ -458,10 +458,21 @@ class LeaguePlayerController extends Controller
 
         $user = auth()->user();
 
-        // Validate position selection
-        $request->validate([
-            'position_id' => 'required|exists:game_positions,id'
-        ]);
+        // Validate position selection (optional - use default if not provided)
+        $positionId = $request->position_id;
+        
+        // If no position provided, get the first available position for the league's game
+        if (!$positionId) {
+            $defaultPosition = \App\Models\GamePosition::where('game_id', $league->game_id)->first();
+            if ($defaultPosition) {
+                $positionId = $defaultPosition->id;
+            }
+        } else {
+            // Validate the provided position exists and belongs to the league's game
+            $request->validate([
+                'position_id' => 'exists:game_positions,id'
+            ]);
+        }
 
         // Check if player is already registered in this league
         $existingPlayer = LeaguePlayer::where('user_id', $user->id)
@@ -476,8 +487,8 @@ class LeaguePlayerController extends Controller
         }
 
         // Update user's position if different from current
-        if ($user->position_id != $request->position_id) {
-            $user->update(['position_id' => $request->position_id]);
+        if ($user->position_id != $positionId) {
+            $user->update(['position_id' => $positionId]);
         }
 
         // Create the league player with pending status
@@ -494,5 +505,45 @@ class LeaguePlayerController extends Controller
             'success' => true,
             'message' => 'Registration request submitted successfully! Please wait for approval from the organizers.'
         ]);
+    }
+
+    /**
+     * Simple player registration method
+     */
+    public function simpleRegister($leagueId)
+    {
+        $league = League::find($leagueId);
+        if (!$league) {
+            return response()->json(['success' => false, 'message' => 'League not found'], 404);
+        }
+        
+        $user = auth()->user();
+        if (!$user || !$user->isPlayer()) {
+            return response()->json(['success' => false, 'message' => 'Only players can register'], 403);
+        }
+        
+        // Check if already registered
+        $existing = LeaguePlayer::where('user_id', $user->id)
+            ->where('league_id', $league->id)
+            ->first();
+        
+        if ($existing) {
+            return response()->json(['success' => false, 'message' => 'Already registered'], 400);
+        }
+        
+        // Get default position
+        $defaultPosition = \App\Models\GamePosition::where('game_id', $league->game_id)->first();
+        
+        // Create registration
+        LeaguePlayer::create([
+            'league_id' => $league->id,
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'base_price' => $league->player_reg_fee ?? 0,
+            'retention' => false,
+            'created_by' => $user->id,
+        ]);
+        
+        return response()->json(['success' => true, 'message' => 'Registration successful']);
     }
 }

@@ -69,6 +69,10 @@ Route::get('players/{player}', [PlayerController::class, 'show'])->name('players
 Route::get('players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit')->middleware('auth');
 Route::put('players/{player}', [PlayerController::class, 'update'])->name('players.update')->middleware('auth');
 Route::delete('players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy')->middleware('auth');
+// Simple player registration route
+Route::post('register-player/{leagueId}', [LeaguePlayerController::class, 'simpleRegister'])
+    ->name('register-player')->middleware('auth');
+
 Route::post('leagues/{league}/players/register', [PlayerController::class, 'register'])
     ->name('league-players.register');
 
@@ -165,7 +169,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy')->middleware('league.organizer');
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus')->middleware('league.organizer');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus')->middleware('league.organizer');
-    Route::post('leagues/{league}/players/request-registration', [LeaguePlayerController::class, 'requestRegistration'])->name('league-players.request-registration');
 
     // Auction routes
     Route::prefix('leagues/{league}/auction')->name('auction.')->middleware('league.organizer')->group(function () {

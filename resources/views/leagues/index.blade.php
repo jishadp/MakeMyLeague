@@ -212,7 +212,7 @@
                                         @endphp
                                         
                                         @if (!$existingPlayer && in_array($league->status, ['active', 'pending']))
-                                            <button onclick="openLeagueRegistrationModal({{ $league->id }}, '{{ addslashes($league->name) }}', {{ $league->player_reg_fee ?? 0 }}, '{{ addslashes($league->game->name) }}')"
+                                            <button onclick="openPaymentConfirmationModal({{ $league->id }}, '{{ addslashes($league->name) }}', {{ $league->player_reg_fee ?? 0 }}, '{{ addslashes($league->game->name) }}')"
                                                 class="bg-green-600 text-black px-4 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
                                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -336,24 +336,6 @@
                         </div>
                     </div>
 
-                    <!-- Position Selection -->
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                        <div class="flex items-center mb-3">
-                            <div class="bg-purple-100 rounded-full p-2 mr-3">
-                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <h4 class="text-lg font-semibold text-purple-900">Select Your Position</h4>
-                        </div>
-                        <div>
-                            <label for="position_id" class="block text-sm font-medium text-purple-700 mb-2">Game Position *</label>
-                            <select id="position_id" name="position_id" class="w-full border border-purple-300 rounded-lg px-3 py-2 focus:ring-purple-500 focus:border-purple-500">
-                                <option value="">Select a position</option>
-                                <!-- Options will be populated dynamically based on selected league -->
-                            </select>
-                        </div>
-                    </div>
 
                     <!-- Registration Info -->
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -390,6 +372,79 @@
                                 <h4 class="text-sm font-semibold text-yellow-900">Important Notice</h4>
                                 <p class="text-sm text-yellow-700 mt-1">
                                     Your registration request will be reviewed by the league organizer. You'll be notified once approved.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Confirmation Modal -->
+    <div id="paymentConfirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-6 border w-11/12 max-w-md shadow-lg rounded-lg bg-white mb-20 sm:mb-24 lg:mb-32">
+            <div class="mt-3">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Payment Confirmation</h3>
+                    <button onclick="closePaymentConfirmationModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- Payment Question -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0-2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-900">Registration Fee Payment</h4>
+                        </div>
+                        <p class="text-sm text-blue-700 mb-3">
+                            Registration Fee: <span class="font-bold" id="paymentModalFee">₹0.00</span>
+                        </p>
+                        <p class="text-sm text-blue-700">
+                            Have you paid the registration fee for this league?
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button onclick="confirmPaymentAndRegister()" 
+                                class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Yes, I Paid
+                        </button>
+                        <button onclick="closePaymentConfirmationModal()" 
+                                class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-lg">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancel
+                        </button>
+                    </div>
+
+                    <!-- Notice -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-yellow-900">Important</h4>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    Only proceed if you have already paid the registration fee. Your request will be reviewed by the league organizer.
                                 </p>
                             </div>
                         </div>
@@ -438,24 +493,6 @@
                         </div>
                     </div>
 
-                    <!-- Position Selection -->
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                        <div class="flex items-center mb-3">
-                            <div class="bg-purple-100 rounded-full p-2 mr-3">
-                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <h4 class="text-lg font-semibold text-purple-900">Select Your Position</h4>
-                        </div>
-                        <div>
-                            <label for="league_position_id" class="block text-sm font-medium text-purple-700 mb-2">Game Position *</label>
-                            <select id="league_position_id" name="position_id" class="w-full border border-purple-300 rounded-lg px-3 py-2 focus:ring-purple-500 focus:border-purple-500">
-                                <option value="">Select a position</option>
-                                <!-- Options will be populated dynamically -->
-                            </select>
-                        </div>
-                    </div>
 
                     <!-- Registration Action -->
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -568,6 +605,40 @@
             $('#broadcastModal').modal('show');
         });
 
+        // Success message function
+        function showSuccessMessage(message) {
+            // Create success message element
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out';
+            successDiv.style.transform = 'translateX(100%)';
+            successDiv.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(successDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                successDiv.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                successDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.parentNode.removeChild(successDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         // Player Registration Modal Functions
         function openPlayerRegistrationModal() {
             document.getElementById('playerRegistrationModal').classList.remove('hidden');
@@ -579,51 +650,16 @@
             document.body.style.overflow = 'auto';
             // Reset form
             document.getElementById('league_id').value = '';
-            document.getElementById('position_id').innerHTML = '<option value="">Select a position</option>';
         }
 
-        // Handle league selection change
-        document.getElementById('league_id').addEventListener('change', function() {
-            const leagueId = this.value;
-            const positionSelect = document.getElementById('position_id');
-            
-            if (leagueId) {
-                // Fetch positions for the selected league
-                fetch(`/api/leagues/${leagueId}/positions`)
-                    .then(response => response.json())
-                    .then(data => {
-                        positionSelect.innerHTML = '<option value="">Select a position</option>';
-                        data.positions.forEach(position => {
-                            const option = document.createElement('option');
-                            option.value = position.id;
-                            option.textContent = position.name;
-                            if (position.id == {{ auth()->user()->position_id ?? 'null' }}) {
-                                option.selected = true;
-                            }
-                            positionSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching positions:', error);
-                        positionSelect.innerHTML = '<option value="">Error loading positions</option>';
-                    });
-            } else {
-                positionSelect.innerHTML = '<option value="">Select a position</option>';
-            }
-        });
 
         // Submit player registration
         function submitPlayerRegistration() {
             const leagueId = document.getElementById('league_id').value;
-            const positionId = document.getElementById('position_id').value;
 
             // Validate selections
             if (!leagueId) {
                 alert('Please select a league');
-                return;
-            }
-            if (!positionId) {
-                alert('Please select a position');
                 return;
             }
 
@@ -639,12 +675,10 @@
             submitBtn.disabled = true;
 
             // Prepare data
-            const formData = {
-                position_id: positionId
-            };
+            const formData = {};
 
             // Send AJAX request
-            fetch(`/leagues/${leagueId}/players/request-registration`, {
+            fetch(`/register-player/${leagueId}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -662,10 +696,16 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        alert('Registration request submitted successfully! You will be notified once approved.');
+                        // Close modal immediately
                         closePlayerRegistrationModal();
+                        
+                        // Show success message
+                        showSuccessMessage('Registration request submitted successfully! You will be notified once approved.');
+                        
                         // Reload page to update the UI
-                        window.location.reload();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     } else {
                         alert('Error: ' + (data.message || 'Unknown error occurred'));
                     }
@@ -688,67 +728,40 @@
             }
         });
 
-        // League-specific registration modal functions
+        // Payment confirmation modal functions
         let currentLeagueId = null;
+        let currentLeagueName = '';
+        let currentRegFee = 0;
 
-        function openLeagueRegistrationModal(leagueId, leagueName, regFee, gameName) {
+        function openPaymentConfirmationModal(leagueId, leagueName, regFee, gameName) {
             currentLeagueId = leagueId;
+            currentLeagueName = leagueName;
+            currentRegFee = regFee;
             
             // Update modal content
-            document.getElementById('leagueModalName').textContent = leagueName;
-            document.getElementById('leagueModalGame').textContent = gameName;
-            document.getElementById('leagueModalFee').textContent = `₹${parseFloat(regFee).toFixed(2)}`;
-            
-            // Fetch positions for this league
-            fetch(`/api/leagues/${leagueId}/positions`)
-                .then(response => response.json())
-                .then(data => {
-                    const positionSelect = document.getElementById('league_position_id');
-                    positionSelect.innerHTML = '<option value="">Select a position</option>';
-                    data.positions.forEach(position => {
-                        const option = document.createElement('option');
-                        option.value = position.id;
-                        option.textContent = position.name;
-                        if (position.id == {{ auth()->user()->position_id ?? 'null' }}) {
-                            option.selected = true;
-                        }
-                        positionSelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching positions:', error);
-                    document.getElementById('league_position_id').innerHTML = '<option value="">Error loading positions</option>';
-                });
+            document.getElementById('paymentModalFee').textContent = `₹${parseFloat(regFee).toFixed(2)}`;
             
             // Show modal
-            document.getElementById('leagueRegistrationModal').classList.remove('hidden');
+            document.getElementById('paymentConfirmationModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
-        function closeLeagueRegistrationModal() {
-            document.getElementById('leagueRegistrationModal').classList.add('hidden');
+        function closePaymentConfirmationModal() {
+            document.getElementById('paymentConfirmationModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
             currentLeagueId = null;
-            // Reset form
-            document.getElementById('league_position_id').innerHTML = '<option value="">Select a position</option>';
+            currentLeagueName = '';
+            currentRegFee = 0;
         }
 
-        function submitLeagueRegistration() {
-            const positionId = document.getElementById('league_position_id').value;
-
-            // Validate position selection
-            if (!positionId) {
-                alert('Please select a position');
-                return;
-            }
-
+        function confirmPaymentAndRegister() {
             if (!currentLeagueId) {
                 alert('League not selected');
                 return;
             }
 
             // Show loading state
-            const submitBtn = document.querySelector('button[onclick="submitLeagueRegistration()"]');
+            const submitBtn = document.querySelector('button[onclick="confirmPaymentAndRegister()"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = `
                 <svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -759,12 +772,10 @@
             submitBtn.disabled = true;
 
             // Prepare data
-            const formData = {
-                position_id: positionId
-            };
+            const formData = {};
 
             // Send AJAX request
-            fetch(`/leagues/${currentLeagueId}/players/request-registration`, {
+            fetch(`/register-player/${currentLeagueId}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -782,10 +793,16 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        alert('Registration request submitted successfully! You will be notified once approved.');
-                        closeLeagueRegistrationModal();
+                        // Close modal immediately
+                        closePaymentConfirmationModal();
+                        
+                        // Show success message
+                        showSuccessMessage('Registration request submitted successfully! You will be notified once approved.');
+                        
                         // Reload page to update the UI
-                        window.location.reload();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     } else {
                         alert('Error: ' + (data.message || 'Unknown error occurred'));
                     }
@@ -799,6 +816,27 @@
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
+        }
+
+        // Close payment modal when clicking outside
+        document.getElementById('paymentConfirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePaymentConfirmationModal();
+            }
+        });
+
+        // League-specific registration modal functions (kept for compatibility)
+        function openLeagueRegistrationModal(leagueId, leagueName, regFee, gameName) {
+            // Redirect to payment confirmation modal
+            openPaymentConfirmationModal(leagueId, leagueName, regFee, gameName);
+        }
+
+        function closeLeagueRegistrationModal() {
+            closePaymentConfirmationModal();
+        }
+
+        function submitLeagueRegistration() {
+            confirmPaymentAndRegister();
         }
 
         // Close league modal when clicking outside

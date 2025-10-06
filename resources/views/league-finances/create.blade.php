@@ -22,113 +22,6 @@
             </div>
         </div>
 
-        <!-- Cash Prize Cards Section -->
-        @if($league->winner_prize || $league->runner_prize)
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 border border-gray-100 mb-6 sm:mb-8">
-            <div class="flex items-center mb-4">
-                <div class="p-2 sm:p-3 bg-yellow-100 rounded-lg sm:rounded-xl mr-3 sm:mr-4">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-bold text-gray-900">Cash Prizes</h3>
-                    <p class="text-xs sm:text-sm text-gray-600">Add cash prizes as expense records</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @if($league->winner_prize)
-                    @php
-                        $existingWinnerExpense = \App\Models\LeagueFinance::where('league_id', $league->id)
-                            ->where('type', 'expense')
-                            ->where('title', 'like', '%Winner Prize%')
-                            ->first();
-                    @endphp
-                    @if(!$existingWinnerExpense)
-                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center">
-                                <div class="p-2 bg-yellow-100 rounded-lg mr-3">
-                                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-gray-900">Winner Prize</h4>
-                                    <p class="text-xs text-gray-600">Cash prize for winning team</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-yellow-600">₹{{ number_format($league->winner_prize, 2) }}</p>
-                            </div>
-                        </div>
-                        <form method="POST" action="{{ route('league-finances.store', $league) }}" class="w-full">
-                            @csrf
-                            <input type="hidden" name="type" value="expense">
-                            <input type="hidden" name="expense_category_id" value="{{ $expenseCategories->where('name', 'Trophies and Awards')->first()->id ?? $expenseCategories->first()->id }}">
-                            <input type="hidden" name="title" value="Winner Prize - {{ $league->name }}">
-                            <input type="hidden" name="description" value="Cash prize for the winning team">
-                            <input type="hidden" name="amount" value="{{ $league->winner_prize }}">
-                            <input type="hidden" name="transaction_date" value="{{ date('Y-m-d') }}">
-                            <button type="submit" class="w-full bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium flex items-center justify-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                Add as Expense
-                            </button>
-                        </form>
-                    </div>
-                    @endif
-                @endif
-
-                @if($league->runner_prize)
-                    @php
-                        $existingRunnerExpense = \App\Models\LeagueFinance::where('league_id', $league->id)
-                            ->where('type', 'expense')
-                            ->where('title', 'like', '%Runner-up Prize%')
-                            ->first();
-                    @endphp
-                    @if(!$existingRunnerExpense)
-                    <div class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-4 border border-gray-200">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center">
-                                <div class="p-2 bg-gray-100 rounded-lg mr-3">
-                                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-gray-900">Runner-up Prize</h4>
-                                    <p class="text-xs text-gray-600">Cash prize for runner-up team</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-gray-600">₹{{ number_format($league->runner_prize, 2) }}</p>
-                            </div>
-                        </div>
-                        <form method="POST" action="{{ route('league-finances.store', $league) }}" class="w-full">
-                            @csrf
-                            <input type="hidden" name="type" value="expense">
-                            <input type="hidden" name="expense_category_id" value="{{ $expenseCategories->where('name', 'Trophies and Awards')->first()->id ?? $expenseCategories->first()->id }}">
-                            <input type="hidden" name="title" value="Runner-up Prize - {{ $league->name }}">
-                            <input type="hidden" name="description" value="Cash prize for the runner-up team">
-                            <input type="hidden" name="amount" value="{{ $league->runner_prize }}">
-                            <input type="hidden" name="transaction_date" value="{{ date('Y-m-d') }}">
-                            <button type="submit" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium flex items-center justify-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                Add as Expense
-                            </button>
-                        </form>
-                    </div>
-                    @endif
-                @endif
-            </div>
-        </div>
-        @endif
-
         <!-- Easy Cards Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <!-- Player Registration Fee Card -->
@@ -286,37 +179,18 @@
                     </div>
 
                     @if($teamCount > 0)
-                        <!-- Simple Team Registration Form -->
+                        <!-- Dynamic Team Registration Form -->
                         <form method="POST" action="{{ route('league-finances.individual-team-income', $league) }}" class="w-full" id="teamPaymentForm">
                             @csrf
 
                             <!-- Team Selection -->
                             <div class="bg-gray-50 rounded-lg p-3 mb-3">
                                 <label for="teamSelect" class="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Select Team</label>
-                                <select name="team_id" id="teamSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" required onchange="updateTeamPaymentInfo()">
+                                <select name="team_id" id="teamSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" required>
                                     <option value="">Choose a team...</option>
                                     @foreach($league->leagueTeams as $leagueTeam)
-                                        @php
-                                            // Calculate total paid amount for this team
-                                            $totalPaid = \App\Models\LeagueFinance::where('league_id', $league->id)
-                                                ->where('type', 'income')
-                                                ->where('title', 'like', '%Team Registration Fee - ' . $leagueTeam->team->name . '%')
-                                                ->sum('amount');
-                                            $balance = $league->team_reg_fee - $totalPaid;
-                                        @endphp
-                                        <option value="{{ $leagueTeam->id }}" 
-                                                data-team-name="{{ $leagueTeam->team->name }}"
-                                                data-paid="{{ $totalPaid }}"
-                                                data-balance="{{ $balance }}"
-                                                data-status="{{ $balance <= 0 ? 'paid' : ($totalPaid > 0 ? 'partial' : 'pending') }}">
+                                        <option value="{{ $leagueTeam->id }}" data-team-name="{{ $leagueTeam->team->name }}">
                                             {{ $leagueTeam->team->name }}
-                                            @if($balance <= 0)
-                                                (Paid)
-                                            @elseif($totalPaid > 0)
-                                                (₹{{ number_format($totalPaid, 2) }} paid)
-                                            @else
-                                                (Pending)
-                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -401,168 +275,143 @@
             </div>
         </div>
 
-        <!-- Expense Card -->
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 border border-gray-100 mb-6 sm:mb-8">
-            <div class="flex items-center mb-4">
-                <div class="p-2 sm:p-3 bg-red-100 rounded-lg sm:rounded-xl mr-3 sm:mr-4">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-bold text-gray-900">Expense</h3>
-                    <p class="text-xs sm:text-sm text-gray-600">Record a single expense transaction</p>
-                </div>
-            </div>
-
-            <form method="POST" action="{{ route('league-finances.store', $league) }}" class="space-y-4">
+        <!-- Form -->
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Add Manual Transaction</h2>
+            <form method="POST" action="{{ route('league-finances.store', $league) }}" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="type" value="expense">
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <!-- Transaction Type -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Transaction Type</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="type" value="income"
+                                       class="mr-2 text-green-600 focus:ring-green-500"
+                                       {{ old('type', 'income') === 'income' ? 'checked' : '' }}>
+                                <span class="text-sm font-medium text-gray-700">Income</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="type" value="expense"
+                                       class="mr-2 text-red-600 focus:ring-red-500"
+                                       {{ old('type') === 'expense' ? 'checked' : '' }}>
+                                <span class="text-sm font-medium text-gray-700">Expense</span>
+                            </label>
+                        </div>
+                        @error('type')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Category -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                        <select name="expense_category_id" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
-                            <option value="">Select expense category</option>
-                            @foreach($expenseCategories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Amount -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (₹)</label>
-                        <input type="number" name="amount" step="0.01" min="0.01" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
-                               placeholder="0.00">
-                    </div>
-
-                    <!-- Title -->
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                        <input type="text" name="title" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
-                               placeholder="Enter expense title">
-                    </div>
-
-                    <!-- Description -->
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea name="description" rows="2"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
-                                  placeholder="Enter expense description (optional)"></textarea>
-                    </div>
-
-                    <!-- Transaction Date -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-                        <input type="date" name="transaction_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
-                    </div>
-
-                    <!-- Reference Number -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Number</label>
-                        <input type="text" name="reference_number"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
-                               placeholder="Invoice/receipt number (optional)">
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit"
-                            class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        Add Expense
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Income Card -->
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 border border-gray-100 mb-6 sm:mb-8">
-            <div class="flex items-center mb-4">
-                <div class="p-2 sm:p-3 bg-green-100 rounded-lg sm:rounded-xl mr-3 sm:mr-4">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-bold text-gray-900">Income</h3>
-                    <p class="text-xs sm:text-sm text-gray-600">Record a single income transaction</p>
-                </div>
-            </div>
-
-            <form method="POST" action="{{ route('league-finances.store', $league) }}" class="space-y-4">
-                @csrf
-                <input type="hidden" name="type" value="income">
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                        <select name="expense_category_id" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
-                            <option value="">Select income category</option>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Category</label>
+                        <select name="expense_category_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">Select a category</option>
                             @foreach($incomeCategories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                <option value="{{ $category->id }}"
+                                        {{ old('expense_category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                            @foreach($expenseCategories as $category)
+                                <option value="{{ $category->id }}"
+                                        {{ old('expense_category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
                             @endforeach
                         </select>
+                        @error('expense_category_id')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Amount -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (₹)</label>
-                        <input type="number" name="amount" step="0.01" min="0.01" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Amount (₹)</label>
+                        <input type="number" name="amount" step="0.01" min="0.01"
+                               value="{{ old('amount') }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                placeholder="0.00">
+                        @error('amount')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Title -->
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                        <input type="text" name="title" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                               placeholder="Enter income title">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Title</label>
+                        <input type="text" name="title"
+                               value="{{ old('title') }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="Enter transaction title">
+                        @error('title')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Description -->
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea name="description" rows="2"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                                  placeholder="Enter income description (optional)"></textarea>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Description</label>
+                        <textarea name="description" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                  placeholder="Enter transaction description (optional)">{{ old('description') }}</textarea>
+                        @error('description')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Transaction Date -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-                        <input type="date" name="transaction_date" value="{{ date('Y-m-d') }}" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Transaction Date</label>
+                        <input type="date" name="transaction_date"
+                               value="{{ old('transaction_date', date('Y-m-d')) }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        @error('transaction_date')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Reference Number -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Number</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Reference Number</label>
                         <input type="text" name="reference_number"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                               placeholder="Invoice/receipt number (optional)">
+                               value="{{ old('reference_number') }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="Invoice number, receipt number, etc. (optional)">
+                        @error('reference_number')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Attachment -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Attachment</label>
+                        <input type="file" name="attachment"
+                               accept=".pdf,.jpg,.jpeg,.png"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <p class="text-sm text-gray-500 mt-2">Upload receipt, invoice, or other supporting documents (PDF, JPG, PNG - Max 10MB)</p>
+                        @error('attachment')
+                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
-                <div class="flex justify-end">
+                <!-- Submit Button -->
+                <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <button type="submit"
-                            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            class="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium flex items-center justify-center">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Add Income
+                        Add Transaction
                     </button>
+                    <a href="{{ route('league-finances.index', $league) }}"
+                       class="w-full sm:w-auto bg-gray-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base font-medium text-center">
+                        Cancel
+                    </a>
                 </div>
             </form>
         </div>
@@ -619,6 +468,40 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- General Form: Transaction Type Category Filtering ---
+    const typeRadios = document.querySelectorAll('input[name="type"]');
+    const categorySelect = document.querySelector('select[name="expense_category_id"]');
+    
+    function updateCategories() {
+        const selectedType = document.querySelector('input[name="type"]:checked')?.value;
+        const options = categorySelect.querySelectorAll('option');
+        
+        options.forEach(option => {
+            if (option.value === '') return; // Keep the default 'Select a category' option
+            
+            const categoryText = option.textContent.trim();
+            const isIncomeCategory = @json($incomeCategories->pluck('name')->toArray()).includes(categoryText);
+            const isExpenseCategory = @json($expenseCategories->pluck('name')->toArray()).includes(categoryText);
+            
+            option.style.display = 'none'; // Hide all options first
+            
+            if (selectedType === 'income' && isIncomeCategory) {
+                option.style.display = 'block';
+            } else if (selectedType === 'expense' && isExpenseCategory) {
+                option.style.display = 'block';
+            }
+        });
+        
+        // If the currently selected option is now hidden, reset the dropdown
+        const selectedOption = categorySelect.querySelector(`option[value="${categorySelect.value}"]`);
+        if (selectedOption && selectedOption.style.display === 'none') {
+            categorySelect.value = '';
+        }
+    }
+    
+    typeRadios.forEach(radio => radio.addEventListener('change', updateCategories));
+    updateCategories(); // Initial call to set the correct state on page load
+
     
     // --- Player Registration Card: Percentage Slider ---
     @if(!$existingPlayerRegistration)
@@ -660,9 +543,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     @endif
 
-    // --- Team Registration Card: Simple Logic ---
-    // This function is called when team selection changes
-    window.updateTeamPaymentInfo = function() {
+    // --- Team Registration Card: Professional State Management ---
+    const teamPaymentForm = document.getElementById('teamPaymentForm');
+    if (teamPaymentForm) {
         const teamSelect = document.getElementById('teamSelect');
         const paymentStatus = document.getElementById('paymentStatus');
         const selectedTeamName = document.getElementById('selectedTeamName');
@@ -675,68 +558,139 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
 
-        if (!teamSelect || teamSelect.value === '') {
-            // No team selected
-            paymentStatus.classList.add('hidden');
-            collectionStatus.textContent = 'Select Team';
-            submitBtn.disabled = true;
-            submitBtn.className = 'w-full bg-gray-400 cursor-not-allowed text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center';
-            submitText.textContent = 'Select Team First';
-            return;
-        }
+        /**
+         * Controls the state of the submit button (appearance, text, and disabled status).
+         * @param {('initial'|'loading'|'ready'|'paid'|'error')} state - The desired button state.
+         * @param {string} [text] - Optional text override for the button.
+         */
+        const setButtonState = (state, text = '') => {
+            const baseClasses = 'w-full text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center';
+            submitBtn.disabled = true; // Disabled by default in most states
 
-        // Get selected team data
-        const selectedOption = teamSelect.options[teamSelect.selectedIndex];
-        const teamName = selectedOption.dataset.teamName;
-        const paid = parseFloat(selectedOption.dataset.paid || 0);
-        const balance = parseFloat(selectedOption.dataset.balance || 0);
-        const status = selectedOption.dataset.status;
+            switch (state) {
+                case 'loading':
+                    submitBtn.className = `${baseClasses} bg-gray-400 cursor-wait`;
+                    submitText.textContent = text || 'Loading...';
+                    break;
+                case 'ready':
+                    submitBtn.disabled = false;
+                    submitBtn.className = `${baseClasses} bg-green-600 hover:bg-green-700`;
+                    submitText.textContent = text || 'Record Payment';
+                    break;
+                case 'paid':
+                    submitBtn.className = `${baseClasses} bg-gray-500 cursor-not-allowed`;
+                    submitText.textContent = text || 'Fully Paid';
+                    break;
+                case 'error':
+                    submitBtn.className = `${baseClasses} bg-red-500 cursor-not-allowed`;
+                    submitText.textContent = text || 'Error Loading Data';
+                    break;
+                case 'initial':
+                default:
+                    submitBtn.className = `${baseClasses} bg-gray-400 cursor-not-allowed`;
+                    submitText.textContent = text || 'Select Team First';
+                    break;
+            }
+        };
 
-        // Update display
-        selectedTeamName.textContent = teamName;
-        paidAmount.textContent = `₹${paid.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        balanceAmount.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        balanceAmount.className = 'text-sm font-bold ' + (balance > 0 ? 'text-red-600' : 'text-green-600');
+        /**
+         * Fetches the payment status for a given team from the server.
+         * @param {string} teamId - The ID of the team to check.
+         */
+        const fetchTeamBalance = (teamId) => {
+            fetch(`/leagues/{{ $league->id }}/team-payment-status/${teamId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                updatePaymentDisplay(data);
+                // Set button state only AFTER getting data
+                if (data.status === 'paid') {
+                    setButtonState('paid');
+                } else {
+                    setButtonState('ready');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching team balance:', error);
+                collectionStatus.textContent = 'Error loading balance';
+                paymentStatusBadge.textContent = 'Error';
+                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+                setButtonState('error');
+            });
+        };
 
-        // Update status badge
-        if (status === 'paid') {
-            paymentStatusBadge.textContent = 'Paid';
-            paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-            collectionStatus.textContent = 'Fully Paid';
-        } else if (status === 'partial') {
-            paymentStatusBadge.textContent = 'Partial';
-            paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
-            collectionStatus.textContent = 'Partially Paid';
-        } else {
-            paymentStatusBadge.textContent = 'Pending';
-            paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-            collectionStatus.textContent = 'Payment Pending';
-        }
+        /**
+         * Updates the UI display with the fetched payment information.
+         * This function ONLY updates informational text and badges, not the button state.
+         * @param {object} data - The payment status data from the server.
+         */
+        const updatePaymentDisplay = (data) => {
+            const expectedAmount = parseFloat(data.expected_amount || 0);
+            const paidAmountValue = parseFloat(data.paid_amount || 0);
+            const balance = expectedAmount - paidAmountValue;
 
-        // Update amount input and collection display
-        if (balance > 0) {
-            amountInput.value = balance.toFixed(2);
-            amountInput.max = balance;
-            amountToCollect.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else {
-            amountInput.value = '0.00';
-            amountInput.max = '0';
-            amountToCollect.textContent = '₹0.00';
-        }
+            paidAmount.textContent = `₹${paidAmountValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            balanceAmount.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            balanceAmount.className = 'text-sm font-bold ' + (balance > 0 ? 'text-red-600' : 'text-green-600');
 
-        // Show payment status and update button
-        paymentStatus.classList.remove('hidden');
-        
-        if (status === 'paid') {
-            submitBtn.disabled = true;
-            submitBtn.className = 'w-full bg-gray-500 cursor-not-allowed text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center';
-            submitText.textContent = 'Fully Paid';
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.className = 'w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center';
-            submitText.textContent = 'Record Payment';
-        }
-    };
+            if (data.status === 'paid') {
+                paymentStatusBadge.textContent = 'Paid';
+                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                collectionStatus.textContent = 'Fully Paid';
+            } else if (data.status === 'partial') {
+                paymentStatusBadge.textContent = 'Partial';
+                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                collectionStatus.textContent = 'Partially Paid';
+            } else {
+                paymentStatusBadge.textContent = 'Pending';
+                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+                collectionStatus.textContent = 'Payment Pending';
+            }
+
+            if (balance > 0) {
+                amountInput.value = balance.toFixed(2);
+                amountInput.max = balance;
+                amountToCollect.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            } else {
+                amountInput.value = '0.00';
+                amountInput.max = '0';
+                amountToCollect.textContent = '₹0.00';
+            }
+        };
+
+        // --- Event Listeners ---
+        teamSelect.addEventListener('change', function() {
+            const teamId = this.value;
+            if (teamId) {
+                const teamName = this.options[this.selectedIndex].dataset.teamName;
+                selectedTeamName.textContent = teamName;
+                paymentStatus.classList.remove('hidden');
+                collectionStatus.textContent = 'Loading balance...';
+                setButtonState('loading');
+                fetchTeamBalance(teamId);
+            } else {
+                paymentStatus.classList.add('hidden');
+                collectionStatus.textContent = 'Select Team';
+                setButtonState('initial');
+            }
+        });
+
+        teamPaymentForm.addEventListener('submit', function() {
+            // Provide feedback on submission
+            setButtonState('loading', 'Processing...');
+        });
+
+        // Initialize button on page load
+        setButtonState('initial');
+    }
 });
 
 // --- Modal Functions (No changes needed here) ---
