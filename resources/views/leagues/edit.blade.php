@@ -409,89 +409,22 @@
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.css') }}" />
     <style>
-        /* Flatpickr responsive improvements */
+        /* Simple responsive date picker styling */
         .flatpickr-calendar {
-            max-width: 100vw !important;
-            width: 100% !important;
-            font-size: 14px !important;
-        }
-        
-        .flatpickr-months {
-            background: #f8fafc !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-        }
-        
-        .flatpickr-month {
-            background: transparent !important;
-            color: #1f2937 !important;
-            font-weight: 600 !important;
-        }
-        
-        .flatpickr-prev-month,
-        .flatpickr-next-month {
-            background: #ffffff !important;
-            border: 1px solid #d1d5db !important;
-            border-radius: 6px !important;
-            padding: 8px !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        .flatpickr-prev-month:hover,
-        .flatpickr-next-month:hover {
-            background: #f3f4f6 !important;
-            border-color: #9ca3af !important;
-        }
-        
-        .flatpickr-weekdays {
-            background: #f9fafb !important;
-        }
-        
-        .flatpickr-weekday {
-            color: #6b7280 !important;
-            font-weight: 500 !important;
-        }
-        
-        .flatpickr-day {
-            border-radius: 6px !important;
-            margin: 1px !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        .flatpickr-day:hover {
-            background: #dbeafe !important;
-            border-color: #3b82f6 !important;
-        }
-        
-        .flatpickr-day.selected {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
-        }
-        
-        .flatpickr-day.today {
-            border-color: #3b82f6 !important;
-            color: #3b82f6 !important;
+            z-index: 9999 !important;
         }
         
         /* Mobile responsiveness */
         @media (max-width: 640px) {
             .flatpickr-calendar {
-                font-size: 12px !important;
+                font-size: 14px !important;
+                width: 280px !important;
             }
             
             .flatpickr-day {
-                height: 32px !important;
-                line-height: 32px !important;
+                height: 36px !important;
+                line-height: 36px !important;
             }
-            
-            .flatpickr-prev-month,
-            .flatpickr-next-month {
-                padding: 6px !important;
-            }
-        }
-        
-        /* Ensure proper z-index */
-        .flatpickr-calendar.open {
-            z-index: 9999 !important;
         }
     </style>
 @endsection
@@ -500,30 +433,15 @@
     <script src="{{ asset('assets/flatpickr/flatpickr.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Initialize Flatpickr with better options
+            // Initialize Flatpickr with standard options
             flatpickr('.flatpickr', {
                 dateFormat: "Y-m-d",
                 allowInput: true,
                 enableTime: false,
                 minDate: "today",
-                maxDate: new Date().fp_incr(365), // 1 year from today
                 disableMobile: false, // Enable on mobile devices
                 clickOpens: true,
-                static: false, // Allow positioning adjustments
-                monthSelectorType: "static", // Better month navigation
-                prevArrow: "<svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7'></path></svg>",
-                nextArrow: "<svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7'></path></svg>",
-                locale: {
-                    firstDayOfWeek: 1, // Start week on Monday
-                    weekdays: {
-                        shorthand: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-                        longhand: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-                    },
-                    months: {
-                        shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                        longhand: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-                    }
-                }
+                monthSelectorType: "static" // Fix month navigation
             });
         });
         
