@@ -54,7 +54,7 @@
             </h2>
             <div class="flex gap-3">
                 <a href="{{ route('admin.organizer-requests.index') }}" 
-                   class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                   class="bg-gray-600 hover:bg-gray-700 text-black px-4 py-2 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
@@ -62,7 +62,7 @@
                     All Requests
                 </a>
                 <a href="{{ route('admin.organizer-requests.stats') }}" 
-                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors" target="_blank">
+                   class="bg-blue-600 hover:bg-blue-700 text-black px-4 py-2 rounded-lg font-medium transition-colors" target="_blank">
                     <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
                     </svg>
@@ -134,7 +134,7 @@
                             <!-- Actions -->
                             <div class="flex gap-2">
                                 <a href="{{ route('admin.organizer-requests.show', $request) }}" 
-                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-center text-sm transition-colors">
+                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-black px-4 py-2 rounded-lg font-medium text-center text-sm transition-colors">
                                     <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -165,7 +165,7 @@
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">All Caught Up!</h3>
                 <p class="text-gray-600 mb-6">There are no pending organizer requests to review at this time.</p>
                 <a href="{{ route('admin.organizer-requests.index') }}" 
-                   class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-medium active:scale-95 transition-all shadow-md hover:shadow-lg">
+                   class="bg-blue-700 hover:bg-blue-800 text-black px-6 py-3 rounded-xl font-medium active:scale-95 transition-all shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>

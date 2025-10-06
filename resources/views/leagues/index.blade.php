@@ -15,7 +15,7 @@
                     @if (auth()->user()->isPlayer())
                         <button onclick="openPlayerRegistrationModal()"
                             class="bg-green-600 hover:bg-green-700 active:scale-95 transition-all duration-200
-                              text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
+                              text-black px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
@@ -24,7 +24,7 @@
                     @endif
                     <a href="{{ route('leagues.create') }}"
                         class="bg-blue-700 hover:bg-blue-800 active:scale-95 transition-all duration-200
-                          text-white px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
+                          text-black px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
                         + Create New League
                     </a>
                 </div>
@@ -120,25 +120,25 @@
                                 <!-- Quick Stats -->
                                 <div class="grid grid-cols-2 gap-4 mb-4">
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-indigo-600">{{ $league->max_teams }}</div>
-                                        <div class="text-xs text-gray-600">Max Teams</div>
+                                        <div class="text-2xl font-bold text-indigo-700">{{ $league->max_teams }}</div>
+                                        <div class="text-xs text-gray-700">Max Teams</div>
                                     </div>
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-purple-600">{{ $league->max_team_players }}</div>
-                                        <div class="text-xs text-gray-600">Players/Team</div>
+                                        <div class="text-2xl font-bold text-purple-700">{{ $league->max_team_players }}</div>
+                                        <div class="text-xs text-gray-700">Players/Team</div>
                                     </div>
                                 </div>
                                 
                                 <!-- Season & Duration -->
                                 <div class="space-y-2 mb-4">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                                         </svg>
                                         <span class="font-medium">Season {{ $league->season }}</span>
                                     </div>
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                                         </svg>
                                         <span>{{ $league->start_date->format('M d') }} - {{ $league->end_date->format('M d, Y') }}</span>
@@ -147,8 +147,8 @@
                                 
                                 <!-- Venue Info -->
                                 @if ($league->localBody)
-                                    <div class="flex items-center text-sm text-gray-600 mb-4">
-                                        <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="flex items-center text-sm text-gray-700 mb-4">
+                                        <svg class="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                                         </svg>
                                         <span>{{ $league->localBody->name }}, {{ $league->localBody->district->name }}</span>
@@ -184,22 +184,22 @@
                                 <!-- Registration Fees -->
                                 <div class="flex items-center justify-between text-sm mb-4 p-3 bg-blue-50 rounded-lg">
                                     <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
                                         </svg>
-                                        <span class="text-gray-700">Registration</span>
+                                        <span class="text-gray-800">Registration</span>
                                     </div>
                                     <div class="text-right">
                                         <div class="font-semibold text-gray-900">₹{{ number_format($league->team_reg_fee, 0) }}</div>
-                                        <div class="text-xs text-gray-500">Team Fee</div>
+                                        <div class="text-xs text-gray-600">Team Fee</div>
                                     </div>
                                 </div>
                                 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-2">
                                     <a href="{{ route('leagues.show', $league) }}"
-                                        class="flex-1 bg-indigo-600 text-white text-center py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
+                                        class="flex-1 bg-indigo-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl">
                                         View Details
                                     </a>
                                     
@@ -213,7 +213,7 @@
                                         
                                         @if (!$existingPlayer && in_array($league->status, ['active', 'pending']))
                                             <button onclick="openLeagueRegistrationModal({{ $league->id }}, '{{ addslashes($league->name) }}', {{ $league->player_reg_fee ?? 0 }}, '{{ addslashes($league->game->name) }}')"
-                                                class="bg-green-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
+                                                class="bg-green-600 text-black px-4 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
                                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                                 </svg>
@@ -221,14 +221,14 @@
                                             </button>
                                         @elseif($existingPlayer && $existingPlayer->status === 'pending')
                                             <button disabled
-                                                class="bg-yellow-600 text-white px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
+                                                class="bg-yellow-600 text-black px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
                                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
                                                 Pending
                                             </button>
                                         @elseif($existingPlayer && in_array($existingPlayer->status, ['approved', 'available', 'sold', 'active']))
-                                            <span class="bg-green-600 text-white px-4 py-3 rounded-xl font-semibold shadow-lg">
+                                            <span class="bg-green-600 text-black px-4 py-3 rounded-xl font-semibold shadow-lg">
                                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
@@ -236,7 +236,7 @@
                                             </span>
                                         @elseif(!in_array($league->status, ['active', 'pending']))
                                             <button disabled
-                                                class="bg-gray-400 text-white px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
+                                                class="bg-gray-400 text-black px-4 py-3 rounded-xl font-semibold cursor-not-allowed shadow-lg">
                                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
@@ -369,7 +369,7 @@
                                     <p class="text-sm text-green-700">Registration fee will be displayed after selecting a league</p>
                                 </div>
                             </div>
-                            <button onclick="submitPlayerRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                            <button onclick="submitPlayerRegistration()" class="bg-green-600 text-black px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
                                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -471,7 +471,7 @@
                                     <p class="text-sm text-green-700">Click register to submit your request</p>
                                 </div>
                             </div>
-                            <button onclick="submitLeagueRegistration()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
+                            <button onclick="submitLeagueRegistration()" class="bg-green-600 text-black px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg">
                                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>

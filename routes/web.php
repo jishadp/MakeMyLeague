@@ -10,6 +10,8 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LeagueFinanceController;
 use App\Http\Controllers\OrganizerRequestController;
 use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
+use App\Http\Controllers\Admin\LocationController as AdminLocationController;
+use App\Http\Controllers\Admin\GroundController as AdminGroundController;
 
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PlayerController;
@@ -101,6 +103,31 @@ Route::middleware('auth')->group(function () {
         Route::post('organizer-requests/{organizerRequest}/reject', [AdminOrganizerRequestController::class, 'reject'])->name('organizer-requests.reject');
         Route::post('organizer-requests/{organizerRequest}/change-league-status', [AdminOrganizerRequestController::class, 'changeLeagueStatus'])->name('organizer-requests.change-league-status');
         Route::get('organizer-requests-stats', [AdminOrganizerRequestController::class, 'stats'])->name('organizer-requests.stats');
+        
+        // Location Management Routes
+        Route::get('locations', [AdminLocationController::class, 'index'])->name('locations.index');
+        Route::get('locations/create-state', [AdminLocationController::class, 'createState'])->name('locations.create-state');
+        Route::post('locations/create-state', [AdminLocationController::class, 'storeState'])->name('locations.store-state');
+        Route::get('locations/create-district', [AdminLocationController::class, 'createDistrict'])->name('locations.create-district');
+        Route::post('locations/create-district', [AdminLocationController::class, 'storeDistrict'])->name('locations.store-district');
+        Route::get('locations/create-local-body', [AdminLocationController::class, 'createLocalBody'])->name('locations.create-local-body');
+        Route::post('locations/create-local-body', [AdminLocationController::class, 'storeLocalBody'])->name('locations.store-local-body');
+        Route::get('locations/edit-state/{state}', [AdminLocationController::class, 'editState'])->name('locations.edit-state');
+        Route::put('locations/edit-state/{state}', [AdminLocationController::class, 'updateState'])->name('locations.update-state');
+        Route::get('locations/edit-district/{district}', [AdminLocationController::class, 'editDistrict'])->name('locations.edit-district');
+        Route::put('locations/edit-district/{district}', [AdminLocationController::class, 'updateDistrict'])->name('locations.update-district');
+        Route::get('locations/edit-local-body/{localBody}', [AdminLocationController::class, 'editLocalBody'])->name('locations.edit-local-body');
+        Route::put('locations/edit-local-body/{localBody}', [AdminLocationController::class, 'updateLocalBody'])->name('locations.update-local-body');
+        Route::delete('locations/delete-state/{state}', [AdminLocationController::class, 'destroyState'])->name('locations.destroy-state');
+        Route::delete('locations/delete-district/{district}', [AdminLocationController::class, 'destroyDistrict'])->name('locations.destroy-district');
+        Route::delete('locations/delete-local-body/{localBody}', [AdminLocationController::class, 'destroyLocalBody'])->name('locations.destroy-local-body');
+        Route::get('locations/districts-by-state', [AdminLocationController::class, 'getDistrictsByState'])->name('locations.districts-by-state');
+        
+        // Ground Management Routes
+        Route::resource('grounds', AdminGroundController::class);
+        Route::post('grounds/{ground}/toggle-availability', [AdminGroundController::class, 'toggleAvailability'])->name('grounds.toggle-availability');
+        Route::get('grounds/districts-by-state', [AdminGroundController::class, 'getDistrictsByState'])->name('grounds.districts-by-state');
+        Route::get('grounds/local-bodies-by-district', [AdminGroundController::class, 'getLocalBodiesByDistrict'])->name('grounds.local-bodies-by-district');
     });
 
     // Leagues resource routes

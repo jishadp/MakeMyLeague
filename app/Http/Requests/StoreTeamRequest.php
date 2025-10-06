@@ -21,7 +21,7 @@ class StoreTeamRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:teams,name',
-            'home_ground_id' => 'nullable|exists:grounds,id',
+            'home_ground_id' => 'required|exists:grounds,id',
             'local_body_id' => 'required|exists:local_bodies,id',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -37,6 +37,7 @@ class StoreTeamRequest extends FormRequest
         return [
             'name.required' => 'Team name is required.',
             'name.unique' => 'This team name is already taken.',
+            'home_ground_id.required' => 'Please select a home ground.',
             'home_ground_id.exists' => 'Selected home ground is invalid.',
             'local_body_id.required' => 'Please select a local body.',
             'local_body_id.exists' => 'Selected local body is invalid.',

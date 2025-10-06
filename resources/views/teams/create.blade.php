@@ -162,6 +162,8 @@
 @endsection
 
 @section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         // Initialize Select2
@@ -359,6 +361,11 @@
 
     // Modify form submission to include cropped images
     document.querySelector('form').addEventListener('submit', function(e) {
+        // Ensure Select2 values are properly captured
+        $('.select2').each(function() {
+            $(this).trigger('change');
+        });
+        
         // Create a new FormData object
         const formData = new FormData(this);
         
@@ -385,12 +392,19 @@
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
         })
         .then(response => {
             if (response.ok) {
                 return response.text();
+            }
+            // If it's a validation error, try to parse the response
+            if (response.status === 422) {
+                return response.json().then(data => {
+                    throw new Error('Validation failed: ' + JSON.stringify(data));
+                });
             }
             throw new Error('Network response was not ok');
         })
@@ -400,7 +414,11 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Failed to create team. Please try again.');
+            if (error.message.includes('Validation failed')) {
+                alert('Please check the form for errors and try again.');
+            } else {
+                alert('Failed to create team. Please try again.');
+            }
         })
         .finally(() => {
             submitBtn.textContent = originalText;

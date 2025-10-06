@@ -51,4 +51,12 @@ class Ground extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    /**
+     * Get the teams that use this ground as their home ground.
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'home_ground_id');
+    }
 }
