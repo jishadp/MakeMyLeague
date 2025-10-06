@@ -15,7 +15,7 @@ class LeagueMatchController extends Controller
 {
     public function index(League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to league');
         }
 
@@ -39,7 +39,7 @@ class LeagueMatchController extends Controller
 
     public function fixtureSetup(League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to league');
         }
 
@@ -51,7 +51,7 @@ class LeagueMatchController extends Controller
 
     public function createGroups(CreateGroupsRequest $request, League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -76,7 +76,7 @@ class LeagueMatchController extends Controller
 
     public function generateFixtures(GenerateFixturesRequest $request, League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -162,7 +162,7 @@ class LeagueMatchController extends Controller
 
     public function createFixture(Request $request, League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -199,7 +199,7 @@ class LeagueMatchController extends Controller
 
     public function updateFixture(Request $request, League $league, Fixture $fixture)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -224,7 +224,7 @@ class LeagueMatchController extends Controller
 
     public function exportPdf(League $league)
     {
-        if ($league->user_id !== auth()->id()) {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized access to league');
         }
 

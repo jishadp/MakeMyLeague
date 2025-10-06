@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\GamePosition;
 use App\Models\User;
 use App\Models\LocalBody;
+use App\Models\District;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Http\Requests\StorePlayerRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\View\View;
 
 class PlayerController extends Controller
@@ -65,8 +69,9 @@ class PlayerController extends Controller
         }
 
         $positions = GamePosition::orderBy('name')->get();
+        $districts = District::with('state')->orderBy('name')->get();
         $localBodies = LocalBody::with('district')->get();
-        return view('players.create', compact('positions', 'localBodies'));
+        return view('players.create', compact('positions', 'districts', 'localBodies'));
     }
 
     /**
@@ -78,17 +83,24 @@ class PlayerController extends Controller
 
         $player = User::create([
             'name' => $validated['name'],
+            'country_code' => $validated['country_code'],
             'mobile' => $validated['mobile'],
             'pin' => bcrypt($validated['pin']),
             'email' => $validated['email'] ?? null,
             'position_id' => $validated['position_id'],
-            'local_body_id' => $validated['local_body_id'] ?? null,
+            'local_body_id' => $validated['local_body_id'],
         ]);
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('player-photos', 'public');
-            $player->photo = 'storage/' . $photoPath;
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($request->file('photo'));
+            $image->resize(300, 300);
+            $encoded = $image->toJpeg(85);
+            
+            $filename = 'profile-photos/' . uniqid() . '.jpg';
+            Storage::disk('public')->put($filename, $encoded);
+            $player->photo = $filename;
             $player->save();
         }
 
@@ -150,8 +162,35 @@ class PlayerController extends Controller
      */
     public function show(User $player): View
     {
-        $player->load(['position', 'localBody']);
-        return view('players.show', compact('player'));
+        $player->load([
+            'position', 
+            'localBody',
+            'leaguePlayers.league',
+            'leaguePlayers.leagueTeam',
+            'leaguePlayers.auctionBids' => function($query) {
+                $query->orderBy('created_at', 'desc')->limit(5);
+            }
+        ]);
+        
+        // Get recent auction data
+        $recentAuctions = $player->leaguePlayers()
+            ->with(['auctionBids' => function($query) {
+                $query->orderBy('created_at', 'desc')->limit(3);
+            }, 'league', 'leagueTeam'])
+            ->whereHas('auctionBids')
+            ->get()
+            ->pluck('auctionBids')
+            ->flatten()
+            ->sortByDesc('created_at')
+            ->take(3);
+            
+        // Get league teams data
+        $leagueTeams = $player->leaguePlayers()
+            ->with(['league', 'leagueTeam'])
+            ->whereNotNull('league_team_id')
+            ->get();
+            
+        return view('players.show', compact('player', 'recentAuctions', 'leagueTeams'));
     }
 
     /**
@@ -210,8 +249,19 @@ class PlayerController extends Controller
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('player-photos', 'public');
-            $player->photo = 'storage/' . $photoPath;
+            // Delete old photo if exists
+            if ($player->photo && Storage::disk('public')->exists($player->photo)) {
+                Storage::disk('public')->delete($player->photo);
+            }
+            
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($request->file('photo'));
+            $image->resize(300, 300);
+            $encoded = $image->toJpeg(85);
+            
+            $filename = 'profile-photos/' . uniqid() . '.jpg';
+            Storage::disk('public')->put($filename, $encoded);
+            $player->photo = $filename;
         }
 
         $player->save();

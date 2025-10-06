@@ -13,6 +13,7 @@ use App\Models\District;
 use App\Models\LeaguePlayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -428,5 +429,89 @@ class LeagueController
                 'message' => 'Failed to remove banner: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Complete the auction for a league
+     */
+    public function completeAuction(League $league): RedirectResponse
+    {
+        // Check if user is authorized to complete auction
+        if (!Auth::user()->isOrganizerForLeague($league->id) && !Auth::user()->isAdmin()) {
+            abort(403, 'You are not authorized to complete this auction.');
+        }
+
+        // Check if auction is currently active
+        if ($league->status !== 'active') {
+            return redirect()->route('leagues.show', $league)
+                ->with('error', 'Auction can only be completed when league is active.');
+        }
+
+        // Check if all players are sold
+        $unsoldPlayers = $league->leaguePlayers()->where('status', '!=', 'sold')->count();
+        if ($unsoldPlayers > 0) {
+            return redirect()->route('leagues.show', $league)
+                ->with('error', "Cannot complete auction. {$unsoldPlayers} players are still unsold.");
+        }
+
+        // Update league status to auction_completed
+        $league->update([
+            'status' => 'auction_completed',
+            'auction_ended_at' => now()
+        ]);
+
+        return redirect()->route('leagues.show', $league)
+            ->with('success', 'Auction completed successfully! You can now proceed to match setup.');
+    }
+
+    /**
+     * Reset the auction for a league (delete all auction and post-auction data)
+     */
+    public function resetAuction(League $league): RedirectResponse
+    {
+        // Check if user is authorized to reset auction
+        if (!Auth::user()->isOrganizerForLeague($league->id) && !Auth::user()->isAdmin()) {
+            abort(403, 'You are not authorized to reset this auction.');
+        }
+
+        // Check if league is in a state that allows reset
+        if (!in_array($league->status, ['auction_completed', 'active'])) {
+            return redirect()->route('leagues.show', $league)
+                ->with('error', 'Auction can only be reset when league is active or auction is completed.');
+        }
+
+        DB::transaction(function () use ($league) {
+            // Delete all auction data related to this league's players
+            \App\Models\Auction::whereHas('leaguePlayer', function($query) use ($league) {
+                $query->where('league_id', $league->id);
+            })->delete();
+            
+            // Delete all fixtures for this league
+            $league->fixtures()->delete();
+            
+            // Delete all league groups for this league
+            $league->leagueGroups()->delete();
+            
+            // Reset all league players to available status
+            $league->leaguePlayers()->update([
+                'league_team_id' => null,
+                'status' => 'available',
+                'bid_price' => null
+            ]);
+            
+            // Reset all league teams wallet balance to original limit
+            $league->leagueTeams()->update([
+                'wallet_balance' => $league->team_wallet_limit
+            ]);
+            
+            // Reset league status to active
+            $league->update([
+                'status' => 'active',
+                'auction_ended_at' => null
+            ]);
+        });
+
+        return redirect()->route('leagues.show', $league)
+            ->with('success', 'Auction reset successfully! All auction data has been cleared and league is ready for a fresh auction.');
     }
 }

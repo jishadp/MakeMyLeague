@@ -172,6 +172,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index');
         Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
+        Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete');
+        Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
         Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
     });
@@ -181,18 +183,6 @@ Route::middleware('auth')->group(function () {
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     });
 
-    // League match setup routes
-    Route::prefix('leagues/{league}')->name('leagues.')->group(function () {
-        Route::get('league-match', [\App\Http\Controllers\LeagueMatchController::class, 'index'])->name('league-match');
-        Route::post('league-match/groups', [\App\Http\Controllers\LeagueMatchController::class, 'createGroups'])->name('league-match.groups');
-        Route::post('league-match/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'generateFixtures'])->name('league-match.fixtures');
-        Route::get('league-match/fixture-setup', [\App\Http\Controllers\LeagueMatchController::class, 'fixtureSetup'])->name('league-match.fixture-setup');
-        Route::post('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'createFixture'])->name('fixtures.create');
-        Route::patch('fixtures/{fixture}/update', [\App\Http\Controllers\LeagueMatchController::class, 'updateFixture'])->name('fixtures.update');
-        Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
-        Route::get('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('fixtures');
-    });
-    
     // League Finance routes
     Route::prefix('leagues/{league}')->name('league-finances.')->group(function () {
         Route::get('finances', [LeagueFinanceController::class, 'index'])->name('index');
@@ -206,6 +196,18 @@ Route::middleware('auth')->group(function () {
         Route::put('finances/{finance}', [LeagueFinanceController::class, 'update'])->name('update');
         Route::delete('finances/{finance}', [LeagueFinanceController::class, 'destroy'])->name('destroy');
         Route::get('finances-report', [LeagueFinanceController::class, 'report'])->name('report');
+    });
+
+    // League match setup routes
+    Route::prefix('leagues/{league}')->name('leagues.')->group(function () {
+        Route::get('league-match', [\App\Http\Controllers\LeagueMatchController::class, 'index'])->name('league-match');
+        Route::post('league-match/groups', [\App\Http\Controllers\LeagueMatchController::class, 'createGroups'])->name('league-match.groups');
+        Route::post('league-match/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'generateFixtures'])->name('league-match.fixtures');
+        Route::get('league-match/fixture-setup', [\App\Http\Controllers\LeagueMatchController::class, 'fixtureSetup'])->name('league-match.fixture-setup');
+        Route::post('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'createFixture'])->name('fixtures.create');
+        Route::patch('fixtures/{fixture}/update', [\App\Http\Controllers\LeagueMatchController::class, 'updateFixture'])->name('fixtures.update');
+        Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
+        Route::get('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('fixtures');
     });
 });
 

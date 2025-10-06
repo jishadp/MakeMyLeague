@@ -46,7 +46,6 @@ class PostAuctionTestSeeder extends Seeder
             'name' => 'Test Tournament League',
             'slug' => 'test-tournament-league',
             'game_id' => $game->id,
-            'user_id' => $organizer->id,
             'season' => 1,
             'start_date' => now()->addDays(30),
             'end_date' => now()->addDays(60),
