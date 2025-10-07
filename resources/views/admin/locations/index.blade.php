@@ -179,6 +179,13 @@
                     <p>No states found. Add your first state to get started.</p>
                 </div>
             @endif
+            
+            <!-- States Pagination -->
+            @if($states->hasPages())
+                <div class="mt-6">
+                    {{ $states->links() }}
+                </div>
+            @endif
         </div>
 
         <!-- Districts Section -->
@@ -233,6 +240,13 @@
                     <p>No districts found. Add your first district to get started.</p>
                 </div>
             @endif
+            
+            <!-- Districts Pagination -->
+            @if($districts->hasPages())
+                <div class="mt-6">
+                    {{ $districts->links() }}
+                </div>
+            @endif
         </div>
 
         <!-- Local Bodies Section -->
@@ -285,6 +299,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h4a2 2 0 012 2v2H6v-2z"></path>
                     </svg>
                     <p>No local bodies found. Add your first local body to get started.</p>
+                </div>
+            @endif
+            
+            <!-- Local Bodies Pagination -->
+            @if($localBodies->hasPages())
+                <div class="mt-6">
+                    {{ $localBodies->links() }}
                 </div>
             @endif
         </div>

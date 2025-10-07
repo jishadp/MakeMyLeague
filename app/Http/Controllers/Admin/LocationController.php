@@ -21,9 +21,9 @@ class LocationController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $states = State::withCount(['districts', 'localBodies'])->get();
-        $districts = District::with(['state', 'localBodies'])->withCount('localBodies')->get();
-        $localBodies = LocalBody::with(['district.state'])->get();
+        $states = State::withCount(['districts', 'localBodies'])->paginate(10);
+        $districts = District::with(['state', 'localBodies'])->withCount('localBodies')->paginate(15);
+        $localBodies = LocalBody::with(['district.state'])->paginate(20);
 
         return view('admin.locations.index', compact('states', 'districts', 'localBodies'));
     }

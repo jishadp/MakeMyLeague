@@ -132,6 +132,10 @@ Route::middleware('auth')->group(function () {
         Route::post('grounds/{ground}/toggle-availability', [AdminGroundController::class, 'toggleAvailability'])->name('grounds.toggle-availability');
         Route::get('grounds/districts-by-state', [AdminGroundController::class, 'getDistrictsByState'])->name('grounds.districts-by-state');
         Route::get('grounds/local-bodies-by-district', [AdminGroundController::class, 'getLocalBodiesByDistrict'])->name('grounds.local-bodies-by-district');
+        
+        // Player Management Routes
+        Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
+        Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
     });
 
     // Leagues resource routes

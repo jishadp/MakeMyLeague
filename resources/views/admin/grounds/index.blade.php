@@ -259,6 +259,13 @@
             </div>
         @endif
 
+        <!-- Pagination -->
+        @if($grounds->hasPages())
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                {{ $grounds->links() }}
+            </div>
+        @endif
+
         <!-- Back to Admin Dashboard -->
         <div class="text-center mt-8">
             <a href="{{ route('admin.organizer-requests.index') }}" 

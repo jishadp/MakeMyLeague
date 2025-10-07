@@ -52,7 +52,7 @@
                 </svg>
                 Admin Management
             </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <a href="{{ route('admin.organizer-requests.index') }}" 
                    class="flex items-center p-4 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors {{ request()->routeIs('admin.organizer-requests.*') ? 'ring-2 ring-red-500' : '' }}">
                     <div class="bg-red-100 rounded-full p-2 mr-3">
@@ -89,6 +89,19 @@
                     <div>
                         <h4 class="font-semibold text-green-900">Ground Management</h4>
                         <p class="text-sm text-green-700">Manage sports grounds & venues</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.players.index') }}" 
+                   class="flex items-center p-4 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors {{ request()->routeIs('admin.players.*') ? 'ring-2 ring-purple-500' : '' }}">
+                    <div class="bg-purple-100 rounded-full p-2 mr-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-purple-900">Users Management</h4>
+                        <p class="text-sm text-purple-700">Manage all users & reset PINs</p>
                     </div>
                 </a>
             </div>
