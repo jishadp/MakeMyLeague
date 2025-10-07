@@ -702,9 +702,9 @@
                                     </div>
                                 </div>
                                 <h3 class="text-2xl font-bold mb-1">{{ $playerInfo->name }}</h3>
-                                <p class="text-indigo-200 mb-4">{{ $playerInfo->position->name }}</p>
+                                <p class="text-indigo-200 mb-4">{{ $playerInfo->position->name ?? 'No Position' }}</p>
                                 <div class="flex space-x-3 mb-6">
-                                    <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">{{ $playerInfo->position->name }}</span>
+                                    <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">{{ $playerInfo->position->name ?? 'No Position' }}</span>
                                     <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Player</span>
                                 </div>
                                 <div class="w-full space-y-3 text-left">
@@ -743,10 +743,10 @@
                                         <path d="M12 14c2.206 0 4-1.794 4-4s-1.794-4-4-4-4 1.794-4 4 1.794 4 4 4zm0-6c1.103 0 2 .897 2 2s-.897 2-2 2-2-.897-2-2 .897-2 2-2z"></path>
                                         <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path>
                                     </svg>
-                                    <h5 class="text-lg font-medium text-gray-900">{{ $playerInfo->position->name }}</h5>
+                                    <h5 class="text-lg font-medium text-gray-900">{{ $playerInfo->position->name ?? 'No Position' }}</h5>
                                 </div>
                                 <p class="text-gray-600">
-                                    @switch($playerInfo->position->name)
+                                    @switch($playerInfo->position->name ?? 'No Position')
                                         @case('Batter')
                                             Specializes in scoring runs and building partnerships. Key responsibility is to face deliveries and accumulate runs for the team.
                                             @break

@@ -73,9 +73,15 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-semibold text-gray-900 text-lg truncate">{{$leaguePlayer->player->name}}</h3>
                                     <div class="flex items-center space-x-2 text-sm text-gray-600">
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            {{$leaguePlayer->player->position->name}}
-                                        </span>
+                                        @if($leaguePlayer->player->position)
+                                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                {{$leaguePlayer->player->position->name}}
+                                            </span>
+                                        @else
+                                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                                                No Position
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -108,7 +114,7 @@
                                 league-player-id="{{$leaguePlayer->id}}"
                                 player-name="{{$leaguePlayer->player->name}}"
                                 base-price="{{$leaguePlayer->base_price}}"
-                                position="{{$leaguePlayer->player->position->name}}"
+                                position="{{$leaguePlayer->player->position ? $leaguePlayer->player->position->name : 'No Position'}}"
                                 league-id="{{ $league->id}}"
                                 start-bid-action="{{ route('auction.start')}}"
                                     class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center startAuction justify-center group-hover:shadow-md">

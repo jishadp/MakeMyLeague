@@ -21,7 +21,9 @@ class AuctionController extends Controller
      */
     public function index(League $league)
     {
-        $leaguePlayers = LeaguePlayer::where('league_id',$league->id)->get();
+        $leaguePlayers = LeaguePlayer::where('league_id',$league->id)
+            ->with(['player.position'])
+            ->get();
         return view('auction.index',compact('leaguePlayers','league'));
     }
 
