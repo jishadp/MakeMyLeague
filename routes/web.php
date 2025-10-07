@@ -10,6 +10,7 @@ use App\Http\Controllers\LeagueTeamController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LeagueFinanceController;
 use App\Http\Controllers\OrganizerRequestController;
+use App\Http\Controllers\TeamTransferController;
 use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
 use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\GroundController as AdminGroundController;
@@ -116,6 +117,14 @@ Route::middleware('auth')->group(function () {
         $notification->markAsRead();
         return response()->json(['success' => true]);
     })->name('notifications.mark-read');
+
+    // Team transfer routes
+    Route::prefix('teams/{team}')->group(function () {
+        Route::post('transfer', [TeamTransferController::class, 'transfer'])->name('teams.transfer');
+    });
+    
+    // Team transfer search route
+    Route::get('team-transfer/search', [TeamTransferController::class, 'searchUsers'])->name('team-transfer.search');
 
 
 

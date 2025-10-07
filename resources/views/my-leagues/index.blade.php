@@ -727,41 +727,58 @@
 </section>
 
 <!-- Auctioneer Assignment Modal -->
-<div id="auctioneerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Assign Auctioneer</h3>
-                <button onclick="closeAuctioneerModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+<div id="auctioneerModal" class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
+    <div class="white-glass-card relative w-full max-w-md mx-auto p-8 animate-fadeInUp">
+        <!-- Close Button -->
+        <button onclick="closeAuctioneerModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
             </div>
-            
-            <div class="mb-4">
-                <p class="text-sm text-gray-600" id="teamInfo"></p>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">Assign Auctioneer</h3>
+            <p class="text-sm text-gray-600" id="teamInfo"></p>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Search Users</label>
+            <div class="relative">
                 <input type="text" id="userSearch" placeholder="Type to search users..." 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-                <div id="searchResults" class="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md hidden">
-                    <!-- Search results will be populated here -->
+                       class="white-glass-input w-full px-4 py-3 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 text-gray-800 placeholder-gray-500">
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
             </div>
-            
-            <div class="flex justify-end space-x-3">
-                <button onclick="closeAuctioneerModal()" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                    Cancel
-                </button>
-                <button id="assignButton" onclick="confirmAssignment()" 
-                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    Assign
-                </button>
+            <div id="searchResults" class="mt-3 max-h-48 overflow-y-auto white-glass-card hidden">
+                <!-- Search results will be populated here -->
             </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex space-x-4">
+            <button onclick="closeAuctioneerModal()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200">
+                Cancel
+            </button>
+            <button id="assignButton" onclick="confirmAssignment()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg" disabled>
+                <span class="flex items-center justify-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Assign
+                </span>
+            </button>
         </div>
     </div>
 </div>
@@ -777,7 +794,12 @@ function assignAuctioneer(leagueSlug, leagueTeamSlug, teamName) {
     
     document.getElementById('modalTitle').textContent = 'Assign Auctioneer';
     document.getElementById('teamInfo').textContent = `Assign auctioneer for team: ${teamName}`;
-    document.getElementById('userSearch').value = '';
+    
+    // Reset search input
+    const searchInput = document.getElementById('userSearch');
+    searchInput.value = '';
+    searchInput.classList.remove('bg-blue-50', 'border-blue-300');
+    
     document.getElementById('searchResults').classList.add('hidden');
     document.getElementById('assignButton').disabled = true;
     selectedUserId = null;
@@ -889,13 +911,33 @@ function displaySearchResults(users) {
     const resultsContainer = document.getElementById('searchResults');
     
     if (users.length === 0) {
-        resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">No users found</div>';
+        resultsContainer.innerHTML = `
+            <div class="p-4 text-center">
+                <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <div class="text-gray-500 text-sm">No users found</div>
+            </div>
+        `;
     } else {
         resultsContainer.innerHTML = users.map(user => `
-            <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+            <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 rounded-lg m-2" 
                  onclick="selectUser(${user.id}, '${user.name}', '${user.email}')">
-                <div class="font-medium text-gray-900">${user.name}</div>
-                <div class="text-sm text-gray-500">${user.email}</div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        ${user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-800">${user.name}</div>
+                        <div class="text-sm text-gray-600">${user.email}</div>
+                        ${user.phone ? `<div class="text-xs text-gray-500">${user.phone}</div>` : ''}
+                    </div>
+                    <div class="text-blue-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </div>
             </div>
         `).join('');
     }
@@ -905,9 +947,24 @@ function displaySearchResults(users) {
 
 function selectUser(userId, userName, userEmail) {
     selectedUserId = userId;
-    document.getElementById('userSearch').value = `${userName} (${userEmail})`;
+    
+    // Update the search input with selected user info
+    const searchInput = document.getElementById('userSearch');
+    searchInput.value = `${userName} (${userEmail})`;
+    searchInput.classList.add('bg-blue-50', 'border-blue-300');
+    
+    // Hide search results
     document.getElementById('searchResults').classList.add('hidden');
-    document.getElementById('assignButton').disabled = false;
+    
+    // Enable assign button and add visual feedback
+    const assignButton = document.getElementById('assignButton');
+    assignButton.disabled = false;
+    assignButton.classList.add('animate-pulse');
+    
+    // Remove pulse animation after 2 seconds
+    setTimeout(() => {
+        assignButton.classList.remove('animate-pulse');
+    }, 2000);
 }
 
 // Close modal when clicking outside
@@ -954,5 +1011,66 @@ function markNotificationAsRead(notificationId) {
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
+
+/* White Glassmorphism Styles */
+.white-glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.white-glass-card:hover {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.white-glass-button {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.white-glass-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+}
+
+.white-glass-input {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.white-glass-input:focus {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+}
 </style>
 @endsection

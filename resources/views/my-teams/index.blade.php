@@ -119,11 +119,20 @@
                             </div>
                         </div>
                         
-                        <!-- Action Button -->
-                        <a href="{{ route('teams.show', $team) }}"
-                            class="w-full bg-blue-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
-                            Manage Team
-                        </a>
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <a href="{{ route('teams.show', $team) }}"
+                                class="w-full bg-blue-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
+                                Manage Team
+                            </a>
+                            <button onclick="transferTeam('{{ $team->slug }}', '{{ $team->name }}')" 
+                                    class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-center py-2 px-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-colors shadow-lg hover:shadow-xl">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                                Transfer Team
+                            </button>
+                        </div>
                     </div>
                 </div>
                 @endforeach
@@ -334,10 +343,295 @@
     </div>
 </section>
 
+<!-- Team Transfer Modal -->
+<div id="teamTransferModal" class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
+    <div class="white-glass-card relative w-full max-w-md mx-auto p-8 animate-fadeInUp">
+        <!-- Close Button -->
+        <button onclick="closeTeamTransferModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="transferModalTitle">Transfer Team</h3>
+            <p class="text-sm text-gray-600" id="teamTransferInfo"></p>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Search Users</label>
+            <div class="relative">
+                <input type="text" id="userTransferSearch" placeholder="Type to search users..." 
+                       class="white-glass-input w-full px-4 py-3 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 text-gray-800 placeholder-gray-500">
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div id="transferSearchResults" class="mt-3 max-h-48 overflow-y-auto white-glass-card hidden">
+                <!-- Search results will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex space-x-4">
+            <button onclick="closeTeamTransferModal()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200">
+                Cancel
+            </button>
+            <button id="transferButton" onclick="confirmTransfer()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 font-semibold hover:from-orange-700 hover:to-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg" disabled>
+                <span class="flex items-center justify-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                    Transfer
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTeamSlug = '';
+let selectedTransferUserId = null;
+
+function transferTeam(teamSlug, teamName) {
+    currentTeamSlug = teamSlug;
+    
+    document.getElementById('transferModalTitle').textContent = 'Transfer Team';
+    document.getElementById('teamTransferInfo').textContent = `Transfer ownership of team: ${teamName}`;
+    
+    // Reset search input
+    const searchInput = document.getElementById('userTransferSearch');
+    searchInput.value = '';
+    searchInput.classList.remove('bg-orange-50', 'border-orange-300');
+    
+    document.getElementById('transferSearchResults').classList.add('hidden');
+    document.getElementById('transferButton').disabled = true;
+    selectedTransferUserId = null;
+    
+    document.getElementById('teamTransferModal').classList.remove('hidden');
+}
+
+function closeTeamTransferModal() {
+    document.getElementById('teamTransferModal').classList.add('hidden');
+}
+
+function confirmTransfer() {
+    if (!selectedTransferUserId) {
+        alert('Please select a user first.');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to transfer this team? This action cannot be undone.')) {
+        return;
+    }
+    
+    fetch(`/teams/${currentTeamSlug}/transfer`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            new_owner_id: selectedTransferUserId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeTeamTransferModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while transferring the team.');
+    });
+}
+
+// Search functionality
+document.getElementById('userTransferSearch').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('transferSearchResults').classList.add('hidden');
+        return;
+    }
+    
+    fetch(`/team-transfer/search?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                displayTransferSearchResults(data.users);
+            } else {
+                console.error('Search error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+});
+
+function displayTransferSearchResults(users) {
+    const resultsContainer = document.getElementById('transferSearchResults');
+    
+    if (users.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="p-4 text-center">
+                <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <div class="text-gray-500 text-sm">No users found</div>
+            </div>
+        `;
+    } else {
+        resultsContainer.innerHTML = users.map(user => `
+            <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 rounded-lg m-2" 
+                 onclick="selectTransferUser(${user.id}, '${user.name}', '${user.email}')">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        ${user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-800">${user.name}</div>
+                        <div class="text-sm text-gray-600">${user.email}</div>
+                        <div class="text-xs text-gray-500">${user.team_count} teams owned</div>
+                    </div>
+                    <div class="text-orange-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    resultsContainer.classList.remove('hidden');
+}
+
+function selectTransferUser(userId, userName, userEmail) {
+    selectedTransferUserId = userId;
+    
+    // Update the search input with selected user info
+    const searchInput = document.getElementById('userTransferSearch');
+    searchInput.value = `${userName} (${userEmail})`;
+    searchInput.classList.add('bg-orange-50', 'border-orange-300');
+    
+    // Hide search results
+    document.getElementById('transferSearchResults').classList.add('hidden');
+    
+    // Enable transfer button and add visual feedback
+    const transferButton = document.getElementById('transferButton');
+    transferButton.disabled = false;
+    transferButton.classList.add('animate-pulse');
+    
+    // Remove pulse animation after 2 seconds
+    setTimeout(() => {
+        transferButton.classList.remove('animate-pulse');
+    }, 2000);
+}
+
+// Close modal when clicking outside
+document.getElementById('teamTransferModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTeamTransferModal();
+    }
+});
+</script>
+
 <style>
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
+
+/* White Glassmorphism Styles */
+.white-glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.white-glass-card:hover {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.white-glass-button {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.white-glass-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+}
+
+.white-glass-input {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.white-glass-input:focus {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+}
 </style>
 @endsection
