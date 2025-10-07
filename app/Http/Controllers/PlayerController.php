@@ -26,7 +26,9 @@ class PlayerController extends Controller
     {
         $query = User::query()
             ->with(['position', 'localBody'])
-            ->players();
+            ->whereHas('roles', function($q) {
+                $q->where('name', 'Player');
+            });
 
         // Filter by role
         if ($request->has('position_id') && $request->position_id != '') {

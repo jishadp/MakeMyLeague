@@ -9,10 +9,10 @@
                 </div>
                 <div class="flex items-center space-x-4">
                                     <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    6 Players
+                    {{ count($leaguePlayers) }} Players
                 </div>
-                <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                    6 on this page
+                <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium" id="visiblePlayersCount">
+                    {{ min(3, count($leaguePlayers)) }} on this page
                 </div>
                 </div>
             </div>
@@ -21,7 +21,7 @@
         <div class="p-4 sm:p-6">
 
             <!-- Search and Filter Bar -->
-            <div class="mb-6 hidden sm:block">
+            <div class="mb-6">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1">
                         <input type="text" id="playerSearch" placeholder="Search players by name, mobile, or role..."
@@ -51,8 +51,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="playersList">
                     <!-- Static Dummy Players -->
                     <!-- Player 1 -->
-                     @foreach($leaguePlayers as $leaguePlayer)
-                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group">
+                     @foreach($leaguePlayers as $index => $leaguePlayer)
+                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group {{ $index >= 3 ? 'hidden' : '' }}" data-player-index="{{ $index }}">
 
                         <!-- Player Header -->
                         <div class="flex items-start justify-between mb-4">

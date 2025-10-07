@@ -264,34 +264,59 @@
 <!-- Retention Modal -->
 <div id="retention-modal" class="fixed inset-0 z-50 hidden overflow-y-auto overflow-x-hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" id="modal-backdrop"></div>
+        <!-- Modern Backdrop with blur effect -->
+        <div class="fixed inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 backdrop-blur-sm transition-all duration-300" id="modal-backdrop"></div>
         
-        <!-- Modal Content -->
-        <div class="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
-            <div class="flex items-center justify-between p-4 md:p-5 border-b">
-                <h3 class="text-xl font-semibold text-gray-900">
-                    Add Retention Players
-                </h3>
-                <button type="button" id="closeRetentionModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg p-1.5">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
+        <!-- Modal Content with modern design -->
+        <div class="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/20 animate-in fade-in-0 zoom-in-95 duration-300">
+            <!-- Header with gradient background -->
+            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">
+                            Player Retention
+                        </h3>
+                        <p class="text-indigo-100 mt-1">
+                            Select players to retain for {{ $leagueTeam->team->name }}
+                        </p>
+                    </div>
+                    <button type="button" id="closeRetentionModal" class="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2 transition-all duration-200">
+                        <span class="sr-only">Close</span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
             
-            <div class="p-4 md:p-5 max-h-[calc(90vh-120px)] overflow-y-auto">
-                <p class="mb-4 text-gray-600">
-                    Select players to retain for {{ $leagueTeam->team->name }} in {{ $league->name }}.
-                    <span class="font-medium">You can retain {{ $league->retention_players }} players.</span>
-                </p>
-                
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-medium text-gray-900">Retention Players</h4>
+            <div class="p-6 max-h-[calc(90vh-140px)] overflow-y-auto">
+                <!-- Info Card -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
                     <div class="flex items-center">
-                        <span class="text-sm text-gray-600 mr-2">Filter:</span>
-                        <select id="playerFilter" class="text-sm border-gray-300 rounded-md">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-blue-800">
+                                You can retain up to <span class="font-bold">{{ $league->retention_players }} players</span> from your current team or available players in {{ $league->name }}.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter Section -->
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                    <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Available Players
+                    </h4>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-medium text-gray-600">Filter by:</span>
+                        <select id="playerFilter" class="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200">
                             <option value="all">All Players</option>
                             <option value="team">Current Team</option>
                             <option value="league">Available for Auction</option>
@@ -305,97 +330,205 @@
                     @method('POST')
                     <input type="hidden" name="status" value="available">
                     
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div id="current-team-players">
                             @if($leagueTeam->players->count() > 0)
-                                <h5 class="font-medium text-sm text-gray-600 mb-2">Current Team Players</h5>
-                                @foreach($leagueTeam->players as $player)
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2 player-item" data-type="team">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" 
-                                                name="player_ids[]" 
-                                                value="{{ $player->id }}" 
-                                                id="player-{{ $player->id }}"
-                                                class="player-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                {{ $player->retention ? 'checked' : '' }}
-                                                data-retention="{{ $player->retention ? 'true' : 'false' }}">
-                                            <label for="player-{{ $player->id }}" class="ml-3 block">
-                                                <span class="text-sm font-medium text-gray-900">{{ $player->user->name }}</span>
-                                                <span class="text-sm text-gray-500 block">{{ $player->user->position->name ?? 'No Role' }}</span>
-                                            </label>
+                                <div class="mb-4">
+                                    <h5 class="text-lg font-semibold text-gray-800 flex items-center">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                        Current Team Players
+                                        <span class="ml-2 text-sm font-normal text-gray-500">({{ $leagueTeam->players->count() }} players)</span>
+                                    </h5>
+                                </div>
+                                <div class="grid gap-3">
+                                    @foreach($leagueTeam->players as $player)
+                                        <div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-lg transition-all duration-200 player-item" data-type="team">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Custom Checkbox -->
+                                                    <div class="relative">
+                                                        <input type="checkbox" 
+                                                            name="player_ids[]" 
+                                                            value="{{ $player->id }}" 
+                                                            id="player-{{ $player->id }}"
+                                                            class="player-checkbox sr-only"
+                                                            {{ $player->retention ? 'checked' : '' }}
+                                                            data-retention="{{ $player->retention ? 'true' : 'false' }}">
+                                                        <label for="player-{{ $player->id }}" class="flex items-center justify-center w-6 h-6 border-2 border-gray-300 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-400">
+                                                            <svg class="w-4 h-4 text-white opacity-0 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <!-- Player Avatar -->
+                                                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                        {{ substr($player->user->name, 0, 1) }}
+                                                    </div>
+                                                    
+                                                    <!-- Player Info -->
+                                                    <div>
+                                                        <h6 class="font-semibold text-gray-900 text-lg">{{ $player->user->name }}</h6>
+                                                        <p class="text-sm text-gray-500 flex items-center">
+                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                                                            </svg>
+                                                            {{ $player->user->position->name ?? 'No Role' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Player Status & Actions -->
+                                                <div class="flex items-center space-x-3">
+                                                    @if($player->retention)
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Retained
+                                                        </span>
+                                                    @endif
+                                                    
+                                                    <div class="text-right">
+                                                        <div class="text-lg font-bold text-gray-900">
+                                                            @if($player->retention)
+                                                                <span title="Retained player - infinite value" class="text-green-600">∞</span>
+                                                            @else
+                                                                ₹{{ number_format($player->base_price) }}
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-xs text-gray-500">Base Price</div>
+                                                    </div>
+                                                    
+                                                    <button type="button" data-player-id="{{ $player->id }}"
+                                                            class="remove-player-btn p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center">
-                                            @if($player->retention)
-                                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 mr-2">
-                                                    Retained
-                                                </span>
-                                            @endif
-                                            <span class="text-sm font-medium text-gray-900 mr-2">
-                                                @if($player->retention)
-                                                    <span title="Infinite value" class="text-green-600 font-bold">∞</span>
-                                                @else
-                                                    ₹{{ number_format($player->base_price) }}
-                                                @endif
-                                            </span>
-                                            <button type="button" data-player-id="{{ $player->id }}"
-                                                    class="remove-player-btn text-sm text-red-600 hover:text-red-800 focus:outline-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             @else
-                                <div class="text-center py-4 bg-gray-50 rounded-lg">
-                                    <p class="text-sm text-gray-500">No players in this team yet.</p>
+                                <div class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    <p class="text-gray-500 font-medium">No players in this team yet</p>
+                                    <p class="text-sm text-gray-400 mt-1">Add players to your team to enable retention</p>
                                 </div>
                             @endif
                         </div>
                         
-                                                <div id="other-league-players" class="mt-6" style="display:none;">
-                            <h5 class="font-medium text-sm text-gray-600 mb-2">Available Players for Auction</h5>
+                        <div id="other-league-players" class="mt-8" style="display:none;">
+                            <div class="mb-4">
+                                <h5 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                    Available Players for Auction
+                                    <span class="ml-2 text-sm font-normal text-gray-500">({{ $otherLeaguePlayers->count() }} players)</span>
+                                </h5>
+                            </div>
                             
                             @if($otherLeaguePlayers->count() > 0)
-                                @foreach($otherLeaguePlayers as $player)
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2 player-item" data-type="league">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" 
-                                                name="player_ids[]" 
-                                                value="{{ $player->id }}" 
-                                                id="player-{{ $player->id }}"
-                                                class="player-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                {{ $player->retention ? 'checked' : '' }}
-                                                data-retention="{{ $player->retention ? 'true' : 'false' }}">
-                                            <label for="player-{{ $player->id }}" class="ml-3 block">
-                                                <span class="text-sm font-medium text-gray-900">{{ $player->user->name }}</span>
-                                                <span class="text-sm text-gray-500 block">{{ $player->user->position->name ?? 'No Role' }}</span>
-                                            </label>
+                                <div class="grid gap-3">
+                                    @foreach($otherLeaguePlayers as $player)
+                                        <div class="group relative bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 player-item" data-type="league">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Custom Checkbox -->
+                                                    <div class="relative">
+                                                        <input type="checkbox" 
+                                                            name="player_ids[]" 
+                                                            value="{{ $player->id }}" 
+                                                            id="player-{{ $player->id }}"
+                                                            class="player-checkbox sr-only"
+                                                            {{ $player->retention ? 'checked' : '' }}
+                                                            data-retention="{{ $player->retention ? 'true' : 'false' }}">
+                                                        <label for="player-{{ $player->id }}" class="flex items-center justify-center w-6 h-6 border-2 border-gray-300 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-400">
+                                                            <svg class="w-4 h-4 text-white opacity-0 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <!-- Player Avatar -->
+                                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                        {{ substr($player->user->name, 0, 1) }}
+                                                    </div>
+                                                    
+                                                    <!-- Player Info -->
+                                                    <div>
+                                                        <h6 class="font-semibold text-gray-900 text-lg">{{ $player->user->name }}</h6>
+                                                        <p class="text-sm text-gray-500 flex items-center">
+                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                                                            </svg>
+                                                            {{ $player->user->position->name ?? 'No Role' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Player Status & Actions -->
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        Available
+                                                    </span>
+                                                    
+                                                    <div class="text-right">
+                                                        <div class="text-lg font-bold text-gray-900">₹{{ number_format($player->base_price) }}</div>
+                                                        <div class="text-xs text-gray-500">Base Price</div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mr-2">
-                                                Available
-                                            </span>
-                                            <span class="text-sm font-medium text-gray-900">₹{{ number_format($player->base_price) }}</span>
-                                        </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             @else
-                                <div class="text-center py-4 bg-gray-50 rounded-lg">
-                                    <p class="text-sm text-gray-500">No other available players in this league.</p>
+                                <div class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-gray-500 font-medium">No available players for auction</p>
+                                    <p class="text-sm text-gray-400 mt-1">Check back later for new player additions</p>
                                 </div>
                             @endif
                         </div>
                     </div>
                     
-                    <div class="mt-6 flex justify-between">
-                        <div>
-                            <span class="text-sm text-gray-600">Selected: <span id="selectedCount">0</span>/{{ $league->retention_players }}</span>
+                    <!-- Footer Actions -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-gray-700">
+                                        Selected: <span id="selectedCount" class="font-bold text-indigo-600">0</span>/{{ $league->retention_players }}
+                                    </span>
+                                </div>
+                                <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
+                                <div class="text-xs text-gray-500">
+                                    Players will be retained for the next season
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button" id="closeRetentionModal"
+                                        class="px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                                    Cancel
+                                </button>
+                                <button type="button" id="updateRetentionBtn"
+                                        class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Update Retention Players
+                                </button>
+                            </div>
                         </div>
-                        <button type="button" id="updateRetentionBtn"
-                                class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700">
-                            Update Retention Players
-                        </button>
                     </div>
                 </form>
         </div>
@@ -439,11 +572,42 @@
         const maxRetention = {{ $league->retention_players }};
         let initialRetentionState = [];
         
-        // Store initial retention state
+        // Store initial retention state and setup custom checkbox styling
         playerCheckboxes.forEach(checkbox => {
             initialRetentionState.push({
                 id: checkbox.value,
                 retained: checkbox.dataset.retention === 'true'
+            });
+            
+            // Setup custom checkbox styling
+            const label = checkbox.nextElementSibling;
+            if (label && checkbox.checked) {
+                label.classList.add('bg-indigo-600', 'border-indigo-600');
+                label.querySelector('svg').classList.remove('opacity-0');
+            }
+            
+            // Handle checkbox change for custom styling and retention limits
+            checkbox.addEventListener('change', function() {
+                const selectedCount = document.querySelectorAll('.player-checkbox:checked').length;
+                
+                if (this.checked) {
+                    // Check if we've exceeded the retention limit
+                    if (selectedCount > maxRetention) {
+                        this.checked = false;
+                        alert(`You can only retain ${maxRetention} players.`);
+                        return;
+                    }
+                    
+                    label.classList.add('bg-indigo-600', 'border-indigo-600');
+                    label.classList.remove('border-gray-300');
+                    label.querySelector('svg').classList.remove('opacity-0');
+                } else {
+                    label.classList.remove('bg-indigo-600', 'border-indigo-600');
+                    label.classList.add('border-gray-300');
+                    label.querySelector('svg').classList.add('opacity-0');
+                }
+                
+                updateSelectedCount();
             });
         });
         
@@ -486,19 +650,8 @@
         // Initial count update
         updateSelectedCount();
         
-        // Limit retention selection
-        playerCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const selectedCount = document.querySelectorAll('.player-checkbox:checked').length;
-                
-                if (selectedCount > maxRetention) {
-                    this.checked = false;
-                    alert(`You can only retain ${maxRetention} players.`);
-                }
-                
-                updateSelectedCount();
-            });
-        });
+        // Limit retention selection (this is handled in the custom checkbox setup above)
+        // The change event is already handled in the custom checkbox setup
         
         // Handle form submission
         if (updateRetentionBtn) {

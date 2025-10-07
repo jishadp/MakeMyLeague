@@ -21,6 +21,100 @@ function startBidding(playerId, playerName, basePrice, playerRole) {
 }
 
 $(document).ready(function(){
+    // Search functionality for available players
+    $('#playerSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        const playerCards = $('.player-card');
+        let visibleCount = 0;
+        
+        console.log('Search term:', searchTerm);
+        console.log('Total player cards found:', playerCards.length);
+        
+        playerCards.each(function() {
+            const playerName = $(this).find('h3').text().toLowerCase();
+            const playerMobile = $(this).find('.flex.items-center.space-x-2 .text-gray-600').first().text().toLowerCase();
+            const playerPosition = $(this).find('.bg-blue-100').text().toLowerCase();
+            
+            console.log('Player:', playerName, 'Mobile:', playerMobile, 'Position:', playerPosition);
+            
+            if (searchTerm === '') {
+                // If no search term, show only first 3 players (initial state)
+                const playerIndex = $(this).data('player-index');
+                if (playerIndex < 3) {
+                    $(this).removeClass('hidden');
+                    visibleCount++;
+                } else {
+                    $(this).addClass('hidden');
+                }
+            } else if (playerName.includes(searchTerm) || playerMobile.includes(searchTerm) || playerPosition.includes(searchTerm)) {
+                // If searching, show all matching players
+                $(this).removeClass('hidden');
+                visibleCount++;
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+        
+        // Update visible players count
+        $('#visiblePlayersCount').text(visibleCount + ' on this page');
+        console.log('Visible count:', visibleCount);
+    });
+    
+    // Role filter functionality
+    $('#roleFilter').on('change', function() {
+        const selectedRole = $(this).val().toLowerCase();
+        const playerCards = $('.player-card');
+        let visibleCount = 0;
+        
+        playerCards.each(function() {
+            const playerPosition = $(this).find('.bg-blue-100').text().toLowerCase();
+            
+            if (selectedRole === '' || playerPosition.includes(selectedRole)) {
+                $(this).removeClass('hidden');
+                visibleCount++;
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+        
+        // Update visible players count
+        $('#visiblePlayersCount').text(visibleCount + ' on this page');
+    });
+    
+    // Price filter functionality
+    $('#priceFilter').on('change', function() {
+        const selectedPrice = $(this).val();
+        const playerCards = $('.player-card');
+        let visibleCount = 0;
+        
+        playerCards.each(function() {
+            const basePrice = parseInt($(this).find('.text-2xl').text().replace('₹', ''));
+            let showPlayer = false;
+            
+            if (selectedPrice === '') {
+                showPlayer = true;
+            } else if (selectedPrice === '0-100') {
+                showPlayer = basePrice >= 0 && basePrice <= 100;
+            } else if (selectedPrice === '101-200') {
+                showPlayer = basePrice >= 101 && basePrice <= 200;
+            } else if (selectedPrice === '201-500') {
+                showPlayer = basePrice >= 201 && basePrice <= 500;
+            } else if (selectedPrice === '500+') {
+                showPlayer = basePrice > 500;
+            }
+            
+            if (showPlayer) {
+                $(this).removeClass('hidden');
+                visibleCount++;
+            } else {
+                $(this).addClass('hidden');
+            }
+        });
+        
+        // Update visible players count
+        $('#visiblePlayersCount').text(visibleCount + ' on this page');
+    });
+    
     $('.startAuction').click(function(){
         $(".availPlayers").addClass('hidden');
         $(".bidMain").removeClass('hidden');

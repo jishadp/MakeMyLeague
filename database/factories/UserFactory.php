@@ -26,6 +26,9 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'mobile' => fake()->unique()->numerify('##########'),
+            'country_code' => '+91',
+            'pin' => static::$password ??= Hash::make('1234'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -40,5 +43,44 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Create a user with Organiser role.
+     */
+    public function organiser(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $organiserRole = \App\Models\Role::where('name', 'Organiser')->first();
+            if ($organiserRole) {
+                $user->roles()->attach($organiserRole->id);
+            }
+        });
+    }
+
+    /**
+     * Create a user with Owner role.
+     */
+    public function owner(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $ownerRole = \App\Models\Role::where('name', 'Owner')->first();
+            if ($ownerRole) {
+                $user->roles()->attach($ownerRole->id);
+            }
+        });
+    }
+
+    /**
+     * Create a user with Player role.
+     */
+    public function player(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $playerRole = \App\Models\Role::where('name', 'Player')->first();
+            if ($playerRole) {
+                $user->roles()->attach($playerRole->id);
+            }
+        });
     }
 }
