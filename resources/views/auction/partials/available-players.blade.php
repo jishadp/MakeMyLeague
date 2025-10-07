@@ -23,9 +23,17 @@
             <!-- Search and Filter Bar -->
             <div class="mb-6">
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <input type="text" id="playerSearch" placeholder="Search players by name, mobile, or role..."
+                    <div class="flex-1 relative">
+                        <input type="text" id="playerSearch" placeholder="Search players by name, mobile, email, or position..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent glass-input">
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <div id="playerSearchResults" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto hidden">
+                            <!-- Search results will be populated here -->
+                        </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <select id="roleFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent glass-input">
@@ -49,10 +57,9 @@
             <!-- Card View Design -->
             <div id="cardView" class="players-container" url="{{route('leagues.player.broadcast')}}">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="playersList">
-                    <!-- Static Dummy Players -->
-                    <!-- Player 1 -->
+                    <!-- First 3 Players (Always Visible) -->
                      @foreach($leaguePlayers as $index => $leaguePlayer)
-                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group {{ $index >= 3 ? 'hidden' : '' }}" data-player-index="{{ $index }}">
+                    <div class="glass-card p-4 hover:shadow-lg transition-all duration-300 player-card group {{ $index >= 3 ? 'hidden' : '' }}" data-player-index="{{ $index }}" data-player-id="{{ $leaguePlayer->id }}" data-user-id="{{ $leaguePlayer->user_id }}">
 
                         <!-- Player Header -->
                         <div class="flex items-start justify-between mb-4">
@@ -110,14 +117,8 @@
 
                         <!-- Action Buttons -->
                         <div class="flex space-x-2">
-                            <button player-id="{{$leaguePlayer->user_id}}"
-                                league-player-id="{{$leaguePlayer->id}}"
-                                player-name="{{$leaguePlayer->player->name}}"
-                                base-price="{{$leaguePlayer->base_price}}"
-                                position="{{$leaguePlayer->player->position ? $leaguePlayer->player->position->name : 'No Position'}}"
-                                league-id="{{ $league->id}}"
-                                start-bid-action="{{ route('auction.start')}}"
-                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center startAuction justify-center group-hover:shadow-md">
+                            <button onclick="startBidding('{{$leaguePlayer->user_id}}', '{{$leaguePlayer->id}}', '{{$leaguePlayer->player->name}}', '{{$leaguePlayer->base_price}}', '{{$leaguePlayer->player->position ? $leaguePlayer->player->position->name : 'No Position'}}', '{{ $league->id}}', '{{ route('auction.start')}}')"
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center group-hover:shadow-md">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                 </svg>
@@ -134,6 +135,22 @@
                         </div>
                     </div>
                     @endforeach
+                </div>
+                
+                <!-- Player Queue Section (Searched Players) -->
+                <div id="playerQueueSection" class="mt-8 hidden">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Player Queue
+                        </h3>
+                        <p class="text-sm text-gray-600">Players found through search</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="playerQueue">
+                        <!-- Queue items will be added here dynamically -->
+                    </div>
                 </div>
             </div>
         </div>

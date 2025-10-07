@@ -1,23 +1,74 @@
 // Minimal Auction JavaScript - Static Demo Version
 // Simple function to start bidding and show bidding section
-function startBidding(playerId, playerName, basePrice, playerRole) {
+function startBidding(userId, leaguePlayerId, playerName, basePrice, position, leagueId, startBidAction) {
+    // Update the bidding section with player information
+    updateBiddingPlayer(playerName, position, basePrice);
+    
     // Show the bidding section
-
-
     const biddingSection = document.getElementById('biddingSection');
     if (biddingSection) {
         biddingSection.classList.remove('hidden');
         biddingSection.scrollIntoView({ behavior: 'smooth' });
     }
+    
     // Hide available players on mobile
     const availableSection = document.getElementById('availablePlayersSection');
     if (availableSection && window.innerWidth < 1024) {
         availableSection.classList.add('hidden');
     }
+    
     // Show success message
     showMessage(playerName + ' selected for bidding!', 'success');
-    var action=$('.players-container').attr('url');
+    
+    // Store current bidding player info for later use
+    window.currentBiddingPlayer = {
+        userId: userId,
+        leaguePlayerId: leaguePlayerId,
+        playerName: playerName,
+        basePrice: basePrice,
+        position: position,
+        leagueId: leagueId,
+        startBidAction: startBidAction
+    };
+}
 
+// Function to update the bidding player information
+function updateBiddingPlayer(playerName, position, basePrice) {
+    // Update player name
+    const playerNameElement = document.querySelector('.playerName');
+    if (playerNameElement) {
+        playerNameElement.textContent = playerName;
+    }
+    
+    // Update position
+    const positionElement = document.querySelector('.position');
+    if (positionElement) {
+        positionElement.textContent = position;
+    }
+    
+    // Update base price
+    const basePriceElement = document.querySelector('.basePrice');
+    if (basePriceElement) {
+        basePriceElement.textContent = basePrice;
+    }
+    
+    // Update current bid to base price initially
+    const currentBidElement = document.querySelector('.currentBid');
+    if (currentBidElement) {
+        currentBidElement.textContent = basePrice;
+    }
+    
+    // Update bid status
+    const bidStatusElement = document.querySelector('.bidStatus');
+    if (bidStatusElement) {
+        bidStatusElement.textContent = 'Starting bid';
+    }
+    
+    // Clear team info
+    const bidTeamElement = document.querySelector('.bidTeam');
+    if (bidTeamElement) {
+        bidTeamElement.textContent = 'No bids yet';
+    }
 }
 
 $(document).ready(function(){

@@ -44,6 +44,52 @@ class AuctionController extends Controller
             'auction_status' => 'active'
         ]);
     }
+
+    /**
+     * Search available players for auction.
+     */
+    public function searchPlayers(Request $request)
+    {
+        $request->validate([
+            'query' => 'required|string|min:2',
+            'league_id' => 'required|exists:leagues,id'
+        ]);
+
+        $query = $request->input('query');
+        $leagueId = $request->input('league_id');
+        
+        $players = LeaguePlayer::with(['player.position'])
+            ->where('league_id', $leagueId)
+            ->where('status', 'available')
+            ->where(function ($q) use ($query) {
+                $q->whereHas('player', function ($subQ) use ($query) {
+                    $subQ->where('name', 'LIKE', "%{$query}%")
+                         ->orWhere('mobile', 'LIKE', "%{$query}%")
+                         ->orWhere('email', 'LIKE', "%{$query}%");
+                })
+                ->orWhereHas('player.position', function ($subQ) use ($query) {
+                    $subQ->where('name', 'LIKE', "%{$query}%");
+                });
+            })
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'players' => $players->map(function ($leaguePlayer) {
+                return [
+                    'id' => $leaguePlayer->id,
+                    'user_id' => $leaguePlayer->user_id,
+                    'player_name' => $leaguePlayer->player->name,
+                    'mobile' => $leaguePlayer->player->mobile,
+                    'email' => $leaguePlayer->player->email,
+                    'position' => $leaguePlayer->player->position ? $leaguePlayer->player->position->name : 'No Position',
+                    'base_price' => $leaguePlayer->base_price,
+                    'photo' => $leaguePlayer->player->photo ? asset($leaguePlayer->player->photo) : asset('images/defaultplayer.jpeg')
+                ];
+            })
+        ]);
+    }
     /**
      * Call Bid auction.
      */
