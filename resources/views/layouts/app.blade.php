@@ -10,6 +10,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name') . '- Register Today')</title>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NHV9TYVMRL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NHV9TYVMRL');
+    </script>
+
     <!-- Preload critical CSS -->
     <link rel="preload" href="{{ asset('css/main.css') }}?v={{ time() }}" as="style">
     <link rel="preload" href="{{ asset('js/main.js') }}?v={{ time() }}" as="script">
