@@ -20,6 +20,37 @@
 <!-- Leagues Content -->
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div class="max-w-7xl mx-auto">
+        <!-- Notifications Section -->
+        @php
+            $unreadNotifications = auth()->user()->unreadNotifications()->whereIn('type', ['auctioneer_assigned', 'auctioneer_removed'])->get();
+        @endphp
+        @if($unreadNotifications->isNotEmpty())
+            <div class="mb-8 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div class="flex items-center mb-3">
+                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-blue-900">Auctioneer Notifications</h3>
+                </div>
+                <div class="space-y-2">
+                    @foreach($unreadNotifications as $notification)
+                        <div class="bg-white rounded-lg p-3 border border-blue-100">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900">{{ $notification->title }}</h4>
+                                    <p class="text-sm text-gray-600 mt-1">{{ $notification->message }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                                </div>
+                                <button onclick="markNotificationAsRead({{ $notification->id }})" 
+                                        class="text-blue-600 hover:text-blue-800 text-sm">
+                                    Mark as read
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
         @if($organizedLeagues->isNotEmpty())
         <div class="mb-12">
             <div class="mb-8">
@@ -527,13 +558,51 @@
                         @endphp
                         @if($userTeams->isNotEmpty())
                             <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                                    </svg>
-                                    <span class="text-sm font-medium text-purple-800">My Teams</span>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                        </svg>
+                                        <span class="text-sm font-medium text-purple-800">My Teams</span>
+                                    </div>
                                 </div>
-                                <div class="text-sm font-bold text-purple-900 mt-1">{{ $userTeams->pluck('team.name')->join(', ') }}</div>
+                                
+                                @foreach($userTeams as $leagueTeam)
+                                    <div class="bg-white rounded-lg p-3 mb-2 last:mb-0 border border-purple-100">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-semibold text-purple-900">{{ $leagueTeam->team->name }}</div>
+                                                @if($leagueTeam->auctioneer)
+                                                    <div class="text-xs text-green-600 mt-1">
+                                                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        Auctioneer: {{ $leagueTeam->auctioneer->name }}
+                                                    </div>
+                                                @else
+                                                    <div class="text-xs text-orange-600 mt-1">
+                                                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        No auctioneer assigned
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                @if($leagueTeam->auctioneer)
+                                                    <button onclick="removeAuctioneer('{{ $league->slug }}', '{{ $leagueTeam->slug }}')" 
+                                                            class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors">
+                                                        Remove
+                                                    </button>
+                                                @endif
+                                                <button onclick="assignAuctioneer('{{ $league->slug }}', '{{ $leagueTeam->slug }}', '{{ $leagueTeam->team->name }}')" 
+                                                        class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200 transition-colors">
+                                                    {{ $leagueTeam->auctioneer ? 'Change' : 'Assign' }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @endif
                         
@@ -656,6 +725,229 @@
         </div>
     </div>
 </section>
+
+<!-- Auctioneer Assignment Modal -->
+<div id="auctioneerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Assign Auctioneer</h3>
+                <button onclick="closeAuctioneerModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600" id="teamInfo"></p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                <input type="text" id="userSearch" placeholder="Type to search users..." 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <div id="searchResults" class="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md hidden">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeAuctioneerModal()" 
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                    Cancel
+                </button>
+                <button id="assignButton" onclick="confirmAssignment()" 
+                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Assign
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLeagueSlug = '';
+let currentLeagueTeamSlug = '';
+let selectedUserId = null;
+
+function assignAuctioneer(leagueSlug, leagueTeamSlug, teamName) {
+    currentLeagueSlug = leagueSlug;
+    currentLeagueTeamSlug = leagueTeamSlug;
+    
+    document.getElementById('modalTitle').textContent = 'Assign Auctioneer';
+    document.getElementById('teamInfo').textContent = `Assign auctioneer for team: ${teamName}`;
+    document.getElementById('userSearch').value = '';
+    document.getElementById('searchResults').classList.add('hidden');
+    document.getElementById('assignButton').disabled = true;
+    selectedUserId = null;
+    
+    document.getElementById('auctioneerModal').classList.remove('hidden');
+}
+
+function removeAuctioneer(leagueSlug, leagueTeamSlug) {
+    if (!confirm('Are you sure you want to remove the auctioneer for this team?')) {
+        return;
+    }
+    
+    fetch(`/leagues/${leagueSlug}/teams/${leagueTeamSlug}/auctioneer/remove`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while removing the auctioneer.');
+    });
+}
+
+function closeAuctioneerModal() {
+    document.getElementById('auctioneerModal').classList.add('hidden');
+}
+
+function confirmAssignment() {
+    if (!selectedUserId) {
+        alert('Please select a user first.');
+        return;
+    }
+    
+    fetch(`/leagues/${currentLeagueSlug}/teams/${currentLeagueTeamSlug}/auctioneer/assign`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            auctioneer_id: selectedUserId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeAuctioneerModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while assigning the auctioneer.');
+    });
+}
+
+// Search functionality
+document.getElementById('userSearch').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('searchResults').classList.add('hidden');
+        return;
+    }
+    
+    fetch(`/leagues/${currentLeagueSlug}/auctioneers/search?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                displaySearchResults(data.users);
+            } else {
+                console.error('Search error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+});
+
+function displaySearchResults(users) {
+    const resultsContainer = document.getElementById('searchResults');
+    
+    if (users.length === 0) {
+        resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">No users found</div>';
+    } else {
+        resultsContainer.innerHTML = users.map(user => `
+            <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                 onclick="selectUser(${user.id}, '${user.name}', '${user.email}')">
+                <div class="font-medium text-gray-900">${user.name}</div>
+                <div class="text-sm text-gray-500">${user.email}</div>
+            </div>
+        `).join('');
+    }
+    
+    resultsContainer.classList.remove('hidden');
+}
+
+function selectUser(userId, userName, userEmail) {
+    selectedUserId = userId;
+    document.getElementById('userSearch').value = `${userName} (${userEmail})`;
+    document.getElementById('searchResults').classList.add('hidden');
+    document.getElementById('assignButton').disabled = false;
+}
+
+// Close modal when clicking outside
+document.getElementById('auctioneerModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAuctioneerModal();
+    }
+});
+
+function markNotificationAsRead(notificationId) {
+    fetch(`/notifications/${notificationId}/mark-read`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the notification from the DOM
+            const notificationElement = document.querySelector(`[onclick="markNotificationAsRead(${notificationId})"]`).closest('.bg-white');
+            notificationElement.remove();
+            
+            // If no notifications left, hide the entire notifications section
+            const notificationsSection = document.querySelector('.bg-blue-50');
+            if (notificationsSection && notificationsSection.querySelectorAll('.bg-white').length === 0) {
+                notificationsSection.remove();
+            }
+        } else {
+            alert('Error marking notification as read.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while marking the notification as read.');
+    });
+}
+</script>
 
 <style>
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

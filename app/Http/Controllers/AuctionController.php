@@ -48,18 +48,36 @@ class AuctionController extends Controller
     public function call(Request $request)
     {
         $newBid =  $request->base_price + $request->increment;
-        $bidTeam = LeagueTeam::where('league_id',$request->league_id)->whereHas('team',function($query){
-            $query->where('owner_id',auth()->user()->id);
-        })->first();
+        
+        // Find the league team where the current user is the assigned auctioneer
+        $bidTeam = LeagueTeam::where('league_id', $request->league_id)
+            ->where('auctioneer_id', auth()->user()->id)
+            ->first();
 
-        $bidTeam->decrement('wallet_balance',$newBid);
-        if(Auction::where('league_player_id',$request->league_player_id)->count() != 0){
-            info($request->league_player_id);
-            $previousBid = Auction::where('league_player_id',$request->league_player_id)->latest('id')->first();
-            LeagueTeam::find($previousBid->league_team_id)->increment('wallet_balance',$previousBid->amount);
+        // If no auctioneer is assigned, fall back to team owner (backward compatibility)
+        if (!$bidTeam) {
+            $bidTeam = LeagueTeam::where('league_id', $request->league_id)
+                ->whereHas('team', function($query) {
+                    $query->where('owner_id', auth()->user()->id);
+                })->first();
         }
 
-        AuctionPlayerBidCall::dispatch($newBid,$bidTeam->id);
+        if (!$bidTeam) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to bid for any team in this league.'
+            ], 403);
+        }
+
+        $bidTeam->decrement('wallet_balance', $newBid);
+        
+        if(Auction::where('league_player_id', $request->league_player_id)->count() != 0){
+            info($request->league_player_id);
+            $previousBid = Auction::where('league_player_id', $request->league_player_id)->latest('id')->first();
+            LeagueTeam::find($previousBid->league_team_id)->increment('wallet_balance', $previousBid->amount);
+        }
+
+        AuctionPlayerBidCall::dispatch($newBid, $bidTeam->id);
 
         Auction::create([
             'league_player_id'  => $request->league_player_id,

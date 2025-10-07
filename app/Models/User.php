@@ -393,4 +393,82 @@ class User extends Authenticatable
     {
         return $this->country_code . ' ' . $this->mobile;
     }
+
+    /**
+     * Get the league teams where this user is assigned as auctioneer.
+     */
+    public function auctioneerLeagueTeams(): HasMany
+    {
+        return $this->hasMany(LeagueTeam::class, 'auctioneer_id');
+    }
+
+    /**
+     * Check if the user is an auctioneer for a specific league.
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function isAuctioneerForLeague($leagueId): bool
+    {
+        return $this->auctioneerLeagueTeams()
+            ->where('league_id', $leagueId)
+            ->exists();
+    }
+
+    /**
+     * Check if the user can be assigned as auctioneer for a specific league.
+     * A user can only represent one team per league.
+     *
+     * @param int $leagueId
+     * @param int|null $excludeLeagueTeamId
+     * @return bool
+     */
+    public function canBeAuctioneerForLeague($leagueId, $excludeLeagueTeamId = null): bool
+    {
+        $query = $this->auctioneerLeagueTeams()->where('league_id', $leagueId);
+        
+        if ($excludeLeagueTeamId) {
+            $query->where('id', '!=', $excludeLeagueTeamId);
+        }
+        
+        return !$query->exists();
+    }
+
+    /**
+     * Get the league team where this user is auctioneer for a specific league.
+     *
+     * @param int $leagueId
+     * @return LeagueTeam|null
+     */
+    public function getAuctioneerLeagueTeamForLeague($leagueId): ?LeagueTeam
+    {
+        return $this->auctioneerLeagueTeams()
+            ->where('league_id', $leagueId)
+            ->with(['team', 'league'])
+            ->first();
+    }
+
+    /**
+     * Get the notifications for this user.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
+
+    /**
+     * Get unread notifications for this user.
+     */
+    public function unreadNotifications(): HasMany
+    {
+        return $this->notifications()->unread();
+    }
+
+    /**
+     * Get read notifications for this user.
+     */
+    public function readNotifications(): HasMany
+    {
+        return $this->notifications()->read();
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuctionController;
+use App\Http\Controllers\AuctioneerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\LeagueController;
@@ -93,6 +94,30 @@ Route::middleware('auth')->group(function () {
     
     // My Teams route
     Route::get('my-teams', [\App\Http\Controllers\MyTeamsController::class, 'index'])->name('my-teams');
+
+    // Auctioneer assignment routes
+    Route::prefix('leagues/{league}/teams/{leagueTeam}')->group(function () {
+        Route::post('auctioneer/assign', [AuctioneerController::class, 'assign'])->name('auctioneer.assign');
+        Route::delete('auctioneer/remove', [AuctioneerController::class, 'remove'])->name('auctioneer.remove');
+    });
+    
+    // Auctioneer search and availability routes
+    Route::prefix('leagues/{league}')->group(function () {
+        Route::get('auctioneers/available', [AuctioneerController::class, 'getAvailableAuctioneers'])->name('auctioneers.available');
+        Route::get('auctioneers/search', [AuctioneerController::class, 'searchUsers'])->name('auctioneers.search');
+    });
+
+    // Notification routes
+    Route::post('notifications/{notification}/mark-read', function (\App\Models\Notification $notification) {
+        if ($notification->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
+    })->name('notifications.mark-read');
+
+
 
     // Organizer Request routes
     Route::resource('organizer-requests', OrganizerRequestController::class)->except(['edit', 'update']);

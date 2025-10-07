@@ -24,7 +24,7 @@ class MyLeaguesController extends Controller
         $teamOwnerLeagues = $user->isTeamOwner() ? 
             \App\Models\League::whereHas('leagueTeams.team', function($query) use ($user) {
                 $query->where('owner_id', $user->id);
-            })->with(['game', 'leagueTeams.team'])->get() : 
+            })->with(['game', 'leagueTeams.team', 'leagueTeams.auctioneer'])->get() : 
             collect();
         
         return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues'));

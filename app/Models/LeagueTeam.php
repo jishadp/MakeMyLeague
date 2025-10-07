@@ -178,4 +178,12 @@ class LeagueTeam extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    /**
+     * Get the auctioneer assigned to this league team.
+     */
+    public function auctioneer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'auctioneer_id');
+    }
 }

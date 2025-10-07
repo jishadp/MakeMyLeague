@@ -21,99 +21,112 @@ function startBidding(playerId, playerName, basePrice, playerRole) {
 }
 
 $(document).ready(function(){
-    // Search functionality for available players
-    $('#playerSearch').on('input', function() {
-        const searchTerm = $(this).val().toLowerCase();
-        const playerCards = $('.player-card');
-        let visibleCount = 0;
-        
-        console.log('Search term:', searchTerm);
-        console.log('Total player cards found:', playerCards.length);
-        
-        playerCards.each(function() {
-            const playerName = $(this).find('h3').text().toLowerCase();
-            const playerMobile = $(this).find('.flex.items-center.space-x-2 .text-gray-600').first().text().toLowerCase();
-            const playerPosition = $(this).find('.bg-blue-100').text().toLowerCase();
+    // Simple search functionality for available players
+    const searchInput = document.getElementById('playerSearch');
+    const visibleCountElement = document.getElementById('visiblePlayersCount');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const playerCards = document.querySelectorAll('.player-card');
+            let visibleCount = 0;
             
-            console.log('Player:', playerName, 'Mobile:', playerMobile, 'Position:', playerPosition);
+            playerCards.forEach(function(card) {
+                const playerName = card.querySelector('h3').textContent.toLowerCase();
+                const playerMobile = card.querySelector('.text-gray-600').textContent.toLowerCase();
+                const playerPosition = card.querySelector('.bg-blue-100').textContent.toLowerCase();
+                
+                if (searchTerm === '') {
+                    // If no search term, show only first 3 players
+                    const playerIndex = parseInt(card.getAttribute('data-player-index'));
+                    if (playerIndex < 3) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                } else {
+                    // If searching, show matching players
+                    if (playerName.includes(searchTerm) || playerMobile.includes(searchTerm) || playerPosition.includes(searchTerm)) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
             
-            if (searchTerm === '') {
-                // If no search term, show only first 3 players (initial state)
-                const playerIndex = $(this).data('player-index');
-                if (playerIndex < 3) {
-                    $(this).removeClass('hidden');
+            // Update visible players count
+            if (visibleCountElement) {
+                visibleCountElement.textContent = visibleCount + ' on this page';
+            }
+        });
+    }
+    
+    // Simple role filter functionality
+    const roleFilter = document.getElementById('roleFilter');
+    if (roleFilter) {
+        roleFilter.addEventListener('change', function() {
+            const selectedRole = this.value.toLowerCase();
+            const playerCards = document.querySelectorAll('.player-card');
+            let visibleCount = 0;
+            
+            playerCards.forEach(function(card) {
+                const playerPosition = card.querySelector('.bg-blue-100').textContent.toLowerCase();
+                
+                if (selectedRole === '' || playerPosition.includes(selectedRole)) {
+                    card.classList.remove('hidden');
                     visibleCount++;
                 } else {
-                    $(this).addClass('hidden');
+                    card.classList.add('hidden');
                 }
-            } else if (playerName.includes(searchTerm) || playerMobile.includes(searchTerm) || playerPosition.includes(searchTerm)) {
-                // If searching, show all matching players
-                $(this).removeClass('hidden');
-                visibleCount++;
-            } else {
-                $(this).addClass('hidden');
+            });
+            
+            // Update visible players count
+            if (visibleCountElement) {
+                visibleCountElement.textContent = visibleCount + ' on this page';
             }
         });
-        
-        // Update visible players count
-        $('#visiblePlayersCount').text(visibleCount + ' on this page');
-        console.log('Visible count:', visibleCount);
-    });
+    }
     
-    // Role filter functionality
-    $('#roleFilter').on('change', function() {
-        const selectedRole = $(this).val().toLowerCase();
-        const playerCards = $('.player-card');
-        let visibleCount = 0;
-        
-        playerCards.each(function() {
-            const playerPosition = $(this).find('.bg-blue-100').text().toLowerCase();
+    // Simple price filter functionality
+    const priceFilter = document.getElementById('priceFilter');
+    if (priceFilter) {
+        priceFilter.addEventListener('change', function() {
+            const selectedPrice = this.value;
+            const playerCards = document.querySelectorAll('.player-card');
+            let visibleCount = 0;
             
-            if (selectedRole === '' || playerPosition.includes(selectedRole)) {
-                $(this).removeClass('hidden');
-                visibleCount++;
-            } else {
-                $(this).addClass('hidden');
+            playerCards.forEach(function(card) {
+                const basePrice = parseInt(card.querySelector('.text-2xl').textContent.replace('₹', ''));
+                let showPlayer = false;
+                
+                if (selectedPrice === '') {
+                    showPlayer = true;
+                } else if (selectedPrice === '0-100') {
+                    showPlayer = basePrice >= 0 && basePrice <= 100;
+                } else if (selectedPrice === '101-200') {
+                    showPlayer = basePrice >= 101 && basePrice <= 200;
+                } else if (selectedPrice === '201-500') {
+                    showPlayer = basePrice >= 201 && basePrice <= 500;
+                } else if (selectedPrice === '500+') {
+                    showPlayer = basePrice > 500;
+                }
+                
+                if (showPlayer) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Update visible players count
+            if (visibleCountElement) {
+                visibleCountElement.textContent = visibleCount + ' on this page';
             }
         });
-        
-        // Update visible players count
-        $('#visiblePlayersCount').text(visibleCount + ' on this page');
-    });
-    
-    // Price filter functionality
-    $('#priceFilter').on('change', function() {
-        const selectedPrice = $(this).val();
-        const playerCards = $('.player-card');
-        let visibleCount = 0;
-        
-        playerCards.each(function() {
-            const basePrice = parseInt($(this).find('.text-2xl').text().replace('₹', ''));
-            let showPlayer = false;
-            
-            if (selectedPrice === '') {
-                showPlayer = true;
-            } else if (selectedPrice === '0-100') {
-                showPlayer = basePrice >= 0 && basePrice <= 100;
-            } else if (selectedPrice === '101-200') {
-                showPlayer = basePrice >= 101 && basePrice <= 200;
-            } else if (selectedPrice === '201-500') {
-                showPlayer = basePrice >= 201 && basePrice <= 500;
-            } else if (selectedPrice === '500+') {
-                showPlayer = basePrice > 500;
-            }
-            
-            if (showPlayer) {
-                $(this).removeClass('hidden');
-                visibleCount++;
-            } else {
-                $(this).addClass('hidden');
-            }
-        });
-        
-        // Update visible players count
-        $('#visiblePlayersCount').text(visibleCount + ' on this page');
-    });
+    }
     
     $('.startAuction').click(function(){
         $(".availPlayers").addClass('hidden');

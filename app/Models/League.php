@@ -358,4 +358,53 @@ class League extends Model
     {
         return $this->getTeamsCount() * $this->max_team_players;
     }
+
+    /**
+     * Get league teams with their auctioneers.
+     */
+    public function leagueTeamsWithAuctioneers()
+    {
+        return $this->leagueTeams()->with(['team', 'auctioneer']);
+    }
+
+    /**
+     * Get teams that don't have auctioneers assigned.
+     */
+    public function getTeamsWithoutAuctioneers()
+    {
+        return $this->leagueTeams()->whereNull('auctioneer_id')->with('team');
+    }
+
+    /**
+     * Get teams that have auctioneers assigned.
+     */
+    public function getTeamsWithAuctioneers()
+    {
+        return $this->leagueTeams()->whereNotNull('auctioneer_id')->with(['team', 'auctioneer']);
+    }
+
+    /**
+     * Check if all teams have auctioneers assigned.
+     */
+    public function allTeamsHaveAuctioneers()
+    {
+        return $this->leagueTeams()->whereNull('auctioneer_id')->count() === 0;
+    }
+
+    /**
+     * Get available users who can be assigned as auctioneers for this league.
+     * Excludes users who are already auctioneers for other teams in this league.
+     */
+    public function getAvailableAuctioneers()
+    {
+        $assignedAuctioneerIds = $this->leagueTeams()
+            ->whereNotNull('auctioneer_id')
+            ->pluck('auctioneer_id')
+            ->toArray();
+
+        return User::whereNotIn('id', $assignedAuctioneerIds)
+            ->where('id', '!=', 1) // Exclude admin user
+            ->orderBy('name')
+            ->get();
+    }
 }
