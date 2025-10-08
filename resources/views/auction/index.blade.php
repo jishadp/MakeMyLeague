@@ -103,7 +103,7 @@
 
         <!-- Available Players Section -->
         @if(auth()->user()->isOrganizer())
-        <div class="mb-8" id="availablePlayersSection">
+        <div class="mb-8 {{ isset($currentPlayer) && $currentPlayer && $currentPlayer->status === 'auctioning' ? 'hidden' : '' }}" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>
         @endif

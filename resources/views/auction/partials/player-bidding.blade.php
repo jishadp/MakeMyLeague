@@ -1,5 +1,5 @@
 <!-- Player Bidding Section - Laravel Blade Partial -->
-<div class="bidMain w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 lg:py-8 hidden">
+<div class="bidMain w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 lg:py-8 {{ isset($currentPlayer) && $currentPlayer ? '' : 'hidden' }}">
 
     <!-- Header Card -->
     {{-- <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">
@@ -70,9 +70,9 @@
                 <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8">
                     <div class="relative flex-shrink-0">
                         <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
-                            @if(isset($player) && $player->photo)
-                                <img src="{{ asset($player->photo) }}"
-                                     alt="Player"
+                            @if(isset($currentPlayer) && $currentPlayer->player && $currentPlayer->player->photo)
+                                <img src="{{ asset($currentPlayer->player->photo) }}"
+                                     alt="{{ $currentPlayer->player->name }}"
                                      class="w-full h-full object-cover rounded-3xl"
                                      onerror="handleImageError(this);">
                             @else
@@ -93,11 +93,29 @@
                         </div>
                     </div>
                     <div class="text-center sm:text-left flex-grow">
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">Virat Kohli</h2>
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
+                            @if(isset($currentPlayer) && $currentPlayer->player)
+                                {{ $currentPlayer->player->name }}
+                            @else
+                                Select a Player
+                            @endif
+                        </h2>
                         <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
-                            <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position"></span>
+                            <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
+                                @if(isset($currentPlayer) && $currentPlayer->player && $currentPlayer->player->position)
+                                    {{ $currentPlayer->player->position->name }}
+                                @else
+                                    Position
+                                @endif
+                            </span>
                             <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
-                                Base Price ₹<span class="basePrice"></span>
+                                Base Price ₹<span class="basePrice">
+                                    @if(isset($currentPlayer))
+                                        {{ $currentPlayer->base_price ?? 0 }}
+                                    @else
+                                        0
+                                    @endif
+                                </span>
                             </span>
                         </div>
                     </div>
@@ -107,9 +125,33 @@
                 <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg mb-6">
                     <!-- Current Bid (Main Highlight) -->
                     <div class="text-center mb-4">
-                        <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2 bidStatus"></p>
-                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹ <span class="currentBid"></span></p>
-                        <p class="text-gray-600 text-sm font-medium bidTeam"></p>
+                        <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2 bidStatus">
+                            @if(isset($currentHighestBid) && $currentHighestBid)
+                                Current Bid
+                            @elseif(isset($currentPlayer))
+                                Base Price
+                            @else
+                                Select a Player
+                            @endif
+                        </p>
+                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹ <span class="currentBid">
+                            @if(isset($currentHighestBid) && $currentHighestBid)
+                                {{ $currentHighestBid->amount }}
+                            @elseif(isset($currentPlayer))
+                                {{ $currentPlayer->base_price ?? 0 }}
+                            @else
+                                0
+                            @endif
+                        </span></p>
+                        <p class="text-gray-600 text-sm font-medium bidTeam">
+                            @if(isset($currentHighestBid) && $currentHighestBid && $currentHighestBid->leagueTeam && $currentHighestBid->leagueTeam->team)
+                                {{ $currentHighestBid->leagueTeam->team->name }}
+                            @elseif(isset($currentPlayer))
+                                Awaiting new bids..
+                            @else
+                                No player selected
+                            @endif
+                        </p>
                     </div>
 
                     <!-- Bottom Stats Row -->
@@ -131,13 +173,28 @@
                 <!-- 3. Quick Bid Row -->
                 <div class="mb-6">
                     <div class="grid grid-cols-3 gap-3 sm:gap-6" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-gray-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="25">
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-gray-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
+                             increment="25" 
+                             league-id="{{ $league->id ?? '' }}"
+                             player-id="{{ $currentPlayer->player->id ?? '' }}"
+                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
+                             league-player-id="{{ $currentPlayer->id ?? '' }}">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-gray-800">+ ₹25</p>
                         </div>
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="50">
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
+                             increment="50"
+                             league-id="{{ $league->id ?? '' }}"
+                             player-id="{{ $currentPlayer->player->id ?? '' }}"
+                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
+                             league-player-id="{{ $currentPlayer->id ?? '' }}">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">+ ₹50</p>
                         </div>
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" increment="100">
+                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
+                             increment="100"
+                             league-id="{{ $league->id ?? '' }}"
+                             player-id="{{ $currentPlayer->player->id ?? '' }}"
+                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
+                             league-player-id="{{ $currentPlayer->id ?? '' }}">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">+ ₹100</p>
                         </div>
                     </div>
@@ -145,12 +202,14 @@
 
                 <!-- 4. Admin Controls Row -->
                 @if(auth()->user()->isOrganizer())
-                <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}" token="{{ csrf_token()}}">
+                <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}" mark-unsold-action="{{ route('auction.unsold')}}" token="{{ csrf_token()}}">
                     <div class="grid grid-cols-2 gap-3 sm:gap-6">
-                        <div class="markSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
+                        <div class="markSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"
+                             league-player-id="{{ $currentPlayer->id ?? '' }}">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">SOLD</p>
                         </div>
-                        <div class="markUnSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300">
+                        <div class="markUnSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"
+                             league-player-id="{{ $currentPlayer->id ?? '' }}">
                             <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">UNSOLD</p>
                         </div>
                     </div>

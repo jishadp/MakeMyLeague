@@ -112,7 +112,7 @@ class LeaguePlayer extends Model
             'league_team_id' => 'nullable|exists:league_teams,id',
             'user_id' => 'required|exists:users,id',
             'retention' => 'boolean',
-            'status' => 'required|in:pending,available,sold,unsold,skip',
+            'status' => 'required|in:pending,available,auctioning,sold,unsold,skip',
             'base_price' => 'numeric|min:0',
             'bid_price' => 'nullable|numeric|min:0',
         ];
@@ -204,6 +204,14 @@ class LeaguePlayer extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+    
+    /**
+     * Scope to get players currently being auctioned.
+     */
+    public function scopeAuctioning($query)
+    {
+        return $query->where('status', 'auctioning');
     }
     
     /**

@@ -255,6 +255,7 @@ $(document).ready(function(){
     
     $('.startAuction').click(function(){
         $(".availPlayers").addClass('hidden');
+        $("#availablePlayersSection").addClass('hidden');
         $(".bidMain").removeClass('hidden');
         
         // Better mobile scroll handling
@@ -330,6 +331,7 @@ $(document).ready(function(){
 
         $(".bidMain").addClass('hidden');
         $(".availPlayers").removeClass('hidden');
+        $("#availablePlayersSection").removeClass('hidden');
         $.ajax({
             url: markSoldAction,   // Laravel route
             type: "post",
@@ -339,13 +341,39 @@ $(document).ready(function(){
                 team_id: callTeamId,
             },
             success: function (response) {
-                console.log("Bidding started and broadcasted:", response);
-
+                console.log("Player marked as sold:", response);
+                showMessage('Player marked as sold successfully!', 'success');
+            },
+            error: function (xhr) {
+                console.error("Error marking player as sold:", xhr.responseText);
+                showMessage('Error marking player as sold', 'error');
             }
         });
     });
     $('.markUnSold').click(function(){
+        var token = $(this).closest('.mb-6').attr('token');
+        var markUnSoldAction = $(this).closest('.mb-6').attr('mark-unsold-action');
+        var leaguePlayerId = $(this).attr('league-player-id');
+
         $(".bidMain").addClass('hidden');
         $(".availPlayers").removeClass('hidden');
+        $("#availablePlayersSection").removeClass('hidden');
+        
+        $.ajax({
+            url: markUnSoldAction,
+            type: "post",
+            headers: {'X-CSRF-TOKEN': token},
+            data: {
+                league_player_id: leaguePlayerId,
+            },
+            success: function (response) {
+                console.log("Player marked as unsold:", response);
+                showMessage('Player marked as unsold successfully!', 'success');
+            },
+            error: function (xhr) {
+                console.error("Error marking player as unsold:", xhr.responseText);
+                showMessage('Error marking player as unsold', 'error');
+            }
+        });
     });
 });

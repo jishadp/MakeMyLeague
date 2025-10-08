@@ -16,9 +16,19 @@ class Teams extends Component
         $this->leagueId = $leagueId;
     }
 
+    public function refreshTeams()
+    {
+        $this->render();
+    }
+    
+    protected $listeners = ['refreshTeams' => 'refreshTeams'];
+
     public function render()
     {
-        $this->teams = LeagueTeam::withCount('players')->get();
+        $this->teams = LeagueTeam::where('league_id', $this->leagueId)
+            ->with(['team', 'leaguePlayers'])
+            ->withCount('leaguePlayers')
+            ->get();
         return view('livewire.teams');
     }
 }

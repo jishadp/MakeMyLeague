@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Events\AuctionPlayerBidCall;
 use App\Events\LeagueAuctionStarted;
 use App\Events\LeaguePlayerAuctionStarted;
+use App\Events\PlayerSold;
+use App\Events\PlayerUnsold;
 use App\Models\Auction;
 use App\Models\League;
 use App\Models\LeaguePlayer;
@@ -24,7 +26,31 @@ class AuctionController extends Controller
         $leaguePlayers = LeaguePlayer::where('league_id',$league->id)
             ->with(['player.position'])
             ->get();
-        return view('auction.index',compact('leaguePlayers','league'));
+            
+        // Get the currently auctioning player first, then available player
+        $currentPlayer = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'auctioning')
+            ->with(['player.position'])
+            ->first();
+            
+        // If no player is currently being auctioned, get the first available player
+        if (!$currentPlayer) {
+            $currentPlayer = LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'available')
+                ->with(['player.position'])
+                ->first();
+        }
+            
+        // Get the current highest bid for the current player if exists
+        $currentHighestBid = null;
+        if ($currentPlayer) {
+            $currentHighestBid = Auction::where('league_player_id', $currentPlayer->id)
+                ->with(['leagueTeam.team'])
+                ->latest('created_at')
+                ->first();
+        }
+            
+        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid'));
     }
 
     /**
@@ -32,6 +58,12 @@ class AuctionController extends Controller
      */
     public function start(Request $request)
     {
+        // Set the player status to 'auctioning' to prevent other players from being selected
+        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        if ($leaguePlayer) {
+            $leaguePlayer->update(['status' => 'auctioning']);
+        }
+        
         LeaguePlayerAuctionStarted::dispatch($request->all());
         $league = League::find($request->league_id);
         $league->update([
@@ -60,7 +92,7 @@ class AuctionController extends Controller
         
         $players = LeaguePlayer::with(['player.position'])
             ->where('league_id', $leagueId)
-            ->where('status', 'available')
+            ->whereIn('status', ['available', 'auctioning']) // Include auctioning players for search
             ->where(function ($q) use ($query) {
                 $q->whereHas('player', function ($subQ) use ($query) {
                     $subQ->where('name', 'LIKE', "%{$query}%")
@@ -95,8 +127,17 @@ class AuctionController extends Controller
      */
     public function call(Request $request)
     {
-        $newBid =  $request->base_price + $request->increment;
+        $newBid = $request->base_price + $request->increment;
         $user = auth()->user();
+        
+        // Validate that the player is currently being auctioned
+        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        if (!$leaguePlayer || $leaguePlayer->status !== 'auctioning') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This player is not currently being auctioned.'
+            ], 400);
+        }
         
         // Find the league team where the current user is the assigned auctioneer
         $bidTeam = LeagueTeam::where('league_id', $request->league_id)
@@ -130,35 +171,123 @@ class AuctionController extends Controller
             ], 403);
         }
 
-        $bidTeam->decrement('wallet_balance', $newBid);
-        
-        if(Auction::where('league_player_id', $request->league_player_id)->count() != 0){
-            info($request->league_player_id);
-            $previousBid = Auction::where('league_player_id', $request->league_player_id)->latest('id')->first();
-            LeagueTeam::find($previousBid->league_team_id)->increment('wallet_balance', $previousBid->amount);
+        // Check if team has sufficient balance
+        if ($bidTeam->wallet_balance < $newBid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient team balance. Available: ₹' . $bidTeam->wallet_balance . ', Required: ₹' . $newBid
+            ], 400);
         }
 
-        AuctionPlayerBidCall::dispatch($newBid, $bidTeam->id);
+        // Use database transaction for atomic operations
+        DB::transaction(function () use ($newBid, $bidTeam, $request) {
+            // Refund previous bid if exists
+            $previousBid = Auction::where('league_player_id', $request->league_player_id)
+                ->latest('id')
+                ->first();
+                
+            if ($previousBid) {
+                // Refund the previous bidder
+                LeagueTeam::find($previousBid->league_team_id)
+                    ->increment('wallet_balance', $previousBid->amount);
+            }
 
-        Auction::create([
-            'league_player_id'  => $request->league_player_id,
-            'league_team_id'  => $bidTeam->id,
-            'amount'    => $newBid
-        ]);
+            // Deduct new bid from current team
+            $bidTeam->decrement('wallet_balance', $newBid);
+
+            // Create new auction record
+            Auction::create([
+                'league_player_id' => $request->league_player_id,
+                'league_team_id' => $bidTeam->id,
+                'amount' => $newBid,
+                'status' => 'ask' // Current bid status
+            ]);
+        });
+
+        // Broadcast the new bid
+        AuctionPlayerBidCall::dispatch($newBid, $bidTeam->id);
 
         return response()->json([
             'success' => true,
-            'call_team_id'  => $bidTeam->id,
+            'call_team_id' => $bidTeam->id,
+            'new_bid' => $newBid,
+            'team_balance' => $bidTeam->fresh()->wallet_balance,
             'message' => 'Auction bid call success',
             'auction_status' => 'active'
         ]);
     }
 
-    public function sold(Request $request){
-        info($request->all());
-        LeaguePlayer::where('id',$request->league_player_id)->update([
-            'league_team_id'    => $request->team_id,
-            'status'    => 'sold'
+    public function sold(Request $request)
+    {
+        $leaguePlayerId = $request->league_player_id;
+        $teamId = $request->team_id;
+        
+        // Use database transaction for atomic operations
+        DB::transaction(function () use ($leaguePlayerId, $teamId) {
+            // Mark the winning bid as 'won'
+            $winningBid = Auction::where('league_player_id', $leaguePlayerId)
+                ->where('league_team_id', $teamId)
+                ->latest('id')
+                ->first();
+                
+            if ($winningBid) {
+                $winningBid->update(['status' => 'won']);
+            }
+            
+            // Mark all other bids for this player as 'lost'
+            Auction::where('league_player_id', $leaguePlayerId)
+                ->where('id', '!=', $winningBid ? $winningBid->id : 0)
+                ->update(['status' => 'lost']);
+            
+            // Update the league player status to 'sold' and assign to team
+            LeaguePlayer::where('id', $leaguePlayerId)->update([
+                'league_team_id' => $teamId,
+                'status' => 'sold',
+                'bid_price' => $winningBid ? $winningBid->amount : 0
+            ]);
+        });
+
+        // Broadcast the player sold event
+        PlayerSold::dispatch($leaguePlayerId, $teamId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Player marked as sold successfully!'
+        ]);
+    }
+    
+    public function unsold(Request $request)
+    {
+        $leaguePlayerId = $request->league_player_id;
+        
+        // Use database transaction for atomic operations
+        DB::transaction(function () use ($leaguePlayerId) {
+            // Refund all bids for this player
+            $bids = Auction::where('league_player_id', $leaguePlayerId)->get();
+            
+            foreach ($bids as $bid) {
+                // Refund the bid amount to the team
+                LeagueTeam::find($bid->league_team_id)
+                    ->increment('wallet_balance', $bid->amount);
+                    
+                // Mark bid as refunded
+                $bid->update(['status' => 'refunded']);
+            }
+            
+            // Update the league player status to 'unsold'
+            LeaguePlayer::where('id', $leaguePlayerId)->update([
+                'status' => 'unsold',
+                'league_team_id' => null,
+                'bid_price' => null
+            ]);
+        });
+
+        // Broadcast the player unsold event
+        PlayerUnsold::dispatch($leaguePlayerId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Player marked as unsold successfully!'
         ]);
     }
 }

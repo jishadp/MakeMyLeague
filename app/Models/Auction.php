@@ -35,7 +35,7 @@ class Auction extends Model
             'league_player_id' => 'required|exists:league_players,id',
             'league_team_id' => 'required|exists:league_teams,id',
             'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:won,ask',
+            'status' => 'required|in:won,ask,lost,refunded',
         ];
     }
 

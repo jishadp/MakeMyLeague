@@ -42,10 +42,15 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get live auctions (leagues with active status and auction_active = true)
+        // Get live auctions (leagues with active status and auction_active = true, or active leagues with available players)
         $liveAuctions = League::with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
             ->where('status', 'active')
-            ->where('auction_active', true)
+            ->where(function($query) {
+                $query->where('auction_active', true)
+                      ->orWhereHas('leaguePlayers', function($subQuery) {
+                          $subQuery->where('status', 'available');
+                      });
+            })
             ->get();
 
         // Get past auctions (completed auction bids with relationships)
@@ -81,8 +86,23 @@ class DashboardController
     {
         $league->load(['game', 'leagueTeams.team', 'leaguePlayers.user']);
         
+        // Get the current player being auctioned (first available player)
+        $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->with(['player.position'])
+            ->first();
+            
+        // Get current highest bid for the current player if exists
+        $currentHighestBid = null;
+        if ($currentPlayer) {
+            $currentHighestBid = \App\Models\Auction::where('league_player_id', $currentPlayer->id)
+                ->with(['leagueTeam.team'])
+                ->latest('created_at')
+                ->first();
+        }
+        
         // Get current highest bids for each player
-        $currentBids = Auction::with(['leagueTeam.team', 'leaguePlayer.user'])
+        $currentBids = \App\Models\Auction::with(['leagueTeam.team', 'leaguePlayer.user'])
             ->whereHas('leaguePlayer', function($query) use ($league) {
                 $query->where('league_id', $league->id);
             })
@@ -90,6 +110,6 @@ class DashboardController
             ->get()
             ->groupBy('league_player_id');
 
-        return view('auction.live', compact('league', 'currentBids'));
+        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid'));
     }
 }
