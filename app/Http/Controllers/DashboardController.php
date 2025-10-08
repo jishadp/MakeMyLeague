@@ -42,8 +42,14 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get all completed auction bids with relationships
-        $auctions = Auction::with([
+        // Get live auctions (leagues with active status and auction_active = true)
+        $liveAuctions = League::with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
+            ->where('status', 'active')
+            ->where('auction_active', true)
+            ->get();
+
+        // Get past auctions (completed auction bids with relationships)
+        $pastAuctions = Auction::with([
             'leaguePlayer.user',
             'leagueTeam.team',
             'leagueTeam.league'
@@ -52,12 +58,38 @@ class DashboardController
         ->latest()
         ->paginate(10);
 
+        // Get upcoming auctions (leagues that are pending and have auction_active = false)
+        $upcomingAuctions = League::with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
+            ->where('status', 'pending')
+            ->where('auction_active', false)
+            ->latest()
+            ->get();
+
         // Get leagues for filter dropdown
         $leagues = League::all();
 
         // Get teams for filter dropdown
         $teams = LeagueTeam::with('team')->get();
 
-        return view('dashboard.auctions.index', compact('auctions', 'leagues', 'teams'));
+        return view('dashboard.auctions.index', compact('liveAuctions', 'pastAuctions', 'upcomingAuctions', 'leagues', 'teams'));
+    }
+
+    /**
+     * Display the public live auction view.
+     */
+    public function liveAuction(League $league)
+    {
+        $league->load(['game', 'leagueTeams.team', 'leaguePlayers.user']);
+        
+        // Get current highest bids for each player
+        $currentBids = Auction::with(['leagueTeam.team', 'leaguePlayer.user'])
+            ->whereHas('leaguePlayer', function($query) use ($league) {
+                $query->where('league_id', $league->id);
+            })
+            ->latest()
+            ->get()
+            ->groupBy('league_player_id');
+
+        return view('auction.live', compact('league', 'currentBids'));
     }
 }

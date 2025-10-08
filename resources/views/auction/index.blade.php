@@ -16,6 +16,15 @@
                     <div>
                         <h1 class="text-2xl font-bold glacier-text-primary">Cricket League Auction</h1>
                     </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ route('auctions.live', $league) }}" 
+                           class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            Public Live View
+                        </a>
+                    </div>
                 </div>
             </div>
 

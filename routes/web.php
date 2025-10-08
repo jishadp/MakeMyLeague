@@ -83,6 +83,9 @@ Route::post('leagues/{league}/players/register', [PlayerController::class, 'regi
 Route::get('join-league/{league}', [LeagueController::class, 'showJoinLink'])->name('leagues.join-link');
 Route::post('join-league/{league}', [LeagueController::class, 'processJoinLink'])->name('leagues.process-join');
 
+// Public live auction route (no auth required)
+Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
+
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');
     Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index');
