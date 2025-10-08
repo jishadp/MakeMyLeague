@@ -39,7 +39,7 @@ class TeamTransferController extends Controller
         $newOwner = User::findOrFail($request->new_owner_id);
 
         // Check if the new owner already owns too many teams (optional limit)
-        $newOwnerTeamCount = Team::where('owner_id', $newOwner->id)->count();
+        $newOwnerTeamCount = $newOwner->primaryOwnedTeams()->count();
         if ($newOwnerTeamCount >= 10) { // Set a reasonable limit
             return response()->json([
                 'success' => false,
@@ -50,14 +50,12 @@ class TeamTransferController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update team ownership
+            // Update team ownership in both old and new systems for backward compatibility
             $team->update(['owner_id' => $newOwner->id]);
 
-            // Update team_owners pivot table if it exists
-            if ($team->owners()->wherePivot('role', 'owner')->exists()) {
-                $team->owners()->wherePivot('role', 'owner')->detach();
-                $team->owners()->attach($newOwner->id, ['role' => 'owner']);
-            }
+            // Update team_owners pivot table - remove old owner and add new owner
+            $team->owners()->wherePivot('role', 'owner')->detach();
+            $team->owners()->attach($newOwner->id, ['role' => 'owner']);
 
             // TODO: Send notification to the new owner
             // $this->sendTeamTransferNotification($newOwner, $team, Auth::user());
@@ -112,7 +110,7 @@ class TeamTransferController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->mobile ? ($user->country_code . ' ' . $user->mobile) : null,
-                    'team_count' => Team::where('owner_id', $user->id)->count()
+                    'team_count' => $user->primaryOwnedTeams()->count()
                 ];
             })
         ]);
@@ -125,8 +123,8 @@ class TeamTransferController extends Controller
     {
         $user = Auth::user();
         
-        // Check if user is the primary owner
-        if ($team->owner_id === $user->id) {
+        // Check if user is the primary owner using the new relationship
+        if ($user->isOwnerOfTeam($team->id)) {
             return true;
         }
 

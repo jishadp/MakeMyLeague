@@ -11,10 +11,8 @@ class MyTeamsController extends Controller
     {
         $user = Auth::user();
         
-        // Get teams owned by user
-        $ownedTeams = $user->isTeamOwner() ? 
-            \App\Models\Team::where('owner_id', $user->id)->with(['homeGround', 'localBody'])->get() : 
-            collect();
+        // Get teams owned by user using the new team_owners relationship
+        $ownedTeams = $user->primaryOwnedTeams()->with(['homeGround', 'localBody', 'leagueTeams'])->get();
         
         // Get teams where user is a player (sold/available)
         $playerTeams = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])

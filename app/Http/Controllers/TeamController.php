@@ -166,7 +166,7 @@ class TeamController extends Controller
     public function edit(Team $team)
     {
         // Only allow the team owner or admin to edit
-        if (Auth::id() !== $team->owner_id && !Auth::user()->isOrganizer()) {
+        if (!Auth::user()->isOwnerOfTeam($team->id) && !Auth::user()->isOrganizer()) {
             return redirect()->route('teams.show', $team)
                 ->with('error', 'You do not have permission to edit this team.');
         }
@@ -182,7 +182,7 @@ class TeamController extends Controller
     public function update(Request $request, Team $team)
     {
         // Only allow the team owner or admin to update
-        if (Auth::id() !== $team->owner_id && !Auth::user()->isOrganizer()) {
+        if (!Auth::user()->isOwnerOfTeam($team->id) && !Auth::user()->isOrganizer()) {
             return redirect()->route('teams.show', $team)
                 ->with('error', 'You do not have permission to update this team.');
         }
@@ -216,7 +216,7 @@ class TeamController extends Controller
     public function destroy(Team $team)
     {
         // Only allow the team owner or admin to delete
-        if (Auth::id() !== $team->owner_id && !Auth::user()->isOrganizer()) {
+        if (!Auth::user()->isOwnerOfTeam($team->id) && !Auth::user()->isOrganizer()) {
             return redirect()->route('teams.show', $team)
                 ->with('error', 'You do not have permission to delete this team.');
         }

@@ -23,7 +23,9 @@ class MyLeaguesController extends Controller
         // Get leagues where user owns a team
         $teamOwnerLeagues = $user->isTeamOwner() ? 
             \App\Models\League::whereHas('leagueTeams.team', function($query) use ($user) {
-                $query->where('owner_id', $user->id);
+                $query->whereHas('owners', function($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('role', 'owner');
+                });
             })->with(['game', 'leagueTeams.team', 'leagueTeams.auctioneer'])->get() : 
             collect();
         
