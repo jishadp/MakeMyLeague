@@ -159,7 +159,9 @@ class AuctionController extends Controller
                 // Fall back to team owner (backward compatibility for single team)
                 $bidTeam = LeagueTeam::where('league_id', $request->league_id)
                     ->whereHas('team', function($query) use ($user) {
-                        $query->where('owner_id', $user->id);
+                        $query->whereHas('owners', function($q) use ($user) {
+                            $q->where('user_id', $user->id)->where('role', 'owner');
+                        });
                     })->first();
             }
         }
