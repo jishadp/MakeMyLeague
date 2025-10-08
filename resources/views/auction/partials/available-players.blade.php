@@ -69,13 +69,17 @@
                                         <img src="{{ asset($leaguePlayer->player->photo) }}"
                                              alt="{{$leaguePlayer->player->name}}"
                                              class="w-full h-full object-cover"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                             onerror="handleImageError(this);">
                                     @else
                                         <img src="{{ asset('images/defaultplayer.jpeg') }}"
                                              alt="{{$leaguePlayer->player->name}}"
                                              class="w-full h-full object-cover"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                             onerror="handleImageError(this);">
                                     @endif
+                                    <!-- Fallback avatar when image fails -->
+                                    <div class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg hidden">
+                                        {{ substr($leaguePlayer->player->name, 0, 1) }}
+                                    </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-semibold text-gray-900 text-lg truncate">{{$leaguePlayer->player->name}}</h3>

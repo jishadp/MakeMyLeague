@@ -100,10 +100,8 @@
         @endif
 
         <!-- Player Bidding Section -->
-        <div class="flex justify-center mb-8" id="biddingSection">
-            <div class="w-full max-w-2xl">
-                @include('auction.partials.player-bidding')
-            </div>
+        <div class="flex justify-center mb-8 px-4 sm:px-0" id="biddingSection">
+            @include('auction.partials.player-bidding')
         </div>
 
         <!-- Recent and Highest Bids Table -->
@@ -128,7 +126,7 @@
   src="https://code.jquery.com/jquery-3.7.1.js"
   integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
   crossorigin="anonymous"></script>
-<script src="{{ asset('js/auction.js') }}?v=4"></script>
+<script src="{{ asset('js/auction.js') }}?v=8"></script>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script src="{{ asset('js/pusher-main.js') }}?v=1"></script>
 

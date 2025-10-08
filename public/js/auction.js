@@ -1,14 +1,88 @@
 // Minimal Auction JavaScript - Static Demo Version
+
+// Function to handle image loading errors
+function handleImageError(img) {
+    if (img && img.nextElementSibling) {
+        img.style.display = 'none';
+        img.nextElementSibling.style.display = 'flex';
+    }
+}
+
+// Function to show messages
+function showMessage(message, type = 'info') {
+    const messageContainer = document.getElementById('messageContainer');
+    if (!messageContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `p-4 rounded-lg shadow-lg mb-4 transform transition-all duration-300 translate-x-full`;
+    
+    // Set colors based on type
+    switch(type) {
+        case 'success':
+            messageDiv.className += ' bg-green-500 text-white';
+            break;
+        case 'error':
+            messageDiv.className += ' bg-red-500 text-white';
+            break;
+        case 'warning':
+            messageDiv.className += ' bg-yellow-500 text-white';
+            break;
+        default:
+            messageDiv.className += ' bg-blue-500 text-white';
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+    
+    messageContainer.appendChild(messageDiv);
+    
+    // Animate in
+    setTimeout(() => {
+        messageDiv.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        messageDiv.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (messageDiv.parentElement) {
+                messageDiv.remove();
+            }
+        }, 300);
+    }, 5000);
+}
+
 // Simple function to start bidding and show bidding section
 function startBidding(userId, leaguePlayerId, playerName, basePrice, position, leagueId, startBidAction) {
     // Update the bidding section with player information
     updateBiddingPlayer(playerName, position, basePrice);
     
     // Show the bidding section
-    const biddingSection = document.getElementById('biddingSection');
-    if (biddingSection) {
-        biddingSection.classList.remove('hidden');
-        biddingSection.scrollIntoView({ behavior: 'smooth' });
+    const bidMain = document.querySelector('.bidMain');
+    if (bidMain) {
+        bidMain.classList.remove('hidden');
+        
+        // Better mobile scroll handling
+        setTimeout(() => {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                // On mobile, scroll to show the top of the bidding section with more offset
+                const rect = bidMain.getBoundingClientRect();
+                const offsetTop = window.pageYOffset + rect.top - 60; // 60px offset from top to clear header
+                window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            } else {
+                // On desktop, use standard scrollIntoView
+                bidMain.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     }
     
     // Hide available players on mobile
@@ -182,8 +256,22 @@ $(document).ready(function(){
     $('.startAuction').click(function(){
         $(".availPlayers").addClass('hidden');
         $(".bidMain").removeClass('hidden');
-        var scrollPos =  $("#biddingSection").offset().top - 30;
-        $(window).scrollTop(scrollPos);
+        
+        // Better mobile scroll handling
+        setTimeout(() => {
+            const isMobile = window.innerWidth < 768;
+            var scrollPos = $("#biddingSection").offset().top;
+            
+            if (isMobile) {
+                // On mobile, use larger offset to clear header and smooth scrolling
+                scrollPos = scrollPos - 60;
+                $('html, body').animate({ scrollTop: scrollPos }, 300);
+            } else {
+                // On desktop, use original offset
+                scrollPos = scrollPos - 30;
+                $(window).scrollTop(scrollPos);
+            }
+        }, 100);
 
         var actionStartAction = $(this).attr('start-bid-action');
         var playerId = $(this).attr('player-id');

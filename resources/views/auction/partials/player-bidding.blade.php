@@ -1,5 +1,5 @@
 <!-- Player Bidding Section - Laravel Blade Partial -->
-<div class="bidMain w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 hidden">
+<div class="bidMain w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 lg:py-8 hidden">
 
     <!-- Header Card -->
     {{-- <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">
@@ -73,12 +73,18 @@
                             @if(isset($player) && $player->photo)
                                 <img src="{{ asset($player->photo) }}"
                                      alt="Player"
-                                     class="w-full h-full object-cover rounded-3xl">
+                                     class="w-full h-full object-cover rounded-3xl"
+                                     onerror="handleImageError(this);">
                             @else
                                 <img src="{{ asset('images/defaultplayer.jpeg') }}"
                                      alt="Player"
-                                     class="w-full h-full object-cover rounded-3xl">
+                                     class="w-full h-full object-cover rounded-3xl"
+                                     onerror="handleImageError(this);">
                             @endif
+                            <!-- Fallback avatar when image fails -->
+                            <div class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl hidden rounded-3xl">
+                                P
+                            </div>
                         </div>
                         <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
                             <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
