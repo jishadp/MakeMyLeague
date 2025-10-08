@@ -181,8 +181,13 @@ Route::middleware('auth')->group(function () {
         Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
     });
 
-    // Leagues resource routes
-    Route::resource('leagues', LeagueController::class)->middleware('league.organizer');
+    // Leagues resource routes - only restrict create, store, edit, update, destroy to organizers
+    Route::resource('leagues', LeagueController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::get('leagues/create', [LeagueController::class, 'create'])->name('leagues.create')->middleware('league.organizer');
+    Route::post('leagues', [LeagueController::class, 'store'])->name('leagues.store')->middleware('league.organizer');
+    Route::get('leagues/{league}/edit', [LeagueController::class, 'edit'])->name('leagues.edit')->middleware('league.organizer');
+    Route::put('leagues/{league}', [LeagueController::class, 'update'])->name('leagues.update')->middleware('league.organizer');
+    Route::delete('leagues/{league}', [LeagueController::class, 'destroy'])->name('leagues.destroy')->middleware('league.organizer');
     Route::get('leagues/player/broadcast', [LeagueController::class, 'playerBroadcast'])->name('leagues.player.broadcast');
     Route::post('leagues/{league}/set-default', [LeagueController::class, 'setDefault'])->name('leagues.setDefault')->middleware('league.organizer');
     Route::post('leagues/{league}/bid-increments', [LeagueController::class, 'updateBidIncrements'])->name('leagues.update-bid-increments')->middleware('league.organizer');
@@ -217,15 +222,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus')->middleware('league.organizer');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus')->middleware('league.organizer');
 
-    // Auction routes
-    Route::prefix('leagues/{league}/auction')->name('auction.')->middleware('league.organizer')->group(function () {
-        Route::get('/', [AuctionController::class, 'index'])->name('index');
-        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid');
-        Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid');
-        Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete');
-        Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset');
-        Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player');
-        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids');
+    // Auction routes - allow team owners to view and participate, but restrict management to organizers
+    Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
+        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('league.participant');
+        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('league.participant');
+        Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('league.organizer');
+        Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('league.organizer');
+        Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('league.organizer');
+        Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('league.organizer');
+        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('league.participant');
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {
