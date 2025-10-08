@@ -230,7 +230,7 @@ class AuctioneerController extends Controller
         $user = Auth::user();
         
         // Check if user is the team owner (primary owner)
-        if ($leagueTeam->team->owner_id === $user->id) {
+        if ($user->isOwnerOfTeam($leagueTeam->team_id)) {
             return true;
         }
 
@@ -261,10 +261,9 @@ class AuctioneerController extends Controller
 
         // Check if user owns any teams in this league
         $userTeams = $league->leagueTeams()->whereHas('team', function ($query) use ($user) {
-            $query->where('owner_id', $user->id)
-                  ->orWhereHas('owners', function ($q) use ($user) {
-                      $q->where('user_id', $user->id);
-                  });
+            $query->whereHas('owners', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
         })->exists();
 
         return $userTeams;
