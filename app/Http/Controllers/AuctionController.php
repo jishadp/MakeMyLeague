@@ -96,18 +96,31 @@ class AuctionController extends Controller
     public function call(Request $request)
     {
         $newBid =  $request->base_price + $request->increment;
+        $user = auth()->user();
         
         // Find the league team where the current user is the assigned auctioneer
         $bidTeam = LeagueTeam::where('league_id', $request->league_id)
-            ->where('auctioneer_id', auth()->user()->id)
+            ->where('auctioneer_id', $user->id)
             ->first();
 
-        // If no auctioneer is assigned, fall back to team owner (backward compatibility)
+        // If no auctioneer is assigned, use default team logic
         if (!$bidTeam) {
-            $bidTeam = LeagueTeam::where('league_id', $request->league_id)
-                ->whereHas('team', function($query) {
-                    $query->where('owner_id', auth()->user()->id);
-                })->first();
+            // Check if user has multiple teams in this league
+            if ($user->hasMultipleTeamsInLeague($request->league_id)) {
+                // Use default team for this league
+                $defaultTeam = $user->getDefaultTeamForLeague($request->league_id);
+                if ($defaultTeam) {
+                    $bidTeam = LeagueTeam::where('league_id', $request->league_id)
+                        ->where('team_id', $defaultTeam->id)
+                        ->first();
+                }
+            } else {
+                // Fall back to team owner (backward compatibility for single team)
+                $bidTeam = LeagueTeam::where('league_id', $request->league_id)
+                    ->whereHas('team', function($query) use ($user) {
+                        $query->where('owner_id', $user->id);
+                    })->first();
+            }
         }
 
         if (!$bidTeam) {

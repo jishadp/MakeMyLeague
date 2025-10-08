@@ -471,4 +471,68 @@ class User extends Authenticatable
     {
         return $this->notifications()->read();
     }
+
+    /**
+     * Get the default team for bidding.
+     */
+    public function defaultTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'default_team_id');
+    }
+
+    /**
+     * Set the default team for bidding.
+     *
+     * @param int|null $teamId
+     * @return bool
+     */
+    public function setDefaultTeam($teamId): bool
+    {
+        // Validate that the user owns this team
+        if ($teamId && !$this->hasOwnershipOfTeam($teamId)) {
+            return false;
+        }
+
+        $this->default_team_id = $teamId;
+        return $this->save();
+    }
+
+    /**
+     * Get the default team for a specific league (either default team or first owned team in league).
+     *
+     * @param int $leagueId
+     * @return Team|null
+     */
+    public function getDefaultTeamForLeague($leagueId): ?Team
+    {
+        // First, check if user has a default team that participates in this league
+        if ($this->default_team_id) {
+            $defaultTeam = $this->defaultTeam;
+            if ($defaultTeam && $defaultTeam->leagueTeams()->where('league_id', $leagueId)->exists()) {
+                return $defaultTeam;
+            }
+        }
+
+        // Fallback: get the first team owned by user that participates in this league
+        return $this->ownedTeams()
+            ->whereHas('leagueTeams', function($query) use ($leagueId) {
+                $query->where('league_id', $leagueId);
+            })
+            ->first();
+    }
+
+    /**
+     * Check if user has multiple teams in a specific league.
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function hasMultipleTeamsInLeague($leagueId): bool
+    {
+        return $this->ownedTeams()
+            ->whereHas('leagueTeams', function($query) use ($leagueId) {
+                $query->where('league_id', $leagueId);
+            })
+            ->count() > 1;
+    }
 }

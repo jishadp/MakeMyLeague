@@ -11,6 +11,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LeagueFinanceController;
 use App\Http\Controllers\OrganizerRequestController;
 use App\Http\Controllers\TeamTransferController;
+use App\Http\Controllers\DefaultTeamController;
 use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
 use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\GroundController as AdminGroundController;
@@ -125,6 +126,11 @@ Route::middleware('auth')->group(function () {
     
     // Team transfer search route
     Route::get('team-transfer/search', [TeamTransferController::class, 'searchUsers'])->name('team-transfer.search');
+
+    // Default team management routes
+    Route::post('default-team/set', [DefaultTeamController::class, 'setDefault'])->name('default-team.set');
+    Route::delete('default-team/remove', [DefaultTeamController::class, 'removeDefault'])->name('default-team.remove');
+    Route::get('default-team/owned-teams', [DefaultTeamController::class, 'getOwnedTeams'])->name('default-team.owned-teams');
 
 
 
