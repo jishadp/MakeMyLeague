@@ -6,6 +6,7 @@ use App\Models\League;
 use App\Models\LeagueTeam;
 use App\Models\Team;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class LeagueTeamController extends Controller
@@ -147,4 +148,89 @@ class LeagueTeamController extends Controller
 
         return back()->with('success', 'Wallet balance updated successfully!');
     }
+
+    /**
+     * Display the manage teams page for a league.
+     */
+    public function manageTeams(League $league): View
+    {
+        $user = Auth::user();
+        
+        // Check if user is an organizer for this league, admin, or team owner in this league
+        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin() && !$user->hasAnyOwnedTeamInLeague($league->id)) {
+            abort(403, 'You are not authorized to manage teams for this league.');
+        }
+
+        // If user is a team owner (not organizer/admin), only show their own teams
+        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
+            $leagueTeams = $league->leagueTeams()->whereHas('team', function($query) use ($user) {
+                $query->whereHas('owners', function($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('role', 'owner');
+                });
+            })->with([
+                'team',
+                'team.owners' => function($query) use ($user) {
+                    $query->where('role', 'owner');
+                },
+                'auctioneer',
+                'leaguePlayers' => function($query) {
+                    $query->with('player.position');
+                }
+            ])->get();
+            
+            // Group teams by team for better organization when user has multiple teams
+            $teamsByTeam = $leagueTeams->groupBy('team.id');
+        } else {
+            // Organizers and admins see all teams
+            $leagueTeams = $league->leagueTeams()->with([
+                'team',
+                'team.owners' => function($query) {
+                    $query->where('role', 'owner');
+                },
+                'auctioneer',
+                'leaguePlayers' => function($query) {
+                    $query->with('player.position');
+                }
+            ])->get();
+            
+            // Group teams by team for organizers/admins too
+            $teamsByTeam = $leagueTeams->groupBy('team.id');
+        }
+
+        // Get league retention player limit
+        $retentionLimit = $league->retention_players ?? 3; // Default to 3 if not set
+
+        // Get available players for adding as retention (all players registered in league except sold players, who are not retention yet)
+        $availableRetentionPlayers = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('status', '!=', 'sold')
+            ->where('retention', false)
+            ->with(['player.position', 'leagueTeam.team'])
+            ->get();
+
+
+
+        // Filter available players based on user permissions
+        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
+            // Team owners can only add retention players to their own teams
+            // Note: Available players might not have a league_team_id yet, so we allow them to be added to any team the user owns
+            $userTeamIds = $leagueTeams->pluck('id'); // Use league_team IDs instead of team IDs
+            $availableRetentionPlayers = $availableRetentionPlayers->filter(function($player) use ($userTeamIds) {
+                // Allow players without a team (league_team_id is null) or players from user's teams
+                return $player->league_team_id === null || $userTeamIds->contains($player->league_team_id);
+            });
+        }
+
+        // Calculate statistics
+        $totalTeams = $leagueTeams->count();
+        $totalSoldPlayers = $leagueTeams->sum(function($team) {
+            return $team->leaguePlayers->count();
+        });
+        $totalRetentionPlayers = $leagueTeams->sum(function($team) {
+            return $team->leaguePlayers->where('retention', true)->count();
+        });
+
+
+        return view('league-teams.manage', compact('league', 'leagueTeams', 'teamsByTeam', 'retentionLimit', 'totalTeams', 'totalSoldPlayers', 'totalRetentionPlayers', 'availableRetentionPlayers'));
+    }
 }
+

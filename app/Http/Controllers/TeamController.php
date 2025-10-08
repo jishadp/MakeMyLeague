@@ -206,6 +206,9 @@ class TeamController extends Controller
 
         $team->save();
 
+        // Ensure the user who updated the team has the Owner role
+        $this->assignOwnerRoleIfNeeded(Auth::user());
+
         return redirect()->route('teams.show', $team)
             ->with('success', 'Team updated successfully!');
     }
@@ -252,6 +255,9 @@ class TeamController extends Controller
             // Update team with logo path
             $team->update(['logo' => $path]);
             
+            // Ensure the user who uploaded the logo has the Owner role
+            $this->assignOwnerRoleIfNeeded(Auth::user());
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Logo uploaded successfully',
@@ -284,6 +290,9 @@ class TeamController extends Controller
             // Update team with banner path
             $team->update(['banner' => $path]);
             
+            // Ensure the user who uploaded the banner has the Owner role
+            $this->assignOwnerRoleIfNeeded(Auth::user());
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Banner uploaded successfully',
@@ -309,6 +318,9 @@ class TeamController extends Controller
             
             $team->update(['logo' => null]);
             
+            // Ensure the user who removed the logo has the Owner role
+            $this->assignOwnerRoleIfNeeded(Auth::user());
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Logo removed successfully'
@@ -333,6 +345,9 @@ class TeamController extends Controller
             
             $team->update(['banner' => null]);
             
+            // Ensure the user who removed the banner has the Owner role
+            $this->assignOwnerRoleIfNeeded(Auth::user());
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Banner removed successfully'
@@ -342,6 +357,27 @@ class TeamController extends Controller
                 'success' => false,
                 'message' => 'Failed to remove banner: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Assign Team Owner role to a user if they don't already have it.
+     */
+    private function assignOwnerRoleIfNeeded(User $user)
+    {
+        $ownerRole = Role::where('name', User::ROLE_OWNER)->first();
+        if ($ownerRole) {
+            // Check if user already has this role
+            $existingRole = UserRole::where('user_id', $user->id)
+                ->where('role_id', $ownerRole->id)
+                ->first();
+            
+            if (!$existingRole) {
+                UserRole::create([
+                    'user_id' => $user->id,
+                    'role_id' => $ownerRole->id,
+                ]);
+            }
         }
     }
 }

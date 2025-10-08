@@ -195,11 +195,13 @@ Route::middleware('auth')->group(function () {
     Route::post('leagues/{league}/upload-banner', [LeagueController::class, 'uploadBanner'])->name('leagues.upload-banner')->middleware('league.organizer');
     Route::delete('leagues/{league}/remove-logo', [LeagueController::class, 'removeLogo'])->name('leagues.remove-logo')->middleware('league.organizer');
     Route::delete('leagues/{league}/remove-banner', [LeagueController::class, 'removeBanner'])->name('leagues.remove-banner')->middleware('league.organizer');
+    Route::post('leagues/{league}/toggle-auction', [LeagueController::class, 'toggleAuctionStatus'])->name('leagues.toggle-auction')->middleware('league.organizer');
 
     // League Teams routes
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show'])->middleware('league.organizer');
     Route::get('leagues/{league}/teams', [LeagueTeamController::class, 'index'])->name('league-teams.index');
     Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create')->middleware('league.organizer');
+    Route::get('leagues/{league}/manage-teams', [LeagueTeamController::class, 'manageTeams'])->name('league-teams.manage')->middleware('league.participant');
     Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store')->middleware('league.organizer');
     Route::get('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'show'])->name('league-teams.show');
     Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit')->middleware('league.organizer');
@@ -221,16 +223,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy')->middleware('league.organizer');
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus')->middleware('league.organizer');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus')->middleware('league.organizer');
+    Route::post('leagues/{league}/players/{leaguePlayer}/toggle-retention', [LeaguePlayerController::class, 'toggleRetention'])->name('league-players.toggle-retention')->middleware('league.participant');
+    Route::post('leagues/{league}/players/add-retention', [LeaguePlayerController::class, 'addRetentionPlayer'])->name('league-players.add-retention')->middleware('league.participant');
 
-    // Auction routes - allow team owners to view and participate, but restrict management to organizers
+    // Auction routes - allow team owners only when auction is live, organizers can always access
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
-        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('league.participant');
-        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('league.participant');
+        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('auction.access');
+        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('auction.access');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('league.organizer');
         Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('league.organizer');
         Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('league.organizer');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('league.organizer');
-        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('league.participant');
+        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('auction.access');
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {

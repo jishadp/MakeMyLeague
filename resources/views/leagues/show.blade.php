@@ -1470,6 +1470,79 @@
     @if((Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin()))
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        <!-- Auction Toggle Section -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium text-indigo-800">Auction Control</h3>
+                        <p class="text-sm text-indigo-600 mt-1">
+                            @if($league->isAuctionActive())
+                                Auction is currently <span class="font-semibold text-green-600">LIVE</span> - Team owners can access and participate in bidding.
+                            @else
+                                Auction is currently <span class="font-semibold text-gray-600">STOPPED</span> - Team owners cannot access the auction.
+                            @endif
+                        </p>
+                        @if($league->auction_started_at)
+                            <p class="text-xs text-indigo-500 mt-1">
+                                Started: {{ $league->auction_started_at->format('M d, Y H:i') }}
+                                @if($league->auction_ended_at)
+                                    | Ended: {{ $league->auction_ended_at->format('M d, Y H:i') }}
+                                @endif
+                            </p>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <button id="toggleAuctionBtn" 
+                            onclick="toggleAuctionStatus()"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white transition-colors duration-200 {{ $league->isAuctionActive() ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500' }}">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            @if($league->isAuctionActive())
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-8V7a3 3 0 116 0v1M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            @endif
+                        </svg>
+                        {{ $league->isAuctionActive() ? 'Stop Auction' : 'Start Auction' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Manage Teams Section -->
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium text-purple-800">Manage Teams & Players</h3>
+                        <p class="text-sm text-purple-600 mt-1">
+                            View all teams, manage retention players, and track squad details after auction.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('league-teams.manage', $league) }}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        Manage Teams
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Complete Auction Section (only show if auction is active) -->
         @if($league->status === 'active')
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
@@ -2056,6 +2129,46 @@
             const body = `Hi! I'd like to invite you to join ${@json($league->name)} league. Click the link below to register and join:\n\n${joinLink}\n\nLooking forward to seeing you in the league!`;
             const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = emailUrl;
+        }
+
+        // Auction Toggle Function
+        function toggleAuctionStatus() {
+            const button = document.getElementById('toggleAuctionBtn');
+            const originalText = button.innerHTML;
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Toggling...';
+            
+            fetch(`{{ route('leagues.toggle-auction', $league) }}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Reload the page to update the UI
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showNotification(data.message || 'Failed to toggle auction status', 'error');
+                    // Restore button
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while toggling auction status', 'error');
+                // Restore button
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
         }
     </script>
 

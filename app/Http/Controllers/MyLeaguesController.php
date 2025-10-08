@@ -26,7 +26,18 @@ class MyLeaguesController extends Controller
                 $query->whereHas('owners', function($q) use ($user) {
                     $q->where('user_id', $user->id)->where('role', 'owner');
                 });
-            })->with(['game', 'leagueTeams.team', 'leagueTeams.auctioneer'])->get() : 
+            })->with([
+                'game', 
+                'leagueTeams' => function($query) use ($user) {
+                    $query->whereHas('team', function($q) use ($user) {
+                        $q->whereHas('owners', function($ownerQuery) use ($user) {
+                            $ownerQuery->where('user_id', $user->id)->where('role', 'owner');
+                        });
+                    });
+                },
+                'leagueTeams.team', 
+                'leagueTeams.auctioneer'
+            ])->get() : 
             collect();
         
         return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues'));

@@ -535,4 +535,19 @@ class User extends Authenticatable
             })
             ->count() > 1;
     }
+
+    /**
+     * Check if user owns any team in a specific league.
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function hasAnyOwnedTeamInLeague($leagueId): bool
+    {
+        return $this->ownedTeams()
+            ->whereHas('leagueTeams', function($query) use ($leagueId) {
+                $query->where('league_id', $leagueId);
+            })
+            ->exists();
+    }
 }

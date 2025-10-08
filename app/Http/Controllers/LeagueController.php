@@ -180,6 +180,48 @@ class LeagueController
     }
 
     /**
+     * Toggle auction live status (organizer only).
+     */
+    public function toggleAuctionStatus(League $league): JsonResponse
+    {
+        // Check if user is an organizer for this league or is an admin
+        if (!Auth::user()->isOrganizerForLeague($league->id) && !Auth::user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to toggle auction status.'
+            ], 403);
+        }
+
+        try {
+            $newStatus = !$league->auction_active;
+            $league->update(['auction_active' => $newStatus]);
+
+            // If starting auction, set the start time
+            if ($newStatus && !$league->auction_started_at) {
+                $league->update(['auction_started_at' => now()]);
+            }
+
+            // If stopping auction, set the end time
+            if (!$newStatus && $league->auction_started_at && !$league->auction_ended_at) {
+                $league->update(['auction_ended_at' => now()]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $newStatus ? 'Auction started successfully!' : 'Auction stopped successfully!',
+                'auction_active' => $newStatus,
+                'auction_status' => $newStatus ? 'live' : 'stopped'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to toggle auction status. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified league from storage.
      */
     public function destroy(League $league): RedirectResponse

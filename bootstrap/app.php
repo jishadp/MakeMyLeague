@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'league.organizer' => \App\Http\Middleware\CheckLeagueOrganizer::class,
             'league.participant' => \App\Http\Middleware\CheckLeagueParticipant::class,
+            'auction.access' => \App\Http\Middleware\CheckAuctionAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

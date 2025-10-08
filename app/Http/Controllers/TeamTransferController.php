@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Models\UserRole;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +58,12 @@ class TeamTransferController extends Controller
             // Update team_owners pivot table - remove old owner and add new owner
             $team->owners()->wherePivot('role', 'owner')->detach();
             $team->owners()->attach($newOwner->id, ['role' => 'owner']);
+
+            // Assign Team Owner role to the new owner
+            $this->assignOwnerRole($newOwner);
+
+            // Remove Team Owner role from the old owner if they don't own any other teams
+            $this->removeOwnerRoleIfNeeded(Auth::user());
 
             // TODO: Send notification to the new owner
             // $this->sendTeamTransferNotification($newOwner, $team, Auth::user());
@@ -153,5 +161,45 @@ class TeamTransferController extends Controller
                 'previous_owner_name' => $previousOwner->name,
             ]
         ]);
+    }
+
+    /**
+     * Assign Team Owner role to a user.
+     */
+    private function assignOwnerRole(User $user)
+    {
+        $ownerRole = Role::where('name', User::ROLE_OWNER)->first();
+        if ($ownerRole) {
+            // Check if user already has this role
+            $existingRole = UserRole::where('user_id', $user->id)
+                ->where('role_id', $ownerRole->id)
+                ->first();
+            
+            if (!$existingRole) {
+                UserRole::create([
+                    'user_id' => $user->id,
+                    'role_id' => $ownerRole->id,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Remove Team Owner role from a user if they don't own any other teams.
+     */
+    private function removeOwnerRoleIfNeeded(User $user)
+    {
+        // Check if user still owns any teams
+        $ownedTeamsCount = $user->primaryOwnedTeams()->count();
+        
+        if ($ownedTeamsCount === 0) {
+            // User doesn't own any teams anymore, remove the Owner role
+            $ownerRole = Role::where('name', User::ROLE_OWNER)->first();
+            if ($ownerRole) {
+                UserRole::where('user_id', $user->id)
+                    ->where('role_id', $ownerRole->id)
+                    ->delete();
+            }
+        }
     }
 }

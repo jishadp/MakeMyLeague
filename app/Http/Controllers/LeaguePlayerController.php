@@ -6,7 +6,9 @@ use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class LeaguePlayerController extends Controller
@@ -545,5 +547,178 @@ class LeaguePlayerController extends Controller
         ]);
         
         return response()->json(['success' => true, 'message' => 'Registration successful']);
+    }
+
+    /**
+     * Toggle retention status for a player.
+     */
+    public function toggleRetention(League $league, LeaguePlayer $leaguePlayer): JsonResponse
+    {
+        $user = Auth::user();
+        
+        // Check if user is an organizer for this league, admin, or team owner of the player's team
+        $isAuthorized = $user->isOrganizerForLeague($league->id) || 
+                       $user->isAdmin() || 
+                       ($leaguePlayer->league_team_id && $user->isOwnerOfTeam($leaguePlayer->leagueTeam->team_id));
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to modify retention status for this player.'
+            ], 403);
+        }
+
+        // Check if player is not sold (can be available, pending, unsold, etc.)
+        if ($leaguePlayer->status === 'sold') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sold players cannot be marked as retention players.'
+            ], 400);
+        }
+
+        // Check retention limit for the team
+        $teamRetentionCount = LeaguePlayer::where('league_team_id', $leaguePlayer->league_team_id)
+            ->where('retention', true)
+            ->count();
+
+        if (!$leaguePlayer->retention && $teamRetentionCount >= $league->retention_players) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This team has reached the maximum retention player limit (' . $league->retention_players . ').'
+            ], 400);
+        }
+
+        try {
+            $leaguePlayer->update(['retention' => !$leaguePlayer->retention]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $leaguePlayer->retention ? 'Player marked as retention player.' : 'Player unmarked as retention player.',
+                'retention' => $leaguePlayer->retention
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update retention status. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Add a player as retention to a team.
+     */
+    public function addRetentionPlayer(Request $request, League $league): JsonResponse
+    {
+        $user = Auth::user();
+        
+        // Validate request
+        $request->validate([
+            'league_player_id' => 'required|exists:league_players,id',
+            'league_team_id' => 'required|exists:league_teams,id',
+        ]);
+
+        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        $leagueTeam = LeagueTeam::find($request->league_team_id);
+
+        // Verify the player and team belong to this league
+        if ($leaguePlayer->league_id !== $league->id || $leagueTeam->league_id !== $league->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid player or team for this league.'
+            ], 400);
+        }
+
+        // Check authorization
+        $isAuthorized = $user->isOrganizerForLeague($league->id) || 
+                       $user->isAdmin() || 
+                       $user->isOwnerOfTeam($leagueTeam->team_id);
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to add retention players to this team.'
+            ], 403);
+        }
+
+        // Check if player is not sold and not already retention
+        if ($leaguePlayer->status === 'sold') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sold players cannot be added as retention players.'
+            ], 400);
+        }
+
+        if ($leaguePlayer->retention) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This player is already marked as a retention player.'
+            ], 400);
+        }
+
+        // Check if player is already assigned to a different team (only if they have a team assigned)
+        if ($leaguePlayer->league_team_id !== null && $leaguePlayer->league_team_id !== $leagueTeam->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This player is already assigned to a different team.'
+            ], 400);
+        }
+
+        // Check retention limit for the team
+        $teamRetentionCount = LeaguePlayer::where('league_team_id', $leagueTeam->id)
+            ->where('retention', true)
+            ->count();
+
+        if ($teamRetentionCount >= $league->retention_players) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This team has reached the maximum retention player limit (' . $league->retention_players . ').'
+            ], 400);
+        }
+
+        try {
+            // Update player to assign to team and mark as retention
+            $updateData = ['retention' => true];
+            if ($leaguePlayer->league_team_id === null) {
+                $updateData['league_team_id'] = $leagueTeam->id;
+            }
+            
+            \Log::info('Updating player with data:', $updateData);
+            \Log::info('Player before update:', [
+                'id' => $leaguePlayer->id,
+                'name' => $leaguePlayer->player->name,
+                'league_team_id' => $leaguePlayer->league_team_id,
+                'retention' => $leaguePlayer->retention
+            ]);
+            
+            $leaguePlayer->update($updateData);
+            
+            // Refresh the player to get updated data
+            $leaguePlayer->refresh();
+            
+            \Log::info('Player after update:', [
+                'id' => $leaguePlayer->id,
+                'name' => $leaguePlayer->player->name,
+                'league_team_id' => $leaguePlayer->league_team_id,
+                'retention' => $leaguePlayer->retention
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Player successfully added as retention player.',
+                'player' => [
+                    'id' => $leaguePlayer->id,
+                    'name' => $leaguePlayer->player->name,
+                    'position' => $leaguePlayer->player->position->name,
+                    'retention' => true
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add retention player. Please try again.'
+            ], 500);
+        }
     }
 }
