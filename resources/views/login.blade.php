@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - {{config('app.name')}}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Theme CSS Files -->
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
 </head>

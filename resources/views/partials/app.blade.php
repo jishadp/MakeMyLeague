@@ -12,21 +12,11 @@
     <link rel="preload" href="{{ asset('css/main.css') }}?v={{ time() }}" as="style">
     <link rel="preload" href="{{ asset('js/main.js') }}?v={{ time() }}" as="script">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4f46e5', // Indigo-600
-                        secondary: '#6b7280' // Gray-500
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- jQuery -->
+    <script src="{{ asset('js/jquery.min.js') }}" defer></script>
 
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">

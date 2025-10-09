@@ -12,6 +12,7 @@ use App\Http\Controllers\LeagueFinanceController;
 use App\Http\Controllers\OrganizerRequestController;
 use App\Http\Controllers\TeamTransferController;
 use App\Http\Controllers\DefaultTeamController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
 use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\GroundController as AdminGroundController;
@@ -21,22 +22,7 @@ use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    // Get 3 featured grounds (highest capacity) for the landing page
-    $featuredGrounds = \App\Models\Ground::with(['state', 'district', 'localBody'])
-        ->where('is_available', true)
-        ->orderBy('capacity', 'desc')
-        ->take(3)
-        ->get();
-
-    // Get 3 featured teams for the landing page
-    $featuredTeams = \App\Models\Team::with(['homeGround', 'localBody'])
-        ->take(3)
-        ->get();
-
-
-    return view('welcome', compact('featuredGrounds', 'featuredTeams'));
-});
+Route::get('/', [WelcomeController::class, 'index']);
 
 Route::get('login', [LoginController::class, 'login'])->name('login');
 Route::post('do-login', [LoginController::class, 'doLogin'])->name('do.login');

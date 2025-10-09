@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - {{config('app.name')}}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Theme CSS Files -->
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="{{ asset('css/glacier-blue-theme.css') }}?v={{ time() }}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- Select2 CSS -->
+    <link href="{{ asset('assets/select2/select2.min.css') }}" rel="stylesheet" />
 </head>
 <body class="bg-gray-50 antialiased min-h-screen glacier-blue-theme" id="app-body">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -124,8 +130,9 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- JavaScript Assets -->
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/select2/select2.min.js') }}"></script>
     <script src="{{ asset('js/countries.js') }}?v={{ time() }}"></script>
     <script>
         $(document).ready(function() {
