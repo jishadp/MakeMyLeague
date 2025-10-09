@@ -50,6 +50,8 @@ class ProfileController extends Controller
                 // Delete existing game roles
                 $user->gameRoles()->delete();
                 
+                $hasGameRoles = false;
+                
                 // Create new game roles
                 foreach ($request->game_roles as $gameId => $gameRole) {
                     if (isset($gameRole['position_id']) && $gameRole['position_id']) {
@@ -58,6 +60,15 @@ class ProfileController extends Controller
                             'game_position_id' => $gameRole['position_id'],
                             'is_primary' => $request->primary_game_id == $gameId
                         ]);
+                        $hasGameRoles = true;
+                    }
+                }
+                
+                // Auto-assign Player role if user has game roles and doesn't have Player role yet
+                if ($hasGameRoles && !$user->isPlayer()) {
+                    $playerRole = \App\Models\Role::where('name', \App\Models\User::ROLE_PLAYER)->first();
+                    if ($playerRole && !$user->roles->contains($playerRole->id)) {
+                        $user->roles()->attach($playerRole->id);
                     }
                 }
             }

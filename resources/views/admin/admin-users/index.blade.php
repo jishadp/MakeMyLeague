@@ -96,7 +96,7 @@
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-12 w-12">
                                                 @if($adminUser->photo)
-                                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ asset($adminUser->photo) }}" alt="{{ $adminUser->name }}">
+                                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ asset('storage/' . $adminUser->photo) }}" alt="{{ $adminUser->name }}">
                                                 @else
                                                     <div class="h-12 w-12 rounded-full bg-gradient-to-br from-red-600 to-pink-600 flex items-center justify-center">
                                                         <span class="text-white font-bold text-lg">{{ strtoupper(substr($adminUser->name, 0, 1)) }}</span>
