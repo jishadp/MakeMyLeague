@@ -194,7 +194,7 @@
                 </div>
 
                 <!-- Contact Information -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Contact Person -->
                     <div>
                         <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-2">
@@ -226,52 +226,20 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <!-- Contact Email -->
-                    <div>
-                        <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Contact Email
-                        </label>
-                        <input type="email" 
-                               id="contact_email" 
-                               name="contact_email" 
-                               value="{{ old('contact_email') }}"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition-colors @error('contact_email') border-red-500 @enderror"
-                               placeholder="Enter email address">
-                        @error('contact_email')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
 
-                <!-- Facilities -->
+                <!-- Ground Image -->
                 <div>
-                    <label for="facilities" class="block text-sm font-medium text-gray-700 mb-2">
-                        Facilities
-                    </label>
-                    <textarea id="facilities" 
-                              name="facilities" 
-                              rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition-colors @error('facilities') border-red-500 @enderror"
-                              placeholder="List available facilities (e.g., Parking, Restrooms, Food Court, etc.)">{{ old('facilities') }}</textarea>
-                    @error('facilities')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Images -->
-                <div>
-                    <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
-                        Ground Images
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+                        Ground Image
                     </label>
                     <input type="file" 
-                           id="images" 
-                           name="images[]" 
-                           multiple
+                           id="image" 
+                           name="image" 
                            accept="image/*"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition-colors @error('images') border-red-500 @enderror">
-                    <p class="mt-1 text-sm text-gray-500">You can select multiple images. Maximum file size: 2MB per image.</p>
-                    @error('images')
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition-colors @error('image') border-red-500 @enderror">
+                    <p class="mt-1 text-sm text-gray-500">Select a ground image. Maximum file size: 2MB.</p>
+                    @error('image')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

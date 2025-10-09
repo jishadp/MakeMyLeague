@@ -41,9 +41,9 @@
             <!-- No Leagues -->
             @if ($leagues->isEmpty())
                 <div class="bg-white border border-gray-200 rounded-xl shadow-md p-8 text-center animate-fadeInUp">
-                    <p class="text-gray-600 mb-4">You haven't created any leagues yet.</p>
+                    <p class="text-gray-600 mb-4">No approved leagues available at the moment.</p>
                     <a href="{{ route('leagues.create') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
-                        Register by creating your first league
+                        Create your first league
                     </a>
                 </div>
             @else
@@ -284,6 +284,13 @@
                         </div>
                     @endforeach
                 </div>
+                
+                <!-- Pagination Links -->
+                @if(method_exists($leagues, 'links'))
+                    <div class="mt-8 flex justify-center">
+                        {{ $leagues->links() }}
+                    </div>
+                @endif
             @endif
         </div>
     </div>
@@ -593,8 +600,8 @@
 
     <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
     <script>    
-        // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = true;
+        // Pusher logging disabled for production
+        Pusher.logToConsole = false;
 
         var pusher = new Pusher('323027c72d05c6476b51', {
             cluster: 'ap2'

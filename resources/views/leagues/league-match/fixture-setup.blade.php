@@ -301,7 +301,7 @@
 
 <script>
 const groups = @json($groups);
-console.log('Groups data:', groups); // Debug log
+// Debug logging removed for production
 
 document.addEventListener('DOMContentLoaded', function() {
     const matchTypeSelect = document.getElementById('match_type');
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle group selection change
     groupSelect.addEventListener('change', function() {
         const selectedGroup = groups.find(g => g.id == this.value);
-        console.log('Selected group:', selectedGroup); // Debug log
+        // Debug logging removed for production
         if (selectedGroup && selectedGroup.league_teams) {
             updateTeamOptions(selectedGroup.league_teams);
         } else {
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function updateTeamOptions(teams) {
-        console.log('Updating team options with:', teams); // Debug log
+        // Debug logging removed for production
         homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
         awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
         

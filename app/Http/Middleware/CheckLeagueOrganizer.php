@@ -26,8 +26,11 @@ class CheckLeagueOrganizer
         // Get the league from the route parameter
         $league = $request->route('league');
         
+        // Get route name for debugging
+        $routeName = $request->route()?->getName();
+        
         // If this is the index, create, or store route (no league parameter), allow any authenticated user
-        if (!$league && ($request->routeIs('leagues.index') || $request->routeIs('leagues.create') || $request->routeIs('leagues.store'))) {
+        if (!$league && in_array($routeName, ['leagues.index', 'leagues.create', 'leagues.store'])) {
             return $next($request);
         }
         

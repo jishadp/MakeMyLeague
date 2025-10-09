@@ -16,6 +16,8 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Admin\OrganizerRequestController as AdminOrganizerRequestController;
 use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\GroundController as AdminGroundController;
+use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
+use App\Http\Controllers\Admin\AdminUserController as AdminAdminUserController;
 
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PlayerController;
@@ -128,7 +130,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('organizer-requests/{organizerRequest}/cancel', [OrganizerRequestController::class, 'cancel'])->name('organizer-requests.cancel');
 
     // Admin routes
-    Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
         Route::get('organizer-requests', [AdminOrganizerRequestController::class, 'index'])->name('organizer-requests.index');
         Route::get('organizer-requests/pending', [AdminOrganizerRequestController::class, 'pending'])->name('organizer-requests.pending');
         Route::get('organizer-requests/{organizerRequest}', [AdminOrganizerRequestController::class, 'show'])->name('organizer-requests.show');
@@ -165,12 +167,23 @@ Route::middleware('auth')->group(function () {
         // Player Management Routes
         Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
         Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
+        
+        // Analytics Routes
+        Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('analytics/player-registrations', [AdminAnalyticsController::class, 'playerRegistrations'])->name('analytics.player-registrations');
+        Route::get('analytics/team-creations', [AdminAnalyticsController::class, 'teamCreations'])->name('analytics.team-creations');
+        Route::get('analytics/league-creations', [AdminAnalyticsController::class, 'leagueCreations'])->name('analytics.league-creations');
+        Route::get('analytics/auction-completions', [AdminAnalyticsController::class, 'auctionCompletions'])->name('analytics.auction-completions');
+        
+        // Admin User Management Routes
+        Route::resource('admin-users', AdminAdminUserController::class);
+        Route::post('admin-users/{adminUser:slug}/reset-pin', [AdminAdminUserController::class, 'resetPin'])->name('admin-users.reset-pin');
     });
 
     // Leagues resource routes - only restrict create, store, edit, update, destroy to organizers
-    Route::resource('leagues', LeagueController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('leagues/create', [LeagueController::class, 'create'])->name('leagues.create')->middleware('league.organizer');
     Route::post('leagues', [LeagueController::class, 'store'])->name('leagues.store')->middleware('league.organizer');
+    Route::resource('leagues', LeagueController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
     Route::get('leagues/{league}/edit', [LeagueController::class, 'edit'])->name('leagues.edit')->middleware('league.organizer');
     Route::put('leagues/{league}', [LeagueController::class, 'update'])->name('leagues.update')->middleware('league.organizer');
     Route::delete('leagues/{league}', [LeagueController::class, 'destroy'])->name('leagues.destroy')->middleware('league.organizer');

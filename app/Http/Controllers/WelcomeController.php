@@ -25,9 +25,11 @@ class WelcomeController extends Controller
             ->take(3)
             ->get();
 
-        // Get dynamic statistics from database
+        // Get dynamic statistics from database (only approved leagues for public display)
         $stats = [
-            'leagues' => League::count(),
+            'leagues' => League::whereHas('organizers', function($query) {
+                $query->where('status', 'approved');
+            })->count(),
             'teams' => Team::count(),
             'players' => LeaguePlayer::count(), // Count all league players
             'matches' => 10000 // This could be calculated from fixtures if you have that data

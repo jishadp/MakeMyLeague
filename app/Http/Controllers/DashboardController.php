@@ -16,10 +16,16 @@ class DashboardController
 {
     public function view()
     {
-        $leagues = League::with(['game', 'approvedOrganizers'])->latest()->take(5)->get();
+        // Only show leagues with approved organizer requests to prevent flooding
+        $leagues = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })->with(['game', 'approvedOrganizers'])->latest()->take(5)->get();
+        
         $userLeagues = auth()->user()->isOrganizer() ? 
             auth()->user()->organizedLeagues()->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get() : 
-            League::with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get();
+            League::whereHas('organizers', function($query) {
+                $query->where('status', 'approved');
+            })->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->paginate(12);
         $userOwnedTeams = Auth::check() ? Auth::user()->primaryOwnedTeams : collect();
         
         // Get league teams where user is a player
@@ -43,7 +49,9 @@ class DashboardController
     public function auctionsIndex()
     {
         // Get live auctions (leagues with active status and auction_active = true, or active leagues with available players)
-        $liveAuctions = League::with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
+        $liveAuctions = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
             ->where('status', 'active')
             ->where(function($query) {
                 $query->where('auction_active', true)
@@ -64,14 +72,18 @@ class DashboardController
         ->paginate(10);
 
         // Get upcoming auctions (leagues that are pending and have auction_active = false)
-        $upcomingAuctions = League::with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
+        $upcomingAuctions = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
             ->where('status', 'pending')
             ->where('auction_active', false)
             ->latest()
             ->get();
 
-        // Get leagues for filter dropdown
-        $leagues = League::all();
+        // Get leagues for filter dropdown (only approved organizers)
+        $leagues = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })->get();
 
         // Get teams for filter dropdown
         $teams = LeagueTeam::with('team')->get();

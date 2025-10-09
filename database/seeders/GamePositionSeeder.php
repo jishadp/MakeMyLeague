@@ -60,38 +60,38 @@ class GamePositionSeeder extends Seeder
         
         // Create cricket positions
         foreach ($cricketPositions as $positionName) {
-            GamePosition::create([
+            GamePosition::updateOrCreate([
                 'name' => $positionName,
                 'game_id' => $cricketGame->id
             ]);
-            $this->command->info("Created cricket position: {$positionName}");
+            $this->command->info("Created/Updated cricket position: {$positionName}");
         }
         
         // Create football positions
         foreach ($footballPositions as $positionName) {
-            GamePosition::create([
+            GamePosition::updateOrCreate([
                 'name' => $positionName,
                 'game_id' => $footballGame->id
             ]);
-            $this->command->info("Created football position: {$positionName}");
+            $this->command->info("Created/Updated football position: {$positionName}");
         }
         
         // Create badminton positions
         foreach ($badmintonPositions as $positionName) {
-            GamePosition::create([
+            GamePosition::updateOrCreate([
                 'name' => $positionName,
                 'game_id' => $badmintonGame->id
             ]);
-            $this->command->info("Created badminton position: {$positionName}");
+            $this->command->info("Created/Updated badminton position: {$positionName}");
         }
         
         // Create table tennis positions
         foreach ($tableTennisPositions as $positionName) {
-            GamePosition::create([
+            GamePosition::updateOrCreate([
                 'name' => $positionName,
                 'game_id' => $tableTennisGame->id
             ]);
-            $this->command->info("Created table tennis position: {$positionName}");
+            $this->command->info("Created/Updated table tennis position: {$positionName}");
         }
     }
 }

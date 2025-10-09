@@ -563,11 +563,11 @@ function cropAndUpload() {
                 }
             })
             .then(response => {
-                console.log('Response status:', response.status);
+                // Debug logging removed for production
                 return response.json();
             })
             .then(data => {
-                console.log('Response data:', data);
+                // Debug logging removed for production
                 if (data.success) {
                     location.reload();
                 } else {

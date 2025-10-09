@@ -26,11 +26,13 @@ class AppServiceProvider extends ServiceProvider
         // Share stats with all views
         View::composer('*', function ($view) {
             try {
-                // Get statistics for footer
+                // Get statistics for footer (only approved leagues for public display)
                 $stats = [
-                    'leagues' => \App\Models\League::where('status', '!=', 'cancelled')->count(),
+                    'leagues' => \App\Models\League::whereHas('organizers', function($query) {
+                        $query->where('status', 'approved');
+                    })->where('status', '!=', 'cancelled')->count(),
                     'teams' => \App\Models\Team::count(),
-                    'players' => \App\Models\User::players()->count(),
+                    'players' => \App\Models\User::count(),
                 ];
                 
                 $view->with([

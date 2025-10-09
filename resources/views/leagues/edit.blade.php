@@ -748,8 +748,7 @@
                     }
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
+                    // Debug logging removed for production
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);

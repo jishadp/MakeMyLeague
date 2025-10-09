@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'league.organizer' => \App\Http\Middleware\CheckLeagueOrganizer::class,
             'league.participant' => \App\Http\Middleware\CheckLeagueParticipant::class,
             'auction.access' => \App\Http\Middleware\CheckAuctionAccess::class,
+            'admin' => \App\Http\Middleware\CheckAdminAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

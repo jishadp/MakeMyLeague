@@ -881,13 +881,45 @@
             })
             .then(response => {
                 if (response.ok) {
-                    return response.text();
+                    // If successful, redirect to leagues index
+                    window.location.href = '{{ route("leagues.index") }}';
+                    return;
                 }
-                throw new Error('Network response was not ok');
-            })
-            .then(html => {
-                // If successful, redirect to leagues index
-                window.location.href = '{{ route("leagues.index") }}';
+                
+                // If validation error (422), parse and display errors
+                if (response.status === 422) {
+                    return response.json().then(data => {
+                        // Display validation errors
+                        let errorHtml = '<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md"><ul class="list-disc pl-5">';
+                        if (data.errors) {
+                            Object.values(data.errors).forEach(errors => {
+                                errors.forEach(error => {
+                                    errorHtml += `<li>${error}</li>`;
+                                });
+                            });
+                        } else {
+                            errorHtml += '<li>Validation failed. Please check your input.</li>';
+                        }
+                        errorHtml += '</ul></div>';
+                        
+                        // Remove any existing error messages
+                        const existingErrors = document.querySelector('.bg-red-100');
+                        if (existingErrors) {
+                            existingErrors.remove();
+                        }
+                        
+                        // Add new error messages at the top of the form
+                        const form = document.getElementById('leagueForm');
+                        form.insertAdjacentHTML('afterbegin', errorHtml);
+                        
+                        // Scroll to top to show errors
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }).catch(() => {
+                        alert('Validation failed. Please check your input and try again.');
+                    });
+                } else {
+                    throw new Error('Network response was not ok');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);

@@ -229,8 +229,8 @@
                                      m-6-4h.01M9 16h.01"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">You haven't created any leagues yet</h3>
-                    <p class="text-gray-600 mb-6">Get started by creating your first cricket league.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No approved leagues available</h3>
+                    <p class="text-gray-600 mb-6">There are currently no leagues with approved organizers available for joining.</p>
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -375,6 +375,13 @@
                         </div>
                     @endforeach
                 </div>
+                
+                <!-- Pagination Links -->
+                @if(method_exists($userLeagues, 'links'))
+                    <div class="mt-8 flex justify-center">
+                        {{ $userLeagues->links() }}
+                    </div>
+                @endif
             @endif
         </div>
     </section>

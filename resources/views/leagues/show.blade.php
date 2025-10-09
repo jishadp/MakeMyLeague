@@ -1805,7 +1805,7 @@
             updateBtn.disabled = true;
 
             // Log the data being sent
-            console.log('Sending bid increment data:', data);
+            // Debug logging removed for production
 
             // Send AJAX request
             fetch('{{ route('leagues.update-bid-increments', $league) }}', {
@@ -1817,7 +1817,7 @@
                     body: JSON.stringify(data)
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
+                    // Debug logging removed for production
                     if (!response.ok) {
                         return response.json().then(errorData => {
                             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -1826,7 +1826,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Response data:', data);
+                    // Debug logging removed for production
                     if (data.success) {
                         showNotification('Bid increments updated successfully!', 'success');
                         closeAuctionRulesModal();

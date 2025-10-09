@@ -28,7 +28,9 @@ class LeagueController
      */
     public function index(): View
     {
-        $leagues = League::with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->get();
+        $leagues = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers', 'grounds'])->paginate(12);
         return view('leagues.index', compact('leagues'));
     }
 
@@ -48,9 +50,19 @@ class LeagueController
     /**
      * Store a newly created league in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $validated = $request->validate(League::rules());
+        try {
+            $validated = $request->validate(League::rules());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
 
         // If this is the first league or is_default is checked, make it default
         if ($request->has('is_default') || League::count() === 0) {
@@ -95,6 +107,15 @@ class LeagueController
         if ($request->has('ground_ids') && is_array($request->ground_ids)) {
             $league->grounds()->attach($request->ground_ids);
         }
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'League created successfully! Your organizer request is pending admin approval.',
+                'redirect' => route('leagues.index')
+            ]);
+        }
+        
         return redirect()->route('leagues.index')
             ->with('success', 'League created successfully! Your organizer request is pending admin approval.');
     }

@@ -104,7 +104,7 @@
             </div>
 
             <!-- Contact Information -->
-            @if($ground->contact_person || $ground->contact_phone || $ground->contact_email)
+            @if($ground->contact_person || $ground->contact_phone)
             <div class="mt-8 pt-8 border-t border-gray-200">
                 <div class="flex items-center mb-6">
                     <svg class="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">Contact Information</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @if($ground->contact_person)
                     <div>
                         <label class="block text-sm font-medium text-gray-500 mb-1">Contact Person</label>
@@ -127,45 +127,22 @@
                         <p class="text-gray-700">{{ $ground->contact_phone }}</p>
                     </div>
                     @endif
-
-                    @if($ground->contact_email)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                        <p class="text-gray-700">{{ $ground->contact_email }}</p>
-                    </div>
-                    @endif
                 </div>
             </div>
             @endif
 
-            <!-- Facilities -->
-            @if($ground->facilities)
-            <div class="mt-8 pt-8 border-t border-gray-200">
-                <div class="flex items-center mb-6">
-                    <svg class="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <h2 class="text-2xl font-bold text-gray-800">Facilities</h2>
-                </div>
-                <p class="text-gray-700">{{ $ground->facilities }}</p>
-            </div>
-            @endif
 
-            <!-- Images -->
-            @if($ground->images && count($ground->images) > 0)
+            <!-- Ground Image -->
+            @if($ground->image)
             <div class="mt-8 pt-8 border-t border-gray-200">
                 <div class="flex items-center mb-6">
                     <svg class="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <h2 class="text-2xl font-bold text-gray-800">Images</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">Ground Image</h2>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach($ground->images as $image)
-                    <div class="relative">
-                        <img src="{{ Storage::url($image) }}" alt="Ground Image" class="w-full h-32 object-cover rounded-lg shadow-md">
-                    </div>
-                    @endforeach
+                <div class="max-w-md">
+                    <img src="{{ Storage::url($ground->image) }}" alt="Ground Image" class="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow">
                 </div>
             </div>
             @endif

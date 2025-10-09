@@ -52,7 +52,7 @@
                 </svg>
                 Admin Management
             </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <a href="{{ route('admin.organizer-requests.index') }}" 
                    class="flex items-center p-4 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors {{ request()->routeIs('admin.organizer-requests.*') ? 'ring-2 ring-red-500' : '' }}">
                     <div class="bg-red-100 rounded-full p-2 mr-3">
@@ -102,6 +102,32 @@
                     <div>
                         <h4 class="font-semibold text-purple-900">Users Management</h4>
                         <p class="text-sm text-purple-700">Manage all users & reset PINs</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.analytics.index') }}" 
+                   class="flex items-center p-4 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-colors {{ request()->routeIs('admin.analytics.*') ? 'ring-2 ring-indigo-500' : '' }}">
+                    <div class="bg-indigo-100 rounded-full p-2 mr-3">
+                        <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-indigo-900">Analytics Dashboard</h4>
+                        <p class="text-sm text-indigo-700">View platform statistics & reports</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.admin-users.index') }}" 
+                   class="flex items-center p-4 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors {{ request()->routeIs('admin.admin-users.*') ? 'ring-2 ring-orange-500' : '' }}">
+                    <div class="bg-orange-100 rounded-full p-2 mr-3">
+                        <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-orange-900">Admin Users</h4>
+                        <p class="text-sm text-orange-700">Manage admin accounts</p>
                     </div>
                 </a>
             </div>

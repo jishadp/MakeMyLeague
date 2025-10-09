@@ -59,7 +59,7 @@
                 @endif
                 <div>
                     <label for="wallet_balance" class="block text-sm font-medium text-gray-700 mb-2">
-                        Max Team Wallet Limit
+                        Team Wallet Limit
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -73,10 +73,11 @@
                                step="0.01"
                                value="{{ old('wallet_balance', $league->team_wallet_limit) }}"
                                placeholder="0.00"
-                               class="w-full pl-8 border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('wallet_balance') border-red-500 @enderror">
+                               readonly
+                               class="w-full pl-8 border border-gray-300 rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed @error('wallet_balance') border-red-500 @enderror">
                     </div>
                     <p class="mt-1 text-sm text-gray-500">
-                        Maximum allowed: ₹{{ number_format($league->team_wallet_limit, 2) }}
+                        Fixed at league maximum: ₹{{ number_format($league->team_wallet_limit, 2) }}
                     </p>
                     @error('wallet_balance')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -98,4 +99,5 @@
         
     </div>
 </div>
+
 @endsection

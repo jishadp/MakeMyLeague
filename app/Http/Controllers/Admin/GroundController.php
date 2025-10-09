@@ -66,22 +66,17 @@ class GroundController extends Controller
             'is_available' => 'boolean',
             'contact_person' => 'nullable|string|max:255',
             'contact_phone' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:255',
-            'facilities' => 'nullable|string',
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image uploads
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('grounds', 'public');
-                $imagePaths[] = $path;
-            }
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageFilename = 'ground_' . time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->storeAs('grounds', $imageFilename, 'public');
+            $validated['image'] = $imagePath;
         }
 
-        $validated['images'] = $imagePaths;
         $validated['is_available'] = $request->has('is_available');
 
         Ground::create($validated);
@@ -139,40 +134,32 @@ class GroundController extends Controller
             'is_available' => 'boolean',
             'contact_person' => 'nullable|string|max:255',
             'contact_phone' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:255',
-            'facilities' => 'nullable|string',
-            'new_images' => 'nullable|array',
-            'new_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'remove_images' => 'nullable|array',
-            'remove_images.*' => 'string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'remove_image' => 'nullable|boolean',
         ]);
 
-        // Handle new image uploads
-        $newImagePaths = [];
-        if ($request->hasFile('new_images')) {
-            foreach ($request->file('new_images') as $image) {
-                $path = $image->store('grounds', 'public');
-                $newImagePaths[] = $path;
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($ground->image && Storage::disk('public')->exists($ground->image)) {
+                Storage::disk('public')->delete($ground->image);
             }
+            
+            // Upload new image
+            $image = $request->file('image');
+            $imageFilename = 'ground_' . $ground->id . '_' . time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->storeAs('grounds', $imageFilename, 'public');
+            $validated['image'] = $imagePath;
         }
 
         // Handle image removal
-        $currentImages = $ground->images ?? [];
-        if ($request->has('remove_images')) {
-            foreach ($request->remove_images as $imageToRemove) {
-                // Remove from storage
-                if (Storage::disk('public')->exists($imageToRemove)) {
-                    Storage::disk('public')->delete($imageToRemove);
-                }
-                // Remove from array
-                $currentImages = array_filter($currentImages, function($image) use ($imageToRemove) {
-                    return $image !== $imageToRemove;
-                });
+        if ($request->has('remove_image') && $request->remove_image) {
+            if ($ground->image && Storage::disk('public')->exists($ground->image)) {
+                Storage::disk('public')->delete($ground->image);
             }
+            $validated['image'] = null;
         }
 
-        // Merge existing images with new ones
-        $validated['images'] = array_merge($currentImages, $newImagePaths);
         $validated['is_available'] = $request->has('is_available');
 
         $ground->update($validated);
@@ -196,13 +183,9 @@ class GroundController extends Controller
                 ->with('error', 'Cannot delete ground. It is being used by teams.');
         }
 
-        // Delete associated images
-        if ($ground->images) {
-            foreach ($ground->images as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
-                }
-            }
+        // Delete associated image
+        if ($ground->image && Storage::disk('public')->exists($ground->image)) {
+            Storage::disk('public')->delete($ground->image);
         }
 
         $ground->delete();

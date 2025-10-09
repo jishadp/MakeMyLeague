@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 scrollToPlayer(playerId);
                 
                 // Debug log to check what ID we're looking for
-                console.log('Looking for player with ID:', playerId);
+                // Debug logging removed for production
             });
         });
     }
@@ -395,14 +395,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Find and highlight the selected player (check both main list and queue)
         const playerCard = document.querySelector(`[data-player-id="${playerId}"]`);
-        console.log('Looking for card with data-player-id:', playerId);
-        console.log('Found card:', playerCard);
+        // Debug logging removed for production
         
         if (playerCard) {
             playerCard.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
-            console.log('Player highlighted successfully');
+            // Player highlighted successfully
         } else {
-            console.log('Player card not found');
+            // Player card not found
         }
     }
     

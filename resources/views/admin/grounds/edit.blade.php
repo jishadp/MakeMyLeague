@@ -220,36 +220,8 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Contact Email
-                        </label>
-                        <input type="email" 
-                               id="contact_email" 
-                               name="contact_email" 
-                               value="{{ old('contact_email', $ground->contact_email) }}"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-colors @error('contact_email') border-red-500 @enderror"
-                               placeholder="Enter contact email">
-                        @error('contact_email')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
 
-                <!-- Facilities -->
-                <div>
-                    <label for="facilities" class="block text-sm font-medium text-gray-700 mb-2">
-                        Facilities
-                    </label>
-                    <textarea id="facilities" 
-                              name="facilities" 
-                              rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-colors @error('facilities') border-red-500 @enderror"
-                              placeholder="Enter available facilities">{{ old('facilities', $ground->facilities) }}</textarea>
-                    @error('facilities')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 <!-- Availability -->
                 <div>
@@ -263,36 +235,37 @@
                     </label>
                 </div>
 
-                <!-- Images -->
+                <!-- Ground Image -->
                 <div>
-                    <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
-                        Ground Images
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+                        Ground Image
                     </label>
                     <input type="file" 
-                           id="images" 
-                           name="images[]" 
-                           multiple
+                           id="image" 
+                           name="image" 
                            accept="image/*"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-colors @error('images') border-red-500 @enderror">
-                    <p class="mt-1 text-sm text-gray-500">You can select multiple images. Supported formats: JPG, PNG, GIF. Max size: 2MB per image.</p>
-                    @error('images')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                    @error('images.*')
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 transition-colors @error('image') border-red-500 @enderror">
+                    <p class="mt-1 text-sm text-gray-500">Select a new ground image. Supported formats: JPG, PNG, GIF. Max size: 2MB.</p>
+                    @error('image')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Current Images -->
-                @if($ground->images && count($ground->images) > 0)
+                <!-- Current Image -->
+                @if($ground->image)
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Images</label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        @foreach($ground->images as $image)
-                        <div class="relative">
-                            <img src="{{ Storage::url($image) }}" alt="Ground Image" class="w-full h-32 object-cover rounded-lg shadow-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Image</label>
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ Storage::url($ground->image) }}" alt="Ground Image" class="w-32 h-32 object-cover rounded-lg shadow-md">
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" 
+                                       name="remove_image" 
+                                       value="1"
+                                       class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">Remove current image</span>
+                            </label>
                         </div>
-                        @endforeach
                     </div>
                 </div>
                 @endif
