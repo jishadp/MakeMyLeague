@@ -211,7 +211,7 @@
     @endif
 
     <!-- Open Leagues Section -->
-    @if(auth()->user()->isPlayer() || auth()->user()->isTeamOwner())
+    @if(auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id || auth()->user()->isTeamOwner())
     <section class="py-8 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
             <div class="mb-8">

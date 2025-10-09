@@ -153,7 +153,7 @@
                         @if($player->photo)
                             <div class="mb-4">
                                 <p class="text-sm text-gray-600 mb-2">Current Photo:</p>
-                                <img src="{{ asset($player->photo) }}" alt="{{ $player->name }}" class="h-24 w-24 object-cover rounded-lg border border-gray-200">
+                                <img src="{{ asset('storage/' . $player->photo) }}" alt="{{ $player->name }}" class="h-24 w-24 object-cover rounded-lg border border-gray-200">
                             </div>
                         @endif
                         

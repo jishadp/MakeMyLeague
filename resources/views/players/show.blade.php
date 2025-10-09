@@ -83,7 +83,7 @@
             <!-- Photo Section -->
             <div class="relative h-64 overflow-hidden">
                 @if($player->photo)
-                    <img src="{{ asset($player->photo) }}" 
+                    <img src="{{ asset('storage/' . $player->photo) }}" 
                          alt="{{ $player->name }}" 
                          class="w-full h-full object-cover"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

@@ -12,7 +12,7 @@
                     My Leagues
                 </h1>
                 <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    @if (auth()->user()->isPlayer())
+                    @if (auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id)
                         <button onclick="openPlayerRegistrationModal()"
                             class="bg-green-600 hover:bg-green-700 active:scale-95 transition-all duration-200
                               text-black px-5 py-2 rounded-xl shadow-md hover:shadow-lg w-full sm:w-auto text-center font-medium">
@@ -204,7 +204,7 @@
                                     </a>
                                     
                                     <!-- Player Register Button -->
-                                    @if (auth()->user()->isPlayer())
+                                    @if (auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id)
                                         @php
                                             $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
                                                 ->where('league_id', $league->id)

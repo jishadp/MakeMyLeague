@@ -105,7 +105,7 @@
                                     </button>
                                 @endif
 
-                                @if (auth()->user()->isPlayer())
+                                @if (auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id)
                                     @php
                                         $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
                                             ->where('league_id', $league->id)
@@ -256,7 +256,7 @@
                                         </a>
                                     </div>
                                 @endif
-                                @if (auth()->user()->isPlayer())
+                                @if (auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id)
                                     <div class="flex gap-3">
                                         @php
                                             $existingPlayer = \App\Models\LeaguePlayer::where('user_id', auth()->id())
