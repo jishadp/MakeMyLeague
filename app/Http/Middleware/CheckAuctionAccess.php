@@ -32,7 +32,12 @@ class CheckAuctionAccess
 
         // Check if user is an organizer for this league or is an admin
         if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
-            return $next($request);
+            // Check if auction access is granted (admins can always access)
+            if ($league->hasAuctionAccess() || $user->isAdmin()) {
+                return $next($request);
+            } else {
+                abort(403, 'Auction access has not been granted for this league. Please contact the admin to request access.');
+            }
         }
 
         // For team owners: Check if they own a team in this league AND auction is live
@@ -43,6 +48,11 @@ class CheckAuctionAccess
         })->exists();
 
         if ($ownsTeamInLeague) {
+            // Check if auction access is granted
+            if (!$league->hasAuctionAccess()) {
+                abort(403, 'Auction access has not been granted for this league. Please contact the league organizer to request access.');
+            }
+            
             // Check if auction is live
             if ($league->isAuctionActive()) {
                 return $next($request);

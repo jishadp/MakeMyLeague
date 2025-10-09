@@ -135,11 +135,11 @@
                                 <!-- Quick Stats -->
                                 <div class="grid grid-cols-2 gap-4 mb-4">
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}</div>
+                                        <div class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
                                         <div class="text-xs text-gray-600">Teams</div>
                                     </div>
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-purple-600">{{ $league->leaguePlayers->count() }}</div>
+                                        <div class="text-2xl font-bold text-purple-600">{{ $league->leaguePlayers->where('status', '!=', 'pending')->count() }}/{{ $league->max_teams * $league->max_team_players }}</div>
                                         <div class="text-xs text-gray-600">Players</div>
                                     </div>
                                 </div>
@@ -305,11 +305,11 @@
                                 <!-- Quick Stats -->
                                 <div class="grid grid-cols-2 gap-4 mb-4">
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}</div>
+                                        <div class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
                                         <div class="text-xs text-gray-600">Teams</div>
                                     </div>
                                     <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                        <div class="text-2xl font-bold text-purple-600">{{ $league->leaguePlayers->count() }}</div>
+                                        <div class="text-2xl font-bold text-purple-600">{{ $league->leaguePlayers->where('status', '!=', 'pending')->count() }}/{{ $league->max_teams * $league->max_team_players }}</div>
                                         <div class="text-xs text-gray-600">Players</div>
                                     </div>
                                 </div>

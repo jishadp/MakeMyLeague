@@ -193,18 +193,18 @@
                                             @foreach($leagueTeam->leaguePlayers as $player)
                                                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:shadow-md transition-all duration-200 {{ $player->retention ? 'ring-2 ring-purple-200 bg-purple-50' : '' }} gap-3 sm:gap-0">
                                                     <div class="flex items-center">
-                                                        @if($player->player->image)
+                                                        @if($player->player && $player->player->image)
                                                             <img src="{{ asset('storage/' . $player->player->image) }}" 
                                                                  alt="{{ $player->player->name }}" 
                                                                  class="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border-2 border-gray-200">
                                                         @else
                                                             <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center border-2 border-gray-200">
-                                                                <span class="text-white font-semibold text-sm sm:text-base">{{ substr($player->player->name, 0, 1) }}</span>
+                                                                <span class="text-white font-semibold text-sm sm:text-base">{{ $player->player ? substr($player->player->name, 0, 1) : '?' }}</span>
                                                             </div>
                                                         @endif
                                                         <div class="ml-3 sm:ml-4">
-                                                            <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ $player->player->name }}</p>
-                                                            <p class="text-xs sm:text-sm text-gray-600">{{ $player->player->position->name }}</p>
+                                                            <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ $player->player ? $player->player->name : 'Unknown Player' }}</p>
+                                                            <p class="text-xs sm:text-sm text-gray-600">{{ $player->player && $player->player->position ? $player->player->position->name : 'No Position' }}</p>
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 gap-2 sm:gap-0">
@@ -359,18 +359,18 @@
                                         @foreach($leagueTeam->leaguePlayers as $player)
                                             <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 {{ $player->retention ? 'ring-2 ring-purple-200 bg-purple-50' : '' }}">
                                                 <div class="flex items-center">
-                                                    @if($player->player->image)
+                                                    @if($player->player && $player->player->image)
                                                         <img src="{{ asset('storage/' . $player->player->image) }}" 
                                                              alt="{{ $player->player->name }}" 
                                                              class="h-12 w-12 rounded-full object-cover border-2 border-gray-200">
                                                     @else
                                                         <div class="h-12 w-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center border-2 border-gray-200">
-                                                            <span class="text-white font-semibold">{{ substr($player->player->name, 0, 1) }}</span>
+                                                            <span class="text-white font-semibold">{{ $player->player ? substr($player->player->name, 0, 1) : '?' }}</span>
                                                         </div>
                                                     @endif
                                                     <div class="ml-4">
-                                                        <p class="font-semibold text-gray-900">{{ $player->player->name }}</p>
-                                                        <p class="text-sm text-gray-600">{{ $player->player->position->name }}</p>
+                                                        <p class="font-semibold text-gray-900">{{ $player->player ? $player->player->name : 'Unknown Player' }}</p>
+                                                        <p class="text-sm text-gray-600">{{ $player->player && $player->player->position ? $player->player->position->name : 'No Position' }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="flex items-center space-x-3">

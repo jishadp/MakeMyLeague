@@ -35,6 +35,8 @@ class League extends Model
         'auction_active' => 'boolean',
         'auction_started_at' => 'datetime',
         'auction_ended_at' => 'datetime',
+        'auction_access_granted' => 'boolean',
+        'auction_access_requested_at' => 'datetime',
         'team_reg_fee' => 'double',
         'player_reg_fee' => 'double',
         'team_wallet_limit' => 'double',
@@ -405,6 +407,81 @@ class League extends Model
         return User::whereNotIn('id', $assignedAuctioneerIds)
             ->where('id', '!=', 1) // Exclude admin user
             ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Check if auction access is granted for this league.
+     */
+    public function hasAuctionAccess()
+    {
+        return $this->auction_access_granted;
+    }
+
+    /**
+     * Check if auction access has been requested.
+     */
+    public function hasAuctionAccessRequested()
+    {
+        return !is_null($this->auction_access_requested_at);
+    }
+
+    /**
+     * Request auction access for this league.
+     */
+    public function requestAuctionAccess()
+    {
+        if (!$this->hasAuctionAccessRequested()) {
+            $this->update([
+                'auction_access_requested_at' => now(),
+                'auction_access_notes' => null
+            ]);
+        }
+    }
+
+    /**
+     * Grant auction access for this league.
+     */
+    public function grantAuctionAccess($notes = null)
+    {
+        $this->update([
+            'auction_access_granted' => true,
+            'auction_access_notes' => $notes
+        ]);
+    }
+
+    /**
+     * Revoke auction access for this league.
+     */
+    public function revokeAuctionAccess($notes = null)
+    {
+        $this->update([
+            'auction_access_granted' => false,
+            'auction_access_notes' => $notes,
+            'auction_access_requested_at' => null
+        ]);
+    }
+
+    /**
+     * Get leagues with pending auction access requests.
+     */
+    public static function getPendingAuctionAccessRequests()
+    {
+        return static::whereNotNull('auction_access_requested_at')
+            ->where('auction_access_granted', false)
+            ->with(['game', 'approvedOrganizers'])
+            ->orderBy('auction_access_requested_at', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get leagues with granted auction access.
+     */
+    public static function getLeaguesWithAuctionAccess()
+    {
+        return static::where('auction_access_granted', true)
+            ->with(['game', 'approvedOrganizers'])
+            ->orderBy('updated_at', 'desc')
             ->get();
     }
 }

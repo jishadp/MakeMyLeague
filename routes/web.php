@@ -178,8 +178,20 @@ Route::middleware('auth')->group(function () {
         // Admin User Management Routes
         Route::resource('admin-users', AdminAdminUserController::class);
         Route::post('admin-users/{adminUser:slug}/reset-pin', [AdminAdminUserController::class, 'resetPin'])->name('admin-users.reset-pin');
+        
+        // Auction Panel Management Routes
+        Route::get('auction-panel', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'index'])->name('auction-panel.index');
+        Route::post('auction-panel/league/{league}/grant', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'grantAccess'])->name('auction-panel.grant');
+        Route::post('auction-panel/league/{league}/revoke', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'revokeAccess'])->name('auction-panel.revoke');
+        Route::post('auction-panel/bulk-grant', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'bulkGrantAccess'])->name('auction-panel.bulk-grant');
+        Route::post('auction-panel/bulk-revoke', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'bulkRevokeAccess'])->name('auction-panel.bulk-revoke');
+        Route::get('auction-panel/league/{league}/details', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'getLeagueDetails'])->name('auction-panel.league-details');
+        Route::get('auction-panel/stats', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'getStats'])->name('auction-panel.stats');
     });
 
+    // Auction access request route (placed before resource routes to avoid conflicts)
+    Route::post('leagues/{league}/request-auction-access', [LeagueController::class, 'requestAuctionAccess'])->name('leagues.request-auction-access')->middleware('auth');
+    
     // Leagues resource routes - only restrict create, store, edit, update, destroy to organizers
     Route::get('leagues/create', [LeagueController::class, 'create'])->name('leagues.create')->middleware('league.organizer');
     Route::post('leagues', [LeagueController::class, 'store'])->name('leagues.store')->middleware('league.organizer');

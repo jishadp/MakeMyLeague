@@ -437,41 +437,96 @@
                                     </div>
                                 </a>
                                 @else
-                                <a href="{{ route('auction.index', $league->slug) }}"
-                                    class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
+                                    @if($league->hasAuctionAccess() || auth()->user()->isAdmin())
+                                        <a href="{{ route('auction.index', $league->slug) }}"
+                                            class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
 
-                                    <!-- Background Pattern -->
-                                    <div class="absolute inset-0 opacity-5">
-                                        <div
-                                            class="absolute top-2 right-2 w-12 h-12 bg-amber-600 rounded-full transform translate-x-6 -translate-y-6">
-                                        </div>
-                                        <div
-                                            class="absolute bottom-2 left-2 w-8 h-8 bg-orange-400 rounded-full transform -translate-x-4 translate-y-4">
-                                        </div>
-                                    </div>
+                                            <!-- Background Pattern -->
+                                            <div class="absolute inset-0 opacity-5">
+                                                <div
+                                                    class="absolute top-2 right-2 w-12 h-12 bg-amber-600 rounded-full transform translate-x-6 -translate-y-6">
+                                                </div>
+                                                <div
+                                                    class="absolute bottom-2 left-2 w-8 h-8 bg-orange-400 rounded-full transform -translate-x-4 translate-y-4">
+                                                </div>
+                                            </div>
 
-                                    <!-- Icon Container -->
-                                    <div
-                                        class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
-                                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
-                                            </path>
-                                        </svg>
-                                    </div>
+                                            <!-- Icon Container -->
+                                            <div
+                                                class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">
+                                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
+                                                    </path>
+                                                </svg>
+                                            </div>
 
-                                    <!-- Content -->
-                                    <div class="relative z-10 text-center">
-                                        <h3 class="text-sm sm:text-base font-semibold text-amber-800 mb-1">Auction</h3>
-                                        <div class="flex items-center justify-center">
-                                            <span
-                                                class="text-xs text-amber-600 font-medium bg-white/60 px-2 py-1 rounded-full">
-                                                Live Bidding
-                                            </span>
+                                            <!-- Content -->
+                                            <div class="relative z-10 text-center">
+                                                <h3 class="text-sm sm:text-base font-semibold text-amber-800 mb-1">Auction</h3>
+                                                <div class="flex items-center justify-center">
+                                                    <span
+                                                        class="text-xs text-amber-600 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                        Live Bidding
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @else
+                                        <!-- Auction Access Request Card -->
+                                        <div class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 text-gray-600 rounded-xl border border-gray-200 overflow-hidden">
+                                            <!-- Background Pattern -->
+                                            <div class="absolute inset-0 opacity-5">
+                                                <div
+                                                    class="absolute top-2 right-2 w-12 h-12 bg-gray-400 rounded-full transform translate-x-6 -translate-y-6">
+                                                </div>
+                                                <div
+                                                    class="absolute bottom-2 left-2 w-8 h-8 bg-gray-500 rounded-full transform -translate-x-4 translate-y-4">
+                                                </div>
+                                            </div>
+
+                                            <!-- Icon Container -->
+                                            <div
+                                                class="relative z-10 p-3 bg-white/50 backdrop-blur-sm rounded-full mb-3">
+                                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+
+                                            <!-- Content -->
+                                            <div class="relative z-10 text-center">
+                                                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Auction</h3>
+                                                <div class="flex items-center justify-center mb-2">
+                                                    <span
+                                                        class="text-xs text-gray-500 font-medium bg-white/60 px-2 py-1 rounded-full">
+                                                        Access Restricted
+                                                    </span>
+                                                </div>
+                                                @if(auth()->user()->isOrganizerForLeague($league->id))
+                                                    @if($league->hasAuctionAccessRequested())
+                                                        <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-lg">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                            </svg>
+                                                            Request Pending
+                                                        </span>
+                                                    @else
+                                                        <button onclick="requestAuctionAccess({{ $league->id }}, '{{ $league->name }}')"
+                                                                class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                            </svg>
+                                                            Request Access
+                                                        </button>
+                                                    @endif
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                </a>
+                                    @endif
                                 @endif
 
 
@@ -1252,6 +1307,87 @@
     </div>
 
 
+    <!-- Auction Access Request Modal -->
+    <div id="auctionAccessRequestModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 max-w-lg shadow-lg rounded-lg bg-white">
+            <div class="mt-3">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Request Auction Access</h3>
+                    <button onclick="closeAuctionAccessRequestModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="mb-6">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">Auction Access Requirement</h3>
+                                <p class="mt-2 text-sm text-yellow-700">
+                                    Auction access requires an additional cost. Your request will be reviewed by the admin.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-medium text-blue-900 mb-2">League Requirements:</h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                All teams must be registered
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                All players must be approved
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                All teams must have auctioneers assigned
+                            </li>
+                        </ul>
+                    </div>
+
+                    <p class="text-gray-700 mt-4">
+                        Are you sure you want to request auction access for <strong>{{ $league->name }}</strong>?
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeAuctionAccessRequestModal()" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmAuctionAccessRequest()" id="confirmAuctionAccessBtn"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <span class="flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Send Request
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bid Increment Modal -->
     <div id="auctionRulesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
         <div
@@ -1543,8 +1679,8 @@
             </div>
         </div>
 
-        <!-- Complete Auction Section (only show if auction is active) -->
-        @if($league->status === 'active')
+        <!-- Complete Auction Section (only show if auction is active and access is granted) -->
+        @if($league->status === 'active' && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1577,8 +1713,8 @@
         </div>
         @endif
 
-        <!-- Completed Auction Information (only show if auction is completed) -->
-        @if($league->status === 'auction_completed')
+        <!-- Completed Auction Information (only show if auction is completed and access is granted) -->
+        @if($league->status === 'auction_completed' && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1613,8 +1749,8 @@
         </div>
         @endif
 
-        <!-- Reset Auction Section (only show when auction is completed or active) -->
-        @if(in_array($league->status, ['auction_completed', 'active']))
+        <!-- Reset Auction Section (only show when auction is completed or active and access is granted) -->
+        @if(in_array($league->status, ['auction_completed', 'active']) && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
         <div class="bg-red-50 border border-red-200 rounded-xl p-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1994,6 +2130,123 @@
             notification.querySelector('.bg-white').classList.remove('border-l-4', 'border-green-500', 'border-red-500',
                 'border-blue-500');
         }
+
+        // Auction Access Request Function
+        function requestAuctionAccess(leagueId, leagueName) {
+            // Show modal instead of confirm
+            document.getElementById('auctionAccessRequestModal').classList.remove('hidden');
+        }
+
+        function closeAuctionAccessRequestModal() {
+            document.getElementById('auctionAccessRequestModal').classList.add('hidden');
+        }
+
+        function confirmAuctionAccessRequest() {
+            const confirmBtn = document.getElementById('confirmAuctionAccessBtn');
+            const originalHTML = confirmBtn.innerHTML;
+            
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sending...';
+
+            fetch(`/leagues/{{ $league->slug }}/request-auction-access`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeAuctionAccessRequestModal();
+                    showNotification(data.message, 'success');
+                    // Reload the page to update the UI
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    closeAuctionAccessRequestModal();
+                    
+                    // Show errors in a nice modal
+                    let errorMessage = data.message || 'Failed to send auction access request';
+                    let errorDetails = '';
+                    
+                    if (data.errors && Array.isArray(data.errors)) {
+                        errorDetails = '<ul class="list-disc list-inside mt-2 space-y-1">';
+                        data.errors.forEach(err => {
+                            errorDetails += `<li class="text-sm">${err}</li>`;
+                        });
+                        errorDetails += '</ul>';
+                    }
+                    
+                    showErrorModal(errorMessage, errorDetails);
+                    
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = originalHTML;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                closeAuctionAccessRequestModal();
+                showNotification('An error occurred while sending the request', 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalHTML;
+            });
+        }
+
+        function showErrorModal(message, details) {
+            const errorModal = document.createElement('div');
+            errorModal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center';
+            errorModal.innerHTML = `
+                <div class="relative mx-auto p-5 border w-11/12 md:w-1/2 max-w-lg shadow-lg rounded-lg bg-white">
+                    <div class="mt-3">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-red-900">Request Failed</h3>
+                            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">${message}</h3>
+                                    <div class="mt-2 text-sm text-red-700">${details}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(errorModal);
+            
+            // Close modal when clicking outside
+            errorModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('auctionAccessRequestModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAuctionAccessRequestModal();
+            }
+        });
 
         // Initialize modal event listeners when modal opens
         function initializeModalEvents() {

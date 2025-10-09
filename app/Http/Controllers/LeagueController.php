@@ -659,4 +659,100 @@ class LeagueController
             LeagueFinance::create($data);
         }
     }
+
+    /**
+     * Request auction access for a league.
+     */
+    public function requestAuctionAccess(Request $request, League $league): JsonResponse
+    {
+        // Check if user is an organizer for this league
+        if (!auth()->user()->isOrganizerForLeague($league->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to request auction access for this league.'
+            ], 403);
+        }
+
+        // Check if auction access has already been requested
+        if ($league->hasAuctionAccessRequested()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Auction access has already been requested for this league.'
+            ], 400);
+        }
+
+        // Check if auction access is already granted
+        if ($league->hasAuctionAccess()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Auction access has already been granted for this league.'
+            ], 400);
+        }
+
+        // Validate league criteria before allowing auction access request
+        $errors = [];
+        
+        // Check if teams are full
+        $teamsCount = $league->leagueTeams()->count();
+        if ($teamsCount < $league->max_teams) {
+            $errors[] = "League must have all {$league->max_teams} teams registered. Currently has {$teamsCount} team(s).";
+        }
+
+        // Check if players are full (max_teams * max_team_players)
+        $totalPlayersRequired = $league->max_teams * $league->max_team_players;
+        $approvedPlayersCount = $league->leaguePlayers()->where('status', '!=', 'pending')->count();
+        
+        if ($approvedPlayersCount < $totalPlayersRequired) {
+            $errors[] = "League must have all {$totalPlayersRequired} players registered and approved. Currently has {$approvedPlayersCount} approved player(s).";
+        }
+
+        // Check if all teams have auctioneers assigned
+        // Skip teams where:
+        // 1. The team has an owner AND
+        // 2. That owner has set this team as their default team (they'll bid for themselves)
+        $teamsWithoutAuctioneers = $league->leagueTeams()
+            ->with('team.owners')
+            ->whereNull('auctioneer_id')
+            ->get()
+            ->filter(function($leagueTeam) {
+                // Get the team's owners
+                $teamOwners = $leagueTeam->team->owners ?? collect();
+                
+                // If team has no owners, it needs an auctioneer
+                if ($teamOwners->isEmpty()) {
+                    return true;
+                }
+                
+                // Check if any owner has this team as their default team
+                $hasOwnerWithThisAsDefault = $teamOwners->contains(function($owner) use ($leagueTeam) {
+                    return $owner->default_team_id == $leagueTeam->team_id;
+                });
+                
+                // If an owner has this as their default team, they'll be the auctioneer - skip this team
+                // Otherwise, this team needs an auctioneer assigned
+                return !$hasOwnerWithThisAsDefault;
+            })
+            ->count();
+            
+        if ($teamsWithoutAuctioneers > 0) {
+            $errors[] = "All teams must have an auctioneer assigned (or have an owner who has set them as their default team). {$teamsWithoutAuctioneers} team(s) are missing auctioneers.";
+        }
+
+        // If there are validation errors, return them
+        if (!empty($errors)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'League does not meet auction requirements:',
+                'errors' => $errors
+            ], 400);
+        }
+
+        // Request auction access
+        $league->requestAuctionAccess();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Auction access request sent successfully! The admin will review your request.'
+        ]);
+    }
 }
