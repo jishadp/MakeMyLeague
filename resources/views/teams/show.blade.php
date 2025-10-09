@@ -36,11 +36,11 @@
             <!-- Hero Image Section -->
             <div class="relative h-48 overflow-hidden">
                 @if($team->banner)
-                    <img src="{{ asset($team->banner) }}" alt="{{ $team->name }} Banner" 
+                    <img src="{{ asset('storage/' . $team->banner) }}" alt="{{ $team->name }} Banner" 
                          class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                 @elseif($team->logo)
-                    <img src="{{ asset($team->logo) }}" alt="{{ $team->name }} Logo" 
+                    <img src="{{ asset('storage/' . $team->logo) }}" alt="{{ $team->name }} Logo" 
                          class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                 @else
@@ -67,7 +67,7 @@
                     <div class="absolute bottom-4 left-4 right-4">
                         <div class="flex items-center space-x-3">
                             @if($team->logo)
-                                <img src="{{ asset($team->logo) }}" alt="{{ $team->name }} Logo" 
+                                <img src="{{ asset('storage/' . $team->logo) }}" alt="{{ $team->name }} Logo" 
                                      class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
                             @endif
                             <div>

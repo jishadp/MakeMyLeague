@@ -78,7 +78,6 @@
                             <span class="text-gray-600 font-medium">Account Status</span>
                             <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Active</span>
                         </div>
-                        @if($user->roles->isNotEmpty())
                         <div class="flex justify-between items-center py-3 border-b border-gray-100">
                             <span class="text-gray-600 font-medium">Roles</span>
                             <div class="flex flex-wrap gap-2">
@@ -91,14 +90,13 @@
                                 @if($user->isTeamOwner()) 
                                     <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">Team Owner</span>
                                 @endif
-                                @if($user->isPlayer()) 
+                                @if($user->gameRoles->isNotEmpty() || $user->position_id)
                                     <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Player</span>
                                 @endif
                             </div>
                         </div>
-                        @endif
                         
-                        @if($user->isPlayer())
+                        @if($user->gameRoles->isNotEmpty() || $user->position_id)
                         <div class="flex justify-between items-center py-3 border-b border-gray-100">
                             <span class="text-gray-600 font-medium">Player Profile</span>
                             <a href="{{ route('players.show', $user) }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg">
