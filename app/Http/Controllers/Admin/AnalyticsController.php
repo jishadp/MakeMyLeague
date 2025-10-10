@@ -241,7 +241,8 @@ class AnalyticsController extends Controller
                     ->merge($leagueLogs)
                     ->merge($auctionLogs);
 
-        return $logs->sortByDesc('timestamp')->take(50);
+        // Sort by timestamp and paginate (10 per page)
+        return $logs->sortByDesc('timestamp')->paginate(10);
     }
 
     /**

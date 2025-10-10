@@ -204,6 +204,13 @@
                     </div>
                 @endforelse
             </div>
+
+            <!-- Pagination -->
+            @if($activityLogs->hasPages())
+                <div class="mt-6 flex justify-center">
+                    {{ $activityLogs->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
