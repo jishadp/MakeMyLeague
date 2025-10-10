@@ -241,8 +241,30 @@ class AnalyticsController extends Controller
                     ->merge($leagueLogs)
                     ->merge($auctionLogs);
 
-        // Sort by timestamp and paginate (10 per page)
-        return $logs->sortByDesc('timestamp')->paginate(10);
+        // Sort by timestamp and paginate manually (10 per page)
+        $sortedLogs = $logs->sortByDesc('timestamp');
+
+        // Get current page from request, default to 1
+        $currentPage = request('page', 1);
+        $perPage = 10;
+
+        // Calculate offset
+        $offset = ($currentPage - 1) * $perPage;
+
+        // Get items for current page
+        $items = $sortedLogs->slice($offset, $perPage);
+
+        // Create a LengthAwarePaginator manually
+        $total = $sortedLogs->count();
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'pageName' => 'page']
+        );
+
+        return $paginator;
     }
 
     /**
