@@ -66,7 +66,7 @@
                             <div class="flex items-center space-x-3">
                                 <div class="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
                                     @if($leaguePlayer->player->photo)
-                                        <img src="{{ asset($leaguePlayer->player->photo) }}"
+                                        <img src="{{ asset('storage/' . $leaguePlayer->player->photo) }}"
                                              alt="{{$leaguePlayer->player->name}}"
                                              class="w-full h-full object-cover"
                                              onerror="handleImageError(this);">

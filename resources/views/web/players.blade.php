@@ -10,13 +10,12 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            @foreach($featuredPlayers as $player)
                 <div class="group relative text-center rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 overflow-hidden border border-gray-100">
                     <div class="bg-gradient-to-br from-indigo-500 to-purple-600 h-32 flex items-center justify-center relative overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center">
                             <div class="w-16 h-16 rounded-full overflow-hidden bg-white bg-opacity-20 flex items-center justify-center">
                                 @if($player->photo)
-                                    <img src="{{ asset($player->photo) }}" 
+                                    <img src="{{ asset('storage/' . $player->photo) }}" 
                                          alt="{{ $player->name }}" 
                                          class="w-full h-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -25,7 +24,6 @@
                                          alt="{{ $player->name }}" 
                                          class="w-full h-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                @endif
                                 <div class="w-full h-full flex items-center justify-center text-white font-bold text-sm" style="display: none;">
                                     {{ strtoupper(substr($player->name, 0, 2)) }}
                                 </div>

@@ -694,7 +694,7 @@
                             <div class="flex flex-col items-center text-center">
                                 <div class="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-lg">
                                     @if($playerInfo->photo)
-                                        <img src="{{ asset($playerInfo->photo) }}"
+                                        <img src="{{ asset('storage/' . $playerInfo->photo) }}"
                                              alt="{{ $playerInfo->name }}"
                                              class="w-full h-full object-cover"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

@@ -126,7 +126,7 @@
                                         <div class="relative flex-shrink-0">
                                             <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
                                                 @if($currentPlayer->player && $currentPlayer->player->photo)
-                                                    <img src="{{ asset($currentPlayer->player->photo) }}"
+                                                    <img src="{{ asset('storage/' . $currentPlayer->player->photo) }}"
                                                          alt="{{ $currentPlayer->player->name }}"
                                                          class="w-full h-full object-cover rounded-3xl"
                                                          onerror="handleImageError(this);">

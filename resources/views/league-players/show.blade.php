@@ -6,13 +6,12 @@
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div class="flex items-center space-x-4">
                     <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         @if($leaguePlayer->user->photo)
-                            <img src="{{ asset($leaguePlayer->user->photo) }}" 
+                            <img src="{{ asset('storage/' . $leaguePlayer->user->photo) }}" 
                                  alt="{{ $leaguePlayer->user->name }}" 
                                  class="w-full h-full object-cover"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
