@@ -48,17 +48,14 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get live auctions (leagues with active status and auction_active = true, or active leagues with available players)
+        // Get live auctions - only show when auction is actually started
+        // Conditions: auction_access_granted = true, auction_active = true, and auction_started_at is not null
         $liveAuctions = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
         })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
-            ->where('status', 'active')
-            ->where(function($query) {
-                $query->where('auction_active', true)
-                      ->orWhereHas('leaguePlayers', function($subQuery) {
-                          $subQuery->where('status', 'available');
-                      });
-            })
+            ->where('auction_access_granted', true)
+            ->where('auction_active', true)
+            ->whereNotNull('auction_started_at')
             ->get();
 
         // Get past auctions (completed auction bids with relationships)
@@ -71,11 +68,12 @@ class DashboardController
         ->latest()
         ->paginate(10);
 
-        // Get upcoming auctions (leagues that are pending and have auction_active = false)
+        // Get upcoming auctions - show leagues with auction access granted but not yet started
+        // Conditions: auction_access_granted = true, auction_active = false
         $upcomingAuctions = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
         })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
-            ->where('status', 'pending')
+            ->where('auction_access_granted', true)
             ->where('auction_active', false)
             ->latest()
             ->get();
