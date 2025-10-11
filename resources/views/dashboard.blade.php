@@ -47,119 +47,91 @@
                 </div>
             </div>
 
-            <!-- Stats Grid - Futuristic 3D Style -->
-            <div class="space-y-3 sm:space-y-4">
-                <!-- Active Leagues - Full Width - 3D Holographic Card -->
-                <div class="stat-card-3d group relative bg-gradient-to-br from-cyan-500/20 via-purple-600/20 to-pink-500/20 backdrop-blur-xl border-2 border-cyan-400/50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 overflow-hidden transition-all duration-500 hover:scale-[1.03] hover:border-cyan-300 hover:shadow-xl">
-                    <!-- Animated Background Pattern -->
-                    <div class="absolute inset-0 opacity-30">
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-shimmer"></div>
-                    </div>
-                    
-                    <!-- Holographic Top Edge -->
-                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80"></div>
-                    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-80"></div>
-                    
-                    <div class="relative z-10 flex items-center justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                                <div class="text-cyan-300 text-xs sm:text-sm font-bold uppercase tracking-widest">Active Leagues</div>
-                            </div>
-                            <div class="text-5xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 mb-2">{{ $quickStats['active_leagues'] }}</div>
-                            <div class="text-gray-300 text-xs sm:text-sm">Currently running competitions</div>
+            <!-- Stats Card - Tabbed Interface -->
+            <div class="stats-crypto-card">
+                <div class="card-header">
+                    <div class="card-logo">MakeMyLeague</div>
+                    <div class="card-open">STATS</div>
+                </div>
+
+                <!-- Tab Switcher -->
+                <div class="crypto-switch">
+                    <input type="radio" name="stat-tab" id="leagues" checked>
+                    <label for="leagues">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Leagues</span>
+                    </label>
+
+                    <input type="radio" name="stat-tab" id="teams">
+                    <label for="teams">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Teams</span>
+                    </label>
+
+                    <input type="radio" name="stat-tab" id="players">
+                    <label for="players">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="hidden sm:inline">Players</span>
+                    </label>
+
+                    <div class="slider"></div>
+                </div>
+
+                <!-- Stats Content -->
+                <div class="price-infos">
+                    <!-- Leagues Stats -->
+                    <div class="price-info leagues">
+                        <div class="stat-value stat-leagues">{{ $quickStats['active_leagues'] }}</div>
+                        <div class="stat-label">Active Leagues</div>
+                        <div class="stats">
+                            <span class="text-gray-400 text-sm">Total in platform</span>
+                            <span class="change change-purple">⚡ Live Now</span>
                         </div>
-                        <div class="relative">
-                            <div class="w-20 h-20 sm:w-28 sm:h-28 relative transform-3d group-hover:rotate-y-12 transition-transform duration-500">
-                                <!-- 3D Icon Container with Depth -->
-                                <div class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl opacity-30 blur-xl group-hover:blur-2xl transition-all"></div>
-                                <div class="relative w-full h-full bg-gradient-to-br from-cyan-400/30 to-purple-500/30 backdrop-blur-sm border-2 border-cyan-400/50 rounded-2xl flex items-center justify-center shadow-xl transition-all">
-                                    <svg class="w-10 h-10 sm:w-14 sm:h-14 text-cyan-300 group-hover:text-cyan-200 transition-colors animate-float" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
-                                    </svg>
-                                </div>
-                            </div>
+                    </div>
+
+                    <!-- Teams Stats -->
+                    <div class="price-info teams">
+                        <div class="stat-value stat-teams">{{ number_format($quickStats['total_teams']) }}</div>
+                        <div class="stat-label">Total Teams</div>
+                        <div class="stats">
+                            <span class="text-gray-400 text-sm">Registered teams</span>
+                            <span class="change change-indigo">+{{ $quickStats['total_teams'] }}</span>
                         </div>
                     </div>
-                    
-                    <!-- Futuristic Progress Bar -->
-                    <div class="relative z-10 mt-5 h-3 w-full bg-black/40 rounded-full overflow-hidden border border-cyan-500/30 shadow-inner">
-                        <div class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full relative" style="width: {{ $quickStats['active_leagues'] > 0 ? min(($quickStats['active_leagues'] / 10) * 100, 100) : 5 }}%">
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+
+                    <!-- Players Stats -->
+                    <div class="price-info players">
+                        <div class="stat-value stat-players">{{ number_format($quickStats['players_registered']) }}</div>
+                        <div class="stat-label">Total Players</div>
+                        <div class="stats">
+                            <span class="text-gray-400 text-sm">Registered users</span>
+                            <span class="change change-pink">+{{ $quickStats['players_registered'] }}</span>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Total Teams and Players - Two Columns - 3D Cards -->
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <!-- Teams Card -->
-                    <div class="stat-card-3d group relative bg-gradient-to-br from-orange-500/20 via-amber-600/20 to-red-500/20 backdrop-blur-xl border-2 border-orange-400/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-hidden transition-all duration-500 hover:scale-105 hover:border-orange-300 hover:shadow-xl">
-                        <!-- Animated Grid Background -->
-                        <div class="absolute inset-0 opacity-20">
-                            <div class="absolute inset-0 bg-[linear-gradient(to_right,#f97316_20_1px,transparent_1px),linear-gradient(to_bottom,#f97316_20_1px,transparent_1px)] bg-[size:20px_20px] animate-grid-move"></div>
-                        </div>
-                        
-                        <!-- Top Line -->
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent"></div>
-                        
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-center mb-3 sm:mb-4">
-                                <div class="relative w-12 h-12 sm:w-16 sm:h-16">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl opacity-30 blur-lg group-hover:blur-xl transition-all"></div>
-                                    <div class="relative w-full h-full bg-gradient-to-br from-orange-400/30 to-amber-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-xl flex items-center justify-center shadow-lg transition-all transform group-hover:-rotate-6">
-                                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-orange-300 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-amber-300 mb-1">{{ number_format($quickStats['total_teams']) }}</div>
-                                <div class="text-orange-200 text-xs sm:text-sm font-bold uppercase tracking-wider">Total Teams</div>
-                            </div>
-                            <!-- Mini Progress Bar -->
-                            <div class="mt-3 sm:mt-4 h-2 w-full bg-black/40 rounded-full overflow-hidden border border-orange-500/30">
-                                <div class="h-full bg-gradient-to-r from-orange-500 to-amber-500 w-3/4 rounded-full relative">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer-fast"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+                <!-- Chart Visualization -->
+                <div class="chart">
+                    <!-- Leagues Chart -->
+                    <svg id="chart-leagues" viewBox="0 0 320 90" preserveAspectRatio="none">
+                        <path d="M0,70 Q80,20 160,45 T320,30" />
+                    </svg>
                     
-                    <!-- Players Card -->
-                    <div class="stat-card-3d group relative bg-gradient-to-br from-emerald-500/20 via-green-600/20 to-teal-500/20 backdrop-blur-xl border-2 border-emerald-400/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-hidden transition-all duration-500 hover:scale-105 hover:border-emerald-300 hover:shadow-xl">
-                        <!-- Animated Circle Background -->
-                        <div class="absolute inset-0 opacity-20">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/30 rounded-full blur-3xl animate-pulse-slow"></div>
-                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-green-500/30 rounded-full blur-2xl animate-pulse-slow animation-delay-1000"></div>
-                        </div>
-                        
-                        <!-- Top Line -->
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent"></div>
-                        
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-center mb-3 sm:mb-4">
-                                <div class="relative w-12 h-12 sm:w-16 sm:h-16">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl opacity-30 blur-lg group-hover:blur-xl transition-all"></div>
-                                    <div class="relative w-full h-full bg-gradient-to-br from-emerald-400/30 to-teal-500/30 backdrop-blur-sm border-2 border-emerald-400/50 rounded-xl flex items-center justify-center shadow-lg transition-all transform group-hover:rotate-6">
-                                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-300 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-1">{{ number_format($quickStats['players_registered']) }}</div>
-                                <div class="text-emerald-200 text-xs sm:text-sm font-bold uppercase tracking-wider">Total Users</div>
-                            </div>
-                            <!-- Mini Progress Bar -->
-                            <div class="mt-3 sm:mt-4 h-2 w-full bg-black/40 rounded-full overflow-hidden border border-emerald-500/30">
-                                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 w-4/5 rounded-full relative">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer-fast"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Teams Chart -->
+                    <svg id="chart-teams" viewBox="0 0 320 90" preserveAspectRatio="none">
+                        <path d="M0,60 Q80,30 160,50 T320,25" />
+                    </svg>
+                    
+                    <!-- Players Chart -->
+                    <svg id="chart-players" viewBox="0 0 320 90" preserveAspectRatio="none">
+                        <path d="M0,65 Q80,35 160,40 T320,20" />
+                    </svg>
                 </div>
             </div>
             </div>
@@ -1229,6 +1201,320 @@ function switchTab(tab) {
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
+/* Crypto Card Styles */
+.stats-crypto-card {
+    max-width: 100%;
+    width: 100%;
+    padding: 18px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+    color: #1f2937;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.1);
+    border: 2px solid rgba(168, 85, 247, 0.1);
+}
+
+@media (min-width: 640px) {
+    .stats-crypto-card {
+        max-width: 400px;
+        padding: 25px;
+        border-radius: 35px;
+    }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.card-logo {
+    font-weight: bold;
+    font-size: 1em;
+    background: linear-gradient(to right, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@media (min-width: 640px) {
+    .card-logo {
+        font-size: 1.2em;
+    }
+}
+
+.card-open {
+    font-size: 0.75em;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+@media (min-width: 640px) {
+    .card-open {
+        font-size: 0.85em;
+    }
+}
+
+.card-open:hover {
+    color: #6366f1;
+}
+
+.crypto-switch {
+    position: relative;
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 16px;
+    user-select: none;
+    border: 1px solid #e5e7eb;
+}
+
+@media (min-width: 640px) {
+    .crypto-switch {
+        gap: 8px;
+    }
+}
+
+.crypto-switch input {
+    display: none;
+}
+
+.crypto-switch label {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 16px;
+    cursor: pointer;
+    color: #9ca3af;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.3s;
+    font-size: 0.75em;
+    z-index: 2;
+    position: relative;
+}
+
+@media (min-width: 640px) {
+    .crypto-switch label {
+        padding: 10px 0;
+        gap: 6px;
+        font-size: 0.9em;
+    }
+}
+
+.crypto-switch input:checked + label {
+    color: #ffffff;
+}
+
+.crypto-switch input:hover + label {
+    color: #6b7280;
+}
+
+.crypto-switch .slider {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: calc((100% - 16px) / 3);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    backdrop-filter: blur(1px);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 16px;
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.3),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.crypto-switch input:hover + label {
+    color: #ffffff;
+}
+
+#leagues:checked ~ .slider {
+    transform: translateX(0%);
+}
+
+#teams:checked ~ .slider {
+    transform: translateX(108%);
+}
+
+#players:checked ~ .slider {
+    transform: translateX(216%);
+}
+
+.price-infos {
+    margin-bottom: 16px;
+}
+
+.price-info {
+    display: none;
+}
+
+.price-info .stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+@media (min-width: 640px) {
+    .price-info .stat-value {
+        font-size: 2.5em;
+    }
+}
+
+/* Color-coded stat values */
+.stat-leagues {
+    background: linear-gradient(to right, #a855f7, #d946ef);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-teams {
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-players {
+    background: linear-gradient(to right, #ec4899, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.price-info .stat-label {
+    font-size: 0.85em;
+    color: #6b7280;
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (min-width: 640px) {
+    .price-info .stat-label {
+        font-size: 0.95em;
+    }
+}
+
+.price-info .stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: #4b5563;
+}
+
+@media (min-width: 640px) {
+    .price-info .stats {
+        font-size: 0.9em;
+    }
+}
+
+.price-info .change {
+    font-weight: bold;
+}
+
+.change-purple {
+    color: #a855f7;
+}
+
+.change-indigo {
+    color: #6366f1;
+}
+
+.change-pink {
+    color: #ec4899;
+}
+
+.chart {
+    height: 70px;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+}
+
+@media (min-width: 640px) {
+    .chart {
+        height: 90px;
+    }
+}
+
+.chart svg {
+    width: 100%;
+    height: 100%;
+    display: none;
+    transform: translateX(2px) scale(1.05);
+}
+
+.chart path {
+    stroke: #a855f7;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: draw 2s forwards;
+    fill: rgba(168, 85, 247, 0.2);
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Show chart based on selected tab */
+.stats-crypto-card:has(#leagues:checked) .chart #chart-leagues {
+    display: block;
+}
+
+.stats-crypto-card:has(#leagues:checked) .chart path {
+    stroke: #a855f7;
+    fill: rgba(168, 85, 247, 0.2);
+}
+
+.stats-crypto-card:has(#teams:checked) .chart #chart-teams {
+    display: block;
+}
+
+.stats-crypto-card:has(#teams:checked) .chart path {
+    stroke: #6366f1;
+    fill: rgba(99, 102, 241, 0.2);
+}
+
+.stats-crypto-card:has(#players:checked) .chart #chart-players {
+    display: block;
+}
+
+.stats-crypto-card:has(#players:checked) .chart path {
+    stroke: #ec4899;
+    fill: rgba(236, 72, 153, 0.2);
+}
+
+/* Show price info based on selected tab */
+.stats-crypto-card:has(#leagues:checked) .price-info.leagues {
+    display: block;
+}
+
+.stats-crypto-card:has(#teams:checked) .price-info.teams {
+    display: block;
+}
+
+.stats-crypto-card:has(#players:checked) .price-info.players {
+    display: block;
+}
+
 /* Futuristic 3D Animations */
 @keyframes shimmer {
     0% { transform: translateX(-100%); }
@@ -1278,27 +1564,6 @@ function switchTab(tab) {
 .animate-grid-move { animation: grid-move 2s linear infinite; }
 .animation-delay-1000 { animation-delay: 1s; }
 
-/* 3D Card Effects */
-.stat-card-3d {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-    box-shadow: 
-        0 0 40px rgba(0, 0, 0, 0.3),
-        0 10px 30px -10px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.stat-card-3d:hover {
-    transform: translateY(-5px) rotateX(2deg);
-}
-
-.transform-3d {
-    transform-style: preserve-3d;
-}
-
-/* Clean Text - No Neon */
-/* Text effects removed for cleaner look */
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
@@ -1312,15 +1577,6 @@ function switchTab(tab) {
 /* Tab Transition */
 .tab-content { animation: fadeIn 0.3s ease-in-out; }
 
-/* Mobile Optimization */
-@media (max-width: 640px) {
-    .stat-card-3d {
-        box-shadow: 
-            0 0 20px rgba(0, 0, 0, 0.2),
-            0 5px 15px -5px rgba(0, 0, 0, 0.4);
-    }
-}
-
 /* Responsive 3D Effects - Reduced on mobile for performance */
 @media (prefers-reduced-motion: reduce) {
     .animate-shimmer,
@@ -1330,10 +1586,6 @@ function switchTab(tab) {
     .animate-pulse-slow,
     .animate-grid-move {
         animation: none;
-    }
-    
-    .stat-card-3d:hover {
-        transform: translateY(-2px);
     }
 }
     </style>
