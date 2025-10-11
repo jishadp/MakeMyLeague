@@ -49,6 +49,19 @@
                 <div class="w-16 h-6 opacity-0">Spacer</div>
             </div>
 
+            
+            <!-- My Teams Button -->
+            <a href="{{ route('my-teams') }}"
+               class="nav-item flex flex-col items-center justify-center p-2
+                      text-white/80 hover:text-white transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-6 w-6 drop-shadow"
+                     viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                </svg>
+                <span class="text-xs mt-1">My Teams</span>
+            </a>
+
             <!-- Profile Button -->
             <a href="{{ route('profile.show') }}"
                class="nav-item flex flex-col items-center justify-center p-2
@@ -61,17 +74,6 @@
                 <span class="text-xs mt-1">Profile</span>
             </a>
 
-            <!-- My Teams Button -->
-            <a href="{{ route('my-teams') }}"
-               class="nav-item flex flex-col items-center justify-center p-2
-                      text-white/80 hover:text-white transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="h-6 w-6 drop-shadow"
-                     viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                </svg>
-                <span class="text-xs mt-1">My Teams</span>
-            </a>
         </div>
     </div>
 </div>
