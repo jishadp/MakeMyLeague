@@ -16,6 +16,12 @@
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl font-black text-gray-900">League Details</h1>
                 <div class="flex gap-3">
+                    <a href="{{ route('admin.leagues.flow', $league) }}" class="inline-flex items-center px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Progress Flow
+                    </a>
                     <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -27,6 +33,36 @@
                         Edit League
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Progress Summary Card -->
+        @php
+            $completion = $league->getCompletionPercentage();
+            $currentStage = $league->getCurrentStage();
+            $progressColor = $completion >= 75 ? 'bg-green-500' : ($completion >= 50 ? 'bg-yellow-500' : ($completion >= 25 ? 'bg-orange-500' : 'bg-red-500'));
+        @endphp
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl shadow-2xl p-6 mb-6">
+            <div class="flex items-center justify-between text-white mb-4">
+                <div>
+                    <h2 class="text-2xl font-bold mb-1">League Progress</h2>
+                    <p class="text-purple-100">Current Stage: <span class="font-semibold">{{ $currentStage['name'] }}</span></p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-black">{{ $completion }}%</div>
+                    <div class="text-sm text-purple-100">Complete</div>
+                </div>
+            </div>
+            <div class="relative h-4 bg-white bg-opacity-20 rounded-full overflow-hidden">
+                <div class="{{ $progressColor }} h-full transition-all duration-1000" style="width: {{ $completion }}%"></div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <a href="{{ route('admin.leagues.flow', $league) }}" class="inline-flex items-center px-4 py-2 bg-white text-purple-600 rounded-lg font-bold hover:bg-purple-50 transition-all">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    View Detailed Flow
+                </a>
             </div>
         </div>
 

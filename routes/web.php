@@ -198,6 +198,7 @@ Route::middleware('auth')->group(function () {
         // League Management Routes
         Route::get('leagues', [\App\Http\Controllers\Admin\LeagueController::class, 'index'])->name('leagues.index');
         Route::get('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'show'])->name('leagues.show');
+        Route::get('leagues/{league}/flow', [\App\Http\Controllers\Admin\LeagueController::class, 'flow'])->name('leagues.flow');
         Route::get('leagues/{league}/edit', [\App\Http\Controllers\Admin\LeagueController::class, 'edit'])->name('leagues.edit');
         Route::put('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'update'])->name('leagues.update');
         Route::patch('leagues/{league}/status', [\App\Http\Controllers\Admin\LeagueController::class, 'updateStatus'])->name('leagues.update-status');

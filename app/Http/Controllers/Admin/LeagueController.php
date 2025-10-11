@@ -244,5 +244,69 @@ class LeagueController extends Controller
 
         return response()->json($localBodies);
     }
+
+    /**
+     * Show league flow/progress tracking page.
+     */
+    public function flow(League $league)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $league->load([
+            'game',
+            'localBody.district.state',
+            'leagueTeams.team',
+            'leaguePlayers.user',
+            'organizers',
+            'fixtures',
+            'finances'
+        ]);
+
+        // Get progress tracking data
+        $progressStages = $league->getProgressTracking();
+        $completionPercentage = $league->getCompletionPercentage();
+        $currentStage = $league->getCurrentStage();
+
+        // Calculate individual stats - avoid nested arrays to prevent PHP issues
+        $teamsCurrent = $league->leagueTeams->count();
+        $teamsRequired = $league->max_teams;
+        
+        $playersCurrent = $league->leaguePlayers->whereIn('status', ['available', 'sold', 'unsold'])->count();
+        $playersRequired = $league->max_teams * $league->max_team_players;
+        
+        $auctionSold = $league->leaguePlayers->where('status', 'sold')->count();
+        $auctionUnsold = $league->leaguePlayers->where('status', 'unsold')->count();
+        $auctionAvailable = $league->leaguePlayers->where('status', 'available')->count();
+        
+        $fixturesTotal = $league->fixtures->count();
+        $fixturesCompleted = $league->fixtures->where('status', 'completed')->count();
+        
+        $financeIncome = $league->finances->where('type', 'income')->count();
+        $financeExpenses = $league->finances->where('type', 'expense')->count();
+        $financeTotalIncome = $league->finances->where('type', 'income')->sum('amount');
+        $financeTotalExpenses = $league->finances->where('type', 'expense')->sum('amount');
+        
+        return view('admin.leagues.flow', compact(
+            'league',
+            'progressStages',
+            'completionPercentage',
+            'currentStage',
+            'teamsCurrent',
+            'teamsRequired',
+            'playersCurrent',
+            'playersRequired',
+            'auctionSold',
+            'auctionUnsold',
+            'auctionAvailable',
+            'fixturesTotal',
+            'fixturesCompleted',
+            'financeIncome',
+            'financeExpenses',
+            'financeTotalIncome',
+            'financeTotalExpenses'
+        ));
+    }
 }
 

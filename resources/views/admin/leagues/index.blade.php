@@ -209,9 +209,19 @@
                                             <span class="text-purple-600 font-bold text-lg">{{ substr($league->name, 0, 1) }}</span>
                                         </div>
                                     @endif
-                                    <div>
+                                    <div class="flex-grow">
                                         <div class="font-bold text-gray-900">{{ $league->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($league->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($league->end_date)->format('M d, Y') }}</div>
+                                        <div class="text-sm text-gray-500 mb-1">{{ \Carbon\Carbon::parse($league->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($league->end_date)->format('M d, Y') }}</div>
+                                        @php
+                                            $completion = $league->getCompletionPercentage();
+                                            $progressColor = $completion >= 75 ? 'bg-green-500' : ($completion >= 50 ? 'bg-yellow-500' : ($completion >= 25 ? 'bg-orange-500' : 'bg-red-500'));
+                                        @endphp
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden" style="max-width: 120px;">
+                                                <div class="{{ $progressColor }} h-full transition-all" style="width: {{ $completion }}%"></div>
+                                            </div>
+                                            <span class="text-xs font-bold text-gray-600">{{ $completion }}%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -251,6 +261,11 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
+                                    <a href="{{ route('admin.leagues.flow', $league) }}" class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-lg shadow hover:shadow-lg transition-all" title="Progress Flow">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg shadow hover:shadow-lg transition-all" title="View as Organizer">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

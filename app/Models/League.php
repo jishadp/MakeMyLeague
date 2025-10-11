@@ -484,4 +484,174 @@ class League extends Model
             ->orderBy('updated_at', 'desc')
             ->get();
     }
+
+    /**
+     * Get league progress tracking data.
+     * Returns detailed progress for each stage of league setup.
+     */
+    public function getProgressTracking()
+    {
+        $stages = [
+            'league_created' => [
+                'name' => 'League Created',
+                'description' => 'Basic league information setup',
+                'completed' => true, // Always true if league exists
+                'progress' => 100,
+                'icon' => 'trophy',
+                'color' => 'blue',
+            ],
+            'teams_filled' => [
+                'name' => 'Teams Registered',
+                'description' => 'Register all required teams',
+                'completed' => false,
+                'progress' => 0,
+                'current' => 0,
+                'required' => $this->max_teams,
+                'icon' => 'users',
+                'color' => 'indigo',
+            ],
+            'players_filled' => [
+                'name' => 'Players Registered',
+                'description' => 'Register all required players',
+                'completed' => false,
+                'progress' => 0,
+                'current' => 0,
+                'required' => 0,
+                'icon' => 'user-group',
+                'color' => 'purple',
+            ],
+            'auction_complete' => [
+                'name' => 'Auction Complete',
+                'description' => 'Complete player auction',
+                'completed' => false,
+                'progress' => 0,
+                'icon' => 'currency-dollar',
+                'color' => 'green',
+            ],
+            'fixtures_complete' => [
+                'name' => 'Fixtures Created',
+                'description' => 'Create match fixtures',
+                'completed' => false,
+                'progress' => 0,
+                'current' => 0,
+                'required' => 0,
+                'icon' => 'calendar',
+                'color' => 'yellow',
+            ],
+            'finance_entered' => [
+                'name' => 'Finance Records',
+                'description' => 'Add income/expense records (Optional)',
+                'completed' => false,
+                'progress' => 0,
+                'current' => 0,
+                'icon' => 'chart-bar',
+                'color' => 'pink',
+                'optional' => true, // This doesn't count toward completion
+            ],
+        ];
+
+        // Calculate teams progress
+        $teamsCount = $this->leagueTeams()->count();
+        $stages['teams_filled']['current'] = $teamsCount;
+        $stages['teams_filled']['progress'] = $this->max_teams > 0 
+            ? min(100, round(($teamsCount / $this->max_teams) * 100)) 
+            : 0;
+        $stages['teams_filled']['completed'] = $teamsCount >= $this->max_teams;
+
+        // Calculate players progress
+        $totalPlayersRequired = $this->max_teams * $this->max_team_players;
+        $playersCount = $this->leaguePlayers()->whereIn('status', ['available', 'sold', 'unsold'])->count();
+        $stages['players_filled']['required'] = $totalPlayersRequired;
+        $stages['players_filled']['current'] = $playersCount;
+        $stages['players_filled']['progress'] = $totalPlayersRequired > 0 
+            ? min(100, round(($playersCount / $totalPlayersRequired) * 100)) 
+            : 0;
+        $stages['players_filled']['completed'] = $playersCount >= $totalPlayersRequired;
+
+        // Calculate auction progress
+        $soldPlayers = $this->leaguePlayers()->where('status', 'sold')->count();
+        $auctionPlayers = $this->leaguePlayers()->whereIn('status', ['available', 'sold', 'unsold'])->count();
+        if ($auctionPlayers > 0) {
+            $stages['auction_complete']['progress'] = min(100, round(($soldPlayers / $auctionPlayers) * 100));
+        }
+        $stages['auction_complete']['completed'] = $this->auction_ended_at !== null || 
+            ($auctionPlayers > 0 && $soldPlayers >= $auctionPlayers);
+
+        // Calculate fixtures progress
+        $fixturesCount = $this->fixtures()->count();
+        $stages['fixtures_complete']['current'] = $fixturesCount;
+        // Estimate: Each team should play at least (max_teams - 1) matches in a round-robin
+        $estimatedFixtures = max(1, $this->max_teams * ($this->max_teams - 1) / 2);
+        $stages['fixtures_complete']['required'] = $estimatedFixtures;
+        $stages['fixtures_complete']['progress'] = $fixturesCount > 0 
+            ? min(100, round(($fixturesCount / $estimatedFixtures) * 100)) 
+            : 0;
+        $stages['fixtures_complete']['completed'] = $fixturesCount > 0;
+
+        // Calculate finance progress (optional)
+        $financeCount = $this->finances()->count();
+        $stages['finance_entered']['current'] = $financeCount;
+        $stages['finance_entered']['progress'] = $financeCount > 0 ? 100 : 0;
+        $stages['finance_entered']['completed'] = $financeCount > 0;
+
+        return $stages;
+    }
+
+    /**
+     * Get overall league completion percentage.
+     * Excludes optional stages (finance).
+     */
+    public function getCompletionPercentage()
+    {
+        $stages = $this->getProgressTracking();
+        
+        // Filter out optional stages
+        $requiredStages = array_filter($stages, function($stage) {
+            return !isset($stage['optional']) || !$stage['optional'];
+        });
+
+        if (empty($requiredStages)) {
+            return 0;
+        }
+
+        $totalProgress = array_sum(array_column($requiredStages, 'progress'));
+        return round($totalProgress / count($requiredStages));
+    }
+
+    /**
+     * Get current stage of the league.
+     */
+    public function getCurrentStage()
+    {
+        $stages = $this->getProgressTracking();
+        
+        foreach ($stages as $key => $stage) {
+            // Skip optional stages
+            if (isset($stage['optional']) && $stage['optional']) {
+                continue;
+            }
+            
+            if (!$stage['completed']) {
+                return [
+                    'key' => $key,
+                    'name' => $stage['name'],
+                    'progress' => $stage['progress'],
+                ];
+            }
+        }
+
+        return [
+            'key' => 'completed',
+            'name' => 'League Complete',
+            'progress' => 100,
+        ];
+    }
+
+    /**
+     * Check if league is ready for completion.
+     */
+    public function isReadyForCompletion()
+    {
+        return $this->getCompletionPercentage() >= 100;
+    }
 }
