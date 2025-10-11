@@ -191,10 +191,7 @@ class DashboardController
 
         // ============ QUICK STATS SUMMARY ============
         $quickStats = [
-            'active_leagues' => LeaguePlayer::where('user_id', $user->id)
-                ->whereHas('league', function($q) {
-                    $q->where('status', 'active');
-                })->count(),
+            'active_leagues' => League::where('status', 'active')->count(),
             'total_teams' => Team::count(),
             'players_registered' => User::count(),
         ];
