@@ -32,14 +32,13 @@
 
                 <!-- Quick Action Buttons -->
                 <div class="flex flex-wrap gap-3 pt-4">
-                    <a href="#available-leagues" class="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base text-white shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105">
-                        <span class="relative z-10">Join League</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <a href="#available-leagues" class="px-4 sm:px-6 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
+                        Join League
                     </a>
                     @if($liveAuctions->isNotEmpty())
-                    <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base text-white hover:bg-white/20 transition-all duration-300">
+                    <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-4 sm:px-6 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
                         <span class="inline-flex items-center">
-                            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
                             <span class="hidden sm:inline">Watch Live Auction</span>
                             <span class="sm:hidden">Live Auction</span>
                         </span>
@@ -177,7 +176,7 @@
                 <span class="text-white font-bold text-lg">🔴 LIVE AUCTION IN PROGRESS</span>
                 <span class="text-white/90">{{ $liveAuctions->first()->name }}</span>
             </div>
-            <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-6 py-2 bg-white text-red-600 rounded-full font-bold hover:scale-105 transition-transform">
+            <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-6 py-2.5 bg-white hover:bg-gray-100 text-red-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 Watch Now →
             </a>
         </div>
@@ -196,7 +195,7 @@
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Register now and showcase your skills</p>
                 </div>
-            <a href="{{ route('leagues.index') }}" class="hidden sm:inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <a href="{{ route('leagues.index') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 View All
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -212,7 +211,7 @@
                        value="{{ request('search') }}"
                        placeholder="Search leagues by name, game, or location..." 
                        class="w-full px-4 sm:px-6 py-3 sm:py-4 pr-12 sm:pr-14 rounded-xl sm:rounded-2xl border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-sm sm:text-base">
-                <button type="submit" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-2 sm:p-2.5 rounded-lg hover:shadow-lg transition-all">
+                <button type="submit" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white p-2 sm:p-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -330,7 +329,7 @@
                                 
                                 <!-- Action Button -->
                     <div class="flex gap-2">
-                        <a href="{{ route('leagues.show', $league) }}" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-3 px-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <a href="{{ route('leagues.show', $league) }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                             Register Now →
                         </a>
                         <a href="{{ route('leagues.show', $league) }}" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
@@ -660,7 +659,7 @@
                                     </div>
                                 @endif
                                 
-                    <a href="{{ route('leagues.show', $participation->league) }}" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-3 px-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 block">
+                    <a href="{{ route('leagues.show', $participation->league) }}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         View League →
                                 </a>
                             </div>
@@ -711,7 +710,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('leagues.show', $league) }}" class="w-full bg-white text-orange-600 text-center py-3 px-4 rounded-xl font-bold hover:bg-gray-100 transition-colors block">
+                <a href="{{ route('leagues.show', $league) }}" class="w-full bg-white hover:bg-gray-100 text-orange-600 text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all block">
                     View Details →
                 </a>
             </div>
@@ -732,7 +731,7 @@
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Teams you own and manage</p>
                 </div>
-            <a href="{{ route('teams.create') }}" class="hidden sm:inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <a href="{{ route('teams.create') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
@@ -782,7 +781,7 @@
                             </div>
                         </div>
                         
-                    <a href="{{ route('teams.show', $team) }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 px-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 block">
+                    <a href="{{ route('teams.show', $team) }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all block">
                         Manage Team →
                         </a>
                                 </div>
@@ -804,7 +803,7 @@
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Manage your organized leagues</p>
                             </div>
-            <a href="{{ route('leagues.create') }}" class="hidden sm:inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <a href="{{ route('leagues.create') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
@@ -845,7 +844,7 @@
                             </div>
                         </div>
                         
-                    <a href="{{ route('leagues.show', $league) }}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 px-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 block">
+                    <a href="{{ route('leagues.show', $league) }}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all block">
                         Manage League →
                     </a>
                 </div>
@@ -884,7 +883,7 @@
                             <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">{{ $playerInfo->position->name ?? 'N/A' }}</span>
                         </div>
 
-                        <a href="{{ route('players.edit', $playerInfo) }}" class="inline-flex items-center px-6 py-3 bg-white text-purple-600 rounded-xl font-bold hover:bg-gray-100 transition-colors">
+                        <a href="{{ route('players.edit', $playerInfo) }}" class="inline-flex items-center px-6 py-2.5 bg-white hover:bg-gray-100 text-purple-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
@@ -988,7 +987,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">No Organized Leagues</h3>
                     <p class="text-gray-600 mb-6">You haven't organized any leagues yet.</p>
-                    <a href="{{ route('leagues.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    <a href="{{ route('leagues.create') }}" class="inline-flex items-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         Create Your First League
                         </a>
                     </div>
@@ -1058,7 +1057,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">No Teams Owned</h3>
                     <p class="text-gray-600 mb-6">You don't own any teams yet.</p>
-                    <a href="{{ route('teams.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    <a href="{{ route('teams.create') }}" class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         Create Your First Team
                     </a>
                 </div>
@@ -1137,7 +1136,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">No Player Participations</h3>
                     <p class="text-gray-600 mb-6">You haven't joined any leagues as a player yet.</p>
-                    <a href="#available-leagues" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    <a href="#available-leagues" class="inline-flex items-center px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         Browse Available Leagues
                                 </a>
                             </div>
@@ -1182,7 +1181,7 @@
         </div>
                     </div>
 
-                        <a href="{{ route('leagues.show', $participation->league) }}" class="block w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white text-center py-2.5 rounded-lg font-bold hover:shadow-lg transition-all">
+                        <a href="{{ route('leagues.show', $participation->league) }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2.5 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                             View League →
                         </a>
                     </div>
