@@ -17,6 +17,15 @@
                         <h1 class="text-2xl font-bold glacier-text-primary">Cricket League Auction</h1>
                     </div>
                     <div class="flex items-center space-x-4">
+                        @if($league->isAuctionActive())
+                            <button onclick="shareAuctionLink()" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Share Link
+                            </button>
+                        @endif
                         <a href="{{ route('auctions.live', $league) }}" 
                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,5 +424,78 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Share auction link function
+function shareAuctionLink() {
+    const auctionUrl = window.location.href;
+    
+    // Try to use the Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(auctionUrl).then(function() {
+            showMessage('Auction link copied to clipboard!', 'success');
+        }, function() {
+            // Fallback if clipboard API fails
+            fallbackCopyTextToClipboard(auctionUrl);
+        });
+    } else {
+        // Fallback for older browsers
+        fallbackCopyTextToClipboard(auctionUrl);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.width = "2em";
+    textArea.style.height = "2em";
+    textArea.style.padding = "0";
+    textArea.style.border = "none";
+    textArea.style.outline = "none";
+    textArea.style.boxShadow = "none";
+    textArea.style.background = "transparent";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showMessage('Auction link copied to clipboard!', 'success');
+        } else {
+            showMessage('Failed to copy link. Please copy manually: ' + text, 'error');
+        }
+    } catch (err) {
+        showMessage('Failed to copy link. Please copy manually: ' + text, 'error');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showMessage(message, type) {
+    const messageContainer = document.getElementById('messageContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `p-4 rounded-lg shadow-lg mb-2 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
+    messageDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+    messageContainer.appendChild(messageDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (messageDiv.parentElement) {
+            messageDiv.remove();
+        }
+    }, 5000);
+}
 </script>
 @endsection

@@ -188,6 +188,13 @@ Route::middleware('auth')->group(function () {
         Route::get('auction-panel/league/{league}/details', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'getLeagueDetails'])->name('auction-panel.league-details');
         Route::get('auction-panel/stats', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'getStats'])->name('auction-panel.stats');
         
+        // Auctioneer Management Routes
+        Route::get('auctioneers', [\App\Http\Controllers\Admin\AuctioneerManagementController::class, 'index'])->name('auctioneers.index');
+        Route::get('auctioneers/leagues/{league}', [\App\Http\Controllers\Admin\AuctioneerManagementController::class, 'show'])->name('auctioneers.show');
+        Route::post('auctioneers/leagues/{league}/teams/{leagueTeam}/assign', [\App\Http\Controllers\Admin\AuctioneerManagementController::class, 'assign'])->name('auctioneers.assign');
+        Route::delete('auctioneers/leagues/{league}/teams/{leagueTeam}/remove', [\App\Http\Controllers\Admin\AuctioneerManagementController::class, 'remove'])->name('auctioneers.remove');
+        Route::get('auctioneers/leagues/{league}/stats', [\App\Http\Controllers\Admin\AuctioneerManagementController::class, 'stats'])->name('auctioneers.stats');
+        
         // League Management Routes
         Route::get('leagues', [\App\Http\Controllers\Admin\LeagueController::class, 'index'])->name('leagues.index');
         Route::get('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'show'])->name('leagues.show');

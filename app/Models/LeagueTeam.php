@@ -180,10 +180,59 @@ class LeagueTeam extends Model
     }
 
     /**
-     * Get the auctioneer assigned to this league team.
+     * Get the auctioneer assigned to this league team (Legacy - kept for backward compatibility).
+     * Use teamAuctioneer relationship instead.
      */
     public function auctioneer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'auctioneer_id');
+    }
+
+    /**
+     * Get the active team auctioneer assignment for this league team.
+     */
+    public function teamAuctioneer()
+    {
+        return $this->hasOne(TeamAuctioneer::class)->where('status', 'active');
+    }
+
+    /**
+     * Get all team auctioneer assignments (including inactive).
+     */
+    public function teamAuctioneers(): HasMany
+    {
+        return $this->hasMany(TeamAuctioneer::class);
+    }
+
+    /**
+     * Get the active auctioneer user through the team auctioneer table.
+     */
+    public function activeAuctioneer()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            TeamAuctioneer::class,
+            'league_team_id', // Foreign key on team_auctioneers table
+            'id', // Foreign key on users table
+            'id', // Local key on league_teams table
+            'auctioneer_id' // Local key on team_auctioneers table
+        )->where('team_auctioneers.status', 'active');
+    }
+
+    /**
+     * Check if this league team has an active auctioneer assigned.
+     */
+    public function hasActiveAuctioneer(): bool
+    {
+        return $this->teamAuctioneer()->exists();
+    }
+
+    /**
+     * Get the active auctioneer user for this league team.
+     */
+    public function getActiveAuctioneerUser()
+    {
+        $assignment = $this->teamAuctioneer;
+        return $assignment ? $assignment->auctioneer : null;
     }
 }

@@ -95,6 +95,39 @@
                             </div>
                         </div>
                         
+                        <!-- Active Auctions for this team -->
+                        @php
+                            $activeAuctions = $team->leagueTeams->filter(function($lt) {
+                                return $lt->league && $lt->league->isAuctionActive();
+                            });
+                        @endphp
+                        @if($activeAuctions->isNotEmpty())
+                            <div class="mb-4 space-y-2">
+                                @foreach($activeAuctions as $leagueTeam)
+                                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1">
+                                                <div class="flex items-center mb-1">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <h3 class="font-bold text-sm">Auction Live!</h3>
+                                                </div>
+                                                <p class="text-green-100 text-xs">{{ $leagueTeam->league->name }}</p>
+                                            </div>
+                                            <a href="{{ route('auction.index', $leagueTeam->league) }}" 
+                                               class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-green-50 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-8V7a3 3 0 116 0v1M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                </svg>
+                                                Join
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                        
                         <!-- Team Details -->
                         <div class="space-y-2 mb-4">
                             @if($team->homeGround)

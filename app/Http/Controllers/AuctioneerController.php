@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\League;
 use App\Models\LeagueTeam;
+use App\Models\TeamAuctioneer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,8 +48,8 @@ class AuctioneerController extends Controller
             ], 422);
         }
 
-        // Check if the auctioneer can be assigned to this league
-        if (!$auctioneer->canBeAuctioneerForLeague($league->id, $leagueTeam->id)) {
+        // Check if the user is already an auctioneer in this league
+        if (TeamAuctioneer::isAuctioneerInLeague($league->id, $auctioneer->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'This user is already assigned as an auctioneer for another team in this league.'
@@ -58,7 +59,16 @@ class AuctioneerController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update the league team with the new auctioneer
+            // Assign the auctioneer using the TeamAuctioneer model
+            $teamAuctioneer = TeamAuctioneer::assignAuctioneer(
+                $league->id,
+                $leagueTeam->team_id,
+                $leagueTeam->id,
+                $auctioneer->id,
+                'Assigned via team owner/organizer'
+            );
+
+            // Also update the legacy column for backward compatibility
             $leagueTeam->update(['auctioneer_id' => $auctioneer->id]);
 
             // Send notification to the assigned auctioneer
@@ -81,7 +91,7 @@ class AuctioneerController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to assign auctioneer. Please try again.'
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -110,7 +120,14 @@ class AuctioneerController extends Controller
         try {
             DB::beginTransaction();
 
-            $auctioneer = $leagueTeam->auctioneer;
+            // Get the auctioneer before removal
+            $teamAuctioneerAssignment = $leagueTeam->teamAuctioneer;
+            $auctioneer = $teamAuctioneerAssignment ? $teamAuctioneerAssignment->auctioneer : $leagueTeam->auctioneer;
+
+            // Remove the auctioneer assignment from the team_auctioneers table
+            TeamAuctioneer::removeAuctioneer($leagueTeam->id);
+
+            // Also update the legacy column for backward compatibility
             $leagueTeam->update(['auctioneer_id' => null]);
 
             // Send notification to the removed auctioneer
@@ -182,8 +199,10 @@ class AuctioneerController extends Controller
             }
 
             $query = $request->input('query');
-            $assignedAuctioneerIds = $league->leagueTeams()
-                ->whereNotNull('auctioneer_id')
+            
+            // Get assigned auctioneers from the new team_auctioneers table
+            $assignedAuctioneerIds = TeamAuctioneer::where('league_id', $league->id)
+                ->where('status', 'active')
                 ->pluck('auctioneer_id')
                 ->toArray();
 

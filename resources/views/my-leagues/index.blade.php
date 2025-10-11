@@ -705,7 +705,146 @@
         </div>
         @endif
 
-        @if($organizedLeagues->isEmpty() && $playingLeagues->isEmpty() && $requestedLeagues->isEmpty() && $teamOwnerLeagues->isEmpty())
+        @if($auctioneerLeagues->isNotEmpty())
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <svg class="w-6 h-6 text-orange-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                    </svg>
+                    Auctioneer for Teams
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($auctioneerLeagues as $league)
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fadeInUp">
+                    
+                    <!-- Hero Image Section -->
+                    <div class="relative h-48 overflow-hidden">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-16 h-16 rounded-full object-cover border-4 border-white/30 mx-auto mb-3">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                                            <span class="text-white font-bold text-2xl">{{ substr($league->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                    <h3 class="text-2xl font-bold drop-shadow-lg">{{ $league->name }}</h3>
+                                    <p class="text-sm opacity-90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Auctioneer Status Badge -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium shadow-lg bg-orange-500 text-white">
+                                Auctioneer
+                            </span>
+                        </div>
+                        
+                        <!-- League Name Overlay (if banner exists) -->
+                        @if($league->banner)
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-3">
+                                    @if($league->logo)
+                                        <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" 
+                                             class="w-12 h-12 rounded-full object-cover border-2 border-white/80 shadow-lg">
+                                    @endif
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white drop-shadow-lg">{{ $league->name }}</h3>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $league->game->name ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-orange-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
+                                <div class="text-xs text-gray-600">Teams</div>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                <div class="text-2xl font-bold text-red-600">{{ $league->leaguePlayers->where('status', '!=', 'pending')->count() }}/{{ $league->max_teams * $league->max_team_players }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Teams I'm Auctioneer For -->
+                        <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4">
+                            <div class="flex items-center mb-2">
+                                <svg class="w-4 h-4 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                </svg>
+                                <span class="text-sm font-medium text-orange-800">My Assigned Teams</span>
+                            </div>
+                            
+                            @foreach($league->leagueTeams as $leagueTeam)
+                                <div class="bg-white rounded-lg p-2 mb-2 last:mb-0 border border-orange-100">
+                                    <div class="font-semibold text-orange-900 text-sm">{{ $leagueTeam->team->name }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Auction Link (only show if auction is live) -->
+                        @if($league->isAuctionActive())
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 mb-4 text-white shadow-lg">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-lg">Auction is Live!</h3>
+                                            <p class="text-green-100 text-sm">Join the live bidding session</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('auction.index', $league) }}" 
+                                       class="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-green-50 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-8V7a3 3 0 116 0v1M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                        Join Auction
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Season Info -->
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">Season {{ $league->season }}</span>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <a href="{{ route('leagues.show', $league) }}"
+                            class="w-full bg-orange-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl block">
+                            View League Details
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($organizedLeagues->isEmpty() && $playingLeagues->isEmpty() && $requestedLeagues->isEmpty() && $teamOwnerLeagues->isEmpty() && $auctioneerLeagues->isEmpty())
         <div class="bg-white rounded-xl shadow-lg p-12 text-center animate-fadeInUp">
             <div class="mb-4">
                 <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

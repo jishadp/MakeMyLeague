@@ -40,6 +40,18 @@ class MyLeaguesController extends Controller
             ])->get() : 
             collect();
         
-        return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues'));
+        // Get leagues where user is assigned as an auctioneer (using new team_auctioneers table)
+        $auctioneerLeagues = \App\Models\League::whereHas('leagueTeams.teamAuctioneer', function($query) use ($user) {
+            $query->where('auctioneer_id', $user->id)->where('status', 'active');
+        })->with([
+            'game',
+            'leagueTeams' => function($query) use ($user) {
+                $query->whereHas('teamAuctioneer', function($q) use ($user) {
+                    $q->where('auctioneer_id', $user->id)->where('status', 'active');
+                })->with(['team', 'teamAuctioneer']);
+            }
+        ])->get();
+        
+        return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues', 'auctioneerLeagues'));
     }
 }
