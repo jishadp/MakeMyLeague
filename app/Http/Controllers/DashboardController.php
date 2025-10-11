@@ -8,39 +8,225 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\GamePosition;
 use App\Models\LeagueTeam;
+use App\Models\LeaguePlayer;
+use App\Models\Fixture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController
 {
-    public function view()
+    public function view(Request $request)
     {
-        // Only show leagues with approved organizer requests to prevent flooding
-        $leagues = League::whereHas('organizers', function($query) {
+        $user = Auth::user();
+        
+        // ============ AVAILABLE LEAGUES TO JOIN (PRIMARY NEED) ============
+        $searchQuery = $request->get('search');
+        
+        $availableLeagues = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
-        })->with(['game', 'approvedOrganizers'])->latest()->take(5)->get();
-        
-        $userLeagues = auth()->user()->isOrganizer() ? 
-            auth()->user()->organizedLeagues()->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->get() : 
-            League::whereHas('organizers', function($query) {
-                $query->where('status', 'approved');
-            })->with(['game', 'approvedOrganizers', 'localBody.district', 'leagueTeams', 'leaguePlayers'])->paginate(12);
-        $userOwnedTeams = Auth::check() ? Auth::user()->primaryOwnedTeams : collect();
-        
-        // Get league teams where user is a player
-        $userLeagueTeams = Auth::check() ? 
-            \App\Models\LeaguePlayer::where('user_id', Auth::id())
-                ->with(['leagueTeam.team.localBody', 'leagueTeam.league', 'player.position'])
-                ->get() : collect();
+        })
+        ->where('status', 'active')
+        ->where('start_date', '>', now())
+        ->whereDoesntHave('leaguePlayers', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->when($searchQuery, function($query, $searchQuery) {
+            $query->where(function($q) use ($searchQuery) {
+                $q->where('name', 'like', '%' . $searchQuery . '%')
+                  ->orWhereHas('game', function($gameQuery) use ($searchQuery) {
+                      $gameQuery->where('name', 'like', '%' . $searchQuery . '%');
+                  })
+                  ->orWhereHas('localBody', function($bodyQuery) use ($searchQuery) {
+                      $bodyQuery->where('name', 'like', '%' . $searchQuery . '%');
+                  });
+            });
+        })
+        ->with(['game', 'localBody.district', 'leagueTeams', 'leaguePlayers'])
+        ->withCount('leagueTeams', 'leaguePlayers')
+        ->latest()
+        ->paginate(6)
+        ->appends(['search' => $searchQuery]);
 
-        // Get player info if the current user has a position_id (is a player)
+        // ============ USER'S CURRENT LEAGUE PARTICIPATIONS ============
+        $userLeagueParticipations = LeaguePlayer::where('user_id', $user->id)
+            ->with([
+                'league.game',
+                'league.localBody.district',
+                'leagueTeam.team.localBody',
+                'league.leagueTeams',
+                'league.leaguePlayers'
+            ])
+            ->latest()
+            ->get();
+
+        // ============ USER'S AUCTION HISTORY ============
+        $auctionHistory = LeaguePlayer::where('user_id', $user->id)
+            ->where('status', 'sold')
+            ->with([
+                'league.game',
+                'leagueTeam.team',
+                'league.localBody.district'
+            ])
+            ->orderBy('bid_price', 'desc')
+            ->get();
+
+        // Calculate auction stats
+        $auctionStats = [
+            'total_value' => $auctionHistory->sum('bid_price'),
+            'highest_bid' => $auctionHistory->max('bid_price'),
+            'average_bid' => $auctionHistory->avg('bid_price'),
+            'times_sold' => $auctionHistory->count(),
+        ];
+
+        // ============ UPCOMING MATCHES FOR USER'S TEAMS ============
+        $upcomingMatches = Fixture::where(function($query) use ($user) {
+            $query->whereHas('homeTeam.leaguePlayers', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhereHas('awayTeam.leaguePlayers', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        })
+        ->where('status', 'scheduled')
+        ->where('match_date', '>=', now())
+        ->with([
+            'league.game',
+            'homeTeam.team',
+            'awayTeam.team',
+            'leagueGroup'
+        ])
+        ->orderBy('match_date')
+        ->orderBy('match_time')
+        ->take(5)
+        ->get();
+
+        // ============ RECENT MATCH RESULTS ============
+        $recentResults = Fixture::where(function($query) use ($user) {
+            $query->whereHas('homeTeam.leaguePlayers', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhereHas('awayTeam.leaguePlayers', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        })
+        ->where('status', 'completed')
+        ->with([
+            'league.game',
+            'homeTeam.team',
+            'awayTeam.team',
+            'leagueGroup'
+        ])
+        ->orderBy('match_date', 'desc')
+        ->orderBy('match_time', 'desc')
+        ->take(5)
+        ->get();
+
+        // ============ LIVE AUCTIONS ============
+        $liveAuctions = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })
+        ->with(['game', 'localBody.district'])
+        ->where('auction_access_granted', true)
+        ->where('auction_active', true)
+        ->whereNotNull('auction_started_at')
+        ->get();
+
+        // ============ TOP AUCTION LEADERBOARD (HIGHEST SOLD PLAYERS) ============
+        $auctionLeaderboard = LeaguePlayer::where('status', 'sold')
+            ->with([
+                'user.position',
+                'league.game',
+                'leagueTeam.team'
+            ])
+            ->orderBy('bid_price', 'desc')
+            ->take(10)
+            ->get();
+
+        // ============ PLAYER PROFILE INFO ============
         $playerInfo = null;
-        if (Auth::check() && Auth::user()->position_id) {
-            $playerInfo = Auth::user()->load(['position', 'localBody']);
+        if ($user->position_id) {
+            $playerInfo = $user->load(['position', 'localBody.district']);
+            
+            // Add player statistics
+            $playerInfo->stats = [
+                'leagues_joined' => LeaguePlayer::where('user_id', $user->id)->count(),
+                'leagues_active' => LeaguePlayer::where('user_id', $user->id)
+                    ->whereHas('league', function($q) {
+                        $q->where('status', 'active');
+                    })->count(),
+                'teams_played_for' => LeaguePlayer::where('user_id', $user->id)
+                    ->distinct('league_team_id')
+                    ->count('league_team_id'),
+            ];
         }
 
-        return view('dashboard', compact('leagues', 'userLeagues', 'userOwnedTeams', 'userLeagueTeams', 'playerInfo'));
+        // ============ USER'S TEAMS (IF TEAM OWNER) ============
+        $userOwnedTeams = $user->primaryOwnedTeams()->with([
+            'localBody.district',
+            'homeGround',
+            'leagueTeams.league'
+        ])->get();
+
+        // ============ ORGANIZED LEAGUES (IF ORGANIZER) ============
+        $organizedLeagues = collect();
+        if ($user->isOrganizer()) {
+            $organizedLeagues = $user->organizedLeagues()
+                ->with([
+                    'game',
+                    'localBody.district',
+                    'leagueTeams',
+                    'leaguePlayers'
+                ])
+                ->withCount('leagueTeams', 'leaguePlayers')
+                ->get();
+        }
+
+        // ============ RECENT ACTIVITIES / NOTIFICATIONS ============
+        $recentActivities = $user->notifications()
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // ============ QUICK STATS SUMMARY ============
+        $quickStats = [
+            'active_leagues' => LeaguePlayer::where('user_id', $user->id)
+                ->whereHas('league', function($q) {
+                    $q->where('status', 'active');
+                })->count(),
+            'total_teams' => Team::count(),
+            'players_registered' => User::whereHas('position')->count(),
+        ];
+
+        // ============ TRENDING LEAGUES (MOST POPULAR) ============
+        $trendingLeagues = League::whereHas('organizers', function($query) {
+            $query->where('status', 'approved');
+        })
+        ->where('status', 'active')
+        ->with(['game', 'localBody.district'])
+        ->withCount('leagueTeams', 'leaguePlayers')
+        ->orderBy('league_teams_count', 'desc')
+        ->orderBy('league_players_count', 'desc')
+        ->take(3)
+        ->get();
+
+        return view('dashboard', compact(
+            'availableLeagues',
+            'userLeagueParticipations',
+            'auctionHistory',
+            'auctionStats',
+            'upcomingMatches',
+            'recentResults',
+            'liveAuctions',
+            'auctionLeaderboard',
+            'playerInfo',
+            'userOwnedTeams',
+            'organizedLeagues',
+            'recentActivities',
+            'quickStats',
+            'trendingLeagues'
+        ));
     }
 
     /**
@@ -123,3 +309,4 @@ class DashboardController
         return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid'));
     }
 }
+
