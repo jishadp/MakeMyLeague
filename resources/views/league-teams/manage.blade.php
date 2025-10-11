@@ -10,10 +10,10 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 drop-shadow">
-                    {{ Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin() ? 'Manage Teams' : 'My Squad' }}
+                    {{ Auth::user()->canManageLeague($league->id) ? 'Manage Teams' : 'My Squad' }}
                 </h1>
                 <p class="text-lg sm:text-xl text-white/90">
-                    {{ $league->name }} - {{ Auth::user()->isOrganizerForLeague($league->id) || Auth::user()->isAdmin() ? 'View and manage all teams and their players after auction' : 'View and manage your team squad with retention players' }}
+                    {{ $league->name }} - {{ Auth::user()->canManageLeague($league->id) ? 'View and manage all teams and their players after auction' : 'View and manage your team squad with retention players' }}
                 </p>
             </div>
             <a href="{{ route('leagues.show', $league) }}" 

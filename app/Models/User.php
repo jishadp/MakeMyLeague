@@ -166,6 +166,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the user can manage a specific league (organizer OR admin).
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function canManageLeague($leagueId): bool
+    {
+        return $this->isOrganizerForLeague($leagueId) || $this->isAdmin();
+    }
+
+    /**
      * Check if the user is an owner of a specific team.
      *
      * @param int $teamId

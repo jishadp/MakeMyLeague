@@ -74,7 +74,7 @@
                         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <!-- Mobile: 2 buttons per row -->
                             <div class="grid grid-cols-2 gap-3 sm:hidden">
-                                @if (auth()->user()->isOrganizer())
+                                @if (auth()->user()->canManageLeague($league->id))
                                     <a href="{{ route('leagues.edit', $league) }}"
                                         class="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors text-center text-sm">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@
                             </div>
 
                             <!-- Mobile: Add Player and Team buttons -->
-                            @if (auth()->user()->isOrganizer())
+                            @if (auth()->user()->canManageLeague($league->id))
                                 <div class="grid grid-cols-2 gap-3 sm:hidden">
                                     <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                                         class="inline-flex items-center justify-center px-4 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-center text-sm">
@@ -200,7 +200,7 @@
                             <!-- Desktop: Original layout -->
                             <div class="hidden sm:flex flex-col gap-3">
                                 <div class="flex gap-3">
-                                    @if (auth()->user()->isOrganizer())
+                                    @if (auth()->user()->canManageLeague($league->id))
                                         <a href="{{ route('leagues.edit', $league) }}"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 transition-colors text-base">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
@@ -234,7 +234,7 @@
                                         Back to Leagues
                                     </a>
                                 </div>
-                                @if (auth()->user()->isOrganizer() || auth()->user()->isTeamOwner())
+                                @if (auth()->user()->canManageLeague($league->id) || auth()->user()->isTeamOwner())
                                     <div class="flex gap-3">
                                         <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
@@ -321,7 +321,7 @@
                         </div>
                     </div>
                     
-                    @if (auth()->user()->isOrganizer() || auth()->user()->isTeamOwner())
+                    @if (auth()->user()->canManageLeague($league->id) || auth()->user()->isTeamOwner())
                         <!-- Quick Actions -->
                         <div class="mb-8 sm:mb-12">
                             <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -506,7 +506,7 @@
                                                         Access Restricted
                                                     </span>
                                                 </div>
-                                                @if(auth()->user()->isOrganizerForLeague($league->id))
+                                                @if(auth()->user()->canManageLeague($league->id))
                                                     @if($league->hasAuctionAccessRequested())
                                                         <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-lg">
                                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -815,7 +815,7 @@
             </div>
 
             <!-- Join Link Section - Only for League Organizers -->
-            @if (auth()->user()->isOrganizer() && $league->organizers()->where('user_id', auth()->id())->exists())
+            @if (auth()->user()->canManageLeague($league->id))
                 <div class="mt-6 sm:mt-8">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div class="p-4 sm:p-6 lg:p-8">
@@ -924,7 +924,7 @@
             @endif
 
             <!-- Finance Section - Only for League Organizers -->
-            @if (auth()->user()->isOrganizer() && $league->organizers()->where('user_id', auth()->id())->exists())
+            @if (auth()->user()->canManageLeague($league->id))
                 <div class="mt-6 sm:mt-8">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div class="p-4 sm:p-6 lg:p-8">

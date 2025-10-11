@@ -11,8 +11,13 @@ class MyLeaguesController extends Controller
     {
         $user = Auth::user();
         
-        // Get leagues where user is organizer (both approved and pending)
-        $organizedLeagues = $user->organizedLeagues()->with(['game', 'leagueTeams.team', 'organizers'])->get();
+        // If user is admin, show all leagues
+        if ($user->isAdmin()) {
+            $organizedLeagues = \App\Models\League::with(['game', 'leagueTeams.team', 'organizers'])->get();
+        } else {
+            // Get leagues where user is organizer (both approved and pending)
+            $organizedLeagues = $user->organizedLeagues()->with(['game', 'leagueTeams.team', 'organizers'])->get();
+        }
         
         // Get leagues where user is a player (sold/available)
         $playingLeagues = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
