@@ -196,7 +196,7 @@ class DashboardController
                     $q->where('status', 'active');
                 })->count(),
             'total_teams' => Team::count(),
-            'players_registered' => User::whereHas('position')->count(),
+            'players_registered' => User::count(),
         ];
 
         // ============ TRENDING LEAGUES (MOST POPULAR) ============

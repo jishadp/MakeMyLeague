@@ -151,7 +151,7 @@
                             </div>
                             <div class="text-center">
                                 <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-1">{{ number_format($quickStats['players_registered']) }}</div>
-                                <div class="text-emerald-200 text-xs sm:text-sm font-bold uppercase tracking-wider">Players</div>
+                                <div class="text-emerald-200 text-xs sm:text-sm font-bold uppercase tracking-wider">Total Users</div>
                             </div>
                             <!-- Mini Progress Bar -->
                             <div class="mt-3 sm:mt-4 h-2 w-full bg-black/40 rounded-full overflow-hidden border border-emerald-500/30">
@@ -782,7 +782,7 @@
                             </div>
                         </div>
                         
-                    <a href="{{ route('teams.show', $team) }}" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-center py-3 px-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 block">
+                    <a href="{{ route('teams.show', $team) }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 px-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 block">
                         Manage Team →
                         </a>
                                 </div>
@@ -845,7 +845,7 @@
                             </div>
                         </div>
                         
-                    <a href="{{ route('leagues.show', $league) }}" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-3 px-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 block">
+                    <a href="{{ route('leagues.show', $league) }}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 px-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 block">
                         Manage League →
                     </a>
                 </div>
@@ -1038,7 +1038,7 @@
                             @endif
                         </div>
 
-                        <a href="{{ route('leagues.show', $league) }}" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-2.5 rounded-lg font-bold hover:shadow-lg transition-all">
+                        <a href="{{ route('leagues.show', $league) }}" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2.5 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                             Manage League →
                     </a>
                 </div>
@@ -1116,7 +1116,7 @@
                         @endif
 
                         <div class="mt-4">
-                            <a href="{{ route('teams.show', $team) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-bold hover:shadow-lg transition-all">
+                            <a href="{{ route('teams.show', $team) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                                 Manage Team →
                                     </a>
                                 </div>
