@@ -26,6 +26,7 @@ class AuctionController extends Controller
         // Only show available players (exclude sold, unsold, retained, and auctioning players)
         $leaguePlayers = LeaguePlayer::where('league_id',$league->id)
             ->where('status', 'available')
+            ->where('retention', false) // Exclude retained players
             ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->get();
             
@@ -142,6 +143,7 @@ class AuctionController extends Controller
         $players = LeaguePlayer::with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->where('league_id', $leagueId)
             ->where('status', 'available') // Only show available players
+            ->where('retention', false) // Exclude retained players
             ->where(function ($q) use ($query) {
                 $q->whereHas('player', function ($subQ) use ($query) {
                     $subQ->where('name', 'LIKE', "%{$query}%")

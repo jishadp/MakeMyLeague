@@ -15,6 +15,7 @@
                 </div>
                 <!-- Mobile: 2 buttons per row -->
                 <div class="grid grid-cols-2 gap-3 sm:hidden">
+                    @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
                     <a href="{{ route('teams.create') }}?league_slug={{ $league->slug }}"
                        class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,6 +30,7 @@
                         </svg>
                         Add Team
                     </a>
+                    @endif
                 </div>
                 
                 <div class="grid grid-cols-1 gap-3 sm:hidden">
@@ -43,6 +45,7 @@
                 
                 <!-- Desktop: Original layout -->
                 <div class="hidden sm:flex gap-3">
+                    @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
                     <a href="{{ route('teams.create') }}?league_slug={{ $league->slug }}"
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,6 +60,7 @@
                         </svg>
                         Add Team to League
                     </a>
+                    @endif
                     <a href="{{ route('leagues.show', $league) }}"
                        class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,6 +247,7 @@
                     <h3 class="mt-2 text-sm font-medium text-gray-900">No teams</h3>
                     <p class="mt-1 text-sm text-gray-500">Get started by adding a team to this league.</p>
                     <div class="mt-6">
+                        @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
                         <a href="{{ route('league-teams.create', $league) }}"
                            class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 text-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,6 +262,9 @@
                             </svg>
                             Create Team
                         </a>
+                        @else
+                        <p class="text-gray-600">Only league organizers can add teams to this league.</p>
+                        @endif
                     </div>
                 </div>
             @endif

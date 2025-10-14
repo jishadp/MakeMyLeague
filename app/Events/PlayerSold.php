@@ -21,11 +21,17 @@ class PlayerSold implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct($leaguePlayerId, $teamId)
+    public function __construct($leaguePlayerId, $teamId, $team = null)
     {
         $this->leaguePlayer = LeaguePlayer::with(['player', 'leagueTeam.team'])->find($leaguePlayerId);
         $this->teamId = $teamId;
-        $this->team = LeagueTeam::withCount('leaguePlayers')->with('team')->find($teamId);
+        
+        // Use provided team if available, otherwise fetch it
+        if ($team) {
+            $this->team = $team;
+        } else {
+            $this->team = LeagueTeam::withCount('leaguePlayers')->with('team')->find($teamId);
+        }
     }
 
     /**

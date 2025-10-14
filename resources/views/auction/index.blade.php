@@ -7,6 +7,13 @@
 @endsection
 
 @section('content')
+<!-- Hidden inputs for bid increment settings -->
+<input type="hidden" id="bid-increment-type" value="{{ $league->bid_increment_type ?? 'predefined' }}">
+<input type="hidden" id="custom-bid-increment" value="{{ $league->custom_bid_increment ?? 10 }}">
+<input type="hidden" id="predefined-increments" value="{{ json_encode($league->predefined_increments ?? []) }}">
+<input type="hidden" id="league-id" value="{{ $league->id }}">
+<input type="hidden" id="is-organizer-or-admin" value="{{ auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin() ? 'true' : 'false' }}">
+
 <div class="min-h-screen auction-bg py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Header -->

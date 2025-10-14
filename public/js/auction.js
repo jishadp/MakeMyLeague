@@ -5,32 +5,93 @@ function updateBidIncrements(currentBid) {
     // Convert to number if it's a string
     currentBid = Number(currentBid);
     
-    // Define increment rules based on current bid amount
-    if (currentBid < 100) {
-        // For bids under 100, use small increments
-        $('.callBid').eq(0).attr('increment', 10).find('p').text('+ ₹10');
-        $('.callBid').eq(1).attr('increment', 25).find('p').text('+ ₹25');
-        $('.callBid').eq(2).attr('increment', 50).find('p').text('+ ₹50');
-    } else if (currentBid < 500) {
-        // For bids between 100-500, use medium increments
-        $('.callBid').eq(0).attr('increment', 25).find('p').text('+ ₹25');
-        $('.callBid').eq(1).attr('increment', 50).find('p').text('+ ₹50');
-        $('.callBid').eq(2).attr('increment', 100).find('p').text('+ ₹100');
-    } else if (currentBid < 1000) {
-        // For bids between 500-1000, use larger increments
-        $('.callBid').eq(0).attr('increment', 50).find('p').text('+ ₹50');
-        $('.callBid').eq(1).attr('increment', 100).find('p').text('+ ₹100');
-        $('.callBid').eq(2).attr('increment', 200).find('p').text('+ ₹200');
-    } else if (currentBid < 5000) {
-        // For bids between 1000-5000, use even larger increments
-        $('.callBid').eq(0).attr('increment', 100).find('p').text('+ ₹100');
-        $('.callBid').eq(1).attr('increment', 250).find('p').text('+ ₹250');
-        $('.callBid').eq(2).attr('increment', 500).find('p').text('+ ₹500');
-    } else {
-        // For bids above 5000, use the largest increments
-        $('.callBid').eq(0).attr('increment', 500).find('p').text('+ ₹500');
-        $('.callBid').eq(1).attr('increment', 1000).find('p').text('+ ₹1000');
-        $('.callBid').eq(2).attr('increment', 2000).find('p').text('+ ₹2000');
+    // Get league bid increment settings if they exist
+    let incrementType = 'predefined'; // Default to predefined
+    let customIncrement = 0;
+    let predefinedIncrements = [];
+    
+    // Safely check if these elements exist before trying to access their values
+    const bidIncrementTypeEl = document.getElementById('bid-increment-type');
+    const customBidIncrementEl = document.getElementById('custom-bid-increment');
+    const predefinedIncrementsEl = document.getElementById('predefined-increments');
+    
+    if (bidIncrementTypeEl) {
+        incrementType = bidIncrementTypeEl.value;
+    }
+    
+    if (customBidIncrementEl) {
+        customIncrement = Number(customBidIncrementEl.value);
+    }
+    
+    try {
+        if (predefinedIncrementsEl && predefinedIncrementsEl.value) {
+            predefinedIncrements = JSON.parse(predefinedIncrementsEl.value);
+        }
+    } catch (e) {
+        console.error('Error parsing predefined increments:', e);
+    }
+    
+    // Determine the base increment based on current bid and league settings
+    let baseIncrement = 10; // Default value
+    
+    // If using custom increment from league settings
+    if (incrementType === 'custom' && customIncrement > 0) {
+        baseIncrement = customIncrement;
+    }
+    // If using predefined increments based on bid ranges
+    else if (incrementType === 'predefined') {
+        // Default increment rules if no specific predefined increments
+        if (currentBid < 100) {
+            baseIncrement = 10;
+        } else if (currentBid < 500) {
+            baseIncrement = 25;
+        } else if (currentBid < 1000) {
+            baseIncrement = 50;
+        } else if (currentBid < 5000) {
+            baseIncrement = 100;
+        } else {
+            baseIncrement = 500;
+        }
+        
+        // Calculate a percentage-based increment (approximately 10% of current bid)
+        const percentIncrement = Math.ceil(currentBid * 0.1 / 10) * 10; // Round to nearest 10
+        
+        // Use percentage-based increment if it's larger than the default tier
+        if (percentIncrement > baseIncrement) {
+            baseIncrement = percentIncrement;
+        }
+    }
+    
+    // Calculate rounded increment that makes sense (e.g., 33 for a bid of 1695)
+    // For bids over 1000, round to nearest 10
+    if (currentBid > 1000) {
+        baseIncrement = Math.max(10, Math.round(currentBid * 0.02 / 10) * 10);
+    }
+    // For bids over 5000, round to nearest 50
+    if (currentBid > 5000) {
+        baseIncrement = Math.max(50, Math.round(currentBid * 0.02 / 50) * 50);
+    }
+    // For bids over 10000, round to nearest 100
+    if (currentBid > 10000) {
+        baseIncrement = Math.max(100, Math.round(currentBid * 0.02 / 100) * 100);
+    }
+    
+    // Apply the simple 1x, 2x, 4x rule
+    const secondIncrement = Math.round(baseIncrement * 2);
+    const thirdIncrement = Math.round(baseIncrement * 4);
+    
+    // Update the bid buttons if they exist
+    const callBidButtons = $('.callBid');
+    if (callBidButtons.length > 0) {
+        callBidButtons.eq(0).attr('increment', baseIncrement).find('p').text('+ ₹' + baseIncrement);
+        
+        if (callBidButtons.length > 1) {
+            callBidButtons.eq(1).attr('increment', secondIncrement).find('p').text('+ ₹' + secondIncrement);
+        }
+        
+        if (callBidButtons.length > 2) {
+            callBidButtons.eq(2).attr('increment', thirdIncrement).find('p').text('+ ₹' + thirdIncrement);
+        }
     }
 }
 
@@ -451,7 +512,19 @@ $(document).ready(function(){
                         $(this).attr('base-price', response.new_bid);
                     });
                     
-                    // Update the bid increment rule based on the new bid amount
+                    // Update the bid increment rule based on the new bid amount and league settings
+                    // Update any league settings if provided in the response
+                    if (response.bid_increment_type) {
+                        document.getElementById('bid-increment-type').value = response.bid_increment_type;
+                    }
+                    if (response.custom_bid_increment) {
+                        document.getElementById('custom-bid-increment').value = response.custom_bid_increment;
+                    }
+                    if (response.predefined_increments) {
+                        document.getElementById('predefined-increments').value = JSON.stringify(response.predefined_increments);
+                    }
+                    
+                    // Update bid increments based on new bid amount and settings
                     updateBidIncrements(response.new_bid);
                     
                     // Update current bid display
@@ -533,26 +606,163 @@ $(document).ready(function(){
         var markSoldAction = $(this).closest('.mb-6').attr('mark-sold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
         var callTeamId = $(this).attr('call-team-id');
-
-        $(".bidMain").addClass('hidden');
-        $(".availPlayers").removeClass('hidden');
-        $("#availablePlayersSection").removeClass('hidden');
-        $.ajax({
-            url: markSoldAction,   // Laravel route
-            type: "post",
-            headers: {'X-CSRF-TOKEN':token},
-            data: {
+        
+        // Get the current bid information
+        var currentBid = $('.currentBid').text();
+        var bidTeam = $('.bidTeam').text();
+        var playerName = $('.playerName').text().trim();
+        
+        // Create the confirmation popup
+        var confirmationPopup = document.createElement('div');
+        confirmationPopup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmationPopup.id = 'soldConfirmationPopup';
+        
+        // Check if user is organizer or admin
+        var isOrganizerOrAdmin = document.getElementById('is-organizer-or-admin') ? 
+                               document.getElementById('is-organizer-or-admin').value === 'true' : false;
+        
+        // Create popup content with override option for organizers/admins
+        var popupContent = `
+            <div class="bg-white rounded-xl shadow-2xl p-4 sm:p-6 max-w-md w-full mx-2 sm:mx-4 text-black">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-black">Confirm Player Sale</h3>
+                </div>
+                <div class="mb-6">
+                    <p class="text-black mb-4">Are you sure you want to mark <span class="font-bold">${playerName}</span> as sold?</p>
+                    <div class="bg-gray-100 rounded-lg p-4 mb-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-black">Current Bid:</span>
+                            <span class="font-bold text-green-600">₹${currentBid}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-black">Team:</span>
+                            <span class="font-bold text-black">${bidTeam}</span>
+                        </div>
+                    </div>
+                    ${isOrganizerOrAdmin ? `
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <label class="flex items-center text-sm text-black mb-2">
+                            <input type="checkbox" id="override-team" class="mr-2 h-5 w-5 text-blue-600">
+                            <span class="text-base">Override team selection</span>
+                        </label>
+                        <div id="override-team-section" class="hidden mb-4">
+                            <select id="override-team-select" class="w-full border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select team...</option>
+                                <!-- Teams will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <label class="flex items-center text-sm text-black mb-2">
+                            <input type="checkbox" id="override-amount" class="mr-2 h-5 w-5 text-blue-600">
+                            <span class="text-base">Override bid amount</span>
+                        </label>
+                        <div id="override-amount-section" class="hidden">
+                            <input type="number" id="override-amount-input" class="w-full border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter bid amount">
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelSoldBtn" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-black rounded-lg transition-colors text-base font-medium">
+                        Cancel
+                    </button>
+                    <button id="confirmSoldBtn" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-base font-medium">
+                        Confirm Sale
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        confirmationPopup.innerHTML = popupContent;
+        document.body.appendChild(confirmationPopup);
+        
+        // If organizer or admin, load teams for override
+        if (isOrganizerOrAdmin) {
+            // Show/hide override team section
+            document.getElementById('override-team').addEventListener('change', function() {
+                document.getElementById('override-team-section').classList.toggle('hidden', !this.checked);
+                
+                // Load teams if checked and not already loaded
+                if (this.checked && document.getElementById('override-team-select').options.length <= 1) {
+                    // Get league ID
+                    var leagueId = document.getElementById('league-id').value;
+                    
+                    // Fetch teams
+                    $.ajax({
+                        url: '/api/leagues/' + leagueId + '/teams',
+                        type: 'GET',
+                        success: function(response) {
+                            var select = document.getElementById('override-team-select');
+                            if (response.teams && response.teams.length > 0) {
+                                response.teams.forEach(function(team) {
+                                    var option = document.createElement('option');
+                                    option.value = team.id;
+                                    option.textContent = team.name;
+                                    select.appendChild(option);
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading teams:', xhr.responseText);
+                        }
+                    });
+                }
+            });
+            
+            // Show/hide override amount section
+            document.getElementById('override-amount').addEventListener('change', function() {
+                document.getElementById('override-amount-section').classList.toggle('hidden', !this.checked);
+            });
+        }
+        
+        // Cancel button event
+        document.getElementById('cancelSoldBtn').addEventListener('click', function() {
+            document.getElementById('soldConfirmationPopup').remove();
+        });
+        
+        // Confirm button event
+        document.getElementById('confirmSoldBtn').addEventListener('click', function() {
+            // Prepare data
+            var data = {
                 league_player_id: leaguePlayerId,
-                team_id: callTeamId,
-            },
-            success: function (response) {
-                console.log("Player marked as sold:", response);
-                showMessage('Player marked as sold successfully!', 'success');
-            },
-            error: function (xhr) {
-                console.error("Error marking player as sold:", xhr.responseText);
-                showMessage('Error marking player as sold', 'error');
+                team_id: callTeamId
+            };
+            
+            // If organizer/admin and override options are checked, use those values
+            if (isOrganizerOrAdmin) {
+                if (document.getElementById('override-team').checked && 
+                    document.getElementById('override-team-select').value) {
+                    data.team_id = document.getElementById('override-team-select').value;
+                }
+                
+                if (document.getElementById('override-amount').checked && 
+                    document.getElementById('override-amount-input').value) {
+                    data.override_amount = document.getElementById('override-amount-input').value;
+                }
             }
+            
+            // Remove popup
+            document.getElementById('soldConfirmationPopup').remove();
+            
+            // Hide bidding section, show available players
+            $(".bidMain").addClass('hidden');
+            $(".availPlayers").removeClass('hidden');
+            $("#availablePlayersSection").removeClass('hidden');
+            
+            // Send AJAX request
+            $.ajax({
+                url: markSoldAction,
+                type: "post",
+                headers: {'X-CSRF-TOKEN': token},
+                data: data,
+                success: function (response) {
+                    console.log("Player marked as sold:", response);
+                    showMessage('Player marked as sold successfully!', 'success');
+                },
+                error: function (xhr) {
+                    console.error("Error marking player as sold:", xhr.responseText);
+                    showMessage('Error marking player as sold', 'error');
+                }
+            });
         });
     });
     
@@ -560,26 +770,76 @@ $(document).ready(function(){
         var token = $(this).closest('.mb-6').attr('token');
         var markUnSoldAction = $(this).closest('.mb-6').attr('mark-unsold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
-
-        $(".bidMain").addClass('hidden');
-        $(".availPlayers").removeClass('hidden');
-        $("#availablePlayersSection").removeClass('hidden');
+        var playerName = $('.playerName').text().trim();
         
-        $.ajax({
-            url: markUnSoldAction,
-            type: "post",
-            headers: {'X-CSRF-TOKEN': token},
-            data: {
-                league_player_id: leaguePlayerId,
-            },
-            success: function (response) {
-                console.log("Player marked as unsold:", response);
-                showMessage('Player marked as unsold successfully!', 'success');
-            },
-            error: function (xhr) {
-                console.error("Error marking player as unsold:", xhr.responseText);
-                showMessage('Error marking player as unsold', 'error');
-            }
+        // Create the confirmation popup
+        var confirmationPopup = document.createElement('div');
+        confirmationPopup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmationPopup.id = 'unsoldConfirmationPopup';
+        
+        // Create popup content
+        var popupContent = `
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Confirm Unsold Status</h3>
+                </div>
+                <div class="mb-6">
+                    <p class="text-gray-700 mb-4">Are you sure you want to mark <span class="font-bold">${playerName}</span> as unsold?</p>
+                    <div class="bg-yellow-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <span class="text-yellow-800">This will refund all bids and make the player available for future auctions.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelUnsoldBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmUnsoldBtn" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+                        Mark as Unsold
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        confirmationPopup.innerHTML = popupContent;
+        document.body.appendChild(confirmationPopup);
+        
+        // Cancel button event
+        document.getElementById('cancelUnsoldBtn').addEventListener('click', function() {
+            document.getElementById('unsoldConfirmationPopup').remove();
+        });
+        
+        // Confirm button event
+        document.getElementById('confirmUnsoldBtn').addEventListener('click', function() {
+            // Remove popup
+            document.getElementById('unsoldConfirmationPopup').remove();
+            
+            // Hide bidding section, show available players
+            $(".bidMain").addClass('hidden');
+            $(".availPlayers").removeClass('hidden');
+            $("#availablePlayersSection").removeClass('hidden');
+            
+            // Send AJAX request
+            $.ajax({
+                url: markUnSoldAction,
+                type: "post",
+                headers: {'X-CSRF-TOKEN': token},
+                data: {
+                    league_player_id: leaguePlayerId,
+                },
+                success: function (response) {
+                    console.log("Player marked as unsold:", response);
+                    showMessage('Player marked as unsold successfully!', 'success');
+                },
+                error: function (xhr) {
+                    console.error("Error marking player as unsold:", xhr.responseText);
+                    showMessage('Error marking player as unsold', 'error');
+                }
+            });
         });
     });
 });

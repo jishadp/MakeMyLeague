@@ -85,7 +85,7 @@
                                         Edit
                                     </a>
                                 @endif
-                                @if (auth()->user()->isTeamOwner())
+                                @if (auth()->user()->isTeamOwner() && (auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin()))
                                     <a href="{{ route('teams.create') }}?league_slug={{ $league->slug }}"
                                         class="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-center text-sm">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,8 +234,8 @@
                                         Back to Leagues
                                     </a>
                                 </div>
-                                @if (auth()->user()->canManageLeague($league->id) || auth()->user()->isTeamOwner())
-                                    <div class="flex gap-3">
+                                <div class="flex gap-3">
+                                    @if (auth()->user()->canManageLeague($league->id))
                                         <a href="{{ route('players.create') }}?league_slug={{ $league->slug }}"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors text-base">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
@@ -245,6 +245,7 @@
                                             </svg>
                                             Create Player
                                         </a>
+                                        
                                         <a href="{{ route('teams.create') }}?league_slug={{ $league->slug }}"
                                             class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-base">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
@@ -254,8 +255,8 @@
                                             </svg>
                                             Create Team
                                         </a>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
                                 @if (auth()->user()->isPlayer() || auth()->user()->gameRoles->isNotEmpty() || auth()->user()->position_id)
                                     <div class="flex gap-3">
                                         @php
