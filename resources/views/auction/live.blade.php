@@ -239,9 +239,12 @@
                             @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
                             <div class="p-2 bg-gray-50 max-h-48 overflow-y-auto">
                                 <div class="space-y-1">
-                                    @foreach($team->leaguePlayers as $leaguePlayer)
+                                    @foreach($team->leaguePlayers as $index => $leaguePlayer)
                                     <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
                                         <div class="flex items-center space-x-2">
+                                            <div class="flex items-center justify-center w-5 h-5 bg-blue-600 text-white rounded-full text-xs font-bold flex-shrink-0">
+                                                {{ $index + 1 }}
+                                            </div>
                                             <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
                                                 {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
                                             </div>

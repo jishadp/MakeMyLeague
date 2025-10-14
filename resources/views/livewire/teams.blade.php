@@ -34,9 +34,13 @@
                 @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
                 <div class="p-3 bg-gray-50">
                     <div class="space-y-2">
-                        @foreach($team->leaguePlayers as $leaguePlayer)
+                        @foreach($team->leaguePlayers as $index => $leaguePlayer)
                         <div class="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
                             <div class="flex items-center space-x-2">
+                                <!-- Serial Number -->
+                                <div class="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold flex-shrink-0">
+                                    {{ $index + 1 }}
+                                </div>
                                 <!-- Player Avatar -->
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
                                     {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
