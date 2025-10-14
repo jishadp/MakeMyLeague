@@ -65,6 +65,16 @@ function startBidding(userId, leaguePlayerId, playerName, basePrice, position, l
     // Update the bidding section with player information
     updateBiddingPlayer(playerName, position, basePrice);
     
+    // Update bid button attributes dynamically
+    $('.callBid').attr('player-id', userId);
+    $('.callBid').attr('league-player-id', leaguePlayerId);
+    $('.callBid').attr('base-price', basePrice);
+    $('.callBid').attr('league-id', leagueId);
+    
+    // Update markSold and markUnSold button attributes
+    $('.markSold').attr('league-player-id', leaguePlayerId);
+    $('.markUnSold').attr('league-player-id', leaguePlayerId);
+    
     // Show the bidding section
     const bidMain = document.querySelector('.bidMain');
     if (bidMain) {
@@ -319,6 +329,31 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bidding started and broadcasted:", response);
+                
+                // Update all bid buttons with the new bid amount for next increment
+                if (response.success && response.new_bid) {
+                    $('.callBid').attr('base-price', response.new_bid);
+                    
+                    // Update the call_team_id for markSold button
+                    if (response.call_team_id) {
+                        $('.markSold').attr('call-team-id', response.call_team_id);
+                    }
+                    
+                    showMessage('Bid placed successfully! New bid: ₹' + response.new_bid, 'success');
+                }
+            },
+            error: function (xhr) {
+                console.error("Error placing bid:", xhr.responseText);
+                var errorMessage = 'Error placing bid';
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.message) {
+                        errorMessage = response.message;
+                    }
+                } catch (e) {
+                    // Use default error message
+                }
+                showMessage(errorMessage, 'error');
             }
         });
     });

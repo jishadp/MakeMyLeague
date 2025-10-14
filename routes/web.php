@@ -257,13 +257,13 @@ Route::middleware('auth')->group(function () {
 
     // Auction routes - allow team owners only when auction is live, organizers can always access
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
-        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('auction.access');
-        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('auction.access');
+        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware(['auction.access', 'auction.requirements']);
+        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware(['auction.access', 'auction.requirements']);
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('league.organizer');
         Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('league.organizer');
         Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('league.organizer');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('league.organizer');
-        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('auction.access');
+        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware(['auction.access', 'auction.requirements']);
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {
