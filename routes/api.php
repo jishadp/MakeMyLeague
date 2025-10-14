@@ -14,3 +14,9 @@ Route::prefix('auction')->name('auction.')->group(function () {
     Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });
+
+// Auction API endpoints for live view
+Route::prefix('auctions/league/{league:slug}')->group(function () {
+    Route::get('team-balances', [AuctionController::class, 'getTeamBalances']);
+    Route::get('recent-bids', [AuctionController::class, 'getRecentBids']);
+});

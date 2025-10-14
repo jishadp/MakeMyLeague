@@ -314,21 +314,17 @@ class DashboardController
      */
     public function liveAuction(League $league)
     {
-        $league->load(['game', 'leagueTeams.team', 'leaguePlayers.user']);
+        // Only load league teams and the game, do not load all league players
+        $league->load(['game', 'leagueTeams.team']);
         
-        // Get the current player being auctioned
+        // Get only the current player being auctioned - do not fall back to available player
         $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'auctioning')
             ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->first();
             
-        // If no player is currently being auctioned, get the first available player
-        if (!$currentPlayer) {
-            $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
-                ->where('status', 'available')
-                ->with(['player.position', 'player.primaryGameRole.gamePosition'])
-                ->first();
-        }
+        // We don't want to show any other players if there's no auctioning player
+        // So we won't fall back to available players
             
         // Get current highest bid for the current player if exists
         $currentHighestBid = null;
@@ -348,18 +344,19 @@ class DashboardController
             ->get()
             ->groupBy('league_player_id');
 
-        // Get all teams with their players (retention + auctioned)
+        // Get all teams with only their sold players (no retained players)
         $teams = LeagueTeam::where('league_id', $league->id)
             ->with([
                 'team',
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
-                          ->whereIn('status', ['retained', 'sold'])
-                          ->orderByRaw("FIELD(status, 'retained', 'sold')")
+                          ->where('status', 'sold') // Only show sold players, not retained
                           ->orderBy('bid_price', 'desc');
                 }
             ])
-            ->withCount('leaguePlayers')
+            ->withCount(['leaguePlayers' => function($query) {
+                $query->where('status', 'sold'); // Only count sold players
+            }])
             ->get();
 
         return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams'));
