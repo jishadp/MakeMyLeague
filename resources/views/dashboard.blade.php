@@ -4,24 +4,24 @@
 
 @section('content')
 
-<!-- Futuristic Hero Section with Animated Gradient -->
-<section class="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+<!-- Professional Hero Section -->
+<section class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 overflow-hidden"> 
     <!-- Animated Background -->
-    <div class="absolute inset-0 opacity-20">
+    <div class="absolute inset-0 opacity-10">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9nPjwvc3ZnPg==')] animate-pulse"></div>
     </div>
     
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
             <div class="space-y-6">
-                <div class="inline-flex items-center px-4 py-2 bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 rounded-full">
-                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></span>
-                    <span class="text-purple-200 text-sm font-medium">Live Dashboard</span>
+                <div class="inline-flex items-center px-4 py-2 bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-full">
+                    <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse mr-2"></span>
+                    <span class="text-blue-200 text-sm font-medium">Live Dashboard</span>
                 </div>
                 
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
                     Welcome,
-                    <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                    <span class="bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 bg-clip-text text-transparent">
                         {{ auth()->user()->name }}
                     </span>
                     </h1>
@@ -32,7 +32,7 @@
 
                 <!-- Quick Action Buttons -->
                 <div class="flex flex-wrap gap-3 pt-4">
-                    <a href="#available-leagues" class="px-4 sm:px-6 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
+                    <a href="#available-leagues" class="px-4 sm:px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
                         Join League
                     </a>
                     @if($liveAuctions->isNotEmpty())
@@ -140,12 +140,12 @@
 
 <!-- Live Auctions Alert Banner -->
 @if($liveAuctions->isNotEmpty())
-<section class="bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 animate-pulse">
+<section class="bg-gradient-to-r from-red-600 via-red-500 to-red-600 animate-pulse">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center space-x-3">
                 <div class="w-3 h-3 bg-white rounded-full animate-ping"></div>
-                <span class="text-white font-bold text-lg">🔴 LIVE AUCTION IN PROGRESS</span>
+                <span class="text-white font-bold text-lg">LIVE AUCTION IN PROGRESS</span>
                 <span class="text-white/90">{{ $liveAuctions->first()->name }}</span>
             </div>
             <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-6 py-2.5 bg-white hover:bg-gray-100 text-red-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
@@ -162,12 +162,12 @@
         <div class="flex items-center justify-between mb-6">
                 <div>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
-                    🚀 <span class="hidden sm:inline">Available Leagues</span><span class="sm:hidden">Leagues</span>
-                    <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">to Join</span>
+                    <span class="hidden sm:inline">Available Leagues</span><span class="sm:hidden">Leagues</span>
+                    <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">to Join</span>
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Register now and showcase your skills</p>
                 </div>
-            <a href="{{ route('leagues.index') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+            <a href="{{ route('leagues.index') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 View All
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -182,8 +182,8 @@
                        name="search" 
                        value="{{ request('search') }}"
                        placeholder="Search leagues by name, game, or location..." 
-                       class="w-full px-4 sm:px-6 py-3 sm:py-4 pr-12 sm:pr-14 rounded-xl sm:rounded-2xl border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-sm sm:text-base">
-                <button type="submit" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white p-2 sm:p-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                       class="w-full px-4 sm:px-6 py-3 sm:py-4 pr-12 sm:pr-14 rounded-xl sm:rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all text-sm sm:text-base">
+                <button type="submit" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 sm:p-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -192,7 +192,7 @@
             @if(request('search'))
             <div class="mt-3 flex items-center justify-between">
                 <p class="text-sm text-gray-600">
-                    Showing results for: <span class="font-semibold text-purple-600">"{{ request('search') }}"</span>
+                    Showing results for: <span class="font-semibold text-blue-600">"{{ request('search') }}"</span>
                 </p>
                 <a href="{{ route('dashboard') }}" class="text-sm text-red-600 hover:text-red-700 font-medium">
                     Clear Search
@@ -203,8 +203,8 @@
 
         @if($availableLeagues->isEmpty())
         <div class="bg-white rounded-3xl shadow-xl p-12 text-center border-2 border-dashed border-gray-200">
-            <div class="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
@@ -214,9 +214,9 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($availableLeagues as $league)
-            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-200 hover:-translate-y-2">
+            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
                 <!-- League Header -->
-                <div class="relative h-48 overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700">
+                <div class="relative h-48 overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700">
                                 @if($league->banner)
                         <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
@@ -225,7 +225,7 @@
                                 <!-- Status Badge -->
                                 <div class="absolute top-4 left-4">
                         <span class="inline-flex items-center px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg">
-                            ✓ OPEN FOR REGISTRATION
+                            OPEN FOR REGISTRATION
                                     </span>
                                 </div>
                                 
@@ -251,16 +251,16 @@
                             <div class="p-6">
                                 <!-- Quick Stats -->
                     <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                            <div class="text-xl font-black text-purple-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
+                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                            <div class="text-xl font-black text-blue-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
                             <div class="text-xs text-gray-600 font-medium">Teams</div>
                                     </div>
-                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
-                            <div class="text-xl font-black text-blue-600">{{ $league->leaguePlayers->count() }}</div>
+                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                            <div class="text-xl font-black text-blue-700">{{ $league->leaguePlayers->count() }}</div>
                             <div class="text-xs text-gray-600 font-medium">Players</div>
                         </div>
-                        <div class="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                            <div class="text-xl font-black text-green-600">{{ $league->season }}</div>
+                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                            <div class="text-xl font-black text-blue-800">{{ $league->season }}</div>
                             <div class="text-xs text-gray-600 font-medium">Season</div>
                                     </div>
                                 </div>
@@ -268,7 +268,7 @@
                     <!-- Info -->
                                 <div class="space-y-2 mb-4">
                                     <div class="flex items-center text-sm text-gray-600">
-                            <svg class="w-4 h-4 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                                         </svg>
                             <span class="font-medium">{{ $league->start_date->format('M d') }} - {{ $league->end_date->format('M d, Y') }}</span>
@@ -288,7 +288,7 @@
                     <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-4 mb-4">
                         <div class="flex items-center justify-between text-white">
                             <div>
-                                <div class="text-xs font-bold mb-1">🏆 PRIZE POOL</div>
+                                <div class="text-xs font-bold mb-1">PRIZE POOL</div>
                                 <div class="text-2xl font-black">₹{{ number_format(($league->winner_prize + $league->runner_prize)/1000, 0) }}K</div>
                                         </div>
                             <div class="text-right">
@@ -301,7 +301,7 @@
                                 
                                 <!-- Action Button -->
                     <div class="flex gap-2">
-                        <a href="{{ route('leagues.show', $league) }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+                        <a href="{{ route('leagues.show', $league) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                             Register Now →
                         </a>
                         <a href="{{ route('leagues.show', $league) }}" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
@@ -327,12 +327,12 @@
     </section>
 
 <!-- Auction Leaderboard Section -->
-<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
         <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
             <div>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2">
-                    🏆 <span class="hidden sm:inline">Auction</span> <span class="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">Leaderboard</span>
+                    <span class="hidden sm:inline">Auction</span> <span class="bg-gradient-to-r from-blue-300 to-blue-400 bg-clip-text text-transparent">Leaderboard</span>
                 </h2>
                 <p class="text-sm sm:text-base text-gray-300">Top valued players across all leagues</p>
             </div>
@@ -340,7 +340,11 @@
 
         @if($auctionLeaderboard->isEmpty())
         <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-12 text-center">
-            <div class="text-6xl mb-4">🏆</div>
+            <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
             <h3 class="text-2xl font-bold text-white mb-3">No Auction Data Yet</h3>
             <p class="text-gray-300">Leaderboard will appear after player auctions</p>
                 </div>
@@ -350,12 +354,12 @@
                 <table class="w-full">
                     <thead>
                         <tr class="bg-white/5 border-b border-white/10">
-                            <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Rank</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Player</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Position</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">Team</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-purple-300 uppercase tracking-wider">League</th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-purple-300 uppercase tracking-wider">Sold Price</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Rank</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Player</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Position</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Team</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">League</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-blue-300 uppercase tracking-wider">Sold Price</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/10">
@@ -364,7 +368,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     @if($index < 3)
-                                        <span class="text-2xl">{{ ['🥇', '🥈', '🥉'][$index] }}</span>
+                                        <span class="text-2xl font-bold text-yellow-400">{{ $index + 1 }}</span>
                                 @else
                                         <span class="text-white font-bold">{{ $index + 1 }}</span>
                                             @endif
@@ -372,7 +376,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold mr-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold mr-3">
                                         {{ strtoupper(substr($player->user->name, 0, 2)) }}
                                     </div>
                                     <div>
@@ -382,7 +386,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm font-medium">
+                                <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">
                                     {{ $player->user->position->name ?? 'N/A' }}
                                 </span>
                             </td>
@@ -412,30 +416,30 @@
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
-            💰 <span class="hidden sm:inline">Your</span> <span class="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Auction Stats</span>
+            <span class="hidden sm:inline">Your</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Auction Stats</span>
         </h2>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
                 <div class="text-sm font-medium mb-2 opacity-90">Total Earnings</div>
                 <div class="text-4xl font-black mb-2">₹{{ number_format($auctionStats['total_value']/1000, 1) }}K</div>
                 <div class="text-xs opacity-75">Across {{ $auctionStats['times_sold'] }} auctions</div>
                                 </div>
                                 
-            <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 text-white shadow-lg">
+            <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
                 <div class="text-sm font-medium mb-2 opacity-90">Highest Bid</div>
                 <div class="text-4xl font-black mb-2">₹{{ number_format($auctionStats['highest_bid']/1000, 1) }}K</div>
                 <div class="text-xs opacity-75">Your top auction price</div>
             </div>
             
-            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg">
+            <div class="bg-gradient-to-br from-blue-700 to-blue-800 rounded-2xl p-6 text-white shadow-lg">
                 <div class="text-sm font-medium mb-2 opacity-90">Average Price</div>
                 <div class="text-4xl font-black mb-2">₹{{ number_format($auctionStats['average_bid']/1000, 1) }}K</div>
                 <div class="text-xs opacity-75">Per auction</div>
             </div>
             
-            <div class="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-lg">
+            <div class="bg-gradient-to-br from-blue-800 to-blue-900 rounded-2xl p-6 text-white shadow-lg">
                 <div class="text-sm font-medium mb-2 opacity-90">Times Sold</div>
                 <div class="text-4xl font-black mb-2">{{ $auctionStats['times_sold'] }}</div>
                 <div class="text-xs opacity-75">Successful auctions</div>
@@ -494,7 +498,7 @@
         <div class="flex items-center justify-between mb-8">
                                             <div>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
-                    ⚡ <span class="hidden sm:inline">Upcoming</span> <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Matches</span>
+                    <span class="hidden sm:inline">Upcoming</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Matches</span>
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Your scheduled fixtures</p>
                                             </div>
@@ -505,7 +509,7 @@
             <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                             VS
                         </div>
                         <div>
@@ -545,13 +549,13 @@
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
-            📊 <span class="hidden sm:inline">Recent</span> <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Results</span>
+            <span class="hidden sm:inline">Recent</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Results</span>
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @foreach($recentResults as $result)
             <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-3">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3">
                     <div class="text-white text-sm font-medium">{{ $result->league->name }}</div>
                 </div>
                             <div class="p-6">
@@ -592,13 +596,13 @@
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
-            🎯 <span class="hidden sm:inline">My</span> <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Leagues</span>
+            <span class="hidden sm:inline">My</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Leagues</span>
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($userLeagueParticipations as $participation)
             <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div class="relative h-32 bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700">
+                <div class="relative h-32 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700">
                     @if($participation->league->banner)
                         <img src="{{ Storage::url($participation->league->banner) }}" alt="{{ $participation->league->name }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
@@ -631,7 +635,7 @@
                                     </div>
                                 @endif
                                 
-                    <a href="{{ route('leagues.show', $participation->league) }}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+                    <a href="{{ route('leagues.show', $participation->league) }}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                         View League →
                                 </a>
                             </div>
@@ -647,12 +651,12 @@
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
-            🔥 <span class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Trending</span> <span class="hidden sm:inline">Leagues</span>
+            <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Trending</span> <span class="hidden sm:inline">Leagues</span>
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($trendingLeagues as $league)
-            <div class="group bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+            <div class="group bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                         @if($league->logo)
@@ -661,7 +665,6 @@
                             <span class="text-white font-black text-2xl">{{ substr($league->name, 0, 1) }}</span>
             @endif
                     </div>
-                    <div class="text-4xl">🔥</div>
                 </div>
 
                 <h3 class="text-2xl font-black mb-2">{{ $league->name }}</h3>
@@ -682,7 +685,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('leagues.show', $league) }}" class="w-full bg-white hover:bg-gray-100 text-orange-600 text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all block">
+                <a href="{{ route('leagues.show', $league) }}" class="w-full bg-white hover:bg-gray-100 text-blue-600 text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all block">
                     View Details →
                 </a>
             </div>
@@ -694,14 +697,14 @@
 
 <!-- Owned Teams (if team owner) -->
 @if($userOwnedTeams->isNotEmpty())
-<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
         <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
                 <div>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
-                    👑 <span class="hidden sm:inline">Your</span> <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Teams</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2">
+                    <span class="hidden sm:inline">Your</span> <span class="bg-gradient-to-r from-blue-300 to-blue-400 bg-clip-text text-transparent">Teams</span>
                 </h2>
-                <p class="text-sm sm:text-base text-gray-600">Teams you own and manage</p>
+                <p class="text-sm sm:text-base text-gray-300">Teams you own and manage</p>
                 </div>
             <a href="{{ route('teams.create') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -713,8 +716,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($userOwnedTeams as $team)
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div class="relative h-40 bg-gradient-to-br from-blue-600 via-cyan-600 to-blue-700">
+            <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="relative h-40 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
                         @if($team->banner)
                         <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
@@ -743,13 +746,13 @@
                     
                     <div class="p-6">
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="text-center p-3 bg-gray-50 rounded-xl">
-                            <div class="text-2xl font-black text-blue-600">{{ $team->leagueTeams->count() }}</div>
-                                <div class="text-xs text-gray-600">Leagues</div>
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                            <div class="text-2xl font-black text-blue-300">{{ $team->leagueTeams->count() }}</div>
+                                <div class="text-xs text-gray-300">Leagues</div>
                             </div>
-                            <div class="text-center p-3 bg-gray-50 rounded-xl">
-                            <div class="text-2xl font-black text-cyan-600">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->count(); }) }}</div>
-                                <div class="text-xs text-gray-600">Players</div>
+                            <div class="text-center p-3 bg-white/10 rounded-xl">
+                            <div class="text-2xl font-black text-blue-300">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->count(); }) }}</div>
+                                <div class="text-xs text-gray-300">Players</div>
                             </div>
                         </div>
                         
@@ -771,11 +774,11 @@
         <div class="flex items-center justify-between mb-8">
                 <div>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
-                    🎪 <span class="hidden sm:inline">Leagues You</span> <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Organize</span>
+                    <span class="hidden sm:inline">Leagues You</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Organize</span>
                 </h2>
                 <p class="text-sm sm:text-base text-gray-600">Manage your organized leagues</p>
                             </div>
-            <a href="{{ route('leagues.create') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+            <a href="{{ route('leagues.create') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>

@@ -33,14 +33,6 @@ class AuctionController extends Controller
             ->with(['player.position'])
             ->first();
             
-        // If no player is currently being auctioned, get the first available player
-        if (!$currentPlayer) {
-            $currentPlayer = LeaguePlayer::where('league_id', $league->id)
-                ->where('status', 'available')
-                ->with(['player.position'])
-                ->first();
-        }
-            
         // Get the current highest bid for the current player if exists
         $currentHighestBid = null;
         if ($currentPlayer) {
