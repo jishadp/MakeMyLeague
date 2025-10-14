@@ -174,27 +174,29 @@ class PlayerController extends Controller
             }
         ]);
         
-        // Get recent auction data
-        $recentAuctions = $player->leaguePlayers()
-            ->with(['auctionBids' => function($query) {
-                $query->orderBy('created_at', 'desc')->limit(3);
-            }, 'league', 'leagueTeam'])
-            ->whereHas('auctionBids')
-            ->get()
-            ->pluck('auctionBids')
-            ->flatten()
-            ->sortByDesc('created_at')
-            ->take(3);
+        // Get recent auction data with proper relationships
+        $recentAuctions = \App\Models\Auction::query()
+            ->whereHas('leaguePlayer', function($query) use ($player) {
+                $query->where('user_id', $player->id);
+            })
+            ->with([
+                'leaguePlayer.league',
+                'leagueTeam.team',
+                'leaguePlayer.leagueTeam'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
             
-        // Get league teams data
+        // Get league teams data with proper relationships
         $leagueTeams = $player->leaguePlayers()
-            ->with(['league', 'leagueTeam'])
+            ->with(['league', 'leagueTeam.team'])
             ->whereNotNull('league_team_id')
             ->get();
             
         // Get registered leagues with active and pending status
         $registeredLeagues = $player->leaguePlayers()
-            ->with(['league.game', 'league.localBody.district'])
+            ->with(['league.game', 'league.localBody.district', 'leagueTeam.team'])
             ->whereIn('status', ['pending', 'available', 'sold', 'active'])
             ->whereHas('league', function($query) {
                 $query->whereIn('status', ['active', 'pending']);

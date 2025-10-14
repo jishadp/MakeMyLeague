@@ -387,7 +387,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">
-                                    {{ $player->user->position->name ?? 'N/A' }}
+                                    {{ $player->user->position->name ?? 'No Role' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-gray-300">
@@ -851,11 +851,11 @@
                                     @endif
                 </div>
                         <h3 class="text-2xl font-black text-white mb-2">{{ $playerInfo->name }}</h3>
-                        <p class="text-purple-200 mb-4">{{ $playerInfo->position->name ?? 'No Position' }}</p>
+                        <p class="text-purple-200 mb-4">{{ $playerInfo->position->name ?? 'No Game Role' }}</p>
                         
                         <div class="flex justify-center gap-2 mb-6">
                             <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">Player</span>
-                            <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">{{ $playerInfo->position->name ?? 'N/A' }}</span>
+                            <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">{{ $playerInfo->position->name ?? 'No Role' }}</span>
                         </div>
 
                         <a href="{{ route('players.edit', $playerInfo) }}" class="inline-flex items-center px-6 py-2.5 bg-white hover:bg-gray-100 text-purple-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">

@@ -32,7 +32,7 @@
                     {{ $player->name }}
                 </h1>
                 <p class="text-lg sm:text-xl text-white/90">
-                    {{ $player->position->name ?? 'Cricket Player' }}
+                    {{ $player->position->name ?? 'Cricket Player' }} • Player Profile
                 </p>
             </div>
             
@@ -98,10 +98,10 @@
                     </div>
                 </div>
                 
-                <!-- Position Badge -->
+                <!-- Game Role Badge -->
                 <div class="absolute top-6 left-6">
                     <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white/90 text-indigo-700 shadow-lg">
-                        {{ $player->position->name ?? 'Player' }}
+                        {{ $player->position->name ?? 'No Role' }}
                     </span>
                 </div>
             </div>
@@ -126,9 +126,9 @@
                                 </div>
                                 
                                 <div>
-                                    <h4 class="text-sm font-medium text-gray-500 mb-1">Playing Role</h4>
+                                    <h4 class="text-sm font-medium text-gray-500 mb-1">Game Role</h4>
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                                        {{ $player->position->name ?? 'N/A' }}
+                                        {{ $player->position->name ?? 'Not Set' }}
                                     </span>
                                 </div>
                                 
@@ -165,7 +165,7 @@
                         <!-- Role Description -->
                         @if($player->position)
                             <div class="mt-8 p-6 bg-gray-50 rounded-xl">
-                                <h4 class="text-lg font-semibold text-gray-900 mb-3">About {{ $player->position->name }}</h4>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-3">About {{ $player->position->name }} Role</h4>
                                 <p class="text-gray-600 leading-relaxed">
                                     @switch($player->position->name)
                                         @case('Batter')
@@ -244,19 +244,25 @@
                         
                         <div class="space-y-2">
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Team:</span>
-                                <span class="text-sm font-medium text-gray-900">{{ $auction->leaguePlayer->leagueTeam->name ?? 'Unsold' }}</span>
+                                <span class="text-sm text-gray-600">Bidding Team:</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $auction->leagueTeam->team->name ?? 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600">Bid Amount:</span>
                                 <span class="text-sm font-bold text-green-600">₹{{ number_format($auction->amount) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Status:</span>
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $auction->leaguePlayer->status === 'sold' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ ucfirst($auction->leaguePlayer->status) }}
+                                <span class="text-sm text-gray-600">Bid Status:</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $auction->status === 'won' ? 'bg-green-100 text-green-800' : ($auction->status === 'ask' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ ucfirst($auction->status) }}
                                 </span>
                             </div>
+                            @if($auction->leaguePlayer->status === 'sold' && $auction->leaguePlayer->leagueTeam)
+                            <div class="flex justify-between pt-2 border-t border-yellow-200">
+                                <span class="text-sm text-gray-600">Final Team:</span>
+                                <span class="text-sm font-bold text-indigo-600">{{ $auction->leaguePlayer->leagueTeam->team->name ?? 'N/A' }}</span>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -285,7 +291,7 @@
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600">Team:</span>
-                                <span class="text-sm font-medium text-gray-900">{{ $leaguePlayer->leagueTeam->name ?? 'No Team' }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $leaguePlayer->leagueTeam->team->name ?? 'No Team' }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600">Status:</span>
@@ -363,7 +369,7 @@
                                     <svg class="w-4 h-4 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                                     </svg>
-                                    <span>Team: {{ $leaguePlayer->leagueTeam->name }}</span>
+                                    <span>Team: {{ $leaguePlayer->leagueTeam->team->name ?? 'N/A' }}</span>
                                 </div>
                             @endif
                         </div>

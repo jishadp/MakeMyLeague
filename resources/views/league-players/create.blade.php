@@ -76,7 +76,7 @@
                         <option value="">Choose a player...</option>
                         @foreach($availablePlayers as $player)
                             <option value="{{ $player->id }}" {{ old('user_id') == $player->id ? 'selected' : '' }}>
-                                {{ $player->name }} ({{ $player->position->name ?? 'No Role' }})
+                                {{ $player->name }} ({{ $player->position->name ?? 'No Game Role' }})
                             </option>
                         @endforeach
                     </select>
@@ -84,7 +84,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                     @if($availablePlayers->isEmpty())
-                        <p class="mt-1 text-sm text-yellow-600">All players are already added to this league.</p>
+                        <p class="mt-1 text-sm text-gray-500">All players are already added to this league.</p>
                     @endif
                 </div>
 

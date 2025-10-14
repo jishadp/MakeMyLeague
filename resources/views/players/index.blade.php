@@ -51,9 +51,9 @@
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                    <!-- Role Filter -->
+                    <!-- Game Role Filter -->
                     <div>
-                        <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Playing Role</label>
+                        <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Game Role</label>
                         <select name="position_id" id="position_id" class="w-full h-12 rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3"
                                 onchange="this.form.submit()">
                             <option value="">All Roles</option>
@@ -153,10 +153,10 @@
                                 </div>
                             </div>
                             
-                            <!-- Position Badge -->
+                            <!-- Game Role Badge -->
                             <div class="absolute top-4 left-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 text-indigo-700 shadow-lg">
-                                    {{ $player->position->name ?? 'Player' }}
+                                    {{ $player->position->name ?? 'No Role' }}
                                 </span>
                             </div>
                             
@@ -165,7 +165,7 @@
                                 <div class="absolute bottom-4 left-4 right-4">
                                     <div class="bg-black/50 backdrop-blur-sm rounded-xl p-3">
                                         <h3 class="text-lg font-bold text-white drop-shadow-lg">{{ $player->name }}</h3>
-                                        <p class="text-sm text-white/90 drop-shadow">{{ $player->position->name ?? 'Player' }}</p>
+                                        <p class="text-sm text-white/90 drop-shadow">{{ $player->position->name ?? 'No Role' }}</p>
                                     </div>
                                 </div>
                             @endif

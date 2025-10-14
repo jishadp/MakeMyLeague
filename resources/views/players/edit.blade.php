@@ -105,12 +105,12 @@
                                    minlength="4" maxlength="6">
                         </div>
 
-                        <!-- Player Role -->
+                        <!-- Game Role -->
                         <div>
-                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Role <span class="text-red-500">*</span></label>
-                            <select name="position_id" id="position_id" required {{ auth()->user()->isOrganizer() ? '' : 'disabled' }}
+                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Game Role</label>
+                            <select name="position_id" id="position_id" {{ auth()->user()->isOrganizer() ? '' : 'disabled' }}
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4 {{ !auth()->user()->isOrganizer() ? 'bg-gray-100' : '' }}">
-                                <option value="">Select Role</option>
+                                <option value="">Select Game Role</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->id }}" {{ old('position_id', $player->position_id) == $role->id ? 'selected' : '' }}>
                                         {{ $role->name }}
@@ -118,7 +118,7 @@
                                 @endforeach
                             </select>
                             @if(!auth()->user()->isOrganizer())
-                                <p class="mt-1 text-sm text-gray-500">Only administrators can change player roles.</p>
+                                <p class="mt-1 text-sm text-gray-500">Only administrators can change game roles.</p>
                                 <input type="hidden" name="position_id" value="{{ $player->position_id }}">
                             @endif
                         </div>

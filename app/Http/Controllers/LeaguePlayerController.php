@@ -74,8 +74,7 @@ class LeaguePlayerController extends Controller
             ->get();
 
         // Get players not already in this league
-        $availablePlayers = User::whereNotNull('position_id')
-            ->whereNotIn('id', function($query) use ($league) {
+        $availablePlayers = User::whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
                       ->from('league_players')
                       ->where('league_id', $league->id);
@@ -96,8 +95,7 @@ class LeaguePlayerController extends Controller
             ->get();
 
         // Get players not already in this league
-        $availablePlayers = User::whereNotNull('position_id')
-            ->whereNotIn('id', function($query) use ($league) {
+        $availablePlayers = User::whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
                       ->from('league_players')
                       ->where('league_id', $league->id);

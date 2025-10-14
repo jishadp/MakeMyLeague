@@ -119,12 +119,12 @@
                             </select>
                         </div>
 
-                        <!-- Player Role -->
+                        <!-- Game Role -->
                         <div>
-                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Player Position <span class="text-red-500">*</span></label>
-                            <select name="position_id" id="position_id" required
+                            <label for="position_id" class="block text-sm font-medium text-gray-700 mb-2">Game Role</label>
+                            <select name="position_id" id="position_id"
                                     class="select2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-base py-3 px-4">
-                                <option value="">Select Position</option>
+                                <option value="">Select Game Role</option>
                                 @foreach($positions as $position)
                                     <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>
                                         {{ $position->name }}
