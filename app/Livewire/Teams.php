@@ -38,7 +38,10 @@ class Teams extends Component
                 'team',
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
-                          ->whereIn('status', ['retained', 'sold'])
+                          ->where(function($q) {
+                              $q->whereIn('status', ['retained', 'sold'])
+                                ->orWhere('retention', true); // Include retained players regardless of status
+                          })
                           ->orderByRaw("FIELD(status, 'retained', 'sold')")
                           ->orderBy('bid_price', 'desc');
                 }

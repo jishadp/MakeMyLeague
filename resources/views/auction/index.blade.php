@@ -12,6 +12,7 @@
 <input type="hidden" id="custom-bid-increment" value="{{ $league->custom_bid_increment ?? 10 }}">
 <input type="hidden" id="predefined-increments" value="{{ json_encode($league->predefined_increments ?? []) }}">
 <input type="hidden" id="league-id" value="{{ $league->id }}">
+<input type="hidden" id="league-slug" value="{{ $league->slug }}">
 <input type="hidden" id="is-organizer-or-admin" value="{{ auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin() ? 'true' : 'false' }}">
 
 <div class="min-h-screen auction-bg py-6">
@@ -106,12 +107,24 @@
 
                 <!-- Progress Bar -->
                 <div class="mt-4">
+                    @php
+                        // Calculate total players that need auction
+                        $totalPlayers = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                                            ->where(function($query) {
+                                                $query->whereIn('status', ['available', 'sold', 'unsold', 'auctioning'])
+                                                    ->orWhere('retention', false);
+                                            })->count();
+                        $soldPlayers = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                                            ->where('status', 'sold')->count();
+                        $progressPercentage = $totalPlayers > 0 ? round(($soldPlayers / $totalPlayers) * 100) : 0;
+                    @endphp
                     <div class="flex justify-between text-sm text-gray-600 mb-1">
                         <span>Progress</span>
-                        <span>70%</span>
+                        <span>{{ $progressPercentage }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300" style="width: 70%"></div>
+                        <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300" 
+                             style="width: {{ $progressPercentage }}%"></div>
                     </div>
                 </div>
             </div>

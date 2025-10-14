@@ -535,6 +535,11 @@ $(document).ready(function(){
                         $('.markSold').attr('call-team-id', response.call_team_id);
                     }
                     
+                    // Update bidding team name 
+                    if (response.team_name) {
+                        $('.bidTeam').text(response.team_name);
+                    }
+                    
                     // Refresh Livewire components - but safely
                     try {
                         if (window.Livewire) {
@@ -602,6 +607,7 @@ $(document).ready(function(){
     });
 
     $('.markSold').click(function(){
+        
         var token = $(this).closest('.mb-6').attr('token');
         var markSoldAction = $(this).closest('.mb-6').attr('mark-sold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
@@ -614,60 +620,102 @@ $(document).ready(function(){
         
         // Create the confirmation popup
         var confirmationPopup = document.createElement('div');
-        confirmationPopup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmationPopup.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
         confirmationPopup.id = 'soldConfirmationPopup';
         
         // Check if user is organizer or admin
         var isOrganizerOrAdmin = document.getElementById('is-organizer-or-admin') ? 
                                document.getElementById('is-organizer-or-admin').value === 'true' : false;
         
-        // Create popup content with override option for organizers/admins
+        // Create popup content with override option for organizers/admins - styled like the ownership modal
         var popupContent = `
-            <div class="bg-white rounded-xl shadow-2xl p-4 sm:p-6 max-w-md w-full mx-2 sm:mx-4 text-black">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-bold text-black">Confirm Player Sale</h3>
-                </div>
-                <div class="mb-6">
-                    <p class="text-black mb-4">Are you sure you want to mark <span class="font-bold">${playerName}</span> as sold?</p>
-                    <div class="bg-gray-100 rounded-lg p-4 mb-4">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-black">Current Bid:</span>
-                            <span class="font-bold text-green-600">₹${currentBid}</span>
+            <div class="relative top-2 sm:top-8 lg:top-20 mx-auto p-3 sm:p-4 lg:p-6 border w-11/12 sm:w-10/12 lg:w-4/5 xl:w-3/4 max-w-6xl shadow-lg rounded-lg bg-white mb-20 sm:mb-24 lg:mb-32">
+                <div class="mt-2 sm:mt-3">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-4 sm:mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Confirm Player Sale</h3>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-black">Team:</span>
-                            <span class="font-bold text-black">${bidTeam}</span>
+                        <button id="cancelSoldBtn" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Sale Content -->
+                    <div class="space-y-4 sm:space-y-6">
+                        <!-- Player Information -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-green-100 rounded-lg p-3 mr-4">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-green-900">${playerName}</h4>
+                                    <p class="text-sm sm:text-base text-green-700">Sold to ${bidTeam}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-white rounded-lg p-3 border border-green-100">
+                                    <div class="flex items-center mb-2">
+                                        <svg class="w-4 h-4 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span class="text-xs font-medium text-green-700 uppercase tracking-wide">Bid Amount</span>
+                                    </div>
+                                    <p class="text-lg font-semibold text-green-900">₹${currentBid}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${isOrganizerOrAdmin ? `
+                        <!-- Override Options -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4">Organizer Options</h4>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="flex items-center text-sm text-gray-700 mb-2">
+                                        <input type="checkbox" id="override-team" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                                        <span class="text-base">Override team selection</span>
+                                    </label>
+                                    <div id="override-team-section" class="hidden ml-7">
+                                        <select id="override-team-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="">Select team...</option>
+                                            <!-- Teams will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="flex items-center text-sm text-gray-700 mb-2">
+                                        <input type="checkbox" id="override-amount" class="mr-2 h-5 w-5 text-blue-600 rounded">
+                                        <span class="text-base">Override bid amount</span>
+                                    </label>
+                                    <div id="override-amount-section" class="hidden ml-7">
+                                        <input type="number" id="override-amount-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter bid amount">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Confirmation Button -->
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
+                            <button id="confirmSoldBtn" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                                Confirm Sale
+                            </button>
                         </div>
                     </div>
-                    ${isOrganizerOrAdmin ? `
-                    <div class="border-t border-gray-200 pt-4 mt-4">
-                        <label class="flex items-center text-sm text-black mb-2">
-                            <input type="checkbox" id="override-team" class="mr-2 h-5 w-5 text-blue-600">
-                            <span class="text-base">Override team selection</span>
-                        </label>
-                        <div id="override-team-section" class="hidden mb-4">
-                            <select id="override-team-select" class="w-full border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select team...</option>
-                                <!-- Teams will be loaded dynamically -->
-                            </select>
-                        </div>
-                        <label class="flex items-center text-sm text-black mb-2">
-                            <input type="checkbox" id="override-amount" class="mr-2 h-5 w-5 text-blue-600">
-                            <span class="text-base">Override bid amount</span>
-                        </label>
-                        <div id="override-amount-section" class="hidden">
-                            <input type="number" id="override-amount-input" class="w-full border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter bid amount">
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-                <div class="flex justify-end space-x-3">
-                    <button id="cancelSoldBtn" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-black rounded-lg transition-colors text-base font-medium">
-                        Cancel
-                    </button>
-                    <button id="confirmSoldBtn" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-base font-medium">
-                        Confirm Sale
-                    </button>
                 </div>
             </div>
         `;
@@ -683,12 +731,12 @@ $(document).ready(function(){
                 
                 // Load teams if checked and not already loaded
                 if (this.checked && document.getElementById('override-team-select').options.length <= 1) {
-                    // Get league ID
-                    var leagueId = document.getElementById('league-id').value;
+                    // Get league slug
+                    var leagueSlug = document.getElementById('league-slug').value;
                     
-                    // Fetch teams
+                    // Fetch teams - use the league-teams.index route with slug
                     $.ajax({
-                        url: '/api/leagues/' + leagueId + '/teams',
+                        url: '/leagues/' + leagueSlug + '/teams',
                         type: 'GET',
                         success: function(response) {
                             var select = document.getElementById('override-team-select');
@@ -771,36 +819,70 @@ $(document).ready(function(){
         var markUnSoldAction = $(this).closest('.mb-6').attr('mark-unsold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
         var playerName = $('.playerName').text().trim();
+        var bidTeam = $('.bidTeam').text().trim();
+        var hasBid = !(bidTeam === 'Awaiting new bids..' || bidTeam === 'No player selected');
         
         // Create the confirmation popup
         var confirmationPopup = document.createElement('div');
-        confirmationPopup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmationPopup.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
         confirmationPopup.id = 'unsoldConfirmationPopup';
         
-        // Create popup content
+        // Create popup content with same style as sold popup
         var popupContent = `
-            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Confirm Unsold Status</h3>
-                </div>
-                <div class="mb-6">
-                    <p class="text-gray-700 mb-4">Are you sure you want to mark <span class="font-bold">${playerName}</span> as unsold?</p>
-                    <div class="bg-yellow-50 rounded-lg p-4 mb-4">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            <div class="relative top-2 sm:top-8 lg:top-20 mx-auto p-3 sm:p-4 lg:p-6 border w-11/12 sm:w-10/12 lg:w-4/5 xl:w-3/4 max-w-6xl shadow-lg rounded-lg bg-white mb-20 sm:mb-24 lg:mb-32">
+                <div class="mt-2 sm:mt-3">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-4 sm:mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-yellow-100 rounded-lg p-2">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Confirm Unsold Status</h3>
+                        </div>
+                        <button id="cancelUnsoldBtn" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            <span class="text-yellow-800">This will refund all bids and make the player available for future auctions.</span>
+                        </button>
+                    </div>
+
+                    <!-- Player Information -->
+                    <div class="space-y-4 sm:space-y-6">
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-yellow-100 rounded-lg p-3 mr-4">
+                                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-yellow-900">${playerName}</h4>
+                                    <p class="text-sm sm:text-base text-yellow-700">Will be marked as unsold</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4 border border-yellow-100 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span class="text-yellow-800">This will refund all bids and make the player available for future auctions.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirmation Button -->
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
+                            <div class="flex space-x-3">
+                                ${hasBid ? 
+                                `<button id="confirmUnsoldBtn" class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                                    Confirm Unsold
+                                </button>` : ''}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="flex justify-end space-x-3">
-                    <button id="cancelUnsoldBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors">
-                        Cancel
-                    </button>
-                    <button id="confirmUnsoldBtn" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
-                        Mark as Unsold
-                    </button>
                 </div>
             </div>
         `;

@@ -14,8 +14,27 @@ class LeagueTeamController extends Controller
     /**
      * Display a listing of league teams.
      */
-    public function index(League $league): View
+    public function index(League $league, Request $request)
     {
+        // If it's an AJAX request, return JSON for the teams
+        if($request->ajax() || $request->wantsJson()) {
+            $leagueTeams = LeagueTeam::with(['team'])
+                ->where('league_id', $league->id)
+                ->get();
+                
+            $teams = $leagueTeams->map(function($leagueTeam) {
+                return [
+                    'id' => $leagueTeam->id,
+                    'name' => $leagueTeam->team->name,
+                    'wallet_balance' => $leagueTeam->wallet_balance,
+                    'status' => $leagueTeam->status
+                ];
+            });
+            
+            return response()->json(['teams' => $teams]);
+        }
+        
+        // Regular view request
         $leagueTeams = LeagueTeam::with(['team', 'team.owner', 'team.homeGround'])
             ->where('league_id', $league->id)
             ->paginate(10);

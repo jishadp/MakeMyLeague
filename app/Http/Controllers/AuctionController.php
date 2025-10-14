@@ -52,6 +52,7 @@ class AuctionController extends Controller
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
                           ->whereIn('status', ['retained', 'sold'])
+                          ->orWhere('retention', true) // Include retained players regardless of status
                           ->orderByRaw("FIELD(status, 'retained', 'sold')")
                           ->orderBy('bid_price', 'desc');
                 }
@@ -298,9 +299,10 @@ class AuctionController extends Controller
     {
         $leaguePlayerId = $request->league_player_id;
         $teamId = $request->team_id;
+        $overrideAmount = $request->override_amount;
         
         // Use database transaction for atomic operations
-        DB::transaction(function () use ($leaguePlayerId, $teamId) {
+        DB::transaction(function () use ($leaguePlayerId, $teamId, $overrideAmount) {
             // Mark the winning bid as 'won'
             $winningBid = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('league_team_id', $teamId)
@@ -321,11 +323,21 @@ class AuctionController extends Controller
                 $bid->update(['status' => 'lost']);
             }
             
+            // Determine the bid price - use override amount if provided, otherwise use winning bid amount
+            $bidPrice = null;
+            if ($overrideAmount) {
+                $bidPrice = $overrideAmount;
+            } elseif ($winningBid) {
+                $bidPrice = $winningBid->amount;
+            } else {
+                $bidPrice = 0;
+            }
+            
             // Update the league player status to 'sold' and assign to team
             LeaguePlayer::where('id', $leaguePlayerId)->update([
                 'league_team_id' => $teamId,
                 'status' => 'sold',
-                'bid_price' => $winningBid ? $winningBid->amount : 0
+                'bid_price' => $bidPrice
             ]);
         });
 
