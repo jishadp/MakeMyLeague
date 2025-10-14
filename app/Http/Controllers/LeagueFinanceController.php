@@ -513,21 +513,41 @@ class LeagueFinanceController extends Controller
 
         $request->validate([
             'team_id' => 'required|exists:league_teams,id',
-            'amount' => 'required|numeric|min:0.01|max:' . $league->team_reg_fee,
+            'amount' => 'required|numeric|min:0.01',
         ], [
             'team_id.required' => 'Please select a team.',
             'team_id.exists' => 'Selected team is not valid.',
             'amount.required' => 'Please enter an amount.',
             'amount.numeric' => 'Amount must be a valid number.',
             'amount.min' => 'Amount must be greater than 0.',
-            'amount.max' => 'Amount cannot exceed the team registration fee of ₹' . number_format($league->team_reg_fee, 2) . '.',
         ]);
 
         // Find the league team
         $leagueTeam = $league->leagueTeams()->where('id', $request->team_id)->with('team')->first();
         
         if (!$leagueTeam) {
-            return redirect()->back()->with('error', 'Team not found.');
+            return redirect()->route('league-finances.create', $league)
+                ->with('error', 'Team not found.');
+        }
+
+        // Check existing payments for this team
+        $existingPayments = LeagueFinance::where('league_id', $league->id)
+            ->where('type', 'income')
+            ->where('title', 'like', '%Team Registration Fee - ' . $leagueTeam->team->name . '%')
+            ->sum('amount');
+
+        $remainingBalance = $league->team_reg_fee - $existingPayments;
+
+        // Check if team has already paid in full
+        if ($remainingBalance <= 0) {
+            return redirect()->route('league-finances.create', $league)
+                ->with('error', $leagueTeam->team->name . ' has already paid the registration fee in full.');
+        }
+
+        // Validate amount doesn't exceed remaining balance
+        if ($request->amount > $remainingBalance) {
+            return redirect()->route('league-finances.create', $league)
+                ->with('error', 'Amount cannot exceed the remaining balance of ₹' . number_format($remainingBalance, 2) . ' for ' . $leagueTeam->team->name . '.');
         }
 
         // Get the appropriate income category

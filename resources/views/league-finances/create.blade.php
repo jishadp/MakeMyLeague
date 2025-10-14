@@ -22,6 +22,20 @@
             </div>
         </div>
 
+        @php
+            // Helper function to format numbers compactly (1000 -> 1K)
+            function formatCompactNumber($number) {
+                if ($number >= 1000000) {
+                    return number_format($number / 1000000, 1) . 'M';
+                } elseif ($number >= 100000) {
+                    return number_format($number / 1000, 0) . 'K';
+                } elseif ($number >= 1000) {
+                    return number_format($number / 1000, 1) . 'K';
+                }
+                return number_format($number, 0);
+            }
+        @endphp
+
         <!-- Easy Cards Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <!-- Player Registration Fee Card -->
@@ -47,7 +61,7 @@
                         </div>
                         <div class="bg-gray-50 rounded-lg p-3">
                             <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Registration Fee</p>
-                            <p class="text-base sm:text-lg font-bold text-gray-900">₹{{ number_format($league->player_reg_fee, 2) }}</p>
+                            <p class="text-base sm:text-lg font-bold text-gray-900">₹{{ formatCompactNumber($league->player_reg_fee) }}</p>
                         </div>
                     </div>
 
@@ -70,7 +84,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <p class="text-xs text-blue-700">Amount Collected:</p>
-                                    <p class="text-sm font-bold text-blue-800">₹{{ number_format($existingPlayerRegistration->amount, 2) }}</p>
+                                    <p class="text-sm font-bold text-blue-800">₹{{ formatCompactNumber($existingPlayerRegistration->amount) }}</p>
                                 </div>
                                 <div>
                                     <p class="text-xs text-blue-700">Date Recorded:</p>
@@ -82,12 +96,12 @@
                                     <div class="flex justify-between items-center">
                                         <span class="text-xs text-orange-700">Balance:</span>
                                         <span class="text-sm font-bold {{ $playerBalance > 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $playerBalance > 0 ? '+' : '' }}₹{{ number_format($playerBalance, 2) }}
+                                            {{ $playerBalance > 0 ? '+' : '' }}₹{{ formatCompactNumber(abs($playerBalance)) }}
                                         </span>
                                     </div>
                                     <p class="text-xs text-orange-600 mt-1">
-                                        Expected: ₹{{ number_format($expectedPlayerAmount, 2) }} |
-                                        Recorded: ₹{{ number_format($existingPlayerRegistration->amount, 2) }}
+                                        Expected: ₹{{ formatCompactNumber($expectedPlayerAmount) }} |
+                                        Recorded: ₹{{ formatCompactNumber($existingPlayerRegistration->amount) }}
                                     </p>
                                 </div>
                             @endif
@@ -124,7 +138,7 @@
                             <div>
                                 <p class="text-xs sm:text-sm font-medium text-gray-600">Total Amount to Collect</p>
                                 <p class="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600" id="playerTotalAmount">
-                                    ₹{{ number_format($existingPlayerRegistration ? $existingPlayerRegistration->amount : $expectedPlayerAmount, 2) }}
+                                    ₹{{ formatCompactNumber($existingPlayerRegistration ? $existingPlayerRegistration->amount : $expectedPlayerAmount) }}
                                 </p>
                             </div>
                             <div class="text-left sm:text-right">
@@ -160,118 +174,121 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                     </div>
-                    <div>
-                        <h3 class="text-base sm:text-lg font-bold text-gray-900">Team Registration Fee</h3>
-                        <p class="text-xs sm:text-sm text-gray-600">Individual team payment tracking</p>
+                    <div class="flex-1">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900">Team Registration Fees</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">Track payments for each team</p>
                     </div>
                 </div>
 
-                <div class="space-y-3 sm:space-y-4">
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Teams</p>
-                            <p class="text-base sm:text-lg font-bold text-gray-900">{{ $teamCount }}</p>
+                @if($teamCount > 0)
+                    @php
+                        // Calculate totals
+                        $totalExpected = $teamCount * $league->team_reg_fee;
+                        $totalPaid = 0;
+                        $teamPayments = [];
+                        
+                        foreach($league->leagueTeams as $leagueTeam) {
+                            $paid = \App\Models\LeagueFinance::where('league_id', $league->id)
+                                ->where('type', 'income')
+                                ->where('title', 'like', '%Team Registration Fee - ' . $leagueTeam->team->name . '%')
+                                ->sum('amount');
+                            $teamPayments[$leagueTeam->id] = $paid;
+                            $totalPaid += $paid;
+                        }
+                        $totalBalance = $totalExpected - $totalPaid;
+                    @endphp
+
+                    <!-- Summary Stats -->
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="bg-blue-50 rounded-lg p-3 text-center">
+                            <p class="text-xs font-medium text-blue-600 uppercase">Expected</p>
+                            <p class="text-lg font-bold text-blue-700">₹{{ formatCompactNumber($totalExpected) }}</p>
+                            <p class="text-xs text-blue-600">{{ $teamCount }} teams</p>
                         </div>
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Registration Fee</p>
-                            <p class="text-base sm:text-lg font-bold text-gray-900">₹{{ number_format($league->team_reg_fee, 2) }}</p>
+                        <div class="bg-green-50 rounded-lg p-3 text-center">
+                            <p class="text-xs font-medium text-green-600 uppercase">Received</p>
+                            <p class="text-lg font-bold text-green-700">₹{{ formatCompactNumber($totalPaid) }}</p>
+                        </div>
+                        <div class="bg-{{ $totalBalance > 0 ? 'orange' : 'gray' }}-50 rounded-lg p-3 text-center">
+                            <p class="text-xs font-medium text-{{ $totalBalance > 0 ? 'orange' : 'gray' }}-600 uppercase">Balance</p>
+                            <p class="text-lg font-bold text-{{ $totalBalance > 0 ? 'orange' : 'gray' }}-700">₹{{ formatCompactNumber($totalBalance) }}</p>
                         </div>
                     </div>
 
-                    @if($teamCount > 0)
-                        <!-- Dynamic Team Registration Form -->
-                        <form method="POST" action="{{ route('league-finances.individual-team-income', $league) }}" class="w-full" id="teamPaymentForm">
-                            @csrf
-
-                            <!-- Team Selection -->
-                            <div class="bg-gray-50 rounded-lg p-3 mb-3">
-                                <label for="teamSelect" class="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Select Team</label>
-                                <select name="team_id" id="teamSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" required>
-                                    <option value="">Choose a team...</option>
-                                    @foreach($league->leagueTeams as $leagueTeam)
-                                        <option value="{{ $leagueTeam->id }}" data-team-name="{{ $leagueTeam->team->name }}">
-                                            {{ $leagueTeam->team->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Payment Status Display -->
-                            <div id="paymentStatus" class="hidden mb-3">
-                                <div class="bg-white rounded-lg p-4 border border-gray-200">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h4 class="text-sm font-bold text-gray-900" id="selectedTeamName"></h4>
-                                        <span id="paymentStatusBadge" class="px-2 py-1 rounded-full text-xs font-medium"></span>
-                                    </div>
-
-                                    <div class="grid grid-cols-3 gap-3">
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500">Expected</p>
-                                            <p class="text-sm font-bold text-gray-900">₹{{ number_format($league->team_reg_fee, 2) }}</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500">Paid</p>
-                                            <p class="text-sm font-bold text-green-600" id="paidAmount">₹0.00</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500">Balance</p>
-                                            <p class="text-sm font-bold" id="balanceAmount">₹0.00</p>
-                                        </div>
+                    <!-- Teams List -->
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
+                        @foreach($league->leagueTeams as $leagueTeam)
+                            @php
+                                $paid = $teamPayments[$leagueTeam->id] ?? 0;
+                                $balance = $league->team_reg_fee - $paid;
+                                $status = $paid >= $league->team_reg_fee ? 'paid' : ($paid > 0 ? 'partial' : 'pending');
+                            @endphp
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 hover:border-green-300 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center flex-1">
+                                        <h4 class="text-sm font-bold text-gray-900">{{ $leagueTeam->team->name }}</h4>
+                                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
+                                            @if($status === 'paid') bg-green-100 text-green-800
+                                            @elseif($status === 'partial') bg-yellow-100 text-yellow-800
+                                            @else bg-red-100 text-red-800
+                                            @endif">
+                                            @if($status === 'paid') Paid
+                                            @elseif($status === 'partial') Partial
+                                            @else Pending
+                                            @endif
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Amount Input Section -->
-                            <div class="bg-gray-50 rounded-lg p-3 mb-3">
-                                <label for="amount" class="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Amount to Record</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                                    <input type="number"
-                                           name="amount"
-                                           id="amountInput"
-                                           step="0.01"
-                                           min="0.01"
-                                           max="{{ $league->team_reg_fee }}"
-                                           value="{{ $league->team_reg_fee }}"
-                                           class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                                           placeholder="Enter amount"
-                                           required>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Maximum: ₹{{ number_format($league->team_reg_fee, 2) }}</p>
-                            </div>
-
-                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 sm:p-4 border border-green-200 mb-3">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                                
+                                <div class="grid grid-cols-3 gap-2 mb-2">
                                     <div>
-                                        <p class="text-xs sm:text-sm font-medium text-gray-600">Amount to Collect</p>
-                                        <p class="text-lg sm:text-xl lg:text-2xl font-bold text-green-600" id="amountToCollect">
-                                            ₹{{ number_format($league->team_reg_fee, 2) }}
+                                        <p class="text-xs text-gray-500">Expected</p>
+                                        <p class="text-sm font-semibold text-gray-700">₹{{ formatCompactNumber($league->team_reg_fee) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Paid</p>
+                                        <p class="text-sm font-semibold text-green-600">₹{{ formatCompactNumber($paid) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Balance</p>
+                                        <p class="text-sm font-semibold {{ $balance > 0 ? 'text-orange-600' : 'text-gray-500' }}">
+                                            ₹{{ formatCompactNumber($balance) }}
                                         </p>
                                     </div>
-                                    <div class="text-left sm:text-right">
-                                        <p class="text-xs sm:text-sm font-medium text-gray-600">Status</p>
-                                        <p class="text-sm sm:text-lg font-bold text-gray-600" id="collectionStatus">Select Team</p>
-                                    </div>
                                 </div>
-                            </div>
 
-                            <button type="submit"
-                                    id="submitBtn"
-                                    class="w-full bg-gray-400 cursor-not-allowed text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center"
-                                    disabled>
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                <span id="submitText">Select Team First</span>
-                            </button>
-                        </form>
-                    @else
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Teams Registered</p>
-                            <p class="text-xs text-gray-500 italic">No teams registered yet</p>
-                        </div>
-                    @endif
-                </div>
+                                @if($balance > 0)
+                                    <form method="POST" action="{{ route('league-finances.individual-team-income', $league) }}" class="flex gap-2">
+                                        @csrf
+                                        <input type="hidden" name="team_id" value="{{ $leagueTeam->id }}">
+                                        <div class="relative flex-1">
+                                            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">₹</span>
+                                            <input type="number" 
+                                                   name="amount" 
+                                                   step="0.01" 
+                                                   min="0.01" 
+                                                   max="{{ $balance }}"
+                                                   value="{{ $balance }}"
+                                                   class="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                   required>
+                                        </div>
+                                        <button type="submit" 
+                                                class="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors whitespace-nowrap">
+                                            Add Payment
+                                        </button>
+                                    </form>
+                                @else
+                                    <p class="text-xs text-green-600 font-medium">✓ Fully Paid</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <p class="text-sm text-gray-500">No teams registered yet</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -468,6 +485,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to format numbers compactly (1000 -> 1K)
+    function formatCompactNumber(number) {
+        if (number >= 1000000) {
+            return (number / 1000000).toFixed(1) + 'M';
+        } else if (number >= 100000) {
+            return Math.round(number / 1000) + 'K';
+        } else if (number >= 1000) {
+            return (number / 1000).toFixed(1) + 'K';
+        }
+        return Math.round(number).toString();
+    }
+
     // --- General Form: Transaction Type Category Filtering ---
     const typeRadios = document.querySelectorAll('input[name="type"]');
     const categorySelect = document.querySelector('select[name="expense_category_id"]');
@@ -520,10 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const actualPlayers = Math.round((totalPlayers * percentage) / 100);
         const totalAmount = actualPlayers * playerRegFee;
         
-        playerTotalAmount.textContent = '₹' + totalAmount.toLocaleString('en-IN', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        playerTotalAmount.textContent = '₹' + formatCompactNumber(totalAmount);
         playerCollectionRate.textContent = percentage + '%';
         playerPercentageHidden.value = percentage;
         actualPlayersCount.textContent = actualPlayers;
@@ -542,155 +568,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePlayerAmount();
     });
     @endif
-
-    // --- Team Registration Card: Professional State Management ---
-    const teamPaymentForm = document.getElementById('teamPaymentForm');
-    if (teamPaymentForm) {
-        const teamSelect = document.getElementById('teamSelect');
-        const paymentStatus = document.getElementById('paymentStatus');
-        const selectedTeamName = document.getElementById('selectedTeamName');
-        const paymentStatusBadge = document.getElementById('paymentStatusBadge');
-        const paidAmount = document.getElementById('paidAmount');
-        const balanceAmount = document.getElementById('balanceAmount');
-        const amountInput = document.getElementById('amountInput');
-        const amountToCollect = document.getElementById('amountToCollect');
-        const collectionStatus = document.getElementById('collectionStatus');
-        const submitBtn = document.getElementById('submitBtn');
-        const submitText = document.getElementById('submitText');
-
-        /**
-         * Controls the state of the submit button (appearance, text, and disabled status).
-         * @param {('initial'|'loading'|'ready'|'paid'|'error')} state - The desired button state.
-         * @param {string} [text] - Optional text override for the button.
-         */
-        const setButtonState = (state, text = '') => {
-            const baseClasses = 'w-full text-white px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base flex items-center justify-center';
-            submitBtn.disabled = true; // Disabled by default in most states
-
-            switch (state) {
-                case 'loading':
-                    submitBtn.className = `${baseClasses} bg-gray-400 cursor-wait`;
-                    submitText.textContent = text || 'Loading...';
-                    break;
-                case 'ready':
-                    submitBtn.disabled = false;
-                    submitBtn.className = `${baseClasses} bg-green-600 hover:bg-green-700`;
-                    submitText.textContent = text || 'Record Payment';
-                    break;
-                case 'paid':
-                    submitBtn.className = `${baseClasses} bg-gray-500 cursor-not-allowed`;
-                    submitText.textContent = text || 'Fully Paid';
-                    break;
-                case 'error':
-                    submitBtn.className = `${baseClasses} bg-red-500 cursor-not-allowed`;
-                    submitText.textContent = text || 'Error Loading Data';
-                    break;
-                case 'initial':
-                default:
-                    submitBtn.className = `${baseClasses} bg-gray-400 cursor-not-allowed`;
-                    submitText.textContent = text || 'Select Team First';
-                    break;
-            }
-        };
-
-        /**
-         * Fetches the payment status for a given team from the server.
-         * @param {string} teamId - The ID of the team to check.
-         */
-        const fetchTeamBalance = (teamId) => {
-            fetch(`/leagues/{{ $league->id }}/team-payment-status/${teamId}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                updatePaymentDisplay(data);
-                // Set button state only AFTER getting data
-                if (data.status === 'paid') {
-                    setButtonState('paid');
-                } else {
-                    setButtonState('ready');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching team balance:', error);
-                collectionStatus.textContent = 'Error loading balance';
-                paymentStatusBadge.textContent = 'Error';
-                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-                setButtonState('error');
-            });
-        };
-
-        /**
-         * Updates the UI display with the fetched payment information.
-         * This function ONLY updates informational text and badges, not the button state.
-         * @param {object} data - The payment status data from the server.
-         */
-        const updatePaymentDisplay = (data) => {
-            const expectedAmount = parseFloat(data.expected_amount || 0);
-            const paidAmountValue = parseFloat(data.paid_amount || 0);
-            const balance = expectedAmount - paidAmountValue;
-
-            paidAmount.textContent = `₹${paidAmountValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            balanceAmount.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            balanceAmount.className = 'text-sm font-bold ' + (balance > 0 ? 'text-red-600' : 'text-green-600');
-
-            if (data.status === 'paid') {
-                paymentStatusBadge.textContent = 'Paid';
-                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                collectionStatus.textContent = 'Fully Paid';
-            } else if (data.status === 'partial') {
-                paymentStatusBadge.textContent = 'Partial';
-                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
-                collectionStatus.textContent = 'Partially Paid';
-            } else {
-                paymentStatusBadge.textContent = 'Pending';
-                paymentStatusBadge.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-                collectionStatus.textContent = 'Payment Pending';
-            }
-
-            if (balance > 0) {
-                amountInput.value = balance.toFixed(2);
-                amountInput.max = balance;
-                amountToCollect.textContent = `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            } else {
-                amountInput.value = '0.00';
-                amountInput.max = '0';
-                amountToCollect.textContent = '₹0.00';
-            }
-        };
-
-        // --- Event Listeners ---
-        teamSelect.addEventListener('change', function() {
-            const teamId = this.value;
-            if (teamId) {
-                const teamName = this.options[this.selectedIndex].dataset.teamName;
-                selectedTeamName.textContent = teamName;
-                paymentStatus.classList.remove('hidden');
-                collectionStatus.textContent = 'Loading balance...';
-                setButtonState('loading');
-                fetchTeamBalance(teamId);
-            } else {
-                paymentStatus.classList.add('hidden');
-                collectionStatus.textContent = 'Select Team';
-                setButtonState('initial');
-            }
-        });
-
-        teamPaymentForm.addEventListener('submit', function() {
-            // Provide feedback on submission
-            setButtonState('loading', 'Processing...');
-        });
-
-        // Initialize button on page load
-        setButtonState('initial');
-    }
 });
 
 // --- Modal Functions (No changes needed here) ---
