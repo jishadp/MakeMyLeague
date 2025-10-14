@@ -177,7 +177,7 @@
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 @if($leagueTeam->team->logo)
                                                     <img class="h-10 w-10 rounded-full object-cover"
-                                                         src="{{ $leagueTeam->team->logo }}"
+                                                         src="{{ Storage::url($leagueTeam->team->logo) }}"
                                                          alt="{{ $leagueTeam->team->name }}">
                                                 @else
                                                     <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
