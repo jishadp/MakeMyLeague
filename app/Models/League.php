@@ -161,6 +161,8 @@ class League extends Model
             'team_wallet_limit' => 'required|numeric|min:0',
             'winner_prize' => 'nullable|numeric|min:0',
             'runner_prize' => 'nullable|numeric|min:0',
+            'winner_team_id' => 'nullable|exists:league_teams,id',
+            'runner_team_id' => 'nullable|exists:league_teams,id',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'status' => 'required|in:pending,active,completed,cancelled',
@@ -223,6 +225,22 @@ class League extends Model
     public function leagueTeams(): HasMany
     {
         return $this->hasMany(LeagueTeam::class);
+    }
+
+    /**
+     * Get the winner team for this league.
+     */
+    public function winnerTeam(): BelongsTo
+    {
+        return $this->belongsTo(LeagueTeam::class, 'winner_team_id');
+    }
+
+    /**
+     * Get the runner team for this league.
+     */
+    public function runnerTeam(): BelongsTo
+    {
+        return $this->belongsTo(LeagueTeam::class, 'runner_team_id');
     }
 
     /**

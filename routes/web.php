@@ -225,6 +225,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('leagues/{league}/remove-logo', [LeagueController::class, 'removeLogo'])->name('leagues.remove-logo')->middleware('league.organizer');
     Route::delete('leagues/{league}/remove-banner', [LeagueController::class, 'removeBanner'])->name('leagues.remove-banner')->middleware('league.organizer');
     Route::post('leagues/{league}/toggle-auction', [LeagueController::class, 'toggleAuctionStatus'])->name('leagues.toggle-auction')->middleware('league.organizer');
+    Route::post('leagues/{league}/set-winner-runner', [LeagueController::class, 'setWinnerRunner'])->name('leagues.set-winner-runner')->middleware('league.organizer');
 
     // League Teams routes
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show'])->middleware('league.organizer');

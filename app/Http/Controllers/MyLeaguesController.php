@@ -13,17 +13,17 @@ class MyLeaguesController extends Controller
         
         // If user is admin, show all leagues
         if ($user->isAdmin()) {
-            $organizedLeagues = \App\Models\League::with(['game', 'leagueTeams.team', 'organizers'])->get();
+            $organizedLeagues = \App\Models\League::with(['game', 'leagueTeams.team', 'organizers', 'winnerTeam.team', 'runnerTeam.team'])->get();
         } else {
             // Get leagues where user is organizer (both approved and pending)
-            $organizedLeagues = $user->organizedLeagues()->with(['game', 'leagueTeams.team', 'organizers'])->get();
+            $organizedLeagues = $user->organizedLeagues()->with(['game', 'leagueTeams.team', 'organizers', 'winnerTeam.team', 'runnerTeam.team'])->get();
         }
         
         // Get leagues where user is a player (sold/available)
-        $playingLeagues = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
+        $playingLeagues = $user->leaguePlayers()->whereIn('status', ['sold', 'available'])->with(['league.game', 'league.winnerTeam.team', 'league.runnerTeam.team', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
         
         // Get leagues where user has requested to join (pending)
-        $requestedLeagues = $user->leaguePlayers()->where('status', 'pending')->with(['league.game', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
+        $requestedLeagues = $user->leaguePlayers()->where('status', 'pending')->with(['league.game', 'league.winnerTeam.team', 'league.runnerTeam.team', 'leagueTeam.team'])->get()->pluck('league')->unique('id');
         
         // Get leagues where user owns a team
         $teamOwnerLeagues = $user->isTeamOwner() ? 
@@ -41,7 +41,9 @@ class MyLeaguesController extends Controller
                     });
                 },
                 'leagueTeams.team', 
-                'leagueTeams.auctioneer'
+                'leagueTeams.auctioneer',
+                'winnerTeam.team',
+                'runnerTeam.team'
             ])->get() : 
             collect();
         
@@ -54,7 +56,9 @@ class MyLeaguesController extends Controller
                 $query->whereHas('teamAuctioneer', function($q) use ($user) {
                     $q->where('auctioneer_id', $user->id)->where('status', 'active');
                 })->with(['team', 'teamAuctioneer']);
-            }
+            },
+            'winnerTeam.team',
+            'runnerTeam.team'
         ])->get();
         
         return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues', 'auctioneerLeagues'));

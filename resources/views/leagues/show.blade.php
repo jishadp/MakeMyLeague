@@ -1025,6 +1025,21 @@
                 </div>
             @endif
 
+            <!-- Winner & Runner Section (Only for Organizers and Completed Leagues) -->
+            @if(auth()->user() && auth()->user()->canManageLeague($league->id))
+                <div class="mt-8 pb-6">
+                    <div class="border-t border-gray-200 pt-6">
+                        <button onclick="openWinnerRunnerModal()" 
+                                class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-semibold rounded-xl shadow-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-200 hover:shadow-xl">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            Set Winner & Runner
+                        </button>
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 
@@ -2269,6 +2284,203 @@
             }
         }
     </script>
+    <!-- Winner & Runner Modal -->
+    <div id="winnerRunnerModal" class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
+        <div class="white-glass-card relative w-full max-w-md mx-auto p-8 animate-fadeInUp">
+            <!-- Close Button -->
+            <button onclick="closeWinnerRunnerModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Set Winner & Runner</h3>
+                <p class="text-sm text-gray-600">Select the winning and runner-up teams for {{ $league->name }}</p>
+            </div>
+            
+            <!-- Winner Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    <span class="text-yellow-600">🥇</span> Winner Team
+                </label>
+                <select id="winnerTeamId" class="white-glass-input w-full px-4 py-3 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200 text-gray-800">
+                    <option value="">Select winner team...</option>
+                    @foreach($league->leagueTeams as $leagueTeam)
+                        <option value="{{ $leagueTeam->id }}" {{ $league->winner_team_id == $leagueTeam->id ? 'selected' : '' }}>
+                            {{ $leagueTeam->team->name ?? 'Unknown Team' }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <!-- Runner Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    <span class="text-gray-500">🥈</span> Runner-up Team
+                </label>
+                <select id="runnerTeamId" class="white-glass-input w-full px-4 py-3 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 text-gray-800">
+                    <option value="">Select runner-up team...</option>
+                    @foreach($league->leagueTeams as $leagueTeam)
+                        <option value="{{ $leagueTeam->id }}" {{ $league->runner_team_id == $leagueTeam->id ? 'selected' : '' }}>
+                            {{ $leagueTeam->team->name ?? 'Unknown Team' }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-4">
+                <button onclick="closeWinnerRunnerModal()" 
+                        class="flex-1 white-glass-button px-6 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200">
+                    Cancel
+                </button>
+                <button id="saveWinnerRunnerButton" onclick="saveWinnerRunner()" 
+                        class="flex-1 white-glass-button px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-600 to-orange-600 text-white font-semibold hover:from-yellow-700 hover:to-orange-700 transition-all duration-200 shadow-lg">
+                    <span class="flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Save
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* White Glassmorphism Styles */
+    .white-glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            0 4px 16px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .white-glass-button {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+    }
+
+    .white-glass-button:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+        transform: translateY(-1px);
+    }
+
+    .white-glass-input {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+    }
+
+    .white-glass-input:focus {
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-1px);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fadeInUp {
+        animation: fadeInUp 0.4s ease-in-out;
+    }
+    </style>
+
+    <script>
+        function openWinnerRunnerModal() {
+            document.getElementById('winnerRunnerModal').classList.remove('hidden');
+        }
+
+        function closeWinnerRunnerModal() {
+            document.getElementById('winnerRunnerModal').classList.add('hidden');
+        }
+
+        function saveWinnerRunner() {
+            const winnerTeamId = document.getElementById('winnerTeamId').value;
+            const runnerTeamId = document.getElementById('runnerTeamId').value;
+            const saveButton = document.getElementById('saveWinnerRunnerButton');
+            
+            // Disable button
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
+            
+            fetch('{{ route('leagues.set-winner-runner', $league) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    winner_team_id: winnerTeamId || null,
+                    runner_team_id: runnerTeamId || null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message || 'Winner and runner set successfully!', 'success');
+                    closeWinnerRunnerModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification(data.message || 'Failed to set winner and runner', 'error');
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = '<span class="flex items-center justify-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Save</span>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while saving', 'error');
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<span class="flex items-center justify-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Save</span>';
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('winnerRunnerModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWinnerRunnerModal();
+            }
+        });
+    </script>
+
     <script>
         function openConfirmModal() {
             document.getElementById('confirmModal').classList.remove('hidden');

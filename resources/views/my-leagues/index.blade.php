@@ -165,25 +165,42 @@
                             @endif
                         </div>
                         
-                        <!-- Prize Pool (if available) -->
-                        @if ($league->winner_prize || $league->runner_prize)
+                        <!-- Prize Pool & Winners (only for completed leagues) -->
+                        @if ($league->status === 'completed' && ($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id))
                             <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
                                 <div class="flex items-center mb-2">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="font-bold text-sm">Prize Pool</span>
+                                    <span class="font-bold text-sm">League Results</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-1">
-                                    @if ($league->winner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                <div class="space-y-1">
+                                    @if ($league->winner_team_id && $league->winnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-sm">{{ $league->winnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->winner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->winner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
-                                    @if ($league->runner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                    
+                                    @if ($league->runner_team_id && $league->runnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-sm">{{ $league->runnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->runner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->runner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
@@ -303,25 +320,42 @@
                             <span class="font-medium">Season {{ $league->season }}</span>
                         </div>
                         
-                        <!-- Prize Pool (if available) -->
-                        @if ($league->winner_prize || $league->runner_prize)
+                        <!-- Prize Pool & Winners (only for completed leagues) -->
+                        @if ($league->status === 'completed' && ($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id))
                             <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
                                 <div class="flex items-center mb-2">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="font-bold text-sm">Prize Pool</span>
+                                    <span class="font-bold text-sm">League Results</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-1">
-                                    @if ($league->winner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                <div class="space-y-1">
+                                    @if ($league->winner_team_id && $league->winnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-sm">{{ $league->winnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->winner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->winner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
-                                    @if ($league->runner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                    
+                                    @if ($league->runner_team_id && $league->runnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-sm">{{ $league->runnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->runner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->runner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
@@ -436,25 +470,42 @@
                             <span class="font-medium">Season {{ $league->season }}</span>
                         </div>
                         
-                        <!-- Prize Pool (if available) -->
-                        @if ($league->winner_prize || $league->runner_prize)
+                        <!-- Prize Pool & Winners (only for completed leagues) -->
+                        @if ($league->status === 'completed' && ($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id))
                             <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
                                 <div class="flex items-center mb-2">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="font-bold text-sm">Prize Pool</span>
+                                    <span class="font-bold text-sm">League Results</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-1">
-                                    @if ($league->winner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                <div class="space-y-1">
+                                    @if ($league->winner_team_id && $league->winnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-sm">{{ $league->winnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->winner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->winner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
-                                    @if ($league->runner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                    
+                                    @if ($league->runner_team_id && $league->runnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-sm">{{ $league->runnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->runner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->runner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
@@ -655,25 +706,42 @@
                             <span class="font-medium">Season {{ $league->season }}</span>
                         </div>
                         
-                        <!-- Prize Pool (if available) -->
-                        @if ($league->winner_prize || $league->runner_prize)
+                        <!-- Prize Pool & Winners (only for completed leagues) -->
+                        @if ($league->status === 'completed' && ($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id))
                             <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-3 mb-4 text-white">
                                 <div class="flex items-center mb-2">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="font-bold text-sm">Prize Pool</span>
+                                    <span class="font-bold text-sm">League Results</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-1">
-                                    @if ($league->winner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                <div class="space-y-1">
+                                    @if ($league->winner_team_id && $league->winnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥇 Winner</div>
+                                            <div class="font-bold text-sm">{{ $league->winnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->winner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->winner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->winner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥇 Winner Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif
-                                    @if ($league->runner_prize)
-                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                    
+                                    @if ($league->runner_team_id && $league->runnerTeam)
+                                        <div class="bg-white/20 rounded-lg p-2">
                                             <div class="text-xs opacity-90">🥈 Runner-up</div>
+                                            <div class="font-bold text-sm">{{ $league->runnerTeam->team->name ?? 'N/A' }}</div>
+                                            @if ($league->runner_prize)
+                                                <div class="text-xs opacity-90">Prize: ₹{{ number_format($league->runner_prize) }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif ($league->runner_prize)
+                                        <div class="bg-white/20 rounded-lg p-1 text-center">
+                                            <div class="text-xs opacity-90">🥈 Runner-up Prize</div>
                                             <div class="font-bold text-xs">₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
                                         </div>
                                     @endif

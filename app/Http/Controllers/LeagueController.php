@@ -755,4 +755,62 @@ class LeagueController
             'message' => 'Auction access request sent successfully! The admin will review your request.'
         ]);
     }
+
+    /**
+     * Set winner and runner teams for a league
+     */
+    public function setWinnerRunner(Request $request, League $league): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'winner_team_id' => 'nullable|exists:league_teams,id',
+                'runner_team_id' => 'nullable|exists:league_teams,id',
+            ]);
+
+            // Check if winner_team_id and runner_team_id belong to this league
+            if ($validated['winner_team_id']) {
+                $winnerTeam = \App\Models\LeagueTeam::find($validated['winner_team_id']);
+                if ($winnerTeam->league_id !== $league->id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Winner team does not belong to this league'
+                    ], 400);
+                }
+            }
+
+            if ($validated['runner_team_id']) {
+                $runnerTeam = \App\Models\LeagueTeam::find($validated['runner_team_id']);
+                if ($runnerTeam->league_id !== $league->id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Runner team does not belong to this league'
+                    ], 400);
+                }
+            }
+
+            // Check if winner and runner are different teams
+            if ($validated['winner_team_id'] && $validated['runner_team_id'] && 
+                $validated['winner_team_id'] === $validated['runner_team_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Winner and runner-up must be different teams'
+                ], 400);
+            }
+
+            $league->update([
+                'winner_team_id' => $validated['winner_team_id'],
+                'runner_team_id' => $validated['runner_team_id'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Winner and runner-up teams set successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to set winner and runner: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
