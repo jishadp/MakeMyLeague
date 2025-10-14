@@ -24,7 +24,7 @@ class LeaguePlayerAuctionStarted implements ShouldBroadcastNow
      */
     public function __construct($request)
     {
-        $this->player = User::with('position')->find($request['player_id']);
+        $this->player = User::with(['position', 'primaryGameRole.gamePosition'])->find($request['player_id']);
         $this->league = League::find($request['league_id']);
         $this->leaguePlayer = LeaguePlayer::find($request['league_player_id']);
     }
@@ -34,7 +34,14 @@ class LeaguePlayerAuctionStarted implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('auctions');
+        $channels = [new Channel('auctions')];
+        
+        // Also broadcast to league-specific channel
+        if ($this->league && $this->league->id) {
+            $channels[] = new Channel('auctions.league.' . $this->league->id);
+        }
+        
+        return $channels;
     }
 
     /**

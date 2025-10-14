@@ -71,6 +71,8 @@
 @endsection
 
 @section('content')
+<input type="hidden" id="league-id" value="{{ $league->id }}">
+<input type="hidden" id="league-slug" value="{{ $league->slug }}">
 <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -153,7 +155,13 @@
                                             </h2>
                                             <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
                                                 <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
-                                                    {{ $currentPlayer->player->position->name ?? 'Player' }}
+                                                    @if($currentPlayer->player->primaryGameRole && $currentPlayer->player->primaryGameRole->gamePosition)
+                                                        {{ $currentPlayer->player->primaryGameRole->gamePosition->name }}
+                                                    @elseif($currentPlayer->player->position)
+                                                        {{ $currentPlayer->player->position->name }}
+                                                    @else
+                                                        Player
+                                                    @endif
                                                 </span>
                                                 <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
                                                     Base Price ₹<span class="basePrice">{{ $currentPlayer->base_price ?? 0 }}</span>
@@ -199,20 +207,79 @@
                 </div>
             </div>
 
-            <!-- Team Balances -->
+            <!-- Team Cards with Players -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Team Balances</h2>
-                    <div class="space-y-3" id="teamBalances">
-                        @foreach($league->leagueTeams as $leagueTeam)
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                    {{ substr($leagueTeam->team->name, 0, 1) }}
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        Teams ({{ count($teams) }})
+                    </h2>
+                    <div class="space-y-4" id="teamsContainer">
+                        @foreach($teams as $team)
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Team Header -->
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-3 text-white">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold backdrop-blur-sm">
+                                            {{ strtoupper(substr($team->team->name, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold">{{ $team->team->name }}</h3>
+                                            <p class="text-xs text-blue-100">{{ $team->league_players_count }} Players</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-bold">₹{{ number_format($team->wallet_balance) }}</p>
+                                        <p class="text-xs text-blue-100">Balance</p>
+                                    </div>
                                 </div>
-                                <span class="font-medium text-gray-900">{{ $leagueTeam->team->name }}</span>
                             </div>
-                            <span class="font-semibold text-green-600">₹{{ number_format($leagueTeam->wallet_balance, 0) }}</span>
+
+                            <!-- Players List -->
+                            @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
+                            <div class="p-2 bg-gray-50 max-h-48 overflow-y-auto">
+                                <div class="space-y-1">
+                                    @foreach($team->leaguePlayers as $leaguePlayer)
+                                    <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                <p class="text-xs text-gray-500">
+                                                    @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
+                                                        {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                                                    @elseif($leaguePlayer->player->position)
+                                                        {{ $leaguePlayer->player->position->name }}
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            @if($leaguePlayer->status === 'retained')
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    ⭐ Retained
+                                                </span>
+                                            @else
+                                                <p class="text-xs font-bold text-green-600">₹{{ number_format($leaguePlayer->bid_price ?? 0) }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @else
+                            <div class="p-3 text-center text-gray-500 text-xs">
+                                No players yet
+                            </div>
+                            @endif
+
+                            <!-- Team Stats Footer -->
+                            <div class="bg-gray-100 px-3 py-1.5 flex items-center justify-between text-xs text-gray-600">
+                                <span>Spent: <strong class="text-gray-900">₹{{ number_format($team->leaguePlayers->sum('bid_price') ?? 0) }}</strong></span>
+                                <span>Avg: <strong class="text-gray-900">₹{{ $team->leaguePlayers->count() > 0 ? number_format($team->leaguePlayers->avg('bid_price') ?? 0) : 0 }}</strong></span>
+                            </div>
                         </div>
                         @endforeach
                     </div>
@@ -239,33 +306,144 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Pusher for live updates
-    var pusher = new Pusher('a1afbae37f05666fb5b6', { cluster: 'ap2' });
+    var pusher = new Pusher('b62b3b015a81d2d28278', { 
+        cluster: 'ap2',
+        forceTLS: true,
+        enabledTransports: ['ws', 'wss']
+    });
+    
+    // Subscribe to the general auctions channel
     var channel = pusher.subscribe('auctions');
     
-    // Auto-refresh every 5 seconds
-    setInterval(function() {
-        updateLastUpdated();
-        refreshTeamBalances();
-    }, 5000);
+    // Subscribe to league-specific channel
+    const leagueId = document.getElementById('league-id').value;
+    const leagueSlug = document.getElementById('league-slug').value;
+    var leagueChannel = pusher.subscribe(`auctions.league.${leagueId}`);
+    console.log(`Subscribed to league channel: auctions.league.${leagueId}`);
     
-    // Listen for new player started
+    // Use a more efficient approach to update content instead of full page refresh
+    console.log('🔄 Live view: Auto-updating specific content (every 8 seconds)');
+    let autoRefreshInterval = setInterval(function() {
+        console.log('🔄 Updating specific components...');
+        updateLastUpdated();
+        fetchRecentBids();
+        refreshTeamBalances();
+    }, 8000);
+    
+    // Listen to sold/unsold events to update data
+    channel.bind('player-sold', function(data) {
+        console.log('✅ Player sold - updating components');
+        // Refresh all components without page reload
+        fetchRecentBids();
+        refreshTeamBalances();
+        updateLastUpdated();
+        
+        // Show user notification
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        notificationElement.textContent = `Player sold to ${data.team.team.name}!`;
+        document.body.appendChild(notificationElement);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notificationElement.remove();
+        }, 3000);
+    });
+    
+    channel.bind('player-unsold', function(data) {
+        console.log('❌ Player unsold - updating components');
+        // Refresh all components without page reload
+        fetchRecentBids();
+        refreshTeamBalances();
+        updateLastUpdated();
+        
+        // Show user notification
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'fixed top-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        notificationElement.textContent = `Player marked as unsold!`;
+        document.body.appendChild(notificationElement);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notificationElement.remove();
+        }, 3000);
+    });
+    
+    leagueChannel.bind('player-sold', function(data) {
+        console.log('✅ Player sold (league channel) - updating components');
+        // Refresh all components without page reload
+        fetchRecentBids();
+        refreshTeamBalances();
+        updateLastUpdated();
+        
+        // Show user notification
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        notificationElement.textContent = `Player sold to ${data.team.team.name}!`;
+        document.body.appendChild(notificationElement);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notificationElement.remove();
+        }, 3000);
+    });
+    
+    leagueChannel.bind('player-unsold', function(data) {
+        console.log('❌ Player unsold (league channel) - updating components');
+        // Refresh all components without page reload
+        fetchRecentBids();
+        refreshTeamBalances();
+        updateLastUpdated();
+        
+        // Show user notification
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'fixed top-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded shadow-lg z-50';
+        notificationElement.textContent = `Player marked as unsold!`;
+        document.body.appendChild(notificationElement);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notificationElement.remove();
+        }, 3000);
+    });
+    
+    // Listen for new player started on both channels
     channel.bind('new-player-started', function(data) {
         if (data.league.id === {{ $league->id }}) {
             updateCurrentPlayer(data);
         }
     });
     
-    // Listen for new bids
+    leagueChannel.bind('new-player-started', function(data) {
+        updateCurrentPlayer(data);
+    });
+    
+    // Listen for new bids on both channels
     channel.bind('new-player-bid-call', function(data) {
         if (data.league_team.league_id === {{ $league->id }}) {
             addRecentBid(data);
             updateTeamBalances();
+            updateCurrentBid(data);
         }
+    });
+    
+    leagueChannel.bind('new-player-bid-call', function(data) {
+        addRecentBid(data);
+        updateTeamBalances();
+        updateCurrentBid(data);
     });
     
     function updateCurrentPlayer(data) {
         const playerCard = document.getElementById('currentPlayerCard');
-        const positionName = data.player.position ? data.player.position.name : 'Player';
+        
+        // Get position name from primary game role or fallback to position
+        let positionName = 'Player';
+        if (data.player.primary_game_role && data.player.primary_game_role.game_position) {
+            positionName = data.player.primary_game_role.game_position.name;
+        } else if (data.player.position) {
+            positionName = data.player.position.name;
+        }
+        
         const playerInitial = data.player.name ? data.player.name.charAt(0).toUpperCase() : 'P';
         
         playerCard.innerHTML = `
@@ -382,9 +560,99 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function refreshTeamBalances() {
-        // This would typically make an AJAX call to get updated balances
-        // For now, we'll just update the timestamp
-        updateLastUpdated();
+        // Get the league slug from the hidden input
+        const leagueSlug = document.getElementById('league-slug').value;
+        
+        // Make an AJAX call to get updated balances
+        fetch(`/api/auctions/league/${leagueSlug}/team-balances`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.teams) {
+                    // Update team balances in the UI
+                    const teamsContainer = document.getElementById('teamsContainer');
+                    if (teamsContainer) {
+                        const teamCards = teamsContainer.querySelectorAll('.border');
+                        data.teams.forEach(team => {
+                            // Find team card by team name
+                            teamCards.forEach(card => {
+                                const teamNameElement = card.querySelector('h3');
+                                if (teamNameElement && teamNameElement.textContent === team.name) {
+                                    // Update balance
+                                    const balanceElement = card.querySelector('.text-lg.font-bold');
+                                    if (balanceElement) {
+                                        balanceElement.textContent = `₹${numberFormat(team.wallet_balance)}`;
+                                    }
+                                    
+                                    // Update player count
+                                    const playerCountElement = card.querySelector('.text-xs.text-blue-100');
+                                    if (playerCountElement) {
+                                        playerCountElement.textContent = `${team.players_count} Players`;
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+                
+                // Update timestamp regardless of API success
+                updateLastUpdated();
+            })
+            .catch(error => {
+                console.error('Error fetching team balances:', error);
+                updateLastUpdated(); // Still update timestamp on error
+            });
+    }
+    
+    // Helper function to format numbers with commas
+    function numberFormat(number) {
+        return new Intl.NumberFormat('en-IN').format(number);
+    }
+    
+    function fetchRecentBids() {
+        // Get the league slug from the hidden input
+        const leagueSlug = document.getElementById('league-slug').value;
+        
+        // Fetch recent bids via AJAX instead of refreshing the entire page
+        fetch(`/api/auctions/league/${leagueSlug}/recent-bids`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.bids && data.bids.length > 0) {
+                    const recentBids = document.getElementById('recentBids');
+                    
+                    // Clear existing content if we have bids
+                    recentBids.innerHTML = '';
+                    
+                    // Add each bid to the container
+                    data.bids.forEach(bid => {
+                        const bidElement = document.createElement('div');
+                        bidElement.className = 'bid-card bg-gray-50 rounded-lg p-4 border-l-4 border-green-500';
+                        bidElement.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-semibold text-gray-900">${bid.league_team.team.name}</span>
+                                    <span class="text-gray-600 ml-2">placed a bid</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xl font-bold text-green-600">₹${bid.amount}</span>
+                                    <p class="text-xs text-gray-500">${new Date(bid.created_at).toLocaleTimeString()}</p>
+                                </div>
+                            </div>
+                        `;
+                        recentBids.appendChild(bidElement);
+                    });
+                } else if (!data.bids || data.bids.length === 0) {
+                    // If no bids, show the empty state
+                    const recentBids = document.getElementById('recentBids');
+                    recentBids.innerHTML = `
+                        <div class="text-center text-gray-500 py-4">
+                            <p>No recent bids yet...</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching recent bids:', error);
+            });
     }
 });
 </script>

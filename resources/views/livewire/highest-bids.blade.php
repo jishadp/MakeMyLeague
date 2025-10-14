@@ -3,7 +3,7 @@
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold glacier-text-primary">Highest Bids</h2>
                         <div class="badge-purple px-3 py-1 rounded-full text-sm font-medium">
-                            105 Sold
+                            Top {{ count($bids) }} Players
                         </div>
                     </div>
                 </div>
@@ -34,8 +34,17 @@
                                                 @endif
                                             </div>
                                             <div>
-                                                <p class="font-medium glacier-text-primary text-sm">{{ $bid->leaguePlayer->player->name}}</p>
-                                                <p class="text-xs text-gray-500">{{ $bid->leaguePlayer->player->position->name}}</p>
+                                                <p class="font-medium glacier-text-primary text-sm">{{ $bid->leaguePlayer->player->name }}</p>
+                                                <!-- Only show position if it exists -->
+                                                @if(($bid->leaguePlayer->player->primaryGameRole && $bid->leaguePlayer->player->primaryGameRole->gamePosition) || $bid->leaguePlayer->player->position)
+                                                    <p class="text-xs text-gray-500">
+                                                        @if($bid->leaguePlayer->player->primaryGameRole && $bid->leaguePlayer->player->primaryGameRole->gamePosition)
+                                                            {{ $bid->leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                                                        @elseif($bid->leaguePlayer->player->position)
+                                                            {{ $bid->leaguePlayer->player->position->name }}
+                                                        @endif
+                                                    </p>
+                                                @endif
                                             </div>
                                         </div>
                                     </td>

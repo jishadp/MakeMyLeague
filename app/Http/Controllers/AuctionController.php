@@ -23,8 +23,10 @@ class AuctionController extends Controller
      */
     public function index(League $league)
     {
+        // Only show available players (exclude sold, unsold, retained, and auctioning players)
         $leaguePlayers = LeaguePlayer::where('league_id',$league->id)
-            ->with(['player.position'])
+            ->where('status', 'available')
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->get();
             
         // Get the currently auctioning player first, then available player
@@ -41,8 +43,22 @@ class AuctionController extends Controller
                 ->latest('created_at')
                 ->first();
         }
+        
+        // Get all teams with their players (retention + auctioned) for the teams section
+        $teams = LeagueTeam::where('league_id', $league->id)
+            ->with([
+                'team',
+                'leaguePlayers' => function($query) {
+                    $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
+                          ->whereIn('status', ['retained', 'sold'])
+                          ->orderByRaw("FIELD(status, 'retained', 'sold')")
+                          ->orderBy('bid_price', 'desc');
+                }
+            ])
+            ->withCount('leaguePlayers')
+            ->get();
             
-        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid'));
+        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams'));
     }
 
     /**
@@ -50,17 +66,57 @@ class AuctionController extends Controller
      */
     public function start(Request $request)
     {
+        // Validate request
+        $validated = $request->validate([
+            'league_id' => 'required|exists:leagues,id',
+            'league_player_id' => 'required|exists:league_players,id',
+            'player_id' => 'required|exists:users,id'
+        ]);
+        
+        // First, reset any existing players that might be in 'auctioning' status for this league
+        LeaguePlayer::where('league_id', $request->league_id)
+            ->where('status', 'auctioning')
+            ->update(['status' => 'available']);
+        
         // Set the player status to 'auctioning' to prevent other players from being selected
         $leaguePlayer = LeaguePlayer::find($request->league_player_id);
-        if ($leaguePlayer) {
-            $leaguePlayer->update(['status' => 'auctioning']);
+        
+        if (!$leaguePlayer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Player not found'
+            ], 404);
         }
         
-        LeaguePlayerAuctionStarted::dispatch($request->all());
+        // Verify this player belongs to the specified league
+        if ($leaguePlayer->league_id != $request->league_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Player does not belong to this league'
+            ], 400);
+        }
+        
+        // Verify player is available for auction
+        if (!in_array($leaguePlayer->status, ['available', 'auctioning'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Player is not available for auction. Current status: ' . $leaguePlayer->status
+            ], 400);
+        }
+        
+        // Update player status to auctioning
+        $leaguePlayer->update(['status' => 'auctioning']);
+        
+        // Update league status
         $league = League::find($request->league_id);
-        $league->update([
-            'status'    => 'active'
-        ]);
+        if ($league) {
+            $league->update([
+                'status' => 'active'
+            ]);
+        }
+        
+        // Broadcast event
+        LeaguePlayerAuctionStarted::dispatch($request->all());
 
         return response()->json([
             'success' => true,
@@ -82,9 +138,10 @@ class AuctionController extends Controller
         $query = $request->input('query');
         $leagueId = $request->input('league_id');
         
-        $players = LeaguePlayer::with(['player.position'])
+        // Only search available players (exclude sold, unsold, retained, auctioning)
+        $players = LeaguePlayer::with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->where('league_id', $leagueId)
-            ->whereIn('status', ['available', 'auctioning']) // Include auctioning players for search
+            ->where('status', 'available') // Only show available players
             ->where(function ($q) use ($query) {
                 $q->whereHas('player', function ($subQ) use ($query) {
                     $subQ->where('name', 'LIKE', "%{$query}%")
@@ -92,6 +149,9 @@ class AuctionController extends Controller
                          ->orWhere('email', 'LIKE', "%{$query}%");
                 })
                 ->orWhereHas('player.position', function ($subQ) use ($query) {
+                    $subQ->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhereHas('player.primaryGameRole.gamePosition', function ($subQ) use ($query) {
                     $subQ->where('name', 'LIKE', "%{$query}%");
                 });
             })
@@ -107,7 +167,7 @@ class AuctionController extends Controller
                     'player_name' => $leaguePlayer->player->name,
                     'mobile' => $leaguePlayer->player->mobile,
                     'email' => $leaguePlayer->player->email,
-                    'position' => $leaguePlayer->player->position ? $leaguePlayer->player->position->name : 'No Position',
+                    'position' => $leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition ? $leaguePlayer->player->primaryGameRole->gamePosition->name : '',
                     'base_price' => $leaguePlayer->base_price,
                     'photo' => $leaguePlayer->player->photo ? asset($leaguePlayer->player->photo) : asset('images/defaultplayer.jpeg')
                 ];
@@ -119,6 +179,7 @@ class AuctionController extends Controller
      */
     public function call(Request $request)
     {
+        // Calculate new bid based on base price and increment
         $newBid = $request->base_price + $request->increment;
         $user = auth()->user();
         
@@ -198,8 +259,28 @@ class AuctionController extends Controller
             ]);
         });
 
-        // Broadcast the new bid
-        AuctionPlayerBidCall::dispatch($newBid, $bidTeam->id);
+        // Get the league player and reload it to ensure we have consistent data
+        $leaguePlayer = LeaguePlayer::with(['player', 'player.position', 'player.primaryGameRole.gamePosition'])->find($request->league_player_id);
+        
+        // Make sure the team is fully loaded with all necessary relationships
+        $bidTeam = LeagueTeam::with(['team', 'league'])->find($bidTeam->id);
+        
+        // Create a bid record with consistent data
+        $bidData = [
+            'amount' => $newBid,
+            'league_team_id' => $bidTeam->id,
+            'league_team' => $bidTeam->toArray(),
+            'league_player_id' => $leaguePlayer->id,
+            'league_player' => $leaguePlayer->toArray(),
+            'timestamp' => now()->timestamp
+        ];
+        
+        // Store the current bid data in cache to ensure all users see the same values
+        \Cache::put("auction_current_bid_{$leaguePlayer->id}", $bidData, now()->addHours(12));
+        \Cache::put("auction_latest_bid", $bidData, now()->addHours(12));
+        
+        // Broadcast the new bid with consistent data - using broadcastNow for immediate delivery
+        event(new AuctionPlayerBidCall($newBid, $bidTeam->id, $leaguePlayer->id));
 
         return response()->json([
             'success' => true,
@@ -229,9 +310,14 @@ class AuctionController extends Controller
             }
             
             // Mark all other bids for this player as 'lost'
-            Auction::where('league_player_id', $leaguePlayerId)
+            // Use the query builder with proper quoting for enum values
+            $otherBids = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('id', '!=', $winningBid ? $winningBid->id : 0)
-                ->update(['status' => 'lost']);
+                ->get();
+            
+            foreach ($otherBids as $bid) {
+                $bid->update(['status' => 'lost']);
+            }
             
             // Update the league player status to 'sold' and assign to team
             LeaguePlayer::where('id', $leaguePlayerId)->update([
@@ -282,6 +368,61 @@ class AuctionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Player marked as unsold successfully!'
+        ]);
+    }
+    
+    /**
+     * API endpoint to get recent bids for a league
+     */
+    public function getRecentBids(League $league)
+    {
+        // Use short-term caching to prevent excessive database queries
+        $cacheKey = "league.{$league->slug}.recent-bids";
+        $cacheDuration = 3; // 3 seconds
+        
+        $recentBids = \Cache::remember($cacheKey, $cacheDuration, function() use ($league) {
+            return Auction::with(['leagueTeam.team', 'leaguePlayer.player'])
+                ->whereHas('leagueTeam', function($query) use ($league) {
+                    $query->where('league_id', $league->id);
+                })
+                ->latest()
+                ->take(10)
+                ->get();
+        });
+        
+        return response()->json([
+            'success' => true,
+            'bids' => $recentBids
+        ]);
+    }
+    
+    /**
+     * API endpoint to get team balances for a league
+     */
+    public function getTeamBalances(League $league)
+    {
+        // Use short-term caching to prevent excessive database queries
+        $cacheKey = "league.{$league->slug}.team-balances";
+        $cacheDuration = 3; // 3 seconds
+        
+        $teams = \Cache::remember($cacheKey, $cacheDuration, function() use ($league) {
+            return LeagueTeam::where('league_id', $league->id)
+                ->with(['team'])
+                ->withCount('leaguePlayers as players_count')
+                ->get()
+                ->map(function($leagueTeam) {
+                    return [
+                        'id' => $leagueTeam->id,
+                        'name' => $leagueTeam->team->name,
+                        'wallet_balance' => $leagueTeam->wallet_balance,
+                        'players_count' => $leagueTeam->players_count
+                    ];
+                });
+        });
+        
+        return response()->json([
+            'success' => true,
+            'teams' => $teams
         ]);
     }
 }

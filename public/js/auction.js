@@ -1,5 +1,39 @@
 // Minimal Auction JavaScript - Static Demo Version
 
+// Function to update bid increments based on current bid amount
+function updateBidIncrements(currentBid) {
+    // Convert to number if it's a string
+    currentBid = Number(currentBid);
+    
+    // Define increment rules based on current bid amount
+    if (currentBid < 100) {
+        // For bids under 100, use small increments
+        $('.callBid').eq(0).attr('increment', 10).find('p').text('+ ₹10');
+        $('.callBid').eq(1).attr('increment', 25).find('p').text('+ ₹25');
+        $('.callBid').eq(2).attr('increment', 50).find('p').text('+ ₹50');
+    } else if (currentBid < 500) {
+        // For bids between 100-500, use medium increments
+        $('.callBid').eq(0).attr('increment', 25).find('p').text('+ ₹25');
+        $('.callBid').eq(1).attr('increment', 50).find('p').text('+ ₹50');
+        $('.callBid').eq(2).attr('increment', 100).find('p').text('+ ₹100');
+    } else if (currentBid < 1000) {
+        // For bids between 500-1000, use larger increments
+        $('.callBid').eq(0).attr('increment', 50).find('p').text('+ ₹50');
+        $('.callBid').eq(1).attr('increment', 100).find('p').text('+ ₹100');
+        $('.callBid').eq(2).attr('increment', 200).find('p').text('+ ₹200');
+    } else if (currentBid < 5000) {
+        // For bids between 1000-5000, use even larger increments
+        $('.callBid').eq(0).attr('increment', 100).find('p').text('+ ₹100');
+        $('.callBid').eq(1).attr('increment', 250).find('p').text('+ ₹250');
+        $('.callBid').eq(2).attr('increment', 500).find('p').text('+ ₹500');
+    } else {
+        // For bids above 5000, use the largest increments
+        $('.callBid').eq(0).attr('increment', 500).find('p').text('+ ₹500');
+        $('.callBid').eq(1).attr('increment', 1000).find('p').text('+ ₹1000');
+        $('.callBid').eq(2).attr('increment', 2000).find('p').text('+ ₹2000');
+    }
+}
+
 // Function to handle image loading errors
 function handleImageError(img) {
     if (img && img.nextElementSibling) {
@@ -68,11 +102,15 @@ function startBidding(userId, leaguePlayerId, playerName, basePrice, position, l
         playerName: playerName,
         basePrice: basePrice,
         position: position,
-        leagueId: leagueId
+        leagueId: leagueId,
+        startBidAction: startBidAction
     });
     
     // Update bidding player info
     updateBiddingPlayer(playerName, position, basePrice);
+    
+    // Initialize bid increments based on base price
+    updateBidIncrements(basePrice);
     
     // Important: Update the callBid buttons with correct data
     $('.callBid').each(function() {
@@ -85,6 +123,37 @@ function startBidding(userId, leaguePlayerId, playerName, basePrice, position, l
     // Update markSold and markUnSold buttons
     $('.markSold').attr('league-player-id', leaguePlayerId);
     $('.markUnSold').attr('league-player-id', leaguePlayerId);
+    
+    // Critical: Send AJAX request to set this player's status to 'auctioning' in the database
+    if (startBidAction && leaguePlayerId && leagueId) {
+        $.ajax({
+            url: startBidAction,
+            type: "post",
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: {
+                league_id: leagueId,
+                player_id: userId,
+                league_player_id: leaguePlayerId
+            },
+            success: function(response) {
+                console.log("Player auction status updated:", response);
+                if (!response.success) {
+                    showMessage('Error: ' + response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                console.error("Error setting player auction status:", xhr.responseText);
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    showMessage('Error: ' + (response.message || 'Could not start auction'), 'error');
+                } catch (e) {
+                    showMessage('Error starting auction. Please try again.', 'error');
+                }
+            }
+        });
+    } else {
+        console.warn("Missing data required to start auction:", { startBidAction, leaguePlayerId, leagueId });
+    }
     
     // Show the bidding section
     const bidMain = document.querySelector('.bidMain');
@@ -345,6 +414,15 @@ $(document).ready(function(){
             showMessage('Error: Player data missing. Please select a player first.', 'error');
             return;
         }
+        
+        // Prevent double-clicking by adding a processing class
+        if ($this.hasClass('processing')) {
+            return false;
+        }
+        
+        // Disable all bid buttons while processing to prevent race conditions
+        $('.callBid').prop('disabled', true).addClass('opacity-75');
+        $this.addClass('processing');
 
         $.ajax({
             url: callBidAction,   // Laravel route
@@ -359,10 +437,22 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bid placed:", response);
+                // Add a small delay before re-enabling buttons to prevent rapid clicks
+                setTimeout(function() {
+                    // Re-enable all bid buttons
+                    $('.callBid').prop('disabled', false).removeClass('opacity-75');
+                    $this.removeClass('processing');
+                }, 500);
                 
                 // Update base price for next bid if successful
                 if (response.success && response.new_bid) {
-                    $('.callBid').attr('base-price', response.new_bid);
+                    // Update all bid buttons with the new base price
+                    $('.callBid').each(function() {
+                        $(this).attr('base-price', response.new_bid);
+                    });
+                    
+                    // Update the bid increment rule based on the new bid amount
+                    updateBidIncrements(response.new_bid);
                     
                     // Update current bid display
                     $('.currentBid').text(response.new_bid);
@@ -372,12 +462,68 @@ $(document).ready(function(){
                         $('.markSold').attr('call-team-id', response.call_team_id);
                     }
                     
+                    // Refresh Livewire components - but safely
+                    try {
+                        if (window.Livewire) {
+                            // Use a single timeout to avoid multiple requests
+                            clearTimeout(window.livewireRefreshTimeout);
+                            window.livewireRefreshTimeout = setTimeout(function() {
+                                try {
+                                    // Use the correct Livewire dispatch method based on version
+                                    if (typeof Livewire.dispatch === 'function') {
+                                        // Livewire 3.x
+                                        Livewire.dispatch('refreshBids');
+                                    } else if (typeof Livewire.emit === 'function') {
+                                        // Livewire 2.x
+                                        Livewire.emit('refreshBids');
+                                    } else {
+                                        console.warn("Livewire dispatch methods not available");
+                                    }
+                                    
+                                    // Wait a moment before refreshing teams to avoid simultaneous requests
+                                    setTimeout(function() {
+                                        try {
+                                            if (typeof Livewire.dispatch === 'function') {
+                                                // Livewire 3.x
+                                                Livewire.dispatch('refreshTeams');
+                                            } else if (typeof Livewire.emit === 'function') {
+                                                // Livewire 2.x
+                                                Livewire.emit('refreshTeams');
+                                            }
+                                        } catch (e) {
+                                            console.warn("Error refreshing teams:", e);
+                                        }
+                                    }, 500);
+                                } catch (e) {
+                                    console.warn("Error refreshing bids:", e);
+                                }
+                            }, 1000);
+                        }
+                    } catch (e) {
+                        console.warn("Error with Livewire refresh:", e);
+                    }
+                    
                     showMessage('Bid placed: ₹' + response.new_bid, 'success');
+                } else if (!response.success) {
+                    showMessage('Error: ' + (response.message || 'Failed to place bid'), 'error');
                 }
             },
             error: function(xhr) {
                 console.error("Error placing bid:", xhr.responseText);
-                showMessage('Error placing bid', 'error');
+                // Add a small delay before re-enabling buttons
+                setTimeout(function() {
+                    // Re-enable all bid buttons
+                    $('.callBid').prop('disabled', false).removeClass('opacity-75');
+                    $this.removeClass('processing');
+                }, 500);
+                
+                // Try to parse and show specific error message
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    showMessage('Error: ' + (response.message || 'Failed to place bid'), 'error');
+                } catch (e) {
+                    showMessage('Error placing bid. Server issue or player status changed.', 'error');
+                }
             }
         });
     });

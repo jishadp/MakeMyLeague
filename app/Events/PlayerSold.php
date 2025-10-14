@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\LeaguePlayer;
+use App\Models\LeagueTeam;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -15,6 +16,7 @@ class PlayerSold implements ShouldBroadcastNow
 
     public $leaguePlayer;
     public $teamId;
+    public $team;
 
     /**
      * Create a new event instance.
@@ -23,6 +25,7 @@ class PlayerSold implements ShouldBroadcastNow
     {
         $this->leaguePlayer = LeaguePlayer::with(['player', 'leagueTeam.team'])->find($leaguePlayerId);
         $this->teamId = $teamId;
+        $this->team = LeagueTeam::withCount('leaguePlayers')->with('team')->find($teamId);
     }
 
     /**
@@ -30,7 +33,14 @@ class PlayerSold implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('auctions');
+        $channels = [new Channel('auctions')];
+        
+        // Also broadcast to league-specific channel
+        if ($this->leaguePlayer && $this->leaguePlayer->league_id) {
+            $channels[] = new Channel('auctions.league.' . $this->leaguePlayer->league_id);
+        }
+        
+        return $channels;
     }
 
     /**
@@ -48,7 +58,9 @@ class PlayerSold implements ShouldBroadcastNow
     {
         return [
             'league_player' => $this->leaguePlayer,
-            'team_id' => $this->teamId
+            'team_id' => $this->teamId,
+            'team' => $this->team,
+            'message' => 'Player sold successfully!'
         ];
     }
 }

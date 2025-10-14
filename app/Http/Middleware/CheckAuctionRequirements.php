@@ -55,8 +55,9 @@ class CheckAuctionRequirements
         $totalPlayersRequired = $league->max_teams * $league->max_team_players;
         
         // Count all eligible players (excluding 'pending' and 'skip' status)
+        // Also include 'auctioning' status as these players are part of the auction
         $playersCount = $league->leaguePlayers()
-            ->whereIn('status', ['available', 'sold', 'unsold'])
+            ->whereIn('status', ['available', 'sold', 'unsold', 'auctioning'])
             ->count();
         
         // Debug: Log the actual counts

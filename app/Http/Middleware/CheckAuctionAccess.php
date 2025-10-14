@@ -40,21 +40,28 @@ class CheckAuctionAccess
             }
         }
 
-        // For team owners: Check if they own a team in this league AND auction is live
+        // For team owners: Check if they own a team in this league 
         $ownsTeamInLeague = $league->leagueTeams()->whereHas('team', function($query) use ($user) {
             $query->whereHas('owners', function($q) use ($user) {
                 $q->where('user_id', $user->id)->where('role', 'owner');
             });
         })->exists();
 
-        if ($ownsTeamInLeague) {
-            // Check if auction access is granted
+        // Also check if the user is an assigned auctioneer
+        $isAuctioneer = $league->leagueTeams()->where('auctioneer_id', $user->id)->exists();
+
+        if ($ownsTeamInLeague || $isAuctioneer) {
+            // Check if auction access is granted for the league
             if (!$league->hasAuctionAccess()) {
                 abort(403, 'Auction access has not been granted for this league. Please contact the league organizer to request access.');
             }
             
-            // Check if auction is live
-            if ($league->isAuctionActive()) {
+            // Check if any player is currently being auctioned (meaning auction is live)
+            $auctioningPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'auctioning')
+                ->exists();
+                
+            if ($auctioningPlayer || $league->isAuctionActive()) {
                 return $next($request);
             } else {
                 abort(403, 'Auction is not currently live. Only live auctions are accessible to team owners.');

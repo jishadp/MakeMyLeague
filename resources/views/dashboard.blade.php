@@ -36,7 +36,7 @@
                         Join League
                     </a>
                     @if($liveAuctions->isNotEmpty())
-                    <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-4 sm:px-6 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
+                    <a href="{{ route('auctions.live', $liveAuctions->first()) }}" class="px-4 sm:px-6 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
                         <span class="inline-flex items-center">
                             <span class="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
                             <span class="hidden sm:inline">Watch Live Auction</span>
@@ -148,7 +148,7 @@
                 <span class="text-white font-bold text-lg">LIVE AUCTION IN PROGRESS</span>
                 <span class="text-white/90">{{ $liveAuctions->first()->name }}</span>
             </div>
-            <a href="{{ route('auction.live', $liveAuctions->first()) }}" class="px-6 py-2.5 bg-white hover:bg-gray-100 text-red-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+            <a href="{{ route('auctions.live', $liveAuctions->first()) }}" class="px-6 py-2.5 bg-white hover:bg-gray-100 text-red-600 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
                 Watch Now →
             </a>
         </div>

@@ -1,5 +1,6 @@
 <!-- Player Bidding Section - Laravel Blade Partial -->
 <div class="bidMain w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 lg:py-8 {{ isset($currentPlayer) && $currentPlayer ? '' : 'hidden' }}">
+<input type="hidden" id="league-id" value="{{ $league->id ?? '' }}">
 
     <!-- Header Card -->
     {{-- <div class="glassmorphism rounded-3xl shadow-2xl mb-6 sm:mb-8 overflow-hidden">
@@ -101,13 +102,11 @@
                             @endif
                         </h2>
                         <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
-                            <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
-                                @if(isset($currentPlayer) && $currentPlayer->player && $currentPlayer->player->position)
-                                    {{ $currentPlayer->player->position->name }}
-                                @else
-                                    Position
-                                @endif
-                            </span>
+                            @if(isset($currentPlayer) && $currentPlayer->player && $currentPlayer->player->primaryGameRole && $currentPlayer->player->primaryGameRole->gamePosition)
+                                <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
+                                    {{ $currentPlayer->player->primaryGameRole->gamePosition->name }}
+                                </span>
+                            @endif
                             <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
                                 Base Price ₹<span class="basePrice">
                                     @if(isset($currentPlayer))

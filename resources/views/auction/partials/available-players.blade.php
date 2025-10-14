@@ -84,13 +84,9 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-semibold text-gray-900 text-lg truncate">{{$leaguePlayer->player->name}}</h3>
                                     <div class="flex items-center space-x-2 text-sm text-gray-600">
-                                        @if($leaguePlayer->player->position)
+                                        @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
                                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                                {{$leaguePlayer->player->position->name}}
-                                            </span>
-                                        @else
-                                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
-                                                No Position
+                                                {{$leaguePlayer->player->primaryGameRole->gamePosition->name}}
                                             </span>
                                         @endif
                                     </div>

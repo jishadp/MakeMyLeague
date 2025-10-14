@@ -1,2 +1,0 @@
-                                    <p><span class="font-medium">👥 Teams:</span> 0/{{ $league->max_teams }}</p>
-                                    <p><span class="font-medium">🏏 Players:</span> 0/{{ $league->max_teams * $league->max_team_players }}</p>

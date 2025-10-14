@@ -28,7 +28,14 @@ class PlayerUnsold implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('auctions');
+        $channels = [new Channel('auctions')];
+        
+        // Also broadcast to league-specific channel
+        if ($this->leaguePlayer && $this->leaguePlayer->league_id) {
+            $channels[] = new Channel('auctions.league.' . $this->leaguePlayer->league_id);
+        }
+        
+        return $channels;
     }
 
     /**

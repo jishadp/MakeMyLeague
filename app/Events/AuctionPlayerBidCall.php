@@ -18,14 +18,19 @@ class AuctionPlayerBidCall implements ShouldBroadcastNow
 
     public $team;
     public $newBid;
+    public $leaguePlayer;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($newBid,$bidTeam)
+    public function __construct($newBid, $bidTeam, $leaguePlayerId = null)
     {
         $this->team = LeagueTeam::withCount('leaguePlayers')->with('team')->find($bidTeam);
         $this->newBid = $newBid;
+        
+        if ($leaguePlayerId) {
+            $this->leaguePlayer = LeaguePlayer::with(['player.position', 'player.primaryGameRole.gamePosition'])->find($leaguePlayerId);
+        }
     }
 
     /**
@@ -33,7 +38,14 @@ class AuctionPlayerBidCall implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('auctions');
+        $channels = [new Channel('auctions')];
+        
+        // Also broadcast to league-specific channel
+        if ($this->team && isset($this->team->league_id)) {
+            $channels[] = new Channel('auctions.league.' . $this->team->league_id);
+        }
+        
+        return $channels;
     }
 
     /**
@@ -51,7 +63,9 @@ class AuctionPlayerBidCall implements ShouldBroadcastNow
     {
          return [
             'league_team' => $this->team,
-            'new_bid' => $this->newBid
+            'new_bid' => $this->newBid,
+            'league_player' => $this->leaguePlayer ?? null,
+            'timestamp' => now()->timestamp
         ];
     }
 }

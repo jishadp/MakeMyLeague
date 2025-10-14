@@ -124,14 +124,22 @@ class DashboardController
         ->get();
 
         // ============ LIVE AUCTIONS ============
+        // Show leagues where at least one player is sold or currently auctioning
         $liveAuctions = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
         })
-        ->with(['game', 'localBody.district'])
+        ->with(['game', 'localBody.district', 'leaguePlayers'])
         ->where('auction_access_granted', true)
-        ->where('auction_active', true)
-        ->whereNotNull('auction_started_at')
-        ->get();
+        ->whereHas('leaguePlayers', function($query) {
+            $query->whereIn('status', ['sold', 'auctioning']);
+        })
+        ->get()
+        ->filter(function($league) {
+            // Only show if auction is still ongoing (has available or auctioning players)
+            $availableCount = $league->leaguePlayers->where('status', 'available')->count();
+            $auctioningCount = $league->leaguePlayers->where('status', 'auctioning')->count();
+            return $availableCount > 0 || $auctioningCount > 0;
+        });
 
         // ============ TOP AUCTION LEADERBOARD (HIGHEST SOLD PLAYERS) ============
         $auctionLeaderboard = LeaguePlayer::where('status', 'sold')
@@ -231,35 +239,64 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get live auctions - only show when auction is actually started
-        // Conditions: auction_access_granted = true, auction_active = true, and auction_started_at is not null
-        $liveAuctions = League::whereHas('organizers', function($query) {
+        // Get all leagues with auction access granted
+        $allAuctionLeagues = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
-        })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
+        })->with(['game', 'leagueTeams.team', 'leaguePlayers'])
             ->where('auction_access_granted', true)
-            ->where('auction_active', true)
-            ->whereNotNull('auction_started_at')
             ->get();
 
-        // Get past auctions (completed auction bids with relationships)
-        $pastAuctions = Auction::with([
-            'leaguePlayer.user',
-            'leagueTeam.team',
-            'leagueTeam.league'
-        ])
-        ->where('status', 'won')
-        ->latest()
-        ->paginate(10);
+        // Categorize leagues based on player status
+        $liveAuctions = [];
+        $pastAuctions = [];
+        $upcomingAuctions = [];
 
-        // Get upcoming auctions - show leagues with auction access granted but not yet started
-        // Conditions: auction_access_granted = true, auction_active = false
-        $upcomingAuctions = League::whereHas('organizers', function($query) {
-            $query->where('status', 'approved');
-        })->with(['game', 'leagueTeams.team', 'leaguePlayers.user'])
-            ->where('auction_access_granted', true)
-            ->where('auction_active', false)
-            ->latest()
-            ->get();
+        foreach ($allAuctionLeagues as $league) {
+            // Count players by status
+            $soldCount = $league->leaguePlayers->where('status', 'sold')->count();
+            $auctioningCount = $league->leaguePlayers->where('status', 'auctioning')->count();
+            $totalPlayers = $league->leaguePlayers->count();
+
+            // Live Auctions: At least one player sold OR currently auctioning
+            if ($soldCount > 0 || $auctioningCount > 0) {
+                // Check if auction is still ongoing (not all players sold/unsold)
+                $availableCount = $league->leaguePlayers->where('status', 'available')->count();
+                if ($availableCount > 0 || $auctioningCount > 0) {
+                    $liveAuctions[] = $league;
+                    continue;
+                }
+            }
+
+            // Past Auctions: All players sold (no available or auctioning players) OR auction date passed
+            $allProcessed = $league->leaguePlayers->whereIn('status', ['sold', 'unsold', 'retained'])->count() === $totalPlayers;
+            $datePassed = $league->auction_ended_at && $league->auction_ended_at < now();
+            
+            if ($allProcessed || $datePassed) {
+                $pastAuctions[] = $league;
+                continue;
+            }
+
+            // Upcoming Auctions: No sold or auctioning players yet
+            if ($soldCount === 0 && $auctioningCount === 0) {
+                $upcomingAuctions[] = $league;
+            }
+        }
+        
+        // Convert to collections for the view
+        $liveAuctions = collect($liveAuctions);
+        $upcomingAuctions = collect($upcomingAuctions);
+        
+        // Paginate past auctions manually
+        $perPage = 10;
+        $currentPage = request()->get('page', 1);
+        $pastAuctionsCollection = collect($pastAuctions);
+        $pastAuctions = new \Illuminate\Pagination\LengthAwarePaginator(
+            $pastAuctionsCollection->forPage($currentPage, $perPage),
+            $pastAuctionsCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         // Get leagues for filter dropdown (only approved organizers)
         $leagues = League::whereHas('organizers', function($query) {
@@ -279,11 +316,19 @@ class DashboardController
     {
         $league->load(['game', 'leagueTeams.team', 'leaguePlayers.user']);
         
-        // Get the current player being auctioned (first available player)
+        // Get the current player being auctioned
         $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'available')
-            ->with(['player.position'])
+            ->where('status', 'auctioning')
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->first();
+            
+        // If no player is currently being auctioned, get the first available player
+        if (!$currentPlayer) {
+            $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'available')
+                ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+                ->first();
+        }
             
         // Get current highest bid for the current player if exists
         $currentHighestBid = null;
@@ -303,7 +348,21 @@ class DashboardController
             ->get()
             ->groupBy('league_player_id');
 
-        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid'));
+        // Get all teams with their players (retention + auctioned)
+        $teams = LeagueTeam::where('league_id', $league->id)
+            ->with([
+                'team',
+                'leaguePlayers' => function($query) {
+                    $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
+                          ->whereIn('status', ['retained', 'sold'])
+                          ->orderByRaw("FIELD(status, 'retained', 'sold')")
+                          ->orderBy('bid_price', 'desc');
+                }
+            ])
+            ->withCount('leaguePlayers')
+            ->get();
+
+        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams'));
     }
 }
 
