@@ -103,6 +103,35 @@ function handleImageError(img) {
     }
 }
 
+// Function to update team balance in UI
+function updateTeamBalanceInUI(teamId, balance, teamName) {
+    console.log('Updating team balance:', teamId, balance, teamName);
+    
+    // Format the balance
+    const formattedBalance = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    }).format(balance);
+    
+    // Find and update the team balance in the teams section
+    // Look for team cards by data attribute or text content
+    $('.teamBalance').each(function() {
+        const teamCard = $(this).closest('.team-card, .border, .glacier-card');
+        const teamNameEl = teamCard.find('h3, .team-name, .font-bold');
+        
+        if (teamNameEl.text().trim().includes(teamName)) {
+            $(this).html(formattedBalance.replace('₹', '₹'));
+            console.log('Updated balance for', teamName);
+        }
+    });
+    
+    // Also update in any other balance displays
+    $('[data-team-id="' + teamId + '"]').find('.wallet-balance, .team-balance, .balance').each(function() {
+        $(this).text(formattedBalance);
+    });
+}
+
 // Function to show messages
 function showMessage(message, type = 'info') {
     const messageContainer = document.getElementById('messageContainer');
@@ -805,6 +834,21 @@ $(document).ready(function(){
                 success: function (response) {
                     console.log("Player marked as sold:", response);
                     showMessage('Player marked as sold successfully!', 'success');
+                    
+                    // Update team balance in UI if returned
+                    if (response.team_balance !== undefined && response.team_id) {
+                        // Update balance in teams section
+                        updateTeamBalanceInUI(response.team_id, response.team_balance, response.team_name);
+                    }
+                    
+                    // Reload teams data to reflect changes
+                    if (typeof Livewire !== 'undefined') {
+                        try {
+                            Livewire.emit('refreshComponent');
+                        } catch (e) {
+                            console.log('Livewire refresh not available');
+                        }
+                    }
                 },
                 error: function (xhr) {
                     console.error("Error marking player as sold:", xhr.responseText);

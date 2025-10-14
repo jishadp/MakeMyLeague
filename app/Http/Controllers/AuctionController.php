@@ -314,23 +314,36 @@ class AuctionController extends Controller
             }
             
             // Mark all other bids for this player as 'lost'
-            // Use the query builder with proper quoting for enum values
+            // Refund losing teams
             $otherBids = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('id', '!=', $winningBid ? $winningBid->id : 0)
                 ->get();
             
             foreach ($otherBids as $bid) {
+                // Refund the bid amount to losing teams
+                LeagueTeam::find($bid->league_team_id)
+                    ->increment('wallet_balance', $bid->amount);
                 $bid->update(['status' => 'lost']);
             }
             
             // Determine the bid price - use override amount if provided, otherwise use winning bid amount
             $bidPrice = null;
-            if ($overrideAmount) {
-                $bidPrice = $overrideAmount;
+            if ($overrideAmount !== null && $overrideAmount !== '') {
+                $bidPrice = floatval($overrideAmount);
             } elseif ($winningBid) {
                 $bidPrice = $winningBid->amount;
             } else {
                 $bidPrice = 0;
+            }
+            
+            // Adjust winning team's balance if override amount is different from bid
+            if ($winningBid && $overrideAmount !== null && $overrideAmount !== '') {
+                $balanceAdjustment = $winningBid->amount - $bidPrice;
+                if ($balanceAdjustment != 0) {
+                    // If override is less than bid, refund difference
+                    // If override is more than bid, deduct extra
+                    LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
+                }
             }
             
             // Update the league player status to 'sold' and assign to team
@@ -341,12 +354,18 @@ class AuctionController extends Controller
             ]);
         });
 
+        // Get updated team balance for response
+        $updatedTeam = LeagueTeam::with('team')->find($teamId);
+
         // Broadcast the player sold event
         PlayerSold::dispatch($leaguePlayerId, $teamId);
 
         return response()->json([
             'success' => true,
-            'message' => 'Player marked as sold successfully!'
+            'message' => 'Player marked as sold successfully!',
+            'team_balance' => $updatedTeam->wallet_balance,
+            'team_id' => $teamId,
+            'team_name' => $updatedTeam->team->name ?? 'Unknown'
         ]);
     }
     

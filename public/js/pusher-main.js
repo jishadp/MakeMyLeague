@@ -116,6 +116,11 @@ function handlePlayerSold(data) {
     console.log('Player:', data.league_player?.player?.name, 'Team:', data.team?.team?.name);
     console.log('Updated Team Data:', data.team);
     
+    // Update team balance immediately in UI if function exists
+    if (typeof updateTeamBalanceInUI === 'function' && data.team) {
+        updateTeamBalanceInUI(data.team.id, data.team.wallet_balance, data.team.team?.name);
+    }
+    
     // Show available players section again
     $('.availPlayers').removeClass('hidden');
     $('#availablePlayersSection').removeClass('hidden');
