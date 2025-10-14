@@ -62,16 +62,27 @@ function showMessage(message, type = 'info') {
 
 // Simple function to start bidding and show bidding section
 function startBidding(userId, leaguePlayerId, playerName, basePrice, position, leagueId, startBidAction) {
-    // Update the bidding section with player information
+    console.log('Starting bidding for player:', {
+        userId: userId,
+        leaguePlayerId: leaguePlayerId,
+        playerName: playerName,
+        basePrice: basePrice,
+        position: position,
+        leagueId: leagueId
+    });
+    
+    // Update bidding player info
     updateBiddingPlayer(playerName, position, basePrice);
     
-    // Update bid button attributes dynamically
-    $('.callBid').attr('player-id', userId);
-    $('.callBid').attr('league-player-id', leaguePlayerId);
-    $('.callBid').attr('base-price', basePrice);
-    $('.callBid').attr('league-id', leagueId);
+    // Important: Update the callBid buttons with correct data
+    $('.callBid').each(function() {
+        $(this).attr('player-id', userId);
+        $(this).attr('league-player-id', leaguePlayerId);
+        $(this).attr('base-price', basePrice);
+        $(this).attr('league-id', leagueId);
+    });
     
-    // Update markSold and markUnSold button attributes
+    // Update markSold and markUnSold buttons
     $('.markSold').attr('league-player-id', leaguePlayerId);
     $('.markUnSold').attr('league-player-id', leaguePlayerId);
     
@@ -308,13 +319,32 @@ $(document).ready(function(){
     });
 
     $('.callBid').click(function(){
-        var leagueId = $(this).attr('league-id');
-        var playerId = $(this).attr('player-id');
-        var basePrice = $(this).attr('base-price');
-        var increment = $(this).attr('increment');
-        var leaguePlayerId = $(this).attr('league-player-id');
-        var callBidAction = $(this).closest('.grid').attr('call-bid-action');
-        var token = $(this).closest('.grid').attr('token');
+        // Get this button element
+        var $this = $(this);
+        
+        // Get attributes
+        var leagueId = $this.attr('league-id');
+        var playerId = $this.attr('player-id');
+        var basePrice = $this.attr('base-price');
+        var increment = $this.attr('increment');
+        var leaguePlayerId = $this.attr('league-player-id');
+        var callBidAction = $this.closest('.grid').attr('call-bid-action');
+        var token = $this.closest('.grid').attr('token');
+        
+        // Log data for debugging
+        console.log('Bid data:', {
+            leagueId: leagueId,
+            playerId: playerId,
+            basePrice: basePrice,
+            increment: increment,
+            leaguePlayerId: leaguePlayerId
+        });
+        
+        // Check for missing data
+        if (!leaguePlayerId || leaguePlayerId === '' || !playerId || playerId === '') {
+            showMessage('Error: Player data missing. Please select a player first.', 'error');
+            return;
+        }
 
         $.ajax({
             url: callBidAction,   // Laravel route
@@ -328,32 +358,26 @@ $(document).ready(function(){
                 league_player_id: leaguePlayerId,
             },
             success: function (response) {
-                console.log("Bidding started and broadcasted:", response);
+                console.log("Bid placed:", response);
                 
-                // Update all bid buttons with the new bid amount for next increment
+                // Update base price for next bid if successful
                 if (response.success && response.new_bid) {
                     $('.callBid').attr('base-price', response.new_bid);
                     
-                    // Update the call_team_id for markSold button
+                    // Update current bid display
+                    $('.currentBid').text(response.new_bid);
+                    
+                    // Update team info if available
                     if (response.call_team_id) {
                         $('.markSold').attr('call-team-id', response.call_team_id);
                     }
                     
-                    showMessage('Bid placed successfully! New bid: ₹' + response.new_bid, 'success');
+                    showMessage('Bid placed: ₹' + response.new_bid, 'success');
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 console.error("Error placing bid:", xhr.responseText);
-                var errorMessage = 'Error placing bid';
-                try {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.message) {
-                        errorMessage = response.message;
-                    }
-                } catch (e) {
-                    // Use default error message
-                }
-                showMessage(errorMessage, 'error');
+                showMessage('Error placing bid', 'error');
             }
         });
     });
@@ -385,6 +409,7 @@ $(document).ready(function(){
             }
         });
     });
+    
     $('.markUnSold').click(function(){
         var token = $(this).closest('.mb-6').attr('token');
         var markUnSoldAction = $(this).closest('.mb-6').attr('mark-unsold-action');
