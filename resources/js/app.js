@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
         dateFormat: "Y-m-d",
         allowInput: true,
         enableTime: false,
-        minDate: "today",
         disableMobile: false, // Enable on mobile devices
         clickOpens: true,
         monthSelectorType: "static", // Fix month navigation
