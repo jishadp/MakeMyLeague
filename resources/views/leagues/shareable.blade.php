@@ -390,7 +390,11 @@
                                             <!-- Price/Status -->
                                             @if($player->status === 'sold' && $player->bid_price)
                                                 <div class="bg-green-400 text-green-900 text-xs font-black py-1 px-2 rounded-lg text-center">
-                                                    ₹{{ number_format($player->bid_price/1000, 0) }}K
+                                                    @if($player->bid_price >= 1000)
+                                                        ₹{{ number_format($player->bid_price/1000, 0) }}K
+                                                    @else
+                                                        ₹{{ number_format($player->bid_price) }}
+                                                    @endif
                                                 </div>
                                             @elseif($player->retention)
                                                 <div class="bg-blue-400 text-blue-900 text-xs font-bold py-1 px-2 rounded-lg text-center">
