@@ -61,14 +61,6 @@
                     <div class="text-3xl md:text-4xl font-bold text-white">{{ $auctionStats['total_players'] }}</div>
                     <div class="text-white/80 text-sm mt-1">Players</div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-                    <div class="text-3xl md:text-4xl font-bold text-white">₹{{ number_format($auctionStats['total_spent'] / 1000, 0) }}K</div>
-                    <div class="text-white/80 text-sm mt-1">Total Spent</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all">
-                    <div class="text-3xl md:text-4xl font-bold text-white">₹{{ number_format($auctionStats['average_price'], 0) }}</div>
-                    <div class="text-white/80 text-sm mt-1">Avg. Price</div>
-                </div>
             </div>
         </div>
     </div>
@@ -91,16 +83,23 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <!-- Winner -->
             @if($league->winner_team_id && $league->winnerTeam)
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-400 to-yellow-600 p-8 text-white shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in">
+                <div class="relative overflow-hidden rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in h-64">
+                    @if($league->winnerTeam->team->banner)
+                        <img src="{{ Storage::url($league->winnerTeam->team->banner) }}" alt="{{ $league->winnerTeam->team->name }}" 
+                             class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-600/90 to-yellow-800/90"></div>
+                    @else
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600"></div>
+                    @endif
                     <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-                    <div class="relative">
+                    <div class="relative h-full flex flex-col justify-center p-8 text-white">
                         <div class="flex items-center justify-center mb-4">
                             <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-center mb-2">🥇 Champions</h3>
+                        <h3 class="text-2xl font-bold text-center mb-2">Champions</h3>
                         <p class="text-center text-3xl font-extrabold mb-4">{{ $league->winnerTeam->team->name }}</p>
                         @if($league->winner_prize)
                             <div class="bg-white/20 rounded-2xl p-4 text-center backdrop-blur-sm">
@@ -124,16 +123,23 @@
 
             <!-- Runner-up -->
             @if($league->runner_team_id && $league->runnerTeam)
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-300 to-gray-500 p-8 text-white shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in">
+                <div class="relative overflow-hidden rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in h-64">
+                    @if($league->runnerTeam->team->banner)
+                        <img src="{{ Storage::url($league->runnerTeam->team->banner) }}" alt="{{ $league->runnerTeam->team->name }}" 
+                             class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-br from-gray-400/90 to-gray-600/90"></div>
+                    @else
+                        <div class="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-500"></div>
+                    @endif
                     <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-                    <div class="relative">
+                    <div class="relative h-full flex flex-col justify-center p-8 text-white">
                         <div class="flex items-center justify-center mb-4">
                             <svg class="w-14 h-14" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-center mb-2">🥈 Runner-up</h3>
+                        <h3 class="text-2xl font-bold text-center mb-2">Runner-up</h3>
                         <p class="text-center text-3xl font-extrabold mb-4">{{ $league->runnerTeam->team->name }}</p>
                         @if($league->runner_prize)
                             <div class="bg-white/20 rounded-2xl p-4 text-center backdrop-blur-sm">
@@ -176,7 +182,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($topAuctions as $index => $auction)
-                <div class="group relative bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in-up" style="animation-delay: {{ $index * 0.1 }}s">
+                <div class="group relative rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in-up" style="animation-delay: {{ $index * 0.1 }}s">
                     <!-- Rank Badge -->
                     <div class="absolute top-4 left-4 z-10">
                         <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-black text-2xl shadow-lg
@@ -187,8 +193,15 @@
                         </div>
                     </div>
 
-                    <!-- Player Image Placeholder -->
-                    <div class="relative h-64 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <!-- Player Image with League Banner Background -->
+                    <div class="relative h-64 flex items-center justify-center">
+                        @if($league->banner)
+                            <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" 
+                                 class="absolute inset-0 w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/80 to-purple-900/80"></div>
+                        @else
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                        @endif
                         <div class="absolute inset-0 bg-black/20"></div>
                         <div class="relative">
                             @if($auction->user->photo)
@@ -203,7 +216,7 @@
                     </div>
 
                     <!-- Player Details -->
-                    <div class="p-6">
+                    <div class="p-6 bg-white">
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $auction->user->name }}</h3>
                         <div class="flex items-center gap-2 text-gray-600 mb-4">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -281,36 +294,67 @@
                         </div>
                     </div>
 
-                    <!-- Team Players -->
-                    <div class="p-6">
+                    <!-- Team Players - Football Formation Style -->
+                    <div class="p-4">
                         @if($team->leaguePlayers->count() > 0)
-                            <div class="space-y-3">
-                                @foreach($team->leaguePlayers->sortByDesc('bid_price') as $player)
-                                    <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100">
-                                        <div class="flex items-center gap-3 flex-1">
-                                            @if($player->user->photo)
-                                                <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}" 
-                                                     class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
-                                            @else
-                                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                                                    {{ substr($player->user->name, 0, 1) }}
+                            @php
+                                // Sort: Retention players first, then by bid price (highest first)
+                                $sortedPlayers = $team->leaguePlayers->sortBy([
+                                    fn($a, $b) => $b->retention <=> $a->retention,
+                                    fn($a, $b) => ($b->bid_price ?? 0) <=> ($a->bid_price ?? 0)
+                                ]);
+                            @endphp
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                @foreach($sortedPlayers as $player)
+                                    <!-- Football Formation Card -->
+                                    <div class="relative group">
+                                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-3 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                                            <!-- Retention Badge -->
+                                            @if($player->retention)
+                                                <div class="absolute -top-2 -right-2 z-10">
+                                                    <div class="bg-yellow-400 text-yellow-900 text-xs font-black px-2 py-1 rounded-full border-2 border-white shadow-lg">
+                                                        R
+                                                    </div>
                                                 </div>
                                             @endif
-                                            <div class="flex-1 min-w-0">
-                                                <h4 class="font-bold text-gray-900 truncate">{{ $player->user->name }}</h4>
-                                                <p class="text-sm text-gray-500">{{ $player->user->position->name ?? 'Player' }}</p>
+                                            
+                                            <!-- Player Photo -->
+                                            <div class="relative mb-2">
+                                                @if($player->user->photo)
+                                                    <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}" 
+                                                         class="w-full aspect-square rounded-xl object-cover border-2 border-white/50">
+                                                @else
+                                                    <div class="w-full aspect-square rounded-xl bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center">
+                                                        <span class="text-white text-3xl font-bold">{{ substr($player->user->name, 0, 1) }}</span>
+                                                    </div>
+                                                @endif
+                                                
+                                                <!-- Position Badge -->
+                                                <div class="absolute bottom-1 left-1 right-1">
+                                                    <div class="bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-lg text-center truncate">
+                                                        {{ $player->user->position->name ?? 'PLR' }}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="text-right ml-4">
+                                            
+                                            <!-- Player Name -->
+                                            <h4 class="text-white font-bold text-sm text-center truncate mb-1">
+                                                {{ $player->user->name }}
+                                            </h4>
+                                            
+                                            <!-- Price/Status -->
                                             @if($player->status === 'sold' && $player->bid_price)
-                                                <div class="text-lg font-bold text-green-600">₹{{ number_format($player->bid_price) }}</div>
-                                                <div class="text-xs text-gray-500">Bid Price</div>
+                                                <div class="bg-green-400 text-green-900 text-xs font-black py-1 px-2 rounded-lg text-center">
+                                                    ₹{{ number_format($player->bid_price/1000, 0) }}K
+                                                </div>
                                             @elseif($player->retention)
-                                                <div class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                                                    Retained
+                                                <div class="bg-blue-400 text-blue-900 text-xs font-bold py-1 px-2 rounded-lg text-center">
+                                                    RETAINED
                                                 </div>
                                             @else
-                                                <div class="text-sm text-gray-400">Not Sold</div>
+                                                <div class="bg-gray-400 text-gray-900 text-xs font-bold py-1 px-2 rounded-lg text-center">
+                                                    UNSOLD
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
