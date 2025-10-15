@@ -66,66 +66,414 @@
     </div>
 </section>
 
-<!-- Prize Pool & Winners Section -->
+<!-- Prize Pool & Winners Section with 3D Glass Card Design -->
 @if($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id)
-<section class="py-16 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50">
+<style>
+/* 3D Glass Card Styling */
+.card-container {
+  width: 100%;
+  max-width: 320px;
+  height: 340px;
+  perspective: 1000px;
+  margin: 0 auto;
+}
+
+.prize-card {
+  height: 100%;
+  border-radius: 50px;
+  transition: all 0.5s ease-in-out;
+  transform-style: preserve-3d;
+  box-shadow: rgba(5, 71, 17, 0) 40px 50px 25px -40px, rgba(5, 71, 17, 0.2) 0px 25px 25px -5px;
+  position: relative;
+}
+
+.prize-card-winner {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+.prize-card-runner {
+  background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+}
+
+.glass-layer {
+  transform-style: preserve-3d;
+  position: absolute;
+  inset: 8px;
+  border-radius: 55px;
+  border-top-right-radius: 100%;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.349) 0%, rgba(255, 255, 255, 0.815) 100%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transform: translate3d(0px, 0px, 25px);
+  border-left: 1px solid white;
+  border-bottom: 1px solid white;
+  transition: all 0.5s ease-in-out;
+}
+
+.card-content {
+  padding: 30px 30px 0px 30px;
+  transform: translate3d(0, 0, 26px);
+  position: relative;
+  z-index: 10;
+}
+
+.team-logo-badge {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  background: white;
+}
+
+.badge-label {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.badge-winner {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #8B4513;
+}
+
+.badge-runner {
+  background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%);
+  color: #4A4A4A;
+}
+
+.team-title {
+  display: block;
+  color: #2d2d2d;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.team-subtitle {
+  display: block;
+  color: rgba(45, 45, 45, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.card-bottom {
+  padding: 15px 20px;
+  transform-style: preserve-3d;
+  position: absolute;
+  bottom: 25px;
+  left: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transform: translate3d(0, 0, 26px);
+  backdrop-filter: blur(10px);
+}
+
+.prize-display {
+  text-align: center;
+}
+
+.prize-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.prize-amount {
+  font-size: 28px;
+  font-weight: 900;
+  color: #2d2d2d;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prize-amount-winner {
+  background: linear-gradient(135deg, #FF8C00 0%, #FF6B00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.prize-amount-runner {
+  background: linear-gradient(135deg, #708090 0%, #556270 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.decorative-circles {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform-style: preserve-3d;
+}
+
+.circle {
+  display: block;
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  top: 0;
+  right: 0;
+  box-shadow: rgba(100, 100, 111, 0.2) -10px 10px 20px 0px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.5s ease-in-out;
+}
+
+.circle-winner {
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.circle-runner {
+  background: rgba(192, 192, 192, 0.2);
+}
+
+.circle1 {
+  width: 170px;
+  transform: translate3d(0, 0, 20px);
+  top: 8px;
+  right: 8px;
+}
+
+.circle2 {
+  width: 140px;
+  transform: translate3d(0, 0, 40px);
+  top: 10px;
+  right: 10px;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  transition-delay: 0.4s;
+}
+
+.circle3 {
+  width: 110px;
+  transform: translate3d(0, 0, 60px);
+  top: 17px;
+  right: 17px;
+  transition-delay: 0.8s;
+}
+
+.circle4 {
+  width: 80px;
+  transform: translate3d(0, 0, 80px);
+  top: 23px;
+  right: 23px;
+  transition-delay: 1.2s;
+}
+
+.circle5 {
+  width: 50px;
+  transform: translate3d(0, 0, 100px);
+  top: 30px;
+  right: 30px;
+  display: grid;
+  place-content: center;
+  transition-delay: 1.6s;
+}
+
+.circle5 svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Hover Effects */
+.card-container:hover .prize-card {
+  transform: rotate3d(1, 1, 0, 30deg);
+  box-shadow: rgba(5, 71, 17, 0.3) 30px 50px 25px -40px, rgba(5, 71, 17, 0.1) 0px 25px 30px 0px;
+}
+
+.card-container:hover .circle2 {
+  transform: translate3d(0, 0, 60px);
+}
+
+.card-container:hover .circle3 {
+  transform: translate3d(0, 0, 80px);
+}
+
+.card-container:hover .circle4 {
+  transform: translate3d(0, 0, 100px);
+}
+
+.card-container:hover .circle5 {
+  transform: translate3d(0, 0, 120px);
+}
+
+/* Prize Only Card */
+.prize-only-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 30px;
+  transform: translate3d(0, 0, 26px);
+}
+
+.prize-only-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.prize-only-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.prize-only-icon-winner svg {
+  fill: #FF8C00;
+}
+
+.prize-only-icon-runner svg {
+  fill: #708090;
+}
+
+.prize-only-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #2d2d2d;
+  margin-bottom: 15px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prize-only-amount {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-container {
+    max-width: 300px;
+    height: 320px;
+  }
+  
+  .team-title {
+    font-size: 20px;
+  }
+  
+  .prize-amount {
+    font-size: 24px;
+  }
+  
+  .team-logo-badge {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .circle1 { width: 150px; }
+  .circle2 { width: 120px; }
+  .circle3 { width: 95px; }
+  .circle4 { width: 70px; }
+  .circle5 { width: 45px; }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    max-width: 280px;
+    height: 300px;
+  }
+  
+  .card-content {
+    padding: 25px 25px 0px 25px;
+  }
+  
+  .team-title {
+    font-size: 18px;
+  }
+  
+  .prize-amount {
+    font-size: 22px;
+  }
+  
+  .team-logo-badge {
+    width: 55px;
+    height: 55px;
+  }
+}
+</style>
+
+<section class="py-12 md:py-20 bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-3">
-                Champions & Rewards
+        <!-- Section Header -->
+        <div class="text-center mb-12 md:mb-16">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
+                Tournament Champions
             </h2>
-            <p class="text-gray-700 text-xl font-medium">Celebrating excellence and achievements</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+                Celebrating excellence and outstanding performance
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto">
             <!-- Winner Card -->
             @if($league->winner_team_id && $league->winnerTeam)
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in">
-                    <!-- Trophy Badge -->
-                    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full p-3 shadow-2xl border-4 border-white">
-                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <!-- Team Banner/Photo Section -->
-                    <div class="relative h-56 md:h-64">
-                        @if($league->winnerTeam->team->banner)
-                            <img src="{{ Storage::url($league->winnerTeam->team->banner) }}" alt="{{ $league->winnerTeam->team->name }}" 
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
-                        @else
-                            <div class="w-full h-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600"></div>
-                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
-                        @endif
+                <div class="card-container">
+                    <div class="prize-card prize-card-winner">
+                        <div class="glass-layer"></div>
                         
-                        <!-- Team Logo -->
-                        @if($league->winnerTeam->team->logo)
-                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <img src="{{ Storage::url($league->winnerTeam->team->logo) }}" alt="{{ $league->winnerTeam->team->name }}" 
-                                     class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl">
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Details Section -->
-                    <div class="p-6 md:p-8 bg-gradient-to-br from-yellow-50 to-orange-50">
-                        <div class="text-center mb-6">
-                            <div class="inline-block bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-2 rounded-full text-sm font-black uppercase tracking-wider shadow-lg mb-4">
-                                Champions
-                            </div>
-                            <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">
-                                {{ $league->winnerTeam->team->name }}
-                            </h3>
+                        <!-- Decorative Circles -->
+                        <div class="decorative-circles">
+                            <span class="circle circle1 circle-winner"></span>
+                            <span class="circle circle2 circle-winner"></span>
+                            <span class="circle circle3 circle-winner"></span>
+                            <span class="circle circle4 circle-winner"></span>
+                            <span class="circle circle5 circle-winner">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </span>
                         </div>
-                        
+
+                        <!-- Card Content -->
+                        <div class="card-content">
+                            @if($league->winnerTeam->team->logo)
+                                <img src="{{ Storage::url($league->winnerTeam->team->logo) }}" 
+                                     alt="{{ $league->winnerTeam->team->name }}"
+                                     class="team-logo-badge">
+                            @endif
+                            
+                            <span class="badge-label badge-winner">
+                                🏆 Champion
+                            </span>
+                            
+                            <span class="team-title">{{ $league->winnerTeam->team->name }}</span>
+                            <span class="team-subtitle">League Winner</span>
+                        </div>
+
+                        <!-- Prize Display -->
                         @if($league->winner_prize)
-                            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200">
-                                <div class="text-center">
-                                    <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Prize Money</div>
-                                    <div class="text-4xl md:text-5xl font-black bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                            <div class="card-bottom">
+                                <div class="prize-display">
+                                    <div class="prize-label">Prize Money</div>
+                                    <div class="prize-amount prize-amount-winner">
                                         ₹{{ number_format($league->winner_prize) }}
                                     </div>
                                 </div>
@@ -134,59 +482,78 @@
                     </div>
                 </div>
             @elseif($league->winner_prize)
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-                    <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 p-12 text-center">
-                        <h3 class="text-3xl font-black text-white mb-2">Winner Prize</h3>
-                        <div class="text-5xl font-black text-white">₹{{ number_format($league->winner_prize) }}</div>
+                <div class="card-container">
+                    <div class="prize-card prize-card-winner">
+                        <div class="glass-layer"></div>
+                        
+                        <div class="decorative-circles">
+                            <span class="circle circle1 circle-winner"></span>
+                            <span class="circle circle2 circle-winner"></span>
+                            <span class="circle circle3 circle-winner"></span>
+                            <span class="circle circle4 circle-winner"></span>
+                            <span class="circle circle5 circle-winner">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="prize-only-content">
+                            <div class="prize-only-icon">
+                                <svg class="prize-only-icon-winner" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <div class="prize-only-title">Winner Prize</div>
+                            <div class="prize-only-amount prize-amount-winner">
+                                ₹{{ number_format($league->winner_prize) }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif
 
             <!-- Runner-up Card -->
             @if($league->runner_team_id && $league->runnerTeam)
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in">
-                    <!-- Trophy Badge -->
-                    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div class="bg-gradient-to-br from-gray-300 to-gray-500 rounded-full p-3 shadow-2xl border-4 border-white">
-                        </div>
-                    </div>
-
-                    <!-- Team Banner/Photo Section -->
-                    <div class="relative h-56 md:h-64">
-                        @if($league->runnerTeam->team->banner)
-                            <img src="{{ Storage::url($league->runnerTeam->team->banner) }}" alt="{{ $league->runnerTeam->team->name }}" 
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
-                        @else
-                            <div class="w-full h-full bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500"></div>
-                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
-                        @endif
+                <div class="card-container">
+                    <div class="prize-card prize-card-runner">
+                        <div class="glass-layer"></div>
                         
-                        <!-- Team Logo -->
-                        @if($league->runnerTeam->team->logo)
-                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <img src="{{ Storage::url($league->runnerTeam->team->logo) }}" alt="{{ $league->runnerTeam->team->name }}" 
-                                     class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl">
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Details Section -->
-                    <div class="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-slate-50">
-                        <div class="text-center mb-6">
-                            <div class="inline-block bg-gradient-to-r from-gray-400 to-gray-600 text-white px-6 py-2 rounded-full text-sm font-black uppercase tracking-wider shadow-lg mb-4">
-                                Runner-up
-                            </div>
-                            <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">
-                                {{ $league->runnerTeam->team->name }}
-                            </h3>
+                        <!-- Decorative Circles -->
+                        <div class="decorative-circles">
+                            <span class="circle circle1 circle-runner"></span>
+                            <span class="circle circle2 circle-runner"></span>
+                            <span class="circle circle3 circle-runner"></span>
+                            <span class="circle circle4 circle-runner"></span>
+                            <span class="circle circle5 circle-runner">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </span>
                         </div>
-                        
+
+                        <!-- Card Content -->
+                        <div class="card-content">
+                            @if($league->runnerTeam->team->logo)
+                                <img src="{{ Storage::url($league->runnerTeam->team->logo) }}" 
+                                     alt="{{ $league->runnerTeam->team->name }}"
+                                     class="team-logo-badge">
+                            @endif
+                            
+                            <span class="badge-label badge-runner">
+                                🥈 Runner-up
+                            </span>
+                            
+                            <span class="team-title">{{ $league->runnerTeam->team->name }}</span>
+                            <span class="team-subtitle">Second Place</span>
+                        </div>
+
+                        <!-- Prize Display -->
                         @if($league->runner_prize)
-                            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200">
-                                <div class="text-center">
-                                    <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Prize Money</div>
-                                    <div class="text-4xl md:text-5xl font-black bg-gradient-to-r from-gray-600 to-slate-700 bg-clip-text text-transparent">
+                            <div class="card-bottom">
+                                <div class="prize-display">
+                                    <div class="prize-label">Prize Money</div>
+                                    <div class="prize-amount prize-amount-runner">
                                         ₹{{ number_format($league->runner_prize) }}
                                     </div>
                                 </div>
@@ -195,13 +562,33 @@
                     </div>
                 </div>
             @elseif($league->runner_prize)
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-                    <div class="bg-gradient-to-br from-gray-300 to-gray-500 p-12 text-center">
-                        <svg class="w-20 h-20 mx-auto mb-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                        <h3 class="text-3xl font-black text-white mb-2">Runner-up Prize</h3>
-                        <div class="text-5xl font-black text-white">₹{{ number_format($league->runner_prize) }}</div>
+                <div class="card-container">
+                    <div class="prize-card prize-card-runner">
+                        <div class="glass-layer"></div>
+                        
+                        <div class="decorative-circles">
+                            <span class="circle circle1 circle-runner"></span>
+                            <span class="circle circle2 circle-runner"></span>
+                            <span class="circle circle3 circle-runner"></span>
+                            <span class="circle circle4 circle-runner"></span>
+                            <span class="circle circle5 circle-runner">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="prize-only-content">
+                            <div class="prize-only-icon">
+                                <svg class="prize-only-icon-runner" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <div class="prize-only-title">Runner-up Prize</div>
+                            <div class="prize-only-amount prize-amount-runner">
+                                ₹{{ number_format($league->runner_prize) }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif
