@@ -68,95 +68,146 @@
 
 <!-- Prize Pool & Winners Section -->
 @if($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id)
-<section class="py-12 bg-gradient-to-r from-yellow-50 to-orange-50">
+<section class="py-16 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 flex items-center justify-center gap-3">
-                <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-3">
                 Champions & Rewards
             </h2>
-            <p class="text-gray-600 text-lg">Celebrating excellence and achievements</p>
+            <p class="text-gray-700 text-xl font-medium">Celebrating excellence and achievements</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <!-- Winner -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <!-- Winner Card -->
             @if($league->winner_team_id && $league->winnerTeam)
-                <div class="relative overflow-hidden rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in h-64">
-                    @if($league->winnerTeam->team->banner)
-                        <img src="{{ Storage::url($league->winnerTeam->team->banner) }}" alt="{{ $league->winnerTeam->team->name }}" 
-                             class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-600/90 to-yellow-800/90"></div>
-                    @else
-                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600"></div>
-                    @endif
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-                    <div class="relative h-full flex flex-col justify-center p-8 text-white">
-                        <div class="flex items-center justify-center mb-4">
-                            <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in">
+                    <!-- Trophy Badge -->
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+                        <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full p-3 shadow-2xl border-4 border-white">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-center mb-2">Champions</h3>
-                        <p class="text-center text-3xl font-extrabold mb-4">{{ $league->winnerTeam->team->name }}</p>
+                    </div>
+
+                    <!-- Team Banner/Photo Section -->
+                    <div class="relative h-56 md:h-64">
+                        @if($league->winnerTeam->team->banner)
+                            <img src="{{ Storage::url($league->winnerTeam->team->banner) }}" alt="{{ $league->winnerTeam->team->name }}" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600"></div>
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+                        @endif
+                        
+                        <!-- Team Logo -->
+                        @if($league->winnerTeam->team->logo)
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <img src="{{ Storage::url($league->winnerTeam->team->logo) }}" alt="{{ $league->winnerTeam->team->name }}" 
+                                     class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl">
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="p-6 md:p-8 bg-gradient-to-br from-yellow-50 to-orange-50">
+                        <div class="text-center mb-6">
+                            <div class="inline-block bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-2 rounded-full text-sm font-black uppercase tracking-wider shadow-lg mb-4">
+                                Champions
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">
+                                {{ $league->winnerTeam->team->name }}
+                            </h3>
+                        </div>
+                        
                         @if($league->winner_prize)
-                            <div class="bg-white/20 rounded-2xl p-4 text-center backdrop-blur-sm">
-                                <div class="text-sm opacity-90 mb-1">Prize Money</div>
-                                <div class="text-3xl font-black">₹{{ number_format($league->winner_prize) }}</div>
+                            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200">
+                                <div class="text-center">
+                                    <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Prize Money</div>
+                                    <div class="text-4xl md:text-5xl font-black bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                                        ₹{{ number_format($league->winner_prize) }}
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     </div>
                 </div>
             @elseif($league->winner_prize)
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-400 to-yellow-600 p-8 text-white shadow-2xl animate-fade-in">
-                    <div class="text-center">
-                        <svg class="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+                    <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 p-12 text-center">
+                        <svg class="w-20 h-20 mx-auto mb-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
-                        <h3 class="text-2xl font-bold mb-2">Winner Prize</h3>
-                        <div class="text-4xl font-black">₹{{ number_format($league->winner_prize) }}</div>
+                        <h3 class="text-3xl font-black text-white mb-2">Winner Prize</h3>
+                        <div class="text-5xl font-black text-white">₹{{ number_format($league->winner_prize) }}</div>
                     </div>
                 </div>
             @endif
 
-            <!-- Runner-up -->
+            <!-- Runner-up Card -->
             @if($league->runner_team_id && $league->runnerTeam)
-                <div class="relative overflow-hidden rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-fade-in h-64">
-                    @if($league->runnerTeam->team->banner)
-                        <img src="{{ Storage::url($league->runnerTeam->team->banner) }}" alt="{{ $league->runnerTeam->team->name }}" 
-                             class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-br from-gray-400/90 to-gray-600/90"></div>
-                    @else
-                        <div class="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-500"></div>
-                    @endif
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-                    <div class="relative h-full flex flex-col justify-center p-8 text-white">
-                        <div class="flex items-center justify-center mb-4">
-                            <svg class="w-14 h-14" fill="currentColor" viewBox="0 0 20 20">
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-300 animate-fade-in">
+                    <!-- Trophy Badge -->
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+                        <div class="bg-gradient-to-br from-gray-300 to-gray-500 rounded-full p-3 shadow-2xl border-4 border-white">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-center mb-2">Runner-up</h3>
-                        <p class="text-center text-3xl font-extrabold mb-4">{{ $league->runnerTeam->team->name }}</p>
+                    </div>
+
+                    <!-- Team Banner/Photo Section -->
+                    <div class="relative h-56 md:h-64">
+                        @if($league->runnerTeam->team->banner)
+                            <img src="{{ Storage::url($league->runnerTeam->team->banner) }}" alt="{{ $league->runnerTeam->team->name }}" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"></div>
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500"></div>
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+                        @endif
+                        
+                        <!-- Team Logo -->
+                        @if($league->runnerTeam->team->logo)
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <img src="{{ Storage::url($league->runnerTeam->team->logo) }}" alt="{{ $league->runnerTeam->team->name }}" 
+                                     class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl">
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-slate-50">
+                        <div class="text-center mb-6">
+                            <div class="inline-block bg-gradient-to-r from-gray-400 to-gray-600 text-white px-6 py-2 rounded-full text-sm font-black uppercase tracking-wider shadow-lg mb-4">
+                                Runner-up
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">
+                                {{ $league->runnerTeam->team->name }}
+                            </h3>
+                        </div>
+                        
                         @if($league->runner_prize)
-                            <div class="bg-white/20 rounded-2xl p-4 text-center backdrop-blur-sm">
-                                <div class="text-sm opacity-90 mb-1">Prize Money</div>
-                                <div class="text-3xl font-black">₹{{ number_format($league->runner_prize) }}</div>
+                            <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200">
+                                <div class="text-center">
+                                    <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Prize Money</div>
+                                    <div class="text-4xl md:text-5xl font-black bg-gradient-to-r from-gray-600 to-slate-700 bg-clip-text text-transparent">
+                                        ₹{{ number_format($league->runner_prize) }}
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     </div>
                 </div>
             @elseif($league->runner_prize)
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-300 to-gray-500 p-8 text-white shadow-2xl animate-fade-in">
-                    <div class="text-center">
-                        <svg class="w-14 h-14 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+                    <div class="bg-gradient-to-br from-gray-300 to-gray-500 p-12 text-center">
+                        <svg class="w-20 h-20 mx-auto mb-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
-                        <h3 class="text-2xl font-bold mb-2">Runner-up Prize</h3>
-                        <div class="text-4xl font-black">₹{{ number_format($league->runner_prize) }}</div>
+                        <h3 class="text-3xl font-black text-white mb-2">Runner-up Prize</h3>
+                        <div class="text-5xl font-black text-white">₹{{ number_format($league->runner_prize) }}</div>
                     </div>
                 </div>
             @endif
