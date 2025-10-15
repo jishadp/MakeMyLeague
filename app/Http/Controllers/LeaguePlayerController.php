@@ -35,7 +35,9 @@ class LeaguePlayerController extends Controller
                 $query->whereNull('league_team_id');
             });
 
-        $leaguePlayers = $query->orderBy('base_price', 'desc')
+        $leaguePlayers = $query->join('users', 'league_players.user_id', '=', 'users.id')
+            ->orderBy('users.name', 'asc')
+            ->select('league_players.*')
             ->paginate(15);
 
         // Get available teams for filtering

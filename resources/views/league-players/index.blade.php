@@ -194,6 +194,9 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Sl
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Player
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -217,8 +220,11 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($leaguePlayers as $leaguePlayer)
+                            @foreach($leaguePlayers as $index => $leaguePlayer)
                                 <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location.href='{{ route('league-players.show', [$league, $leaguePlayer]) }}'">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ ($leaguePlayers->currentPage() - 1) * $leaguePlayers->perPage() + $index + 1 }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10">
