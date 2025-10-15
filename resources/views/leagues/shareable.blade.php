@@ -66,7 +66,7 @@
     </div>
 </section>
 
-<!-- Prize Pool & Winners Section with 3D Glass Card Design + Gyroscope -->
+<!-- Prize Pool & Winners Section with 3D Glass Card Design -->
 @if($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id)
 <style>
 /* 3D Glass Card Styling */
@@ -81,11 +81,10 @@
 .prize-card {
   height: 100%;
   border-radius: 50px;
-  transition: transform 0.1s ease-out;
+  transition: all 0.5s ease-in-out;
   transform-style: preserve-3d;
   box-shadow: rgba(5, 71, 17, 0) 40px 50px 25px -40px, rgba(5, 71, 17, 0.2) 0px 25px 25px -5px;
   position: relative;
-  will-change: transform;
 }
 
 .prize-card-winner {
@@ -235,8 +234,7 @@
   box-shadow: rgba(100, 100, 111, 0.2) -10px 10px 20px 0px;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  transition: all 0.1s ease-out;
-  will-change: transform;
+  transition: all 0.5s ease-in-out;
 }
 
 .circle-winner {
@@ -261,6 +259,7 @@
   right: 10px;
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
+  transition-delay: 0.4s;
 }
 
 .circle3 {
@@ -268,6 +267,7 @@
   transform: translate3d(0, 0, 60px);
   top: 17px;
   right: 17px;
+  transition-delay: 0.8s;
 }
 
 .circle4 {
@@ -275,6 +275,7 @@
   transform: translate3d(0, 0, 80px);
   top: 23px;
   right: 23px;
+  transition-delay: 1.2s;
 }
 
 .circle5 {
@@ -284,6 +285,7 @@
   right: 30px;
   display: grid;
   place-content: center;
+  transition-delay: 1.6s;
 }
 
 .circle5 svg {
@@ -293,28 +295,26 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* Desktop Hover Effects */
-@media (hover: hover) {
-  .card-container:hover .prize-card {
-    transform: rotate3d(1, 1, 0, 30deg);
-    box-shadow: rgba(5, 71, 17, 0.3) 30px 50px 25px -40px, rgba(5, 71, 17, 0.1) 0px 25px 30px 0px;
-  }
+/* Hover Effects */
+.card-container:hover .prize-card {
+  transform: rotate3d(1, 1, 0, 30deg);
+  box-shadow: rgba(5, 71, 17, 0.3) 30px 50px 25px -40px, rgba(5, 71, 17, 0.1) 0px 25px 30px 0px;
+}
 
-  .card-container:hover .circle2 {
-    transform: translate3d(0, 0, 60px);
-  }
+.card-container:hover .circle2 {
+  transform: translate3d(0, 0, 60px);
+}
 
-  .card-container:hover .circle3 {
-    transform: translate3d(0, 0, 80px);
-  }
+.card-container:hover .circle3 {
+  transform: translate3d(0, 0, 80px);
+}
 
-  .card-container:hover .circle4 {
-    transform: translate3d(0, 0, 100px);
-  }
+.card-container:hover .circle4 {
+  transform: translate3d(0, 0, 100px);
+}
 
-  .card-container:hover .circle5 {
-    transform: translate3d(0, 0, 120px);
-  }
+.card-container:hover .circle5 {
+  transform: translate3d(0, 0, 120px);
 }
 
 /* Prize Only Card */
@@ -365,24 +365,6 @@
   font-size: 36px;
   font-weight: 900;
   line-height: 1;
-}
-
-/* Gyro Indicator */
-.gyro-indicator {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 20px;
-  font-size: 12px;
-  z-index: 1000;
-  display: none;
-}
-
-.gyro-active {
-  display: block;
 }
 
 /* Responsive Design */
@@ -453,7 +435,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto">
             <!-- Winner Card -->
             @if($league->winner_team_id && $league->winnerTeam)
-                <div class="card-container" data-card="winner">
+                <div class="card-container">
                     <div class="prize-card prize-card-winner">
                         <div class="glass-layer"></div>
                         
@@ -500,7 +482,7 @@
                     </div>
                 </div>
             @elseif($league->winner_prize)
-                <div class="card-container" data-card="winner-prize">
+                <div class="card-container">
                     <div class="prize-card prize-card-winner">
                         <div class="glass-layer"></div>
                         
@@ -533,7 +515,7 @@
 
             <!-- Runner-up Card -->
             @if($league->runner_team_id && $league->runnerTeam)
-                <div class="card-container" data-card="runner">
+                <div class="card-container">
                     <div class="prize-card prize-card-runner">
                         <div class="glass-layer"></div>
                         
@@ -580,7 +562,7 @@
                     </div>
                 </div>
             @elseif($league->runner_prize)
-                <div class="card-container" data-card="runner-prize">
+                <div class="card-container">
                     <div class="prize-card prize-card-runner">
                         <div class="glass-layer"></div>
                         
@@ -612,114 +594,7 @@
             @endif
         </div>
     </div>
-
-    <!-- Gyro Indicator -->
-    <div class="gyro-indicator" id="gyroIndicator">📱 Gyroscope Active</div>
 </section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let gyroSupported = false;
-    const cards = document.querySelectorAll('.card-container');
-    const indicator = document.getElementById('gyroIndicator');
-    
-    // Check if device supports gyroscope
-    if (window.DeviceOrientationEvent) {
-        // Request permission for iOS 13+
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            // iOS device - request permission on first interaction
-            const enableGyro = () => {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') {
-                            initGyroscope();
-                        }
-                    })
-                    .catch(console.error);
-            };
-            
-            // Add click listener to enable gyro on iOS
-            document.addEventListener('click', enableGyro, { once: true });
-        } else {
-            // Non-iOS device - directly init
-            initGyroscope();
-        }
-    }
-    
-    function initGyroscope() {
-        gyroSupported = true;
-        
-        window.addEventListener('deviceorientation', function(event) {
-            const beta = event.beta;  // Front-to-back tilt (-180 to 180)
-            const gamma = event.gamma; // Left-to-right tilt (-90 to 90)
-            
-            // Only apply on mobile devices
-            if (window.innerWidth <= 768 && beta !== null && gamma !== null) {
-                indicator.classList.add('gyro-active');
-                
-                cards.forEach(card => {
-                    const prizeCard = card.querySelector('.prize-card');
-                    const circles = card.querySelectorAll('.circle');
-                    
-                    // Normalize values for smoother animation
-                    const tiltX = Math.max(-30, Math.min(30, gamma)); // -30 to 30 degrees
-                    const tiltY = Math.max(-30, Math.min(30, beta - 90)); // -30 to 30 degrees
-                    
-                    // Apply 3D rotation to card
-                    prizeCard.style.transform = `
-                        rotateX(${-tiltY * 0.5}deg) 
-                        rotateY(${tiltX * 0.5}deg)
-                        scale3d(1.02, 1.02, 1.02)
-                    `;
-                    
-                    // Animate decorative circles based on tilt
-                    circles.forEach((circle, index) => {
-                        const baseDepth = [20, 40, 60, 80, 100][index];
-                        const extraDepth = (Math.abs(tiltX) + Math.abs(tiltY)) * 0.5;
-                        const depth = baseDepth + extraDepth;
-                        
-                        circle.style.transform = `translate3d(0, 0, ${depth}px)`;
-                    });
-                });
-                
-                // Hide indicator after 3 seconds
-                setTimeout(() => {
-                    indicator.classList.remove('gyro-active');
-                }, 3000);
-            }
-        }, true);
-    }
-    
-    // Fallback to mouse move on desktop
-    if (window.innerWidth > 768) {
-        cards.forEach(card => {
-            card.addEventListener('mousemove', function(e) {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-                
-                const prizeCard = card.querySelector('.prize-card');
-                prizeCard.style.transform = `
-                    rotateX(${rotateX}deg) 
-                    rotateY(${rotateY}deg)
-                    scale3d(1.05, 1.05, 1.05)
-                `;
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                const prizeCard = card.querySelector('.prize-card');
-                prizeCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-            });
-        });
-    }
-});
-</script>
 @endif
 
 <!-- Top 3 Auction Highlights -->
