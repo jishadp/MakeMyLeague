@@ -164,6 +164,14 @@
                                         </span>
                                     @endif
                                 @endif
+                                <a href="{{ route('leagues.shareable', $league) }}"
+                                    class="inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg shadow-sm hover:from-pink-600 hover:to-purple-700 transition-colors text-center text-sm">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                    </svg>
+                                    Share
+                                </a>
                                 <a href="{{ route('leagues.index') }}"
                                     class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-center text-sm">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,6 +232,14 @@
                                             Ownership
                                         </button>
                                     @endif
+                                    <a href="{{ route('leagues.shareable', $league) }}"
+                                        class="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg shadow-sm hover:from-pink-600 hover:to-purple-700 transition-colors text-base">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                        </svg>
+                                        Share
+                                    </a>
                                     <a href="{{ route('leagues.index') }}"
                                         class="inline-flex items-center justify-center px-6 py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-200 transition-colors text-base">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"

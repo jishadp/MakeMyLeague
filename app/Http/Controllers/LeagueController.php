@@ -813,4 +813,51 @@ class LeagueController
             ], 500);
         }
     }
+
+    /**
+     * Display the shareable public page for a league.
+     */
+    public function shareable(League $league): View
+    {
+        // Load all necessary relationships
+        $league->load([
+            'game',
+            'localBody.district',
+            'leagueTeams.team',
+            'leagueTeams.leaguePlayers.user.position',
+            'winnerTeam.team',
+            'runnerTeam.team',
+            'grounds'
+        ]);
+
+        // Get top 3 auction highlights (highest bid prices)
+        $topAuctions = $league->leaguePlayers()
+            ->where('status', 'sold')
+            ->whereNotNull('bid_price')
+            ->with(['user.position', 'leagueTeam.team'])
+            ->orderBy('bid_price', 'desc')
+            ->take(3)
+            ->get();
+
+        // Get all teams with their players
+        $teams = $league->leagueTeams()
+            ->with(['team', 'leaguePlayers.user.position'])
+            ->get();
+
+        // Get auction statistics
+        $auctionStats = [
+            'total_players' => $league->leaguePlayers()->count(),
+            'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+            'total_spent' => $league->leaguePlayers()
+                ->where('status', 'sold')
+                ->whereNotNull('bid_price')
+                ->sum('bid_price'),
+            'average_price' => $league->leaguePlayers()
+                ->where('status', 'sold')
+                ->whereNotNull('bid_price')
+                ->avg('bid_price'),
+        ];
+
+        return view('leagues.shareable', compact('league', 'topAuctions', 'teams', 'auctionStats'));
+    }
 }
