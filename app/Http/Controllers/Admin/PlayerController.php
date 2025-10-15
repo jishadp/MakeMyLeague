@@ -8,7 +8,10 @@ use App\Models\GamePosition;
 use App\Models\LocalBody;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PlayerController extends Controller
 {
@@ -82,6 +85,48 @@ class PlayerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error resetting PIN: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update player photo.
+     */
+    public function updatePhoto(Request $request, User $player)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required|image|mimes:jpeg,png,jpg|max:10240'
+            ]);
+
+            // Delete old photo if exists
+            if ($player->photo && Storage::disk('public')->exists($player->photo)) {
+                Storage::disk('public')->delete($player->photo);
+            }
+            
+            // Process and save the image
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($request->file('photo'));
+            $image->resize(300, 300);
+            $encoded = $image->toJpeg(85);
+            
+            $filename = 'profile-photos/' . uniqid() . '.jpg';
+            Storage::disk('public')->put($filename, $encoded);
+            
+            // Update the player's photo
+            $player->update([
+                'photo' => $filename
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo updated successfully',
+                'photo_url' => Storage::url($filename)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating photo: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -11,6 +11,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class AdminUserController extends Controller
 {
@@ -248,6 +251,56 @@ class AdminUserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error resetting PIN: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update admin user photo.
+     */
+    public function updatePhoto(Request $request, User $adminUser)
+    {
+        // Ensure the user is an admin
+        if (!$adminUser->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        try {
+            $request->validate([
+                'photo' => 'required|image|mimes:jpeg,png,jpg|max:10240'
+            ]);
+
+            // Delete old photo if exists
+            if ($adminUser->photo && Storage::disk('public')->exists($adminUser->photo)) {
+                Storage::disk('public')->delete($adminUser->photo);
+            }
+            
+            // Process and save the image
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($request->file('photo'));
+            $image->resize(300, 300);
+            $encoded = $image->toJpeg(85);
+            
+            $filename = 'profile-photos/' . uniqid() . '.jpg';
+            Storage::disk('public')->put($filename, $encoded);
+            
+            // Update the admin user's photo
+            $adminUser->update([
+                'photo' => $filename
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo updated successfully',
+                'photo_url' => Storage::url($filename)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating photo: ' . $e->getMessage()
             ], 500);
         }
     }

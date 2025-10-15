@@ -170,6 +170,7 @@ Route::middleware('auth')->group(function () {
         // Player Management Routes
         Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
         Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
+        Route::post('players/{player:slug}/update-photo', [\App\Http\Controllers\Admin\PlayerController::class, 'updatePhoto'])->name('players.update-photo');
         
         // Analytics Routes
         Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
@@ -181,6 +182,7 @@ Route::middleware('auth')->group(function () {
         // Admin User Management Routes
         Route::resource('admin-users', AdminAdminUserController::class);
         Route::post('admin-users/{adminUser:slug}/reset-pin', [AdminAdminUserController::class, 'resetPin'])->name('admin-users.reset-pin');
+        Route::post('admin-users/{adminUser:slug}/update-photo', [AdminAdminUserController::class, 'updatePhoto'])->name('admin-users.update-photo');
         
         // Auction Panel Management Routes
         Route::get('auction-panel', [\App\Http\Controllers\Admin\AuctionPanelController::class, 'index'])->name('auction-panel.index');

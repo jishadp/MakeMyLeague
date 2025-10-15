@@ -263,6 +263,16 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                 </svg>
                                             </a>
+                                            <button onclick="document.getElementById('photo-input-{{ $player->id }}').click()" 
+                                                    class="text-purple-600 hover:text-purple-900 transition-colors"
+                                                    title="Change Photo">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                            </button>
+                                            <input type="file" id="photo-input-{{ $player->id }}" class="hidden" accept="image/*" 
+                                                   onchange="showCropModal(this, '{{ $player->slug }}', '{{ $player->name }}')">
                                             <button onclick="resetPlayerPin('{{ $player->slug }}', '{{ $player->name }}')" 
                                                     class="text-red-600 hover:text-red-900 transition-colors"
                                                     title="Reset PIN">
@@ -350,8 +360,36 @@
     </div>
 </div>
 
+<!-- Crop Modal -->
+<div id="crop-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <svg class="w-6 h-6 text-purple-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" clip-rule="evenodd"/>
+                </svg>
+                Crop Profile Photo for <span id="cropPlayerName" class="text-purple-600"></span>
+            </h3>
+            <div class="mb-6">
+                <div id="crop-container" class="w-full h-64 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200"></div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeCropModal()" class="flex-1 px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 font-medium transition-colors">Cancel</button>
+                <button onclick="cropAndUpload()" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-medium transition-all duration-200 shadow-lg hover:shadow-xl">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
 <script>
 let currentPlayerSlug = null;
+let cropper;
+let selectedFile;
+let currentUserSlug;
+let currentInputElement;
 
 function resetPlayerPin(playerSlug, playerName) {
     currentPlayerSlug = playerSlug;
@@ -414,5 +452,96 @@ document.getElementById('confirmReset').addEventListener('click', function() {
         this.disabled = false;
     });
 });
+
+// Photo cropping and upload functions
+function showCropModal(input, playerSlug, playerName) {
+    if (input.files && input.files[0]) {
+        selectedFile = input.files[0];
+        currentUserSlug = playerSlug;
+        currentInputElement = input;
+        
+        document.getElementById('cropPlayerName').textContent = playerName;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '100%';
+            
+            const container = document.getElementById('crop-container');
+            container.innerHTML = '';
+            container.appendChild(img);
+            
+            cropper = new Cropper(img, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                responsive: true,
+                cropBoxResizable: true,
+                cropBoxMovable: true,
+                guides: false,
+                center: false,
+                highlight: false,
+                background: false,
+                modal: true
+            });
+            
+            document.getElementById('crop-modal').classList.remove('hidden');
+        };
+        reader.readAsDataURL(selectedFile);
+    }
+}
+
+function closeCropModal() {
+    document.getElementById('crop-modal').classList.add('hidden');
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    if (currentInputElement) {
+        currentInputElement.value = '';
+    }
+    selectedFile = null;
+    currentUserSlug = null;
+}
+
+function cropAndUpload() {
+    if (cropper && selectedFile && currentUserSlug) {
+        const canvas = cropper.getCroppedCanvas({
+            width: 300,
+            height: 300,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        
+        canvas.toBlob(function(blob) {
+            const formData = new FormData();
+            formData.append('photo', blob, 'profile.jpg');
+            formData.append('_token', '{{ csrf_token() }}');
+            
+            fetch(`/admin/players/${currentUserSlug}/update-photo`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeCropModal();
+                    location.reload();
+                } else {
+                    console.error('Upload failed:', data.message);
+                    alert('Upload failed: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Network error: ' + error.message);
+            });
+        }, 'image/jpeg', 0.85);
+    }
+}
 </script>
 @endsection
