@@ -781,9 +781,11 @@ $(document).ready(function(){
                         error: function(xhr) {
                             console.error('Error loading teams:', xhr.responseText);
                         }
-                    });
-                }
-            });
+        });
+    }
+    
+    // Custom bid function is now handled in the modal
+});
             
             // Show/hide override amount section
             document.getElementById('override-amount').addEventListener('change', function() {

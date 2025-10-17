@@ -171,32 +171,59 @@
 
                 <!-- 3. Quick Bid Row -->
                 <div class="mb-6">
-                    <div class="grid grid-cols-3 gap-3 sm:gap-6" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-gray-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
-                             increment="25" 
-                             league-id="{{ $league->id ?? '' }}"
-                             player-id="{{ $currentPlayer->player->id ?? '' }}"
-                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
-                             league-player-id="{{ $currentPlayer->id ?? '' }}">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-gray-800">+ ₹25</p>
+                    @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
+                        <!-- Organizer View: 2 mobile-friendly options -->
+                        @php
+                            $currentBid = isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0);
+                            $nextBid = $league->calculateNextBid($currentBid);
+                            $increment = $nextBid - $currentBid;
+                        @endphp
+                        <div class="grid grid-cols-2 gap-4" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
+                            <!-- Bid Button -->
+                            <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
+                                 increment="{{ $increment }}"
+                                 league-id="{{ $league->id ?? '' }}"
+                                 player-id="{{ $currentPlayer->player->id ?? '' }}"
+                                 base-price="{{ $currentBid }}"
+                                 league-player-id="{{ $currentPlayer->id ?? '' }}">
+                                <div class="flex flex-col items-center space-y-2">
+                                    <p class="font-bold text-lg sm:text-xl text-green-600">₹{{ number_format($nextBid, 0) }}</p>
+                                    <p class="text-xs text-green-600">+ ₹{{ $increment }}</p>
+                                </div>
+                            </div>
+                            <!-- Custom Button -->
+                            <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-purple-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"
+                                 onclick="openCustomBidModal()">
+                                <div class="flex flex-col items-center space-y-2">
+                                    <p class="font-bold text-lg sm:text-xl text-purple-600">C</p>
+                                    <p class="text-xs text-gray-600">Custom</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
-                             increment="50"
-                             league-id="{{ $league->id ?? '' }}"
-                             player-id="{{ $currentPlayer->player->id ?? '' }}"
-                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
-                             league-player-id="{{ $currentPlayer->id ?? '' }}">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-green-600">+ ₹50</p>
+                    @else
+                        <!-- Auctioneer/Team Owner View: 1 increment option -->
+                        @php
+                            $currentBid = isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0);
+                            $nextBid = $league->calculateNextBid($currentBid);
+                            $increment = $nextBid - $currentBid;
+                        @endphp
+                        <div class="flex justify-center" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
+                            <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 text-center border border-blue-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300 w-full max-w-md" 
+                                 increment="{{ $increment }}"
+                                 league-id="{{ $league->id ?? '' }}"
+                                 player-id="{{ $currentPlayer->player->id ?? '' }}"
+                                 base-price="{{ $currentBid }}"
+                                 league-player-id="{{ $currentPlayer->id ?? '' }}">
+                                <div class="flex items-center justify-center space-x-3">
+                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                    <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600">₹{{ number_format($nextBid, 0) }}</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-2">Place Bid (+₹{{ $increment }})</p>
+                            </div>
                         </div>
-                        <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-red-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300" 
-                             increment="100"
-                             league-id="{{ $league->id ?? '' }}"
-                             player-id="{{ $currentPlayer->player->id ?? '' }}"
-                             base-price="{{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }}"
-                             league-player-id="{{ $currentPlayer->id ?? '' }}">
-                            <p class="font-bold text-xl sm:text-2xl lg:text-3xl text-red-600">+ ₹100</p>
-                        </div>
-                    </div>
+                    @endif
                 </div>
 
                 <!-- 4. Admin Controls Row -->
@@ -325,6 +352,16 @@
         min-height: 60px;
     }
 
+    /* Mobile-friendly bid buttons */
+    .grid-cols-2 .stat-card {
+        padding: 1rem !important;
+        min-height: 80px;
+    }
+    
+    .grid-cols-2 .stat-card p {
+        font-size: 0.875rem !important;
+    }
+
     /* Ensure proper spacing on mobile */
     .grid-cols-3 .bid-button {
         font-size: 0.875rem;
@@ -368,3 +405,213 @@
     }
 }
 </style>
+
+<!-- Custom Bid Modal -->
+<div id="customBidModal" class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
+    <div class="white-glass-card relative w-full max-w-md mx-auto p-8 animate-fadeInUp">
+        <!-- Close Button -->
+        <button onclick="closeCustomBidModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Custom Bid Amount</h3>
+            <p class="text-sm text-gray-600">Set your desired bid amount</p>
+        </div>
+
+        <!-- Current Bid Display -->
+        <div class="white-glass-card p-4 mb-6">
+            <div class="text-center">
+                <p class="text-sm text-gray-600 mb-1">Current Bid</p>
+                <p class="text-2xl font-bold text-gray-800" id="currentBidDisplay">
+                    ₹{{ isset($currentHighestBid) && $currentHighestBid ? number_format($currentHighestBid->amount, 0) : number_format($currentPlayer->base_price ?? 0, 0) }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Custom Amount Input -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Enter Bid Amount (₹)</label>
+            <div class="relative">
+                <input type="number" 
+                       id="customBidAmount" 
+                       min="1" 
+                       step="1"
+                       placeholder="Enter amount"
+                       class="white-glass-input w-full px-4 py-3 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 text-gray-800 placeholder-gray-500 text-center text-xl font-bold">
+            </div>
+        </div>
+
+        <!-- Next Bid Preview -->
+        <div class="white-glass-card p-4 mb-6">
+            <div class="text-center">
+                <p class="text-sm text-gray-600 mb-1">Next Bid Will Be</p>
+                <p class="text-xl font-bold text-gray-800" id="nextBidPreview">₹0</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-4">
+            <button onclick="closeCustomBidModal()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200">
+                Cancel
+            </button>
+            <button onclick="placeCustomBid()" 
+                    class="flex-1 white-glass-button px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg">
+                <span class="flex items-center justify-center text-white">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                    Place Bid
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openCustomBidModal() {
+    document.getElementById('customBidModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Set current bid value and update preview
+    const currentBid = {{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }};
+    document.getElementById('customBidAmount').value = '';
+    updateBidPreview();
+    
+    // Focus on input
+    setTimeout(() => {
+        document.getElementById('customBidAmount').focus();
+    }, 100);
+}
+
+function closeCustomBidModal() {
+    document.getElementById('customBidModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function updateBidPreview() {
+    const customAmount = document.getElementById('customBidAmount').value;
+    const preview = document.getElementById('nextBidPreview');
+    
+    if (customAmount && customAmount > 0) {
+        preview.textContent = '₹' + parseInt(customAmount).toLocaleString();
+    } else {
+        preview.textContent = '₹0';
+    }
+}
+
+function placeCustomBid() {
+    const customAmount = document.getElementById('customBidAmount').value;
+    
+    if (!customAmount || customAmount <= 0) {
+        alert('Please enter a valid bid amount');
+        return;
+    }
+    
+    // Calculate the increment needed
+    const currentBid = {{ isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0) }};
+    const increment = customAmount - currentBid;
+    
+    if (increment <= 0) {
+        alert('Bid amount must be higher than current bid');
+        return;
+    }
+    
+        // Get the bid action URL and token from existing bid buttons
+    const bidContainer = document.querySelector('[call-bid-action]');
+    if (!bidContainer) {
+        alert('Error: Could not find bid configuration. Please refresh the page and try again.');
+        return;
+    }
+    
+    const callBidAction = bidContainer.getAttribute('call-bid-action');
+    const token = bidContainer.getAttribute('token');
+    
+    // Get league and player data
+    const leagueId = '{{ $league->id ?? "" }}';
+    const playerId = '{{ $currentPlayer->player->id ?? "" }}';
+    const leaguePlayerId = '{{ $currentPlayer->id ?? "" }}';
+    
+    if (!leagueId || !playerId || !leaguePlayerId) {
+        alert('Error: Missing player or league data. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Disable the button to prevent double-clicking
+    const placeBidBtn = document.querySelector('button[onclick="placeCustomBid()"]');
+    const originalText = placeBidBtn.innerHTML;
+    placeBidBtn.disabled = true;
+    placeBidBtn.innerHTML = '<span class="flex items-center justify-center text-white"><svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Placing...</span>';
+    
+    // Make the AJAX request
+    $.ajax({
+        url: callBidAction,
+        type: "post",
+        headers: {'X-CSRF-TOKEN': token},
+        data: {
+            league_id: leagueId,
+            player_id: playerId,
+            base_price: currentBid,
+            increment: increment,
+            league_player_id: leaguePlayerId,
+        },
+        success: function (response) {
+            console.log("Custom bid placed:", response);
+            
+            if (response.success) {
+                // Close the modal
+                closeCustomBidModal();
+                
+                // Show success message
+                if (typeof showMessage === 'function') {
+                    showMessage('Custom bid placed successfully!', 'success');
+                } else {
+                    alert('Custom bid placed successfully!');
+                }
+                
+                // Refresh the page to show updated bid
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                alert('Error: ' + (response.message || 'Failed to place bid'));
+            }
+        },
+        error: function (xhr) {
+            console.error("Error placing custom bid:", xhr.responseText);
+            let errorMessage = 'Error placing bid. Please try again.';
+            
+            try {
+                const errorData = JSON.parse(xhr.responseText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                // Use default error message
+            }
+            
+            alert(errorMessage);
+        },
+        complete: function() {
+            // Restore button state
+            placeBidBtn.disabled = false;
+            placeBidBtn.innerHTML = originalText;
+        }
+    });
+}
+
+// Update preview on input change
+document.addEventListener('DOMContentLoaded', function() {
+    const customBidInput = document.getElementById('customBidAmount');
+    if (customBidInput) {
+        customBidInput.addEventListener('input', updateBidPreview);
+    }
+});
+</script>

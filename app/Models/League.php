@@ -304,6 +304,14 @@ class League extends Model
     }
 
     /**
+     * Alias for getNextMinimumBid for compatibility.
+     */
+    public function calculateNextBid($currentBid)
+    {
+        return $this->getNextMinimumBid($currentBid);
+    }
+
+    /**
      * Check if auction is active.
      */
     public function isAuctionActive()
