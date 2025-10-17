@@ -324,13 +324,11 @@ function updateBidButtonIncrements(newBid) {
         const $container = $button.closest('.grid, .flex');
         
         if ($container.hasClass('grid')) {
-            // Organizer view - update the increment display (no currency symbol)
-            $button.find('.highlight-increment').html(parseInt(increment).toLocaleString());
-            $button.find('p:last').html('Add');
+            // Organizer view - update only the increment display
+            $button.find('p').html(parseInt(increment).toLocaleString());
         } else {
-            // Team owner/auctioneer view - update the increment display (no currency symbol)
-            $button.find('.highlight-increment').html(parseInt(increment).toLocaleString());
-            $button.find('p:last').html('Add Amount');
+            // Team owner/auctioneer view - update only the increment display
+            $button.find('p').html(parseInt(increment).toLocaleString());
         }
         
         // Update the increment attribute
