@@ -58,16 +58,23 @@ function handlePlayerStarted(data) {
 
 function handleNewBid(data) {
     console.log('💰 NEW BID EVENT RECEIVED:', data);
-    console.log('Bid Amount:', data.new_bid, 'Team:', data.league_team?.team?.name);
+    console.log('Bid Amount:', data.new_bid, 'Team:', data.team?.team?.name);
+    
+    // Ensure we have the team data
+    const teamData = data.team || data.league_team;
+    if (!teamData) {
+        console.error('No team data received in bid event');
+        return;
+    }
     
     $('.currentBid').html(data.new_bid);
     $('.bidStatus').html('Current Bid');
-    $('.callBid').attr('base-price',data.new_bid);
-    $('.bidTeam').html(data.league_team.team.name);
+    $('.callBid').attr('base-price', data.new_bid);
+    $('.bidTeam').html(teamData.team.name);
     $('.teamBidDetls').removeClass('hidden');
-    $('.teamBalance').html(data.league_team.wallet_balance);
-    $('.leageTeamPlayers').html(data.league_team.league_players_count);
-    $('.markSold').attr('call-team-id',data.league_team.id);
+    $('.teamBalance').html(teamData.wallet_balance);
+    $('.leageTeamPlayers').html(teamData.league_players_count);
+    $('.markSold').attr('call-team-id', teamData.id);
     
     // Refresh Livewire components - but only do it once and with try/catch
     try {

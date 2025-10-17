@@ -124,21 +124,18 @@ class DashboardController
         ->get();
 
         // ============ LIVE AUCTIONS ============
-        // Show leagues where at least one player is sold or currently auctioning
+        // Show leagues where auction is currently active using the isAuctionActive() method
         $liveAuctions = League::whereHas('organizers', function($query) {
             $query->where('status', 'approved');
         })
         ->with(['game', 'localBody.district', 'leaguePlayers'])
-        ->where('auction_access_granted', true)
-        ->whereHas('leaguePlayers', function($query) {
-            $query->whereIn('status', ['sold', 'auctioning']);
-        })
+        ->where('auction_active', true)
+        ->where('auction_started_at', '!=', null)
+        ->where('auction_ended_at', null)
         ->get()
         ->filter(function($league) {
-            // Only show if auction is still ongoing (has available or auctioning players)
-            $availableCount = $league->leaguePlayers->where('status', 'available')->count();
-            $auctioningCount = $league->leaguePlayers->where('status', 'auctioning')->count();
-            return $availableCount > 0 || $auctioningCount > 0;
+            // Use the isAuctionActive method to ensure consistency
+            return $league->isAuctionActive();
         });
 
         // ============ TOP AUCTION LEADERBOARD (HIGHEST SOLD PLAYERS) ============
@@ -246,38 +243,21 @@ class DashboardController
             ->where('auction_access_granted', true)
             ->get();
 
-        // Categorize leagues based on player status
+        // Categorize leagues based on auction status using isAuctionActive() method
         $liveAuctions = [];
         $pastAuctions = [];
         $upcomingAuctions = [];
 
         foreach ($allAuctionLeagues as $league) {
-            // Count players by status
-            $soldCount = $league->leaguePlayers->where('status', 'sold')->count();
-            $auctioningCount = $league->leaguePlayers->where('status', 'auctioning')->count();
-            $totalPlayers = $league->leaguePlayers->count();
-
-            // Live Auctions: At least one player sold OR currently auctioning
-            if ($soldCount > 0 || $auctioningCount > 0) {
-                // Check if auction is still ongoing (not all players sold/unsold)
-                $availableCount = $league->leaguePlayers->where('status', 'available')->count();
-                if ($availableCount > 0 || $auctioningCount > 0) {
-                    $liveAuctions[] = $league;
-                    continue;
-                }
-            }
-
-            // Past Auctions: All players sold (no available or auctioning players) OR auction date passed
-            $allProcessed = $league->leaguePlayers->whereIn('status', ['sold', 'unsold', 'retained'])->count() === $totalPlayers;
-            $datePassed = $league->auction_ended_at && $league->auction_ended_at < now();
-            
-            if ($allProcessed || $datePassed) {
+            // Use the isAuctionActive method for consistent status checking
+            if ($league->isAuctionActive()) {
+                // Live Auction: auction_active = true, auction_started_at is set, auction_ended_at is null
+                $liveAuctions[] = $league;
+            } elseif ($league->auction_ended_at) {
+                // Past Auction: auction has ended
                 $pastAuctions[] = $league;
-                continue;
-            }
-
-            // Upcoming Auctions: No sold or auctioning players yet
-            if ($soldCount === 0 && $auctioningCount === 0) {
+            } else {
+                // Upcoming Auction: auction not started yet
                 $upcomingAuctions[] = $league;
             }
         }

@@ -19,6 +19,7 @@ class AuctionPlayerBidCall implements ShouldBroadcastNow
     public $team;
     public $newBid;
     public $leaguePlayer;
+    public $timestamp;
 
     /**
      * Create a new event instance.
@@ -31,6 +32,9 @@ class AuctionPlayerBidCall implements ShouldBroadcastNow
         if ($leaguePlayerId) {
             $this->leaguePlayer = LeaguePlayer::with(['player.position', 'player.primaryGameRole.gamePosition'])->find($leaguePlayerId);
         }
+        
+        // Add timestamp to ensure data consistency
+        $this->timestamp = now()->timestamp;
     }
 
     /**

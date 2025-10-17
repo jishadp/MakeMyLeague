@@ -267,21 +267,33 @@ class AuctionController extends Controller
         // Make sure the team is fully loaded with all necessary relationships
         $bidTeam = LeagueTeam::with(['team', 'league'])->find($bidTeam->id);
         
-        // Create a bid record with consistent data
+        // Create a comprehensive bid record with consistent data
         $bidData = [
             'amount' => $newBid,
             'league_team_id' => $bidTeam->id,
-            'league_team' => $bidTeam->toArray(),
+            'league_team' => [
+                'id' => $bidTeam->id,
+                'team' => $bidTeam->team,
+                'wallet_balance' => $bidTeam->fresh()->wallet_balance,
+                'league_players_count' => $bidTeam->league_players_count,
+                'league_id' => $bidTeam->league_id
+            ],
             'league_player_id' => $leaguePlayer->id,
-            'league_player' => $leaguePlayer->toArray(),
-            'timestamp' => now()->timestamp
+            'league_player' => [
+                'id' => $leaguePlayer->id,
+                'player' => $leaguePlayer->player,
+                'base_price' => $leaguePlayer->base_price,
+                'league_id' => $leaguePlayer->league_id
+            ],
+            'timestamp' => now()->timestamp,
+            'league_id' => $leaguePlayer->league_id
         ];
         
         // Store the current bid data in cache to ensure all users see the same values
         \Cache::put("auction_current_bid_{$leaguePlayer->id}", $bidData, now()->addHours(12));
-        \Cache::put("auction_latest_bid", $bidData, now()->addHours(12));
+        \Cache::put("auction_latest_bid_{$leaguePlayer->league_id}", $bidData, now()->addHours(12));
         
-        // Broadcast the new bid with consistent data - using broadcastNow for immediate delivery
+        // Broadcast the new bid with comprehensive data - using broadcastNow for immediate delivery
         event(new AuctionPlayerBidCall($newBid, $bidTeam->id, $leaguePlayer->id));
 
         return response()->json([
