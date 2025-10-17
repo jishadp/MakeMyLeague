@@ -62,30 +62,17 @@
                 <span class="text-xs mt-1">My Teams</span>
             </a>
 
-            <!-- Auctions/Profile Button -->
-            @if(auth()->user()->canParticipateInAuctions())
-                <a href="{{ route('auctions.index') }}"
-                   class="nav-item flex flex-col items-center justify-center p-2
-                          text-white/80 hover:text-white transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 drop-shadow"
-                         viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-xs mt-1">Auctions</span>
-                </a>
-            @else
-                <a href="{{ route('profile.show') }}"
-                   class="nav-item flex flex-col items-center justify-center p-2
-                          text-white/80 hover:text-white transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 drop-shadow"
-                         viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-xs mt-1">Profile</span>
-                </a>
-            @endif
+            <!-- Profile Button -->
+            <a href="{{ route('profile.show') }}"
+               class="nav-item flex flex-col items-center justify-center p-2
+                      text-white/80 hover:text-white transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-6 w-6 drop-shadow"
+                     viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-xs mt-1">Profile</span>
+            </a>
 
         </div>
     </div>
