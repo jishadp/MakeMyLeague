@@ -213,14 +213,8 @@ class AuctionAccessService
 
         // Auction access check removed - team owners and organizers can bid directly
 
-        // Check if auction is active
-        if (!$league->isAuctionActive()) {
-            return [
-                'valid' => false,
-                'message' => 'Auction is not currently active. Please wait for the auction to start.',
-                'league_team' => null
-            ];
-        }
+        // Auction active check removed - allow bidding even if auction not officially started
+        // This allows team owners to bid without waiting for organizer to start auction
 
         // Check if user can bid in this league
         if (!$this->canUserBidInLeague($user, $league)) {
