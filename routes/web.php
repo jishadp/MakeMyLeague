@@ -272,10 +272,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {
-        Route::post('call', [AuctionController::class, 'call'])->name('call')->middleware('league.organizer');
-        Route::post('sold', [AuctionController::class, 'sold'])->name('sold')->middleware('league.organizer');
-        Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold')->middleware('league.organizer');
+        // Global auction management routes (no league parameter needed)
+        Route::post('call', [AuctionController::class, 'call'])->name('call');
+        Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
+        Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
+        
+        // League-specific auction routes
         Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids')->middleware('auction.access');
         Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances')->middleware('auction.access');
         Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('auction.access');
