@@ -454,7 +454,7 @@
                                     </div>
                                 </a>
                                 @else
-                                    @if($league->hasAuctionAccess() || auth()->user()->isAdmin())
+                                    @if($league->hasAuctionAccess() || auth()->user()->isAdmin() || auth()->user()->isOrganizerForLeague($league->id))
                                         <a href="{{ route('auction.index', $league->slug) }}"
                                             class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
 
