@@ -533,6 +533,56 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user can participate in auctions (has teams or is auctioneer).
+     *
+     * @return bool
+     */
+    public function canParticipateInAuctions(): bool
+    {
+        // Check if user owns any teams in any league
+        $hasOwnedTeams = $this->ownedTeams()->exists();
+        
+        // Check if user is assigned as auctioneer in any league
+        $isAuctioneer = \App\Models\TeamAuctioneer::where('auctioneer_id', $this->id)
+            ->where('status', 'active')
+            ->exists();
+        
+        // Check if user is organizer or admin
+        $isOrganizerOrAdmin = $this->isOrganizer() || $this->isAdmin();
+        
+        return $hasOwnedTeams || $isAuctioneer || $isOrganizerOrAdmin;
+    }
+
+    /**
+     * Check if user can participate in a specific league's auction.
+     *
+     * @param int $leagueId
+     * @return bool
+     */
+    public function canParticipateInLeagueAuction($leagueId): bool
+    {
+        // Check if user is organizer for this league or admin
+        if ($this->isOrganizerForLeague($leagueId) || $this->isAdmin()) {
+            return true;
+        }
+        
+        // Check if user owns any teams in this league
+        $hasOwnedTeams = $this->ownedTeams()->whereHas('leagueTeams', function($query) use ($leagueId) {
+            $query->where('league_id', $leagueId);
+        })->exists();
+        
+        // Check if user is assigned as auctioneer for any team in this league
+        $isAuctioneer = \App\Models\TeamAuctioneer::where('auctioneer_id', $this->id)
+            ->where('status', 'active')
+            ->whereHas('leagueTeam', function($query) use ($leagueId) {
+                $query->where('league_id', $leagueId);
+            })
+            ->exists();
+        
+        return $hasOwnedTeams || $isAuctioneer;
+    }
+
+    /**
      * Check if user has multiple teams in a specific league.
      *
      * @param int $leagueId

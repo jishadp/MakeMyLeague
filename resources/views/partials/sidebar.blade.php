@@ -100,13 +100,22 @@
                     </a>
                     @endif
 
-                    <!-- Profile Link -->
-                    <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="font-medium">Profile</span>
-                    </a>
+                    <!-- Auctions/Profile Link -->
+                    @if(auth()->user()->canParticipateInAuctions())
+                        <a href="{{ route('auctions.index') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="font-medium">Auctions</span>
+                        </a>
+                    @else
+                        <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="font-medium">Profile</span>
+                        </a>
+                    @endif
                 @else
                     <a href="#about" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">

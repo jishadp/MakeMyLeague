@@ -68,8 +68,20 @@ class AuctionController extends Controller
             ])
             ->withCount('leaguePlayers')
             ->get();
+        
+        // Get user's auctioneer assignment for this league
+        $userAuctioneerAssignment = null;
+        if (auth()->check()) {
+            $userAuctioneerAssignment = \App\Models\TeamAuctioneer::where('auctioneer_id', auth()->id())
+                ->where('status', 'active')
+                ->whereHas('leagueTeam', function($query) use ($league) {
+                    $query->where('league_id', $league->id);
+                })
+                ->with(['leagueTeam.team'])
+                ->first();
+        }
             
-        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams'));
+        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams', 'userAuctioneerAssignment'));
     }
 
     /**

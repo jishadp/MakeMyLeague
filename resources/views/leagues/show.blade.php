@@ -454,7 +454,7 @@
                                     </div>
                                 </a>
                                 @else
-                                    @if($league->hasAuctionAccess() || auth()->user()->isAdmin() || auth()->user()->isOrganizerForLeague($league->id))
+                                    @if($league->hasAuctionAccess() || auth()->user()->isAdmin() || auth()->user()->isOrganizerForLeague($league->id) || ($league->auction_active && auth()->user()->hasAnyOwnedTeamInLeague($league->id)))
                                         <a href="{{ route('auction.index', $league->slug) }}"
                                             class="group relative flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100 text-amber-700 rounded-xl hover:from-amber-100 hover:to-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-amber-100 hover:border-amber-200 overflow-hidden">
 
@@ -1712,7 +1712,7 @@
         </div>
 
         <!-- Complete Auction Section (only show if auction is active and access is granted) -->
-        @if($league->status === 'active' && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
+        @if($league->status === 'active' && ($league->hasAuctionAccess() || auth()->user()->isAdmin() || ($league->auction_active && auth()->user()->hasAnyOwnedTeamInLeague($league->id))))
         <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1746,7 +1746,7 @@
         @endif
 
         <!-- Completed Auction Information (only show if auction is completed and access is granted) -->
-        @if($league->status === 'auction_completed' && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
+        @if($league->status === 'auction_completed' && ($league->hasAuctionAccess() || auth()->user()->isAdmin() || ($league->auction_active && auth()->user()->hasAnyOwnedTeamInLeague($league->id))))
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -1782,7 +1782,7 @@
         @endif
 
         <!-- Reset Auction Section (only show when auction is completed or active and access is granted) -->
-        @if(in_array($league->status, ['auction_completed', 'active']) && ($league->hasAuctionAccess() || auth()->user()->isAdmin()))
+        @if(in_array($league->status, ['auction_completed', 'active']) && ($league->hasAuctionAccess() || auth()->user()->isAdmin() || ($league->auction_active && auth()->user()->hasAnyOwnedTeamInLeague($league->id))))
         <div class="bg-red-50 border border-red-200 rounded-xl p-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">

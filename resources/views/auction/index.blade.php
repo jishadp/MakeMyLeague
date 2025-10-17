@@ -23,6 +23,16 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 class="text-2xl font-bold glacier-text-primary">Cricket League Auction</h1>
+                        @if($userAuctioneerAssignment)
+                            <div class="mt-2 flex items-center space-x-2">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Bidding for: {{ $userAuctioneerAssignment->leagueTeam->team->name }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
                     <div class="flex items-center space-x-4">
                         @if($league->isAuctionActive())
@@ -131,7 +141,7 @@
         </div>
 
         <!-- Available Players Section -->
-        @if(auth()->user()->isOrganizer())
+        @if(auth()->user()->canParticipateInLeagueAuction($league->id))
         <div class="mb-8 {{ isset($currentPlayer) && $currentPlayer && $currentPlayer->status === 'auctioning' ? 'hidden' : '' }}" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>

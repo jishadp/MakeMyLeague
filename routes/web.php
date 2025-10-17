@@ -90,6 +90,9 @@ Route::middleware('auth')->group(function () {
     
     // My Teams route
     Route::get('my-teams', [\App\Http\Controllers\MyTeamsController::class, 'index'])->name('my-teams');
+    
+    // My Auctions route
+    Route::get('auctions', [\App\Http\Controllers\AuctionsController::class, 'index'])->name('auctions.index');
 
     // Auctioneer assignment routes - only team owners can assign auctioneers
     Route::prefix('leagues/{league}/teams/{leagueTeam}')->middleware('team.owner')->group(function () {
@@ -216,9 +219,10 @@ Route::middleware('auth')->group(function () {
     Route::post('leagues/{league}/request-auction-access', [LeagueController::class, 'requestAuctionAccess'])->name('leagues.request-auction-access')->middleware('auth');
     
     // Leagues resource routes - CRUD only for organizers, viewing for everyone
+    Route::get('leagues', [LeagueController::class, 'index'])->name('leagues.index')->middleware('league.viewer');
     Route::get('leagues/create', [LeagueController::class, 'create'])->name('leagues.create')->middleware('league.organizer');
     Route::post('leagues', [LeagueController::class, 'store'])->name('leagues.store')->middleware('league.organizer');
-    Route::resource('leagues', LeagueController::class)->except(['create', 'store', 'edit', 'update', 'destroy'])->middleware('league.viewer');
+    Route::get('leagues/{league}', [LeagueController::class, 'show'])->name('leagues.show')->middleware('league.viewer');
     Route::get('leagues/{league}/edit', [LeagueController::class, 'edit'])->name('leagues.edit')->middleware('league.organizer');
     Route::put('leagues/{league}', [LeagueController::class, 'update'])->name('leagues.update')->middleware('league.organizer');
     Route::delete('leagues/{league}', [LeagueController::class, 'destroy'])->name('leagues.destroy')->middleware('league.organizer');
