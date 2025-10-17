@@ -228,6 +228,14 @@ class AuctionController extends Controller
 
         $bidTeam = $accessValidation['league_team'];
 
+        // Check if bid team exists
+        if (!$bidTeam) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You need to own a team in this league to place bids. Please register a team first.'
+            ], 400);
+        }
+
         // Check if team has sufficient balance
         if ($bidTeam->wallet_balance < $newBid) {
             return response()->json([

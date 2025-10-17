@@ -487,8 +487,8 @@ $(document).ready(function(){
         var basePrice = $this.attr('base-price');
         var increment = $this.attr('increment');
         var leaguePlayerId = $this.attr('league-player-id');
-        var callBidAction = $this.closest('.grid').attr('call-bid-action');
-        var token = $this.closest('.grid').attr('token');
+        var callBidAction = $this.closest('[call-bid-action]').attr('call-bid-action');
+        var token = $this.closest('[token]').attr('token');
         
         // Log data for debugging
         console.log('Bid data:', {
