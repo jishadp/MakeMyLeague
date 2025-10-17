@@ -101,24 +101,43 @@ class TeamTransferController extends Controller
 
         $query = $request->input('query');
         
-        $users = User::where(function ($q) use ($query) {
+        $users = User::with(['position', 'primaryGameRole.gamePosition', 'roles'])
+            ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('email', 'LIKE', "%{$query}%");
+                  ->orWhere('email', 'LIKE', "%{$query}%")
+                  ->orWhere('mobile', 'LIKE', "%{$query}%");
             })
-            ->where('id', '!=', Auth::id()) // Exclude current user
-            ->where('id', '!=', 1) // Exclude admin user
+            ->where('id', '!=', Auth::id()) // Exclude current user only
             ->limit(10)
             ->get();
 
         return response()->json([
             'success' => true,
             'users' => $users->map(function ($user) {
+                // Get the last 4 digits of phone number
+                $phoneLast4 = $user->mobile ? substr($user->mobile, -4) : null;
+                
+                // Get game position/role information
+                $gamePosition = null;
+                if ($user->primaryGameRole && $user->primaryGameRole->gamePosition) {
+                    $gamePosition = $user->primaryGameRole->gamePosition->name;
+                } elseif ($user->position) {
+                    $gamePosition = $user->position->name;
+                }
+                
+                // Get user roles
+                $userRoles = $user->roles->pluck('name')->toArray();
+                
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->mobile ? ($user->country_code . ' ' . $user->mobile) : null,
-                    'team_count' => $user->primaryOwnedTeams()->count()
+                    'phone_last_4' => $phoneLast4,
+                    'game_position' => $gamePosition,
+                    'roles' => $userRoles,
+                    'team_count' => $user->primaryOwnedTeams()->count(),
+                    'display_text' => $user->name . ($phoneLast4 ? ' (' . $phoneLast4 . ')' : '') . ($gamePosition ? ' - ' . $gamePosition : '')
                 ];
             })
         ]);
