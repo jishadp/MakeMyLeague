@@ -31,11 +31,6 @@ class AuctionAccessService
      */
     public function canUserBidInLeague(User $user, League $league): bool
     {
-        // Check if league has auction access granted
-        if (!$league->hasAuctionAccess()) {
-            return false;
-        }
-
         // Check if auction is active
         if (!$league->isAuctionActive()) {
             return false;
@@ -43,6 +38,7 @@ class AuctionAccessService
 
         // For organizers and admins, check if they have teams to bid for
         if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
+            // Organizers and admins can bid even without auction access granted
             // Check if they own any teams in this league
             $hasOwnedTeams = LeagueTeam::where('league_id', $league->id)
                 ->whereHas('team', function ($query) use ($user) {
@@ -53,6 +49,11 @@ class AuctionAccessService
                 ->exists();
             
             return $hasOwnedTeams;
+        }
+
+        // For regular users (team owners/auctioneers), auction access must be granted
+        if (!$league->hasAuctionAccess()) {
+            return false;
         }
 
         // Check if user has any team in this league (as owner or auctioneer)
@@ -215,8 +216,8 @@ class AuctionAccessService
             ];
         }
 
-        // Check if league has auction access granted
-        if (!$league->hasAuctionAccess()) {
+        // Check if league has auction access granted (only for non-organizers)
+        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin() && !$league->hasAuctionAccess()) {
             return [
                 'valid' => false,
                 'message' => 'Auction access has not been granted for this league. Please contact the admin.',
