@@ -141,7 +141,7 @@
         </div>
 
         <!-- Available Players Section -->
-        @if(auth()->user()->canParticipateInLeagueAuction($league->id))
+        @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
         <div class="mb-8 {{ isset($currentPlayer) && $currentPlayer && $currentPlayer->status === 'auctioning' ? 'hidden' : '' }}" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>
