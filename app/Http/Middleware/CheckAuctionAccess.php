@@ -47,26 +47,8 @@ class CheckAuctionAccess
         $isAuctioneer = $league->leagueTeams()->where('auctioneer_id', $user->id)->exists();
 
         if ($ownsTeamInLeague || $isAuctioneer) {
-            // If user is both organizer and team owner, they can access without auction access
-            if ($user->isOrganizerForLeague($league->id)) {
-                return $next($request);
-            }
-            
-            // For regular team owners/auctioneers, check if auction access is granted
-            if (!$league->hasAuctionAccess()) {
-                abort(403, 'Auction access has not been granted for this league. The league organizer needs to request auction access from the admin.');
-            }
-            
-            // Check if any player is currently being auctioned (meaning auction is live)
-            $auctioningPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
-                ->where('status', 'auctioning')
-                ->exists();
-                
-            if ($auctioningPlayer || $league->isAuctionActive()) {
-                return $next($request);
-            } else {
-                abort(403, 'Auction is not currently live. Only live auctions are accessible to team owners.');
-            }
+            // Team owners and auctioneers can access auctions
+            return $next($request);
         }
 
         // If user doesn't own a team in this league, deny access
