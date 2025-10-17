@@ -601,14 +601,26 @@
                             </div>
                         </div>
                         
-                        <!-- My Teams Info -->
+                        <!-- My Teams Info Toggle -->
                         @php
                             $userTeams = $league->leagueTeams->filter(function($lt) {
                                 return $lt->team && $lt->team->owner_id == auth()->id();
                             });
                         @endphp
                         @if($userTeams->isNotEmpty())
-                            <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4">
+                            <div class="mb-4">
+                                <div class="flex justify-center">
+                                    <button onclick="toggleActionButtons('teams-{{ $league->id }}')" 
+                                            class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm">
+                                        <svg id="toggleIcon-teams-{{ $league->id }}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        <span id="toggleText-teams-{{ $league->id }}">Show My Teams</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="actionButtons-teams-{{ $league->id }}" class="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4 hidden">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
@@ -749,8 +761,19 @@
                             </div>
                         @endif
                         
+                        <!-- Action Buttons Toggle -->
+                        <div class="mt-4 flex justify-center">
+                            <button onclick="toggleActionButtons('org-{{ $league->id }}')" 
+                                    class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm">
+                                <svg id="toggleIcon-org-{{ $league->id }}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                                <span id="toggleText-org-{{ $league->id }}">Show Actions</span>
+                            </button>
+                        </div>
+                        
                         <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-2">
+                        <div id="actionButtons-org-{{ $league->id }}" class="grid grid-cols-2 gap-2 mt-4 hidden">
                             <a href="{{ route('league-teams.manage', $league) }}"
                                 class="bg-purple-600 text-center py-2 px-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-lg hover:shadow-xl text-sm">
                                 <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -900,11 +923,24 @@
                             <span class="font-medium">Season {{ $league->season }}</span>
                         </div>
                         
+                        <!-- Action Buttons Toggle -->
+                        <div class="mt-4 flex justify-center">
+                            <button onclick="toggleActionButtons('auc-{{ $league->id }}')" 
+                                    class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm">
+                                <svg id="toggleIcon-auc-{{ $league->id }}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                                <span id="toggleText-auc-{{ $league->id }}">Show Actions</span>
+                            </button>
+                        </div>
+                        
                         <!-- Action Button -->
-                        <a href="{{ route('leagues.show', $league) }}"
-                            class="w-full bg-orange-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl block">
-                            View League Details
-                        </a>
+                        <div id="actionButtons-auc-{{ $league->id }}" class="mt-4 hidden">
+                            <a href="{{ route('leagues.show', $league) }}"
+                                class="w-full bg-orange-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl block">
+                                View League Details
+                            </a>
+                        </div>
                     </div>
                 </div>
                 @endforeach
@@ -1047,6 +1083,27 @@
 let currentLeagueSlug = '';
 let currentLeagueTeamSlug = '';
 let selectedUserId = null;
+
+// Action Buttons Toggle Function
+function toggleActionButtons(elementId) {
+    const actionButtons = document.getElementById(`actionButtons-${elementId}`);
+    const toggleIcon = document.getElementById(`toggleIcon-${elementId}`);
+    const toggleText = document.getElementById(`toggleText-${elementId}`);
+    
+    if (actionButtons.classList.contains('hidden')) {
+        // Show buttons
+        actionButtons.classList.remove('hidden');
+        actionButtons.classList.add('animate-fadeInUp');
+        toggleIcon.style.transform = 'rotate(180deg)';
+        toggleText.textContent = 'Hide Actions';
+    } else {
+        // Hide buttons
+        actionButtons.classList.add('hidden');
+        actionButtons.classList.remove('animate-fadeInUp');
+        toggleIcon.style.transform = 'rotate(0deg)';
+        toggleText.textContent = 'Show Actions';
+    }
+}
 
 function assignAuctioneer(leagueSlug, leagueTeamSlug, teamName) {
     currentLeagueSlug = leagueSlug;
