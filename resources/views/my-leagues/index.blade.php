@@ -750,20 +750,20 @@
                         @endif
                         
                         <!-- Action Buttons -->
-                        <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
                             <a href="{{ route('league-teams.manage', $league) }}"
-                                class="w-full bg-purple-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-lg hover:shadow-xl block">
-                                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="bg-purple-600 text-center py-2 px-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-lg hover:shadow-xl text-sm">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                                 </svg>
                                 Manage Squad
                             </a>
                             <a href="{{ route('leagues.show', $league) }}"
-                                class="w-full bg-gray-600 text-center py-2 px-4 rounded-xl font-medium hover:bg-gray-700 transition-colors shadow-lg hover:shadow-xl block">
-                                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="bg-gray-600 text-center py-2 px-3 rounded-lg font-medium hover:bg-gray-700 transition-colors shadow-lg hover:shadow-xl text-sm">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                View League Details
+                                View
                             </a>
                         </div>
                     </div>

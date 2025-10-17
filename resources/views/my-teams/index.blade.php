@@ -90,8 +90,8 @@
                                 <div class="text-xs text-gray-600">Leagues</div>
                             </div>
                             <div class="text-center p-3 bg-gray-50 rounded-xl">
-                                <div class="text-2xl font-bold text-indigo-600">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->count(); }) }}</div>
-                                <div class="text-xs text-gray-600">Players</div>
+                                <div class="text-2xl font-bold text-indigo-600">{{ $team->leagueTeams->sum(function($lt) { return $lt->leaguePlayers->where('status', 'sold')->count(); }) }}</div>
+                                <div class="text-xs text-gray-600">League Players</div>
                             </div>
                         </div>
                         
@@ -153,39 +153,42 @@
                         </div>
                         
                         <!-- Action Buttons -->
-                        <div class="space-y-3">
-                            <a href="{{ route('teams.show', $team) }}"
-                                class="w-full bg-blue-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl block">
-                                Manage Team
-                            </a>
-                            
-                            <!-- Default Team Button -->
-                            @if(auth()->user()->default_team_id == $team->id)
-                                <button onclick="removeDefaultTeam()" 
-                                        class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-center py-2 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-colors shadow-lg hover:shadow-xl">
-                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Default Team (Click to Remove)
-                                </button>
-                            @else
-                                <button onclick="setDefaultTeam({{ $team->id }}, '{{ $team->name }}')" 
-                                        class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-center py-2 px-4 rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-600 transition-colors shadow-lg hover:shadow-xl">
-                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                    </svg>
-                                    Set as Default Team
-                                </button>
-                            @endif
-                            
-                            <button onclick="transferTeam('{{ $team->slug }}', '{{ $team->name }}')" 
-                                    class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-center py-2 px-4 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-colors shadow-lg hover:shadow-xl">
-                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                </svg>
-                                Transfer Team
-                            </button>
-                        </div>
+<div class="grid grid-cols-3 gap-3 mt-4">
+    <a href="{{ route('teams.show', $team) }}"
+        class="flex items-center justify-center gap-2 bg-blue-600 text-white text-center py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+        </svg>
+        <span>Manage</span>
+    </a>
+    
+    <!-- Default Team Button -->
+    @if(auth()->user()->default_team_id == $team->id)
+        <button onclick="removeDefaultTeam()" 
+                class="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-center py-3 px-4 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Default</span>
+        </button>
+    @else
+        <button onclick="setDefaultTeam({{ $team->id }}, '{{ $team->name }}')" 
+                class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-center py-3 px-4 rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+            <span>Set Default</span>
+        </button>
+    @endif
+    
+    <button onclick="transferTeam('{{ $team->slug }}', '{{ $team->name }}')" 
+            class="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-3 px-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+        </svg>
+        <span>Transfer</span>
+    </button>
+</div>  
                     </div>
                 </div>
                 @endforeach

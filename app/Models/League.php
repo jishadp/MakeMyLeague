@@ -422,8 +422,8 @@ class League extends Model
             ->pluck('auctioneer_id')
             ->toArray();
 
-        return User::whereNotIn('id', $assignedAuctioneerIds)
-            ->where('id', '!=', 1) // Exclude admin user
+        return User::with(['position', 'primaryGameRole.gamePosition', 'roles'])
+            ->whereNotIn('id', $assignedAuctioneerIds)
             ->orderBy('name')
             ->get();
     }

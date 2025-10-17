@@ -92,8 +92,8 @@ class AuctioneerManagementController extends Controller
                 ->pluck('auctioneer_id')
                 ->toArray();
 
-            $availableUsers = User::whereNotIn('id', $assignedAuctioneerIds)
-                ->where('id', '!=', 1) // Exclude admin
+            $availableUsers = User::with(['position', 'primaryGameRole.gamePosition', 'roles'])
+                ->whereNotIn('id', $assignedAuctioneerIds)
                 ->orderBy('name')
                 ->get();
 
