@@ -216,7 +216,7 @@
                                  league-player-id="{{ $currentPlayer->id ?? '' }}">
                                 <!-- Background "BID" text -->
                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <span class="text-8xl sm:text-9xl lg:text-[12rem] font-black text-blue-100 opacity-30 select-none">BID</span>
+                                    <span class="text-8xl sm:text-9xl lg:text-[12rem] font-black text-blue-100 opacity-40 select-none drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1), 0 0 8px rgba(59, 130, 246, 0.2);">BID</span>
                                 </div>
                                 
                                 <!-- Content -->

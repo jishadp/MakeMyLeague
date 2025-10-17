@@ -496,12 +496,21 @@ $(document).ready(function(){
             playerId: playerId,
             basePrice: basePrice,
             increment: increment,
-            leaguePlayerId: leaguePlayerId
+            leaguePlayerId: leaguePlayerId,
+            callBidAction: callBidAction,
+            token: token
         });
         
         // Check for missing data
         if (!leaguePlayerId || leaguePlayerId === '' || !playerId || playerId === '') {
             showMessage('Error: Player data missing. Please select a player first.', 'error');
+            return;
+        }
+        
+        // Check if callBidAction is found
+        if (!callBidAction || !token) {
+            console.error('Missing callBidAction or token:', { callBidAction, token });
+            showMessage('Error: Could not find bid configuration. Please refresh the page and try again.', 'error');
             return;
         }
         
