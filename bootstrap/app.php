@@ -15,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'league.organizer' => \App\Http\Middleware\CheckLeagueOrganizer::class,
-            'league.participant' => \App\Http\Middleware\CheckLeagueParticipant::class,
+            'league.viewer' => \App\Http\Middleware\CheckLeagueViewer::class,
             'auction.access' => \App\Http\Middleware\CheckAuctionAccess::class,
-            'auction.requirements' => \App\Http\Middleware\CheckAuctionRequirements::class,
+            'team.owner' => \App\Http\Middleware\CheckTeamOwner::class,
             'admin' => \App\Http\Middleware\CheckAdminAccess::class,
         ]);
     })

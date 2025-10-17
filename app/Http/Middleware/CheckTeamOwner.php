@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CheckLeagueParticipant
+class CheckTeamOwner
 {
     /**
      * Handle an incoming request.
@@ -30,17 +30,16 @@ class CheckLeagueParticipant
             abort(404, 'League not found');
         }
 
-        // Check if user is an organizer for this league, is an admin, or owns a team in this league
-        $isOrganizer = $user->isOrganizerForLeague($league->id);
-        $isAdmin = $user->isAdmin();
+        // Check if user owns a team in this league
         $ownsTeamInLeague = $league->leagueTeams()->whereHas('team', function($query) use ($user) {
             $query->whereHas('owners', function($q) use ($user) {
                 $q->where('user_id', $user->id)->where('role', 'owner');
             });
         })->exists();
 
-        if (!$isOrganizer && !$isAdmin && !$ownsTeamInLeague) {
-            abort(403, 'You are not authorized to perform this action. Only league organizers, admins, or team owners can access this page.');
+        // Also allow organizers and admins
+        if (!$ownsTeamInLeague && !$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
+            abort(403, 'You must be a team owner to perform this action.');
         }
 
         return $next($request);

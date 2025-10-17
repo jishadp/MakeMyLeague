@@ -30,28 +30,30 @@ class CheckAuctionAccess
             abort(404, 'League not found');
         }
 
-        // Check if user is an organizer for this league or is an admin
+        // 1. Organizers and Admins can always access auctions for their leagues
         if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
-            // Organizers and admins can always access auctions for their leagues
             return $next($request);
         }
 
-        // For team owners: Check if they own a team in this league 
+        // 2. Team Owners can access auctions (but no CRUD on league)
         $ownsTeamInLeague = $league->leagueTeams()->whereHas('team', function($query) use ($user) {
             $query->whereHas('owners', function($q) use ($user) {
                 $q->where('user_id', $user->id)->where('role', 'owner');
             });
         })->exists();
 
-        // Also check if the user is an assigned auctioneer
-        $isAuctioneer = $league->leagueTeams()->where('auctioneer_id', $user->id)->exists();
-
-        if ($ownsTeamInLeague || $isAuctioneer) {
-            // Team owners and auctioneers can access auctions
+        if ($ownsTeamInLeague) {
             return $next($request);
         }
 
-        // If user doesn't own a team in this league, deny access
-        abort(403, 'You must own a team in this league to access the auction.');
+        // 3. Assigned Auctioneers can access auctions for bidding
+        $isAuctioneer = $league->leagueTeams()->where('auctioneer_id', $user->id)->exists();
+
+        if ($isAuctioneer) {
+            return $next($request);
+        }
+
+        // If none of the above, deny access
+        abort(403, 'You must be a team owner or assigned auctioneer to access the auction.');
     }
 }

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CheckLeagueOrganizer
+class CheckLeagueViewer
 {
     /**
      * Handle an incoming request.
@@ -26,20 +26,12 @@ class CheckLeagueOrganizer
         // Get the league from the route parameter
         $league = $request->route('league');
         
-        // If this is the index, create, or store route (no league parameter), allow any authenticated user
-        if (!$league && in_array($request->route()?->getName(), ['leagues.index', 'leagues.create', 'leagues.store'])) {
-            return $next($request);
-        }
-        
         if (!$league) {
             abort(404, 'League not found');
         }
 
-        // Only organizers and admins can manage leagues
-        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
-            abort(403, 'You are not authorized to manage this league. Only league organizers can perform this action.');
-        }
-
+        // Anyone can view league details (public information)
+        // This middleware is mainly for authentication check
         return $next($request);
     }
 }
