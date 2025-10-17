@@ -215,38 +215,6 @@ Route::middleware('auth')->group(function () {
     // Auction access request route (placed before resource routes to avoid conflicts)
     Route::post('leagues/{league}/request-auction-access', [LeagueController::class, 'requestAuctionAccess'])->name('leagues.request-auction-access')->middleware('auth');
     
-    // Debug route for auction access (remove in production)
-    Route::get('debug/auction-access/{league}', function(\App\Models\League $league) {
-        $user = auth()->user();
-        $auctionAccessService = app(\App\Services\AuctionAccessService::class);
-        
-        // Get auction statistics
-        $auctionStats = $auctionAccessService->getAuctionAccessStats($league);
-        
-        return response()->json([
-            'user_id' => $user->id,
-            'user_name' => $user->name,
-            'league_id' => $league->id,
-            'league_name' => $league->name,
-            'auction_active' => $league->auction_active,
-            'auction_started_at' => $league->auction_started_at,
-            'auction_ended_at' => $league->auction_ended_at,
-            'is_auction_active' => $league->isAuctionActive(),
-            'can_user_bid' => $auctionAccessService->canUserBidInLeague($user, $league),
-            'user_teams' => $auctionAccessService->getUserTeamsInLeague($user, $league)->toArray(),
-            'bidding_team' => $auctionAccessService->getUserBiddingTeam($user, $league)?->toArray(),
-            'validation' => $auctionAccessService->validateBidAccess($user, $league->leaguePlayers()->where('status', 'auctioning')->first()),
-            'auction_stats' => $auctionStats,
-            'player_counts' => [
-                'available' => $league->leaguePlayers()->where('status', 'available')->where('retention', false)->count(),
-                'auctioning' => $league->leaguePlayers()->where('status', 'auctioning')->count(),
-                'sold' => $league->leaguePlayers()->where('status', 'sold')->count(),
-                'unsold' => $league->leaguePlayers()->where('status', 'unsold')->count(),
-                'retained' => $league->leaguePlayers()->where('retention', true)->count(),
-            ]
-        ]);
-    })->name('debug.auction-access')->middleware('auth');
-    
     // Leagues resource routes - CRUD only for organizers, viewing for everyone
     Route::get('leagues/create', [LeagueController::class, 'create'])->name('leagues.create')->middleware('league.organizer');
     Route::post('leagues', [LeagueController::class, 'store'])->name('leagues.store')->middleware('league.organizer');
@@ -268,6 +236,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('leagues.league-teams', LeagueTeamController::class)->except(['show'])->middleware('league.organizer');
     Route::get('leagues/{league}/teams', [LeagueTeamController::class, 'index'])->name('league-teams.index')->middleware('league.viewer');
     Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create')->middleware('league.organizer');
+    Route::get('leagues/{league}/manage-teams', [LeagueTeamController::class, 'manageTeams'])->name('league-teams.manage')->middleware('team.owner');
     Route::get('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'show'])->name('league-teams.show')->middleware('league.viewer');
     Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store')->middleware('league.organizer');
     Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit')->middleware('league.organizer');
