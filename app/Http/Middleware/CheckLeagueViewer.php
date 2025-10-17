@@ -23,12 +23,16 @@ class CheckLeagueViewer
             return redirect()->route('login');
         }
 
-        // Get the league from the route parameter
+        // Get the league from the route parameter (if exists)
         $league = $request->route('league');
         
+        // If this is the leagues index route (no league parameter), just check authentication
         if (!$league) {
-            abort(404, 'League not found');
+            return $next($request);
         }
+
+        // For league-specific routes, the league parameter should exist
+        // (This check is redundant since we already handled the !$league case above)
 
         // Anyone can view league details (public information)
         // This middleware is mainly for authentication check

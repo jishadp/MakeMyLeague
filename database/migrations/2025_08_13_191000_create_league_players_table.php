@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('slug')->unique();
             $table->boolean('retention')->default(false);
-            $table->enum('status', ['pending', 'available', 'sold', 'unsold', 'skip'])->default('pending');
+            $table->enum('status', ['pending', 'available', 'auctioning', 'sold', 'unsold', 'skip'])->default('pending');
             $table->double('base_price')->default(0.0);
             $table->timestamps();
             
