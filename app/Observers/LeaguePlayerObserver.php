@@ -37,8 +37,14 @@ class LeaguePlayerObserver
                 ->where('id', '!=', $leaguePlayer->id)
                 ->count();
 
-            // If no other players are being auctioned, deactivate auction mode
-            if ($otherAuctioningPlayers === 0) {
+            // Check if there are any available players left to auction
+            $availablePlayers = LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'available')
+                ->where('retention', false) // Exclude retained players
+                ->count();
+
+            // If no other players are being auctioned AND no available players left, end the auction
+            if ($otherAuctioningPlayers === 0 && $availablePlayers === 0) {
                 $league->update([
                     'auction_active' => false,
                     'auction_ended_at' => now()
@@ -47,7 +53,11 @@ class LeaguePlayerObserver
                 // Refresh access cache for all users
                 $this->auctionAccessService->refreshLeagueAccessCache($league);
                 
-                Log::info("No players currently being auctioned in league {$league->id}. Auction mode deactivated.");
+                Log::info("Auction completed for league {$league->id}. All players processed. Auction ended.");
+            }
+            // If no other players are being auctioned but there are still available players, keep auction active
+            else if ($otherAuctioningPlayers === 0) {
+                Log::info("Player {$leaguePlayer->id} finished auctioning in league {$league->id}. Auction remains active for remaining players.");
             }
         }
     }

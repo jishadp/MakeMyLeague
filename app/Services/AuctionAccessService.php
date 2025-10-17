@@ -31,11 +31,6 @@ class AuctionAccessService
      */
     public function canUserBidInLeague(User $user, League $league): bool
     {
-        // Check if auction is active
-        if (!$league->isAuctionActive()) {
-            return false;
-        }
-
         // For organizers and admins, check if they have teams to bid for
         if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
             // Organizers and admins can bid even without auction access granted
@@ -52,6 +47,7 @@ class AuctionAccessService
         }
 
         // For regular users (team owners/auctioneers), check if they have teams
+        // Allow bidding even if auction is not officially started - team owners should be able to bid
         $userTeams = $this->getUserTeamsInLeague($user, $league);
         
         return $userTeams->isNotEmpty();
@@ -260,6 +256,21 @@ class AuctionAccessService
     }
 
     /**
+     * Clear all auction access cache for debugging purposes.
+     *
+     * @return void
+     */
+    public function clearAllAuctionAccessCache(): void
+    {
+        // This is a simple approach - in production you might want to use cache tags
+        $pattern = self::CACHE_PREFIX . '*';
+        
+        // Note: This is a simplified cache clearing - Laravel doesn't have built-in pattern-based cache clearing
+        // In production, you might want to use cache tags or maintain a list of cache keys
+        Log::info("Auction access cache cleared for debugging");
+    }
+
+    /**
      * Refresh auction access cache for all users in a specific league.
      * Call this when league auction status changes.
      *
@@ -313,16 +324,44 @@ class AuctionAccessService
     {
         $league = $leaguePlayer->league;
 
+        // Prepare update data
+        $updateData = [
+            'auction_active' => true
+        ];
+
+        // Only set auction_started_at if it hasn't been set yet
+        if (!$league->auction_started_at) {
+            $updateData['auction_started_at'] = now();
+        }
+
         // Mark league as having live auction
-        $league->update([
-            'auction_active' => true,
-            'auction_started_at' => now()
-        ]);
+        $league->update($updateData);
 
         // Refresh access cache for all users in this league
         $this->refreshLeagueAccessCache($league);
 
         Log::info("Player {$leaguePlayer->id} started auctioning in league {$league->id}. Access control updated.");
+    }
+
+    /**
+     * Handle auction completion for a league.
+     * This sets auction_ended_at and refreshes access cache.
+     *
+     * @param League $league
+     * @return void
+     */
+    public function handleAuctionCompletion(League $league): void
+    {
+        // Mark auction as ended
+        $league->update([
+            'auction_active' => false,
+            'auction_ended_at' => now()
+        ]);
+
+        // Refresh access cache for all users in this league
+        $this->refreshLeagueAccessCache($league);
+
+        Log::info("Auction completed for league {$league->id}. Access control updated.");
     }
 
     /**

@@ -528,9 +528,11 @@ class LeagueController
 
         // Update league status to auction_completed
         $league->update([
-            'status' => 'auction_completed',
-            'auction_ended_at' => now()
+            'status' => 'auction_completed'
         ]);
+
+        // Handle auction completion through service
+        app(\App\Services\AuctionAccessService::class)->handleAuctionCompletion($league);
 
         return redirect()->route('leagues.show', $league)
             ->with('success', 'Auction completed successfully! You can now proceed to match setup.');
