@@ -11,6 +11,7 @@ use App\Models\Auction;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
+use App\Services\AuctionAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Action;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,12 @@ use Illuminate\Support\Facades\DB;
 
 class AuctionController extends Controller
 {
+    protected $auctionAccessService;
+
+    public function __construct(AuctionAccessService $auctionAccessService)
+    {
+        $this->auctionAccessService = $auctionAccessService;
+    }
     /**
      * Display the auction bidding page.
      */
@@ -186,48 +193,26 @@ class AuctionController extends Controller
         $newBid = $request->base_price + $request->increment;
         $user = auth()->user();
         
-        // Validate that the player is currently being auctioned
+        // Get the league player
         $leaguePlayer = LeaguePlayer::find($request->league_player_id);
-        if (!$leaguePlayer || $leaguePlayer->status !== 'auctioning') {
+        if (!$leaguePlayer) {
             return response()->json([
                 'success' => false,
-                'message' => 'This player is not currently being auctioned.'
-            ], 400);
+                'message' => 'Player not found.'
+            ], 404);
         }
+
+        // Use the new access control service to validate bid access
+        $accessValidation = $this->auctionAccessService->validateBidAccess($user, $leaguePlayer);
         
-        // Find the league team where the current user is the assigned auctioneer
-        $bidTeam = LeagueTeam::where('league_id', $request->league_id)
-            ->where('auctioneer_id', $user->id)
-            ->first();
-
-        // If no auctioneer is assigned, use default team logic
-        if (!$bidTeam) {
-            // Check if user has multiple teams in this league
-            if ($user->hasMultipleTeamsInLeague($request->league_id)) {
-                // Use default team for this league
-                $defaultTeam = $user->getDefaultTeamForLeague($request->league_id);
-                if ($defaultTeam) {
-                    $bidTeam = LeagueTeam::where('league_id', $request->league_id)
-                        ->where('team_id', $defaultTeam->id)
-                        ->first();
-                }
-            } else {
-                // Fall back to team owner (backward compatibility for single team)
-                $bidTeam = LeagueTeam::where('league_id', $request->league_id)
-                    ->whereHas('team', function($query) use ($user) {
-                        $query->whereHas('owners', function($q) use ($user) {
-                            $q->where('user_id', $user->id)->where('role', 'owner');
-                        });
-                    })->first();
-            }
-        }
-
-        if (!$bidTeam) {
+        if (!$accessValidation['valid']) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to bid for any team in this league.'
+                'message' => $accessValidation['message']
             ], 403);
         }
+
+        $bidTeam = $accessValidation['league_team'];
 
         // Check if team has sufficient balance
         if ($bidTeam->wallet_balance < $newBid) {
@@ -456,6 +441,54 @@ class AuctionController extends Controller
         return response()->json([
             'success' => true,
             'teams' => $teams
+        ]);
+    }
+
+    /**
+     * API endpoint to get auction access information for the current user
+     */
+    public function getAuctionAccess(League $league)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated.'
+            ], 401);
+        }
+
+        // Check if user can bid in this league
+        $canBid = $this->auctionAccessService->canUserBidInLeague($user, $league);
+        
+        // Get user's teams in this league
+        $userTeams = $this->auctionAccessService->getUserTeamsInLeague($user, $league);
+        
+        // Get the team user should bid for
+        $biddingTeam = $this->auctionAccessService->getUserBiddingTeam($user, $league);
+        
+        // Get auction access statistics
+        $stats = $this->auctionAccessService->getAuctionAccessStats($league);
+
+        return response()->json([
+            'success' => true,
+            'can_bid' => $canBid,
+            'user_teams' => $userTeams->map(function($team) {
+                return [
+                    'league_team_id' => $team['league_team']->id,
+                    'team_id' => $team['team']->id,
+                    'team_name' => $team['team']->name,
+                    'access_type' => $team['access_type'],
+                    'access_source' => $team['access_source']
+                ];
+            }),
+            'bidding_team' => $biddingTeam ? [
+                'league_team_id' => $biddingTeam->id,
+                'team_id' => $biddingTeam->team->id,
+                'team_name' => $biddingTeam->team->name,
+                'wallet_balance' => $biddingTeam->wallet_balance
+            ] : null,
+            'auction_stats' => $stats
         ]);
     }
 }

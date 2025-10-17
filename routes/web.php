@@ -277,6 +277,9 @@ Route::middleware('auth')->group(function () {
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
         Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
+        Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids');
+        Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances');
+        Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access');
     });
 
     // League Finance routes

@@ -3,8 +3,15 @@
 namespace App\Providers;
 
 use App\Models\League;
+use App\Models\LeaguePlayer;
 use App\Models\Team;
+use App\Models\TeamAuctioneer;
+use App\Models\TeamOwner;
 use App\Models\User;
+use App\Observers\LeaguePlayerObserver;
+use App\Observers\TeamAuctioneerObserver;
+use App\Observers\TeamOwnerObserver;
+use App\Services\AuctionAccessService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register model observers for auction access control
+        $this->registerObservers();
+
         // Share stats with all views
         View::composer('*', function ($view) {
             try {
@@ -49,5 +59,18 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+    }
+
+    /**
+     * Register model observers for auction access control.
+     */
+    protected function registerObservers(): void
+    {
+        // Register observers with dependency injection
+        $auctionAccessService = app(AuctionAccessService::class);
+        
+        LeaguePlayer::observe(new LeaguePlayerObserver($auctionAccessService));
+        TeamOwner::observe(new TeamOwnerObserver($auctionAccessService));
+        TeamAuctioneer::observe(new TeamAuctioneerObserver($auctionAccessService));
     }
 }
