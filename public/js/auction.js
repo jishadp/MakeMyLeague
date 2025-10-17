@@ -536,6 +536,43 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bid placed:", response);
+                
+                // Update the player card instantly
+                if (response.success) {
+                    // Update current bid display
+                    $('.currentBid').html('₹' + parseInt(response.new_bid).toLocaleString());
+                    
+                    // Update bid status
+                    $('.bidStatus').text('Current Bid');
+                    
+                    // Update team name if available
+                    if (response.team_name) {
+                        $('.bidTeam').text(response.team_name);
+                    }
+                    
+                    // Update team balance if available
+                    if (response.team_balance) {
+                        $('.teamBalance').text(response.team_balance);
+                    }
+                    
+                    // Update league players count if available
+                    if (response.league_players_count) {
+                        $('.leageTeamPlayers').text(response.league_players_count);
+                    }
+                    
+                    // Update mark sold button with team ID
+                    if (response.call_team_id) {
+                        $('.markSold').attr('call-team-id', response.call_team_id);
+                    }
+                    
+                    // Update bid button increments
+                    updateBidIncrements(response.new_bid);
+                    
+                    // Show success message
+                    if (typeof showMessage === 'function') {
+                        showMessage('Bid placed successfully!', 'success');
+                    }
+                }
                 // Add a small delay before re-enabling buttons to prevent rapid clicks
                 setTimeout(function() {
                     // Re-enable all bid buttons
@@ -980,3 +1017,39 @@ $(document).ready(function(){
         });
     });
 });
+
+// Function to update bid button increments after a new bid is placed
+function updateBidIncrements(newBid) {
+    console.log('🔄 Updating bid button increments for bid:', newBid);
+    
+    // Calculate next bid amount (assuming standard increment logic)
+    const currentBid = parseFloat(newBid);
+    let nextBid = currentBid;
+    
+    // Simple increment logic - you can customize this based on your league rules
+    if (currentBid < 1000) {
+        nextBid = currentBid + 50;
+    } else if (currentBid < 5000) {
+        nextBid = currentBid + 100;
+    } else if (currentBid < 10000) {
+        nextBid = currentBid + 250;
+    } else {
+        nextBid = currentBid + 500;
+    }
+    
+    const increment = nextBid - currentBid;
+    
+    // Update all bid buttons
+    $('.callBid').each(function() {
+        const $button = $(this);
+        
+        // Update only the increment display (no currency symbol)
+        $button.find('p').html(parseInt(increment).toLocaleString());
+        
+        // Update the increment attribute
+        $button.attr('increment', increment);
+        $button.attr('base-price', currentBid);
+    });
+    
+    console.log('✅ Bid button increments updated:', { currentBid, nextBid, increment });
+}
