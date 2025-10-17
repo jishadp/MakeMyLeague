@@ -187,8 +187,8 @@
                                  base-price="{{ $currentBid }}"
                                  league-player-id="{{ $currentPlayer->id ?? '' }}">
                                 <div class="flex flex-col items-center space-y-2">
-                                    <p class="font-bold text-lg sm:text-xl text-green-600">₹{{ number_format($nextBid, 0) }}</p>
-                                    <p class="text-xs text-green-600">+ ₹{{ $increment }}</p>
+                                    <p class="font-bold text-2xl sm:text-3xl text-green-600 highlight-increment">{{ number_format($increment, 0) }}</p>
+                                    <p class="text-xs text-gray-600">Add</p>
                                 </div>
                             </div>
                             <!-- Custom Button -->
@@ -208,7 +208,8 @@
                             $increment = $nextBid - $currentBid;
                         @endphp
                         <div class="flex justify-center" call-bid-action="{{route('auction.call')}}" token="{{csrf_token()}}">
-                            <div class="callBid stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 text-center border border-blue-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300 w-full max-w-md relative overflow-hidden" 
+                            <div class="callBid stat-card backdrop-blur-sm rounded-2xl p-6 sm:p-8 text-center border border-green-600 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300 w-full max-w-md relative overflow-hidden" 
+                                 style="background: linear-gradient(135deg, rgba(84, 122, 84, 0.8), rgba(107, 142, 35, 0.7));"
                                  increment="{{ $increment }}"
                                  league-id="{{ $league->id ?? '' }}"
                                  player-id="{{ $currentPlayer->player->id ?? '' }}"
@@ -216,18 +217,18 @@
                                  league-player-id="{{ $currentPlayer->id ?? '' }}">
                                 <!-- Background "BID" text -->
                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <span class="text-8xl sm:text-9xl lg:text-[12rem] font-black text-blue-100 opacity-40 select-none drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1), 0 0 8px rgba(59, 130, 246, 0.2);">BID</span>
+                                    <span class="text-8xl sm:text-9xl lg:text-[12rem] font-black text-green-200 opacity-25 select-none drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2), 0 0 8px rgba(34, 197, 94, 0.3);">BID</span>
                                 </div>
                                 
                                 <!-- Content -->
                                 <div class="relative z-10">
                                     <div class="flex items-center justify-center space-x-3 mb-2">
-                                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                         </svg>
-                                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600">{{ number_format($nextBid, 0) }}</p>
+                                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-white drop-shadow-md highlight-increment">{{ number_format($increment, 0) }}</p>
                                     </div>
-                                    <p class="text-sm text-gray-600">Place Bid (+{{ number_format($increment, 0) }})</p>
+                                    <p class="text-sm text-green-100 drop-shadow-sm">Add Amount</p>
                                 </div>
                             </div>
                         </div>
@@ -411,6 +412,24 @@
         backdrop-filter: blur(30px);
         -webkit-backdrop-filter: blur(30px);
     }
+}
+
+/* Increment Highlight Styles */
+.highlight-increment {
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    padding: 8px 16px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Team owner bid button increment highlight */
+.highlight-increment {
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15));
+    border-radius: 16px;
+    padding: 12px 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
 }
 </style>
 

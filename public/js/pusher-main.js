@@ -67,6 +67,7 @@ function handleNewBid(data) {
         return;
     }
     
+    // Update bid information
     $('.currentBid').html(data.new_bid);
     $('.bidStatus').html('Current Bid');
     $('.callBid').attr('base-price', data.new_bid);
@@ -75,6 +76,14 @@ function handleNewBid(data) {
     $('.teamBalance').html(teamData.wallet_balance);
     $('.leageTeamPlayers').html(teamData.league_players_count);
     $('.markSold').attr('call-team-id', teamData.id);
+    
+    // Update player card elements if player data is available
+    if (data.league_player) {
+        updatePlayerCard(data.league_player, data.new_bid);
+    }
+    
+    // Update bid button increments
+    updateBidButtonIncrements(data.new_bid);
     
     // Refresh Livewire components - but only do it once and with try/catch
     try {
@@ -257,3 +266,75 @@ pusher.connection.bind('error', function(err) {
 pusher.connection.bind('disconnected', function() {
     console.warn('Pusher disconnected');
 });
+
+// Function to update player card elements
+function updatePlayerCard(playerData, newBid) {
+    console.log('🔄 Updating player card with new bid:', newBid);
+    
+    // Update player name if available
+    if (playerData.player && playerData.player.name) {
+        $('.playerName').text(playerData.player.name);
+    }
+    
+    // Update player position if available
+    if (playerData.player && playerData.player.primary_game_role && playerData.player.primary_game_role.game_position) {
+        $('.position').text(playerData.player.primary_game_role.game_position.name);
+    }
+    
+    // Update base price
+    if (playerData.base_price) {
+        $('.basePrice').text(playerData.base_price);
+    }
+    
+    // Update current bid display with currency symbol
+    $('.currentBid').html('₹' + parseInt(newBid).toLocaleString());
+    
+    // Update custom bid modal current bid display
+    $('#currentBidDisplay').html('₹' + parseInt(newBid).toLocaleString());
+    
+    // Update bid status
+    $('.bidStatus').text('Current Bid');
+}
+
+// Function to update bid button increments
+function updateBidButtonIncrements(newBid) {
+    console.log('🔄 Updating bid button increments for bid:', newBid);
+    
+    // Calculate next bid amount (assuming standard increment logic)
+    // You might need to adjust this based on your league's increment rules
+    const currentBid = parseFloat(newBid);
+    let nextBid = currentBid;
+    
+    // Simple increment logic - you can customize this based on your league rules
+    if (currentBid < 1000) {
+        nextBid = currentBid + 50;
+    } else if (currentBid < 5000) {
+        nextBid = currentBid + 100;
+    } else if (currentBid < 10000) {
+        nextBid = currentBid + 250;
+    } else {
+        nextBid = currentBid + 500;
+    }
+    
+    const increment = nextBid - currentBid;
+    
+    // Update organizer bid buttons (if they exist)
+    $('.callBid').each(function() {
+        const $button = $(this);
+        const $container = $button.closest('.grid, .flex');
+        
+        if ($container.hasClass('grid')) {
+            // Organizer view - update the increment display (no currency symbol)
+            $button.find('.highlight-increment').html(parseInt(increment).toLocaleString());
+            $button.find('p:last').html('Add');
+        } else {
+            // Team owner/auctioneer view - update the increment display (no currency symbol)
+            $button.find('.highlight-increment').html(parseInt(increment).toLocaleString());
+            $button.find('p:last').html('Add Amount');
+        }
+        
+        // Update the increment attribute
+        $button.attr('increment', increment);
+        $button.attr('base-price', currentBid);
+    });
+}
