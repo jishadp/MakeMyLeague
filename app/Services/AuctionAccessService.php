@@ -51,12 +51,7 @@ class AuctionAccessService
             return $hasOwnedTeams;
         }
 
-        // For regular users (team owners/auctioneers), auction access must be granted
-        if (!$league->hasAuctionAccess()) {
-            return false;
-        }
-
-        // Check if user has any team in this league (as owner or auctioneer)
+        // For regular users (team owners/auctioneers), check if they have teams
         $userTeams = $this->getUserTeamsInLeague($user, $league);
         
         return $userTeams->isNotEmpty();
@@ -216,14 +211,7 @@ class AuctionAccessService
             ];
         }
 
-        // Check if league has auction access granted (only for non-organizers)
-        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin() && !$league->hasAuctionAccess()) {
-            return [
-                'valid' => false,
-                'message' => 'Auction access has not been granted for this league. Please contact the admin.',
-                'league_team' => null
-            ];
-        }
+        // Auction access check removed - team owners and organizers can bid directly
 
         // Check if auction is active
         if (!$league->isAuctionActive()) {
