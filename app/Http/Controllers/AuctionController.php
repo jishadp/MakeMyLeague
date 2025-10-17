@@ -56,6 +56,8 @@ class AuctionController extends Controller
         $teams = LeagueTeam::where('league_id', $league->id)
             ->with([
                 'team',
+                'auctioneer', // Include auctioneer information
+                'teamAuctioneer.auctioneer', // Include active team auctioneer
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
                           ->whereIn('status', ['retained', 'sold'])

@@ -41,7 +41,21 @@ class AuctionAccessService
             return false;
         }
 
-        // Check if user has any team in this league
+        // For organizers and admins, check if they have teams to bid for
+        if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
+            // Check if they own any teams in this league
+            $hasOwnedTeams = LeagueTeam::where('league_id', $league->id)
+                ->whereHas('team', function ($query) use ($user) {
+                    $query->whereHas('owners', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+                })
+                ->exists();
+            
+            return $hasOwnedTeams;
+        }
+
+        // Check if user has any team in this league (as owner or auctioneer)
         $userTeams = $this->getUserTeamsInLeague($user, $league);
         
         return $userTeams->isNotEmpty();
@@ -119,6 +133,35 @@ class AuctionAccessService
      */
     public function getUserBiddingTeam(User $user, League $league): ?LeagueTeam
     {
+        // For organizers and admins, try to get their default team first
+        if ($user->isOrganizerForLeague($league->id) || $user->isAdmin()) {
+            $defaultTeam = $user->getDefaultTeamForLeague($league->id);
+            if ($defaultTeam) {
+                $leagueTeam = LeagueTeam::where('league_id', $league->id)
+                    ->where('team_id', $defaultTeam->id)
+                    ->first();
+                if ($leagueTeam) {
+                    return $leagueTeam;
+                }
+            }
+            
+            // If no default team, get any team they own in this league
+            $ownedLeagueTeam = LeagueTeam::where('league_id', $league->id)
+                ->whereHas('team', function ($query) use ($user) {
+                    $query->whereHas('owners', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+                })
+                ->first();
+            
+            if ($ownedLeagueTeam) {
+                return $ownedLeagueTeam;
+            }
+            
+            // If organizer has no teams, they can't bid (they need to own a team to bid)
+            return null;
+        }
+
         $userTeams = $this->getUserTeamsInLeague($user, $league);
 
         if ($userTeams->isEmpty()) {
@@ -172,6 +215,24 @@ class AuctionAccessService
             ];
         }
 
+        // Check if league has auction access granted
+        if (!$league->hasAuctionAccess()) {
+            return [
+                'valid' => false,
+                'message' => 'Auction access has not been granted for this league. Please contact the admin.',
+                'league_team' => null
+            ];
+        }
+
+        // Check if auction is active
+        if (!$league->isAuctionActive()) {
+            return [
+                'valid' => false,
+                'message' => 'Auction is not currently active. Please wait for the auction to start.',
+                'league_team' => null
+            ];
+        }
+
         // Check if user can bid in this league
         if (!$this->canUserBidInLeague($user, $league)) {
             return [
@@ -187,7 +248,7 @@ class AuctionAccessService
         if (!$biddingTeam) {
             return [
                 'valid' => false,
-                'message' => 'You are not authorized to bid for any team in this league.',
+                'message' => 'You need to own a team in this league to place bids. Please register a team first.',
                 'league_team' => null
             ];
         }

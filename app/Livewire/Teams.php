@@ -36,6 +36,8 @@ class Teams extends Component
         $this->teams = LeagueTeam::where('league_id', $this->leagueId)
             ->with([
                 'team',
+                'auctioneer', // Include auctioneer information
+                'teamAuctioneer.auctioneer', // Include active team auctioneer
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
                           ->where(function($q) {

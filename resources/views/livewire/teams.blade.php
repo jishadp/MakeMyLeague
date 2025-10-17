@@ -21,6 +21,21 @@
                             <div>
                                 <h3 class="font-bold text-lg">{{ $team->team->name }}</h3>
                                 <p class="text-sm text-blue-100">{{ $team->league_players_count }} Players</p>
+                                @if($team->teamAuctioneer && $team->teamAuctioneer->auctioneer)
+                                    <p class="text-xs text-blue-200">
+                                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Auctioneer: {{ $team->teamAuctioneer->auctioneer->name }}
+                                    </p>
+                                @elseif($team->auctioneer)
+                                    <p class="text-xs text-blue-200">
+                                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Auctioneer: {{ $team->auctioneer->name }}
+                                    </p>
+                                @endif
                             </div>
                         </div>
                         <div class="text-right">
