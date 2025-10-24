@@ -172,7 +172,7 @@
                 <!-- 3. Quick Bid Row -->
                 @can('placeBid', $league)
                 <div class="mb-6">
-                    @if($userRole === 'organizer' || $userRole === 'both')
+                    @if(isset($userRole) && ($userRole === 'organizer' || $userRole === 'both'))
                         <!-- Organizer View: 2 mobile-friendly options -->
                         @php
                             $currentBid = isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0);
