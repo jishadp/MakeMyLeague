@@ -21,7 +21,11 @@ class LeaguePlayerController extends Controller
         $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.position'])
             ->where('league_id', $league->id)
             ->when(request('status'), function($query, $status) {
-                $query->where('status', $status);
+                if ($status === 'available') {
+                    $query->whereIn('status', ['available', 'auctioning']);
+                } else {
+                    $query->where('status', $status);
+                }
             })
             ->when(request('retention'), function($query, $retention) {
                 $query->where('retention', $retention === 'true');
