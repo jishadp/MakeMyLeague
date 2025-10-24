@@ -308,5 +308,45 @@ class LeagueController extends Controller
             'financeTotalExpenses'
         ));
     }
+
+    /**
+     * Restart league - clean all related data and reset to initial state.
+     */
+    public function restart(League $league)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        \DB::transaction(function () use ($league) {
+            // Delete all league players
+            $league->leaguePlayers()->delete();
+            
+            // Delete all league teams
+            $league->leagueTeams()->delete();
+            
+            // Delete all fixtures
+            $league->fixtures()->delete();
+            
+            // Delete all league groups
+            $league->leagueGroups()->delete();
+            
+            // Delete all finances
+            $league->finances()->delete();
+            
+            // Reset auction status
+            $league->update([
+                'auction_active' => false,
+                'auction_started_at' => null,
+                'auction_ended_at' => null,
+                'winner_team_id' => null,
+                'runner_team_id' => null,
+                'status' => 'pending'
+            ]);
+        });
+
+        return redirect()->route('admin.leagues.index')
+            ->with('success', 'League restarted successfully! All teams, players, and auction data have been cleared.');
+    }
 }
 

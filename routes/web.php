@@ -210,6 +210,7 @@ Route::middleware('auth')->group(function () {
         Route::get('leagues/{league}/edit', [\App\Http\Controllers\Admin\LeagueController::class, 'edit'])->name('leagues.edit');
         Route::put('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'update'])->name('leagues.update');
         Route::patch('leagues/{league}/status', [\App\Http\Controllers\Admin\LeagueController::class, 'updateStatus'])->name('leagues.update-status');
+        Route::post('leagues/{league}/restart', [\App\Http\Controllers\Admin\LeagueController::class, 'restart'])->name('leagues.restart');
         Route::delete('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'destroy'])->name('leagues.destroy');
         Route::get('leagues/districts-by-state', [\App\Http\Controllers\Admin\LeagueController::class, 'getDistrictsByState'])->name('leagues.districts-by-state');
         Route::get('leagues/local-bodies-by-district', [\App\Http\Controllers\Admin\LeagueController::class, 'getLocalBodiesByDistrict'])->name('leagues.local-bodies-by-district');
