@@ -14,6 +14,8 @@
 <input type="hidden" id="league-id" value="{{ $league->id }}">
 <input type="hidden" id="league-slug" value="{{ $league->slug }}">
 <input type="hidden" id="is-organizer-or-admin" value="{{ auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin() ? 'true' : 'false' }}">
+<input type="hidden" id="user-role" value="{{ $userRole }}">
+<input type="hidden" id="user-team-id" value="{{ $userTeamId ?? '' }}">
 
 <div class="min-h-screen auction-bg py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -23,16 +25,37 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 class="text-2xl font-bold glacier-text-primary">Cricket League Auction</h1>
-                        @if($userAuctioneerAssignment)
-                            <div class="mt-2 flex items-center space-x-2">
+                        <div class="mt-2 flex items-center space-x-2">
+                            @if($userRole === 'organizer')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                    Organizer
+                                </span>
+                            @elseif($userRole === 'auctioneer')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
-                                    Bidding for: {{ $userAuctioneerAssignment->leagueTeam->team->name }}
+                                    @if($userAuctioneerAssignment)
+                                        Bidding for: {{ $userAuctioneerAssignment->leagueTeam->team->name }}
+                                    @else
+                                        Auctioneer
+                                    @endif
                                 </span>
-                            </div>
-                        @endif
+                            @elseif($userRole === 'both')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                    </svg>
+                                    Organizer + Auctioneer
+                                    @if($userAuctioneerAssignment)
+                                        ({{ $userAuctioneerAssignment->leagueTeam->team->name }})
+                                    @endif
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     <div class="flex items-center space-x-4">
                         @if($league->isAuctionActive())
@@ -140,12 +163,12 @@
             </div>
         </div>
 
-        <!-- Available Players Section -->
-        @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
+        <!-- Available Players Section (Organizer Only) -->
+        @can('selectPlayer', $league)
         <div class="mb-8 {{ isset($currentPlayer) && $currentPlayer && $currentPlayer->status === 'auctioning' ? 'hidden' : '' }}" id="availablePlayersSection">
             @include('auction.partials.available-players')
         </div>
-        @endif
+        @endcan
 
         <!-- Player Bidding Section -->
         <div class="flex justify-center mb-8 px-4 sm:px-0" id="biddingSection">
@@ -174,9 +197,20 @@
   src="https://code.jquery.com/jquery-3.7.1.js"
   integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
   crossorigin="anonymous"></script>
+<script src="{{ asset('js/auction-access.js') }}?v=1"></script>
 <script src="{{ asset('js/auction.js') }}?v=15"></script>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script src="{{ asset('js/pusher-main.js') }}?v={{ time() + 1 }}"></script>
+
+<script>
+// Override jQuery AJAX error handlers to use role-based error handling
+$(document).ajaxError(function(event, xhr, settings) {
+    if (xhr.status === 403 && typeof handleAuctionError === 'function') {
+        const errorMessage = handleAuctionError(xhr);
+        console.error('Access denied:', errorMessage);
+    }
+});
+</script>
 
 <script>
 // Player search functionality

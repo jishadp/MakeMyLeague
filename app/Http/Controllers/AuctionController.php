@@ -30,6 +30,12 @@ class AuctionController extends Controller
      */
     public function index(League $league)
     {
+        $this->authorize('viewAuctionPanel', $league);
+        
+        $user = auth()->user();
+        $accessCheck = $this->auctionAccessService->canUserAccessAuction($user->id, $league->id);
+        $userRole = $accessCheck['role'];
+        $userTeamId = $accessCheck['team_id'];
         // Only show available players (exclude sold, unsold, retained, and auctioning players)
         $leaguePlayers = LeaguePlayer::where('league_id',$league->id)
             ->where('status', 'available')
@@ -81,7 +87,7 @@ class AuctionController extends Controller
                 ->first();
         }
             
-        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams', 'userAuctioneerAssignment'));
+        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams', 'userAuctioneerAssignment', 'userRole', 'userTeamId'));
     }
 
     /**
@@ -203,18 +209,23 @@ class AuctionController extends Controller
      */
     public function call(Request $request)
     {
-        // Calculate new bid based on base price and increment
-        $newBid = $request->base_price + $request->increment;
-        $user = auth()->user();
-        
-        // Get the league player
         $leaguePlayer = LeaguePlayer::find($request->league_player_id);
         if (!$leaguePlayer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Player not found.'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
         }
+        
+        $this->authorize('placeBid', $leaguePlayer->league);
+        
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'bid_placed',
+            'LeaguePlayer',
+            $leaguePlayer->id,
+            ['amount' => $request->base_price + $request->increment]
+        );
+        $newBid = $request->base_price + $request->increment;
+        $user = auth()->user();
 
         // Use the new access control service to validate bid access
         $accessValidation = $this->auctionAccessService->validateBidAccess($user, $leaguePlayer);
@@ -316,6 +327,21 @@ class AuctionController extends Controller
 
     public function sold(Request $request)
     {
+        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        if (!$leaguePlayer) {
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
+        }
+        
+        $this->authorize('markSoldUnsold', $leaguePlayer->league);
+        
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'player_sold',
+            'LeaguePlayer',
+            $leaguePlayer->id,
+            ['team_id' => $request->team_id, 'amount' => $request->override_amount]
+        );
         $leaguePlayerId = $request->league_player_id;
         $teamId = $request->team_id;
         $overrideAmount = $request->override_amount;
@@ -390,6 +416,20 @@ class AuctionController extends Controller
     
     public function unsold(Request $request)
     {
+        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        if (!$leaguePlayer) {
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
+        }
+        
+        $this->authorize('markSoldUnsold', $leaguePlayer->league);
+        
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'player_unsold',
+            'LeaguePlayer',
+            $leaguePlayer->id
+        );
         $leaguePlayerId = $request->league_player_id;
         
         // Use database transaction for atomic operations

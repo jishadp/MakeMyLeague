@@ -33,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers for auction access control
         $this->registerObservers();
 
+        // Register policies
+        $this->registerPolicies();
+
         // Share stats with all views
         View::composer('*', function ($view) {
             try {
@@ -59,6 +62,14 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+    }
+
+    /**
+     * Register policies.
+     */
+    protected function registerPolicies(): void
+    {
+        \Illuminate\Support\Facades\Gate::policy(League::class, \App\Policies\AuctionPolicy::class);
     }
 
     /**

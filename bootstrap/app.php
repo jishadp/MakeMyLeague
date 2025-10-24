@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'league.organizer' => \App\Http\Middleware\CheckLeagueOrganizer::class,
             'league.viewer' => \App\Http\Middleware\CheckLeagueViewer::class,
             'auction.access' => \App\Http\Middleware\CheckAuctionAccess::class,
+            'live.auction' => \App\Http\Middleware\CheckLiveAuctionAccess::class,
             'team.owner' => \App\Http\Middleware\CheckTeamOwner::class,
             'admin' => \App\Http\Middleware\CheckAdminAccess::class,
         ]);

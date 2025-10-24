@@ -267,13 +267,13 @@ Route::middleware('auth')->group(function () {
 
     // Auction routes - organizers manage, team owners and auctioneers can bid
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
-        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('auction.access');
-        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('auction.access');
-        Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('league.organizer');
-        Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('league.organizer');
-        Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('league.organizer');
-        Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('league.organizer');
-        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('auction.access');
+        Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('live.auction:view');
+        Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('live.auction:auctioneer');
+        Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('live.auction:organizer');
+        Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('live.auction:organizer');
+        Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('live.auction:organizer');
+        Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('live.auction:organizer');
+        Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('live.auction:view');
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {
@@ -284,9 +284,9 @@ Route::middleware('auth')->group(function () {
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
         
         // League-specific auction routes
-        Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids')->middleware('auction.access');
-        Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances')->middleware('auction.access');
-        Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('auction.access');
+        Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids')->middleware('live.auction:view');
+        Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances')->middleware('live.auction:view');
+        Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('live.auction:view');
     });
 
     // League Finance routes - organizers manage finances

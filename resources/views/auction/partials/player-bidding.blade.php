@@ -170,8 +170,9 @@
                 </div>
 
                 <!-- 3. Quick Bid Row -->
+                @can('placeBid', $league)
                 <div class="mb-6">
-                    @if(auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin())
+                    @if($userRole === 'organizer' || $userRole === 'both')
                         <!-- Organizer View: 2 mobile-friendly options -->
                         @php
                             $currentBid = isset($currentHighestBid) && $currentHighestBid ? $currentHighestBid->amount : ($currentPlayer->base_price ?? 0);
@@ -220,9 +221,10 @@
                         </div>
                     @endif
                 </div>
+                @endcan
 
-                <!-- 4. Admin Controls Row -->
-                @if(auth()->user()->isOrganizer())
+                <!-- 4. Organizer Controls Row -->
+                @can('markSoldUnsold', $league)
                 <div class="mb-6" mark-sold-action="{{ route('auction.sold')}}" mark-unsold-action="{{ route('auction.unsold')}}" token="{{ csrf_token()}}">
                     <div class="grid grid-cols-2 gap-3 sm:gap-6">
                         <div class="markSold stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 text-center border border-green-300 shadow-lg cursor-pointer hover:scale-105 transition-all duration-300"

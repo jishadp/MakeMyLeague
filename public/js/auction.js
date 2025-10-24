@@ -1,20 +1,62 @@
-// Minimal Auction JavaScript - Static Demo Version
-// Simple function to start bidding and show bidding section
-function startBidding(playerId, playerName, basePrice, playerRole) {
-    // Show the bidding section
-    const biddingSection = document.getElementById('biddingSection');
-    if (biddingSection) {
-        biddingSection.classList.remove('hidden');
-        biddingSection.scrollIntoView({ behavior: 'smooth' });
-    }
-    // Hide available players on mobile
-    const availableSection = document.getElementById('availablePlayersSection');
-    if (availableSection && window.innerWidth < 1024) {
-        availableSection.classList.add('hidden');
-    }
-    // Show success message
-    showMessage(playerName + ' selected for bidding!', 'success');
-    var action=$('.players-container').attr('url');
+// Function to start bidding and show player card
+function startBidding(playerId, leaguePlayerId, playerName, basePrice, playerRole, leagueId, startAuctionUrl) {
+    // Get CSRF token
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Make AJAX call to start auction
+    $.ajax({
+        url: startAuctionUrl,
+        type: "post",
+        headers: {'X-CSRF-TOKEN': token},
+        data: {
+            league_id: leagueId,
+            player_id: playerId,
+            league_player_id: leaguePlayerId
+        },
+        success: function (response) {
+            console.log("Auction started successfully:", response);
+            
+            if (response.success) {
+                // Show the bidding section
+                const biddingSection = document.getElementById('biddingSection');
+                if (biddingSection) {
+                    biddingSection.classList.remove('hidden');
+                    biddingSection.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                // Hide available players on mobile
+                const availableSection = document.getElementById('availablePlayersSection');
+                if (availableSection && window.innerWidth < 1024) {
+                    availableSection.classList.add('hidden');
+                }
+                
+                // Show success message
+                if (typeof showMessage === 'function') {
+                    showMessage(playerName + ' auction started!', 'success');
+                }
+                
+                // Refresh the page to show the updated player card
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                alert('Error: ' + (response.message || 'Failed to start auction'));
+            }
+        },
+        error: function (xhr) {
+            console.error("Error starting auction:", xhr.responseText);
+            let errorMessage = 'Error starting auction. Please try again.';
+            
+            try {
+                const errorData = JSON.parse(xhr.responseText);
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                // Use default error message
+            }
+            
+            alert(errorMessage);
+        }
+    });
 }
 
 $(document).ready(function(){
@@ -28,10 +70,12 @@ $(document).ready(function(){
         var playerId = $(this).attr('player-id');
         var leagueId = $(this).attr('league-id');
         var leaguePlayerId = $(this).attr('league-player-id');
+        var token = $(this).attr('token') || $('meta[name="csrf-token"]').attr('content');
 
         $.ajax({
-            url: actionStartAction,   // Laravel route
+            url: actionStartAction,
             type: "post",
+            headers: {'X-CSRF-TOKEN': token},
             data: {
                 league_id: leagueId,
                 player_id: playerId,
@@ -39,9 +83,23 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Bidding started and broadcasted:", response);
+                // Refresh page to show updated player card
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             },
             error: function (xhr) {
                 console.error("Error starting bidding:", xhr.responseText);
+                let errorMessage = 'Error starting auction. Please try again.';
+                
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // Use default error message
+                }
+                
+                alert(errorMessage);
             }
         });
     });
@@ -55,8 +113,11 @@ $(document).ready(function(){
         var callBidAction = $(this).closest('[call-bid-action]').attr('call-bid-action');
         var token = $(this).closest('[token]').attr('token');
 
+        // Disable button to prevent double clicks
+        $(this).prop('disabled', true).addClass('opacity-50');
+        
         $.ajax({
-            url: callBidAction,   // Laravel route
+            url: callBidAction,
             type: "post",
             headers: {'X-CSRF-TOKEN':token},
             data: {
@@ -67,9 +128,40 @@ $(document).ready(function(){
                 league_player_id: leaguePlayerId,
             },
             success: function (response) {
-                console.log("Bidding started and broadcasted:", response);
-                $('.markSold').attr('league-player-id',leaguePlayerId);
-                $('.markSold').attr('call-team-id',response.call_team_id);
+                console.log("Bid placed successfully:", response);
+                
+                if (response.success) {
+                    $('.markSold').attr('league-player-id',leaguePlayerId);
+                    $('.markSold').attr('call-team-id',response.call_team_id);
+                    
+                    // Update current bid display
+                    $('.currentBid').text(response.new_bid);
+                    $('.bidStatus').text('Current Bid');
+                    
+                    // Show success message
+                    if (typeof showMessage === 'function') {
+                        showMessage('Bid placed successfully!', 'success');
+                    }
+                } else {
+                    alert('Error: ' + (response.message || 'Failed to place bid'));
+                }
+            },
+            error: function (xhr) {
+                console.error("Error placing bid:", xhr.responseText);
+                let errorMessage = 'Error placing bid. Please try again.';
+                
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // Use default error message
+                }
+                
+                alert(errorMessage);
+            },
+            complete: function() {
+                // Re-enable button
+                $('.callBid').prop('disabled', false).removeClass('opacity-50');
             }
         });
     });
@@ -80,10 +172,17 @@ $(document).ready(function(){
         var leaguePlayerId = $(this).attr('league-player-id');
         var callTeamId = $(this).attr('call-team-id');
 
-        $(".bidMain").addClass('hidden');
-        $(".availPlayers").removeClass('hidden');
+        if (!leaguePlayerId || !callTeamId) {
+            alert('Please place a bid first before marking as sold.');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to mark this player as SOLD?')) {
+            return;
+        }
+
         $.ajax({
-            url: markSoldAction,   // Laravel route
+            url: markSoldAction,
             type: "post",
             headers: {'X-CSRF-TOKEN':token},
             data: {
@@ -92,6 +191,36 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Player sold successfully:", response);
+                
+                if (response.success) {
+                    $(".bidMain").addClass('hidden');
+                    $(".availPlayers").removeClass('hidden');
+                    
+                    // Show success message
+                    if (typeof showMessage === 'function') {
+                        showMessage('Player marked as sold!', 'success');
+                    }
+                    
+                    // Refresh page to update player lists
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert('Error: ' + (response.message || 'Failed to mark player as sold'));
+                }
+            },
+            error: function (xhr) {
+                console.error("Error marking player as sold:", xhr.responseText);
+                let errorMessage = 'Error marking player as sold. Please try again.';
+                
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // Use default error message
+                }
+                
+                alert(errorMessage);
             }
         });
     });
@@ -101,10 +230,17 @@ $(document).ready(function(){
         var markUnSoldAction = $(this).closest('[mark-unsold-action]').attr('mark-unsold-action');
         var leaguePlayerId = $(this).attr('league-player-id');
         
-        $(".bidMain").addClass('hidden');
-        $(".availPlayers").removeClass('hidden');
+        if (!leaguePlayerId) {
+            alert('No player selected for auction.');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to mark this player as UNSOLD?')) {
+            return;
+        }
+        
         $.ajax({
-            url: markUnSoldAction,   // Laravel route
+            url: markUnSoldAction,
             type: "post",
             headers: {'X-CSRF-TOKEN':token},
             data: {
@@ -112,7 +248,45 @@ $(document).ready(function(){
             },
             success: function (response) {
                 console.log("Player marked as unsold:", response);
+                
+                if (response.success) {
+                    $(".bidMain").addClass('hidden');
+                    $(".availPlayers").removeClass('hidden');
+                    
+                    // Show success message
+                    if (typeof showMessage === 'function') {
+                        showMessage('Player marked as unsold!', 'success');
+                    }
+                    
+                    // Refresh page to update player lists
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert('Error: ' + (response.message || 'Failed to mark player as unsold'));
+                }
+            },
+            error: function (xhr) {
+                console.error("Error marking player as unsold:", xhr.responseText);
+                let errorMessage = 'Error marking player as unsold. Please try again.';
+                
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // Use default error message
+                }
+                
+                alert(errorMessage);
             }
         });
     });
+
+    // Handle image error for player photos
+    window.handleImageError = function(img) {
+        if (img && img.nextElementSibling) {
+            img.style.display = 'none';
+            img.nextElementSibling.style.display = 'flex';
+        }
+    };
 });

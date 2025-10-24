@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\League;
+use App\Models\LeagueOrganizer;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
 use App\Models\TeamAuctioneer;
@@ -479,5 +480,251 @@ class AuctionAccessService
             'auction_active' => $league->auction_active,
             'auction_access_granted' => $league->auction_access_granted,
         ];
+    }
+
+    /**
+     * Check if user is approved organizer for league.
+     *
+     * @param int $userId
+     * @param int $leagueId
+     * @return bool
+     */
+    public function isApprovedOrganizer($userId, $leagueId): bool
+    {
+        return LeagueOrganizer::where('user_id', $userId)
+            ->where('league_id', $leagueId)
+            ->where('status', 'approved')
+            ->exists();
+    }
+
+    /**
+     * Check if user is active auctioneer for league.
+     *
+     * @param int $userId
+     * @param int $leagueId
+     * @return array [bool, team_id]
+     */
+    public function isActiveAuctioneer($userId, $leagueId): array
+    {
+        $auctioneer = TeamAuctioneer::where('auctioneer_id', $userId)
+            ->where('league_id', $leagueId)
+            ->where('status', 'active')
+            ->first();
+
+        return [
+            $auctioneer !== null,
+            $auctioneer ? $auctioneer->league_team_id : null
+        ];
+    }
+
+    /**
+     * Check if user is team owner with bidding rights.
+     *
+     * @param int $userId
+     * @param int $leagueId
+     * @return array [bool, team_id]
+     */
+    public function isTeamOwnerWithBiddingRights($userId, $leagueId): array
+    {
+        $leagueTeam = LeagueTeam::where('league_id', $leagueId)
+            ->whereHas('team.owners', function($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->first();
+
+        return [
+            $leagueTeam !== null,
+            $leagueTeam ? $leagueTeam->id : null
+        ];
+    }
+
+    /**
+     * Get user's auction role for league.
+     *
+     * @param int $userId
+     * @param int $leagueId
+     * @return string (organizer|auctioneer|both|none)
+     */
+    public function getUserAuctionRole($userId, $leagueId): string
+    {
+        $isOrganizer = $this->isApprovedOrganizer($userId, $leagueId);
+        [$isAuctioneer, $teamId] = $this->isActiveAuctioneer($userId, $leagueId);
+        
+        if (!$isAuctioneer) {
+            [$isAuctioneer, $teamId] = $this->isTeamOwnerWithBiddingRights($userId, $leagueId);
+        }
+
+        if ($isOrganizer && $isAuctioneer) {
+            return 'both';
+        } elseif ($isOrganizer) {
+            return 'organizer';
+        } elseif ($isAuctioneer) {
+            return 'auctioneer';
+        }
+
+        return 'none';
+    }
+
+    /**
+     * Check if user can access auction.
+     *
+     * @param int $userId
+     * @param int $leagueId
+     * @return array [allowed, role, team_id, message]
+     */
+    public function canUserAccessAuction($userId, $leagueId): array
+    {
+        $user = User::find($userId);
+        $league = League::find($leagueId);
+
+        if (!$user || !$league) {
+            return [
+                'allowed' => false,
+                'role' => 'none',
+                'team_id' => null,
+                'message' => 'User or league not found'
+            ];
+        }
+
+        // Check if admin without role
+        if ($user->isAdmin()) {
+            $isOrganizer = $this->isApprovedOrganizer($userId, $leagueId);
+            [$isAuctioneer, $teamId] = $this->isActiveAuctioneer($userId, $leagueId);
+            
+            if (!$isAuctioneer) {
+                [$isAuctioneer, $teamId] = $this->isTeamOwnerWithBiddingRights($userId, $leagueId);
+            }
+
+            if (!$isOrganizer && !$isAuctioneer) {
+                return [
+                    'allowed' => false,
+                    'role' => 'admin_no_role',
+                    'team_id' => null,
+                    'message' => 'Admins must be assigned as organizer or auctioneer to access live auctions'
+                ];
+            }
+        }
+
+        $role = $this->getUserAuctionRole($userId, $leagueId);
+        
+        if ($role === 'none') {
+            return [
+                'allowed' => false,
+                'role' => 'none',
+                'team_id' => null,
+                'message' => 'You are not authorized to access this auction'
+            ];
+        }
+
+        // Get team ID for auctioneers
+        $teamId = null;
+        if (in_array($role, ['auctioneer', 'both'])) {
+            [$isAuctioneer, $teamId] = $this->isActiveAuctioneer($userId, $leagueId);
+            if (!$teamId) {
+                [$isOwner, $teamId] = $this->isTeamOwnerWithBiddingRights($userId, $leagueId);
+            }
+        }
+
+        return [
+            'allowed' => true,
+            'role' => $role,
+            'team_id' => $teamId,
+            'message' => 'Access granted'
+        ];
+    }
+
+    /**
+     * Validate auction start requirements.
+     *
+     * @param int $leagueId
+     * @return array [valid, data, errors]
+     */
+    public function validateAuctionStart($leagueId): array
+    {
+        $league = League::with(['leagueTeams.team', 'leagueTeams.teamAuctioneer', 'leaguePlayers'])->find($leagueId);
+        
+        if (!$league) {
+            return ['valid' => false, 'data' => [], 'errors' => ['League not found']];
+        }
+
+        $errors = [];
+        $warnings = [];
+        
+        // Check teams
+        $teamsCount = $league->leagueTeams()->count();
+        if ($teamsCount < 2) {
+            $errors[] = "At least 2 teams required (current: {$teamsCount})";
+        }
+
+        // Check players
+        $playersCount = $league->leaguePlayers()->where('status', 'available')->count();
+        if ($playersCount === 0) {
+            $errors[] = 'No players available for auction';
+        }
+
+        // Check auctioneers
+        $teamsWithoutAuctioneers = $league->leagueTeams()
+            ->whereDoesntHave('teamAuctioneer', function($query) {
+                $query->where('status', 'active');
+            })
+            ->whereDoesntHave('team.owners')
+            ->count();
+
+        if ($teamsWithoutAuctioneers > 0) {
+            $warnings[] = "{$teamsWithoutAuctioneers} teams have no auctioneer or owner assigned";
+        }
+
+        // Get auctioneers list
+        $auctioneersList = $league->leagueTeams()->with(['team', 'teamAuctioneer'])->get()->map(function($leagueTeam) {
+            $auctioneer = $leagueTeam->teamAuctioneer;
+            $owners = $leagueTeam->team->owners;
+            
+            return [
+                'team_name' => $leagueTeam->team->name,
+                'auctioneer_name' => $auctioneer ? $auctioneer->auctioneer->name : ($owners->isNotEmpty() ? $owners->first()->name . ' (Owner)' : 'None'),
+                'status' => $auctioneer ? 'Assigned' : ($owners->isNotEmpty() ? 'Owner Bids' : 'No Auctioneer')
+            ];
+        });
+
+        return [
+            'valid' => empty($errors),
+            'data' => [
+                'teams_count' => $teamsCount,
+                'players_count' => $playersCount,
+                'auctioneers_list' => $auctioneersList,
+                'auction_access' => $league->auction_access ?? 'auctioneers'
+            ],
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+
+    /**
+     * Get auctioneers list for league.
+     *
+     * @param int $leagueId
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAuctioneersList($leagueId)
+    {
+        $league = League::with(['leagueTeams.team', 'leagueTeams.teamAuctioneer'])->find($leagueId);
+        
+        if (!$league) {
+            return collect();
+        }
+
+        return $league->leagueTeams->map(function($leagueTeam) {
+            $auctioneer = $leagueTeam->teamAuctioneer;
+            $owners = $leagueTeam->team->owners;
+            
+            return [
+                'team_id' => $leagueTeam->id,
+                'team_name' => $leagueTeam->team->name,
+                'auctioneer_id' => $auctioneer ? $auctioneer->auctioneer_id : null,
+                'auctioneer_name' => $auctioneer ? $auctioneer->auctioneer->name : null,
+                'owner_name' => $owners->isNotEmpty() ? $owners->first()->name : null,
+                'access_type' => $auctioneer ? 'auctioneer' : ($owners->isNotEmpty() ? 'owner' : 'none')
+            ];
+        });
     }
 }
