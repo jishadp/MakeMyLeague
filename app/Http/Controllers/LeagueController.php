@@ -581,9 +581,21 @@ class LeagueController
             // Reset league status to active
             $league->update([
                 'status' => 'active',
+                'auction_active' => false,
+                'auction_started_at' => null,
                 'auction_ended_at' => null
             ]);
         });
+
+        // Log the reset action
+        \App\Models\AuctionLog::logAction(
+            $league->id,
+            Auth::id(),
+            'auction_reset',
+            'League',
+            $league->id,
+            ['reset_by' => Auth::user()->name]
+        );
 
         return redirect()->route('leagues.show', $league)
             ->with('success', 'Auction reset successfully! All auction data has been cleared and league is ready for a fresh auction.');
