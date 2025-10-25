@@ -81,7 +81,7 @@ class LeaguePlayerController extends Controller
 
         // Get current player count and calculate remaining slots
         $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
-        $maxPlayers = $league->max_players ?? 999;
+        $maxPlayers = $league->max_teams * $league->max_team_players;
         $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
 
         // Get players not already in this league
@@ -107,7 +107,7 @@ class LeaguePlayerController extends Controller
 
         // Get current player count and calculate remaining slots
         $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
-        $maxPlayers = $league->max_players ?? 999;
+        $maxPlayers = $league->max_teams * $league->max_team_players;
         $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
 
         // Get players not already in this league
@@ -129,7 +129,7 @@ class LeaguePlayerController extends Controller
     {
         // Check max players limit
         $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
-        $maxPlayers = $league->max_players ?? 999;
+        $maxPlayers = $league->max_teams * $league->max_team_players;
         
         if ($currentPlayerCount >= $maxPlayers) {
             return back()->withErrors(['user_id' => "League is full. Maximum {$maxPlayers} players allowed."]);
@@ -204,7 +204,7 @@ class LeaguePlayerController extends Controller
     {
         // Check current player count and max limit
         $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
-        $maxPlayers = $league->max_players ?? 999;
+        $maxPlayers = $league->max_teams * $league->max_team_players;
         $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
 
         $request->validate([

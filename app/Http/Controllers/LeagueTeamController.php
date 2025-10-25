@@ -49,7 +49,7 @@ class LeagueTeamController extends Controller
     {
         // Check current team count and calculate remaining slots
         $currentTeamCount = LeagueTeam::where('league_id', $league->id)->count();
-        $maxTeams = $league->max_teams ?? 999;
+        $maxTeams = $league->max_teams;
         $remainingSlots = max(0, $maxTeams - $currentTeamCount);
 
         // Get teams that are not already in this league
@@ -69,7 +69,7 @@ class LeagueTeamController extends Controller
     {
         // Check max teams limit
         $currentTeamCount = LeagueTeam::where('league_id', $league->id)->count();
-        $maxTeams = $league->max_teams ?? 999;
+        $maxTeams = $league->max_teams;
         
         if ($currentTeamCount >= $maxTeams) {
             return back()->withErrors(['team_id' => "League is full. Maximum {$maxTeams} teams allowed."]);

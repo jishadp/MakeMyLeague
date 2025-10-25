@@ -157,11 +157,9 @@
                                     </h3>
                                     <p class="text-sm text-gray-600 mt-1">
                                         Select players to add to {{ $league->name }}
-                                        @if($remainingSlots < 999)
-                                            <span class="inline-flex items-center ml-2 px-2 py-0.5 rounded text-xs font-medium {{ $remainingSlots > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ $currentPlayerCount }}/{{ $maxPlayers }} players | {{ $remainingSlots }} slots remaining
-                                            </span>
-                                        @endif
+                                        <span class="inline-flex items-center ml-2 px-2 py-0.5 rounded text-xs font-medium {{ $remainingSlots > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $currentPlayerCount }}/{{ $maxPlayers }} players | {{ $remainingSlots }} slots remaining
+                                        </span>
                                     </p>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-3">
@@ -175,7 +173,7 @@
                                                class="pl-10 bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
                                     </div>
                                     <div class="flex gap-2">
-                                        <button type="button" id="selectAllBtn" class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200" {{ $remainingSlots == 0 ? 'disabled' : '' }}>
+                                        <button type="button" id="selectAllBtn" class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" {{ $remainingSlots == 0 ? 'disabled' : '' }}>
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
