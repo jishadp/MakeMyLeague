@@ -200,7 +200,7 @@ class LeagueController extends Controller
             $league->fixtures()->delete();
             $league->leagueGroups()->delete();
             $league->finances()->delete();
-            $league->organizers()->delete();
+            \DB::table('league_organizers')->where('league_id', $league->id)->delete();
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
             \DB::table('auction_logs')->where('league_id', $league->id)->delete();
             \DB::table('auctions')->where('league_id', $league->id)->delete();
@@ -340,6 +340,12 @@ class LeagueController extends Controller
             
             // Delete all finances
             $league->finances()->delete();
+            
+            // Delete organizers and auctioneers
+            \DB::table('league_organizers')->where('league_id', $league->id)->delete();
+            \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
+            \DB::table('auction_logs')->where('league_id', $league->id)->delete();
+            \DB::table('auctions')->where('league_id', $league->id)->delete();
             
             // Reset auction status
             $league->update([
