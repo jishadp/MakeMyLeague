@@ -47,6 +47,11 @@ class LeagueTeamController extends Controller
      */
     public function create(League $league): View
     {
+        // Check current team count and calculate remaining slots
+        $currentTeamCount = LeagueTeam::where('league_id', $league->id)->count();
+        $maxTeams = $league->max_teams ?? 999;
+        $remainingSlots = max(0, $maxTeams - $currentTeamCount);
+
         // Get teams that are not already in this league
         $availableTeams = Team::whereNotIn('id', function($query) use ($league) {
             $query->select('team_id')
@@ -54,7 +59,7 @@ class LeagueTeamController extends Controller
                   ->where('league_id', $league->id);
         })->get();
 
-        return view('league-teams.create', compact('league', 'availableTeams'));
+        return view('league-teams.create', compact('league', 'availableTeams', 'remainingSlots', 'maxTeams', 'currentTeamCount'));
     }
 
     /**
@@ -62,6 +67,14 @@ class LeagueTeamController extends Controller
      */
     public function store(Request $request, League $league)
     {
+        // Check max teams limit
+        $currentTeamCount = LeagueTeam::where('league_id', $league->id)->count();
+        $maxTeams = $league->max_teams ?? 999;
+        
+        if ($currentTeamCount >= $maxTeams) {
+            return back()->withErrors(['team_id' => "League is full. Maximum {$maxTeams} teams allowed."]);
+        }
+
         $request->validate([
             'team_id' => 'required|exists:teams,id|unique:league_teams,team_id,NULL,id,league_id,' . $league->id,
             'wallet_balance' => 'nullable|numeric|min:0|max:' . $league->team_wallet_limit,

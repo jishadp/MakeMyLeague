@@ -155,7 +155,14 @@
                                         Available Players
                                         <span class="ml-2 text-sm font-normal text-gray-500">({{ $availablePlayers->count() }} players)</span>
                                     </h3>
-                                    <p class="text-sm text-gray-600 mt-1">Select players to add to {{ $league->name }}</p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Select players to add to {{ $league->name }}
+                                        @if($remainingSlots < 999)
+                                            <span class="inline-flex items-center ml-2 px-2 py-0.5 rounded text-xs font-medium {{ $remainingSlots > 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $currentPlayerCount }}/{{ $maxPlayers }} players | {{ $remainingSlots }} slots remaining
+                                            </span>
+                                        @endif
+                                    </p>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <div class="relative">
@@ -168,11 +175,11 @@
                                                class="pl-10 bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
                                     </div>
                                     <div class="flex gap-2">
-                                        <button type="button" id="selectAllBtn" class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
+                                        <button type="button" id="selectAllBtn" class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200" {{ $remainingSlots == 0 ? 'disabled' : '' }}>
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
-                                            Select All
+                                            Select {{ $remainingSlots > 0 && $remainingSlots < $availablePlayers->count() ? $remainingSlots : 'All' }}
                                         </button>
                                         <button type="button" id="clearAllBtn" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +195,15 @@
                         <div class="p-6">
                             <div class="max-h-96 overflow-y-auto">
                                 <div class="space-y-3" id="playerCheckboxContainer">
-                                    @if($availablePlayers->isEmpty())
+                                    @if($remainingSlots == 0)
+                                        <div class="text-center py-12 bg-red-50 rounded-xl border-2 border-dashed border-red-200">
+                                            <svg class="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                            </svg>
+                                            <p class="text-red-600 font-medium">League is full!</p>
+                                            <p class="text-sm text-red-500 mt-1">Maximum {{ $maxPlayers }} players reached. Cannot add more players.</p>
+                                        </div>
+                                    @elseif($availablePlayers->isEmpty())
                                         <div class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                                             <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -301,7 +316,8 @@
                                     Cancel
                                 </a>
                                 <button type="submit" 
-                                        class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                                        class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                        {{ $remainingSlots == 0 ? 'disabled' : '' }}>
                                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
@@ -327,12 +343,22 @@
         const clearAllBtn = document.getElementById('clearAllBtn');
         const selectedCountElem = document.getElementById('selectedCount');
         const selectedCountFooterElem = document.getElementById('selectedCountFooter');
+        const remainingSlots = {{ $remainingSlots }};
         
         // Update selected count
         function updateSelectedCount() {
             const selectedCount = document.querySelectorAll('.player-checkbox:checked').length;
             selectedCountElem.textContent = selectedCount;
             selectedCountFooterElem.textContent = selectedCount;
+            
+            // Show warning if exceeding limit
+            if (remainingSlots > 0 && selectedCount > remainingSlots) {
+                selectedCountElem.classList.add('text-red-600');
+                selectedCountFooterElem.classList.add('text-red-600');
+            } else {
+                selectedCountElem.classList.remove('text-red-600');
+                selectedCountFooterElem.classList.remove('text-red-600');
+            }
         }
         
         // Setup custom checkbox styling
@@ -341,6 +367,15 @@
             
             // Handle checkbox change for custom styling
             checkbox.addEventListener('change', function() {
+                const selectedCount = document.querySelectorAll('.player-checkbox:checked').length;
+                
+                // Prevent selecting more than remaining slots
+                if (this.checked && remainingSlots > 0 && selectedCount > remainingSlots) {
+                    this.checked = false;
+                    alert(`You can only select ${remainingSlots} more player(s). League limit: ${remainingSlots} remaining slots.`);
+                    return;
+                }
+                
                 if (this.checked) {
                     label.classList.add('bg-green-600', 'border-green-600');
                     label.classList.remove('border-gray-300');
@@ -372,14 +407,18 @@
         
         // Select all button
         selectAllBtn.addEventListener('click', function() {
+            let selectedCount = 0;
+            const maxToSelect = remainingSlots > 0 ? remainingSlots : 999999;
+            
             playerCheckboxes.forEach(checkbox => {
                 const item = checkbox.closest('.player-item');
-                if (item.style.display !== 'none') {
+                if (item.style.display !== 'none' && selectedCount < maxToSelect) {
                     checkbox.checked = true;
                     const label = checkbox.nextElementSibling;
                     label.classList.add('bg-green-600', 'border-green-600');
                     label.classList.remove('border-gray-300');
                     label.querySelector('svg').classList.remove('opacity-0');
+                    selectedCount++;
                 }
             });
             updateSelectedCount();

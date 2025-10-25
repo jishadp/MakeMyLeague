@@ -87,6 +87,7 @@ class LeaguePlayer extends Model
         }
         
         $count = static::whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")
+                      ->where('league_id', $this->league_id)
                       ->where('id', '!=', $this->id ?? 0)
                       ->count();
 

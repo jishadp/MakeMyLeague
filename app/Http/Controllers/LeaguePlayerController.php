@@ -79,6 +79,11 @@ class LeaguePlayerController extends Controller
             ->where('league_id', $league->id)
             ->get();
 
+        // Get current player count and calculate remaining slots
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+        $maxPlayers = $league->max_players ?? 999;
+        $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
+
         // Get players not already in this league
         $availablePlayers = User::whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
@@ -88,7 +93,7 @@ class LeaguePlayerController extends Controller
             ->with('position')
             ->get();
 
-        return view('league-players.create', compact('league', 'leagueTeams', 'availablePlayers'));
+        return view('league-players.create', compact('league', 'leagueTeams', 'availablePlayers', 'remainingSlots', 'maxPlayers', 'currentPlayerCount'));
     }
     
     /**
@@ -100,6 +105,11 @@ class LeaguePlayerController extends Controller
             ->where('league_id', $league->id)
             ->get();
 
+        // Get current player count and calculate remaining slots
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+        $maxPlayers = $league->max_players ?? 999;
+        $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
+
         // Get players not already in this league
         $availablePlayers = User::whereNotIn('id', function($query) use ($league) {
                 $query->select('user_id')
@@ -109,7 +119,7 @@ class LeaguePlayerController extends Controller
             ->with('position')
             ->get();
 
-        return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers'));
+        return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers', 'remainingSlots', 'maxPlayers', 'currentPlayerCount'));
     }
 
     /**
@@ -117,6 +127,14 @@ class LeaguePlayerController extends Controller
      */
     public function store(Request $request, League $league)
     {
+        // Check max players limit
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+        $maxPlayers = $league->max_players ?? 999;
+        
+        if ($currentPlayerCount >= $maxPlayers) {
+            return back()->withErrors(['user_id' => "League is full. Maximum {$maxPlayers} players allowed."]);
+        }
+
         // Determine validation rules based on retention status
         $isRetention = $request->has('retention') && $request->retention;
         
@@ -184,9 +202,22 @@ class LeaguePlayerController extends Controller
      */
     public function bulkStore(Request $request, League $league)
     {
+        // Check current player count and max limit
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+        $maxPlayers = $league->max_players ?? 999;
+        $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
+
         $request->validate([
             'league_team_id' => 'nullable|exists:league_teams,id',
-            'user_ids' => 'required|array',
+            'user_ids' => [
+                'required',
+                'array',
+                function ($attribute, $value, $fail) use ($remainingSlots) {
+                    if (count($value) > $remainingSlots) {
+                        $fail("You can only add {$remainingSlots} more player(s). Selected: " . count($value));
+                    }
+                },
+            ],
             'user_ids.*' => [
                 'exists:users,id',
                 function ($attribute, $value, $fail) use ($request, $league) {
@@ -195,7 +226,8 @@ class LeaguePlayerController extends Controller
                         ->exists();
                     
                     if ($exists) {
-                        $fail("Player with ID {$value} is already registered in this league.");
+                        $user = User::find($value);
+                        $fail("Player '{$user->name}' is already registered in this league.");
                     }
                 },
             ],
