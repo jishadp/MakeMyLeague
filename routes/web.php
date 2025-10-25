@@ -248,6 +248,7 @@ Route::middleware('auth')->group(function () {
     Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit')->middleware('league.organizer');
     Route::put('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'update'])->name('league-teams.update')->middleware('league.organizer');
     Route::delete('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'destroy'])->name('league-teams.destroy')->middleware('league.organizer');
+    Route::post('leagues/{league}/teams/{leagueTeam}/replace', [LeagueTeamController::class, 'replace'])->name('league-teams.replace')->middleware('league.organizer');
     Route::patch('leagues/{league}/teams/{leagueTeam}/status', [LeagueTeamController::class, 'updateStatus'])->name('league-teams.updateStatus')->middleware('league.organizer');
     Route::patch('leagues/{league}/teams/{leagueTeam}/wallet', [LeagueTeamController::class, 'updateWallet'])->name('league-teams.updateWallet')->middleware('league.organizer');
 

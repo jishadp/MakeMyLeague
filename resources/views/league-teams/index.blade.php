@@ -221,13 +221,11 @@
                                            class="text-indigo-600 hover:text-indigo-900">View</a>
                                         <a href="{{ route('league-teams.edit', [$league, $leagueTeam]) }}"
                                            class="text-blue-600 hover:text-blue-900">Edit</a>
-                                        <form action="{{ route('league-teams.destroy', [$league, $leagueTeam]) }}"
-                                              method="POST" class="inline"
-                                              onsubmit="return confirm('Are you sure you want to remove this team from the league?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
-                                        </form>
+                                        <button onclick="openReplaceModal({{ $leagueTeam->id }}, '{{ $leagueTeam->team->name }}')" 
+                                                class="text-orange-600 hover:text-orange-900" 
+                                                {{ $league->auction_started_at ? 'disabled title="Cannot replace after auction started"' : '' }}>
+                                            Replace
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -273,3 +271,48 @@
     </div>
 </div>
 @endsection
+
+<!-- Replace Team Modal -->
+<div id="replaceModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Replace Team</h3>
+            <p class="text-sm text-gray-600 mb-4">Replace <span id="oldTeamName" class="font-semibold"></span> with:</p>
+            
+            <form id="replaceForm" method="POST">
+                @csrf
+                <select name="new_team_id" required class="w-full border-gray-300 rounded-lg mb-4">
+                    <option value="">Select new team...</option>
+                    @foreach(\App\Models\Team::whereNotIn('id', function($query) use ($league) {
+                        $query->select('team_id')->from('league_teams')->where('league_id', $league->id);
+                    })->get() as $team)
+                        <option value="{{ $team->id }}">{{ $team->name }}</option>
+                    @endforeach
+                </select>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeReplaceModal()" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                        Replace Team
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openReplaceModal(leagueTeamId, teamName) {
+    document.getElementById('oldTeamName').textContent = teamName;
+    document.getElementById('replaceForm').action = '{{ route("league-teams.replace", [$league, ":id"]) }}'.replace(':id', leagueTeamId);
+    document.getElementById('replaceModal').classList.remove('hidden');
+}
+
+function closeReplaceModal() {
+    document.getElementById('replaceModal').classList.add('hidden');
+}
+</script>

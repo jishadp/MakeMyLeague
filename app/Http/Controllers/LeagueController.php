@@ -167,6 +167,28 @@ class LeagueController
      */
     public function update(Request $request, League $league): RedirectResponse
     {
+        $user = Auth::user();
+        $isAdmin = $user->isAdmin();
+        
+        // Check if teams or players exist
+        $hasTeams = $league->leagueTeams()->count() > 0;
+        $hasPlayers = $league->leaguePlayers()->count() > 0;
+        
+        // Prevent editing max_teams if teams already added
+        if ($hasTeams && $request->max_teams != $league->max_teams) {
+            return back()->withErrors(['max_teams' => 'Cannot change max teams after teams have been added. Current teams: ' . $league->leagueTeams()->count()]);
+        }
+        
+        // Prevent editing max_team_players if players already added
+        if ($hasPlayers && $request->max_team_players != $league->max_team_players) {
+            return back()->withErrors(['max_team_players' => 'Cannot change max players per team after players have been added. Current players: ' . $league->leaguePlayers()->count()]);
+        }
+        
+        // Only admins can change status
+        if (!$isAdmin && $request->has('status') && $request->status != $league->status) {
+            return back()->withErrors(['status' => 'Only admins can change league status.']);
+        }
+        
         $validated = $request->validate(League::rules());
 
         // Handle default league setting

@@ -146,11 +146,48 @@ class LeagueTeamController extends Controller
      */
     public function destroy(League $league, LeagueTeam $leagueTeam)
     {
+        // Check if auction has started
+        if ($league->auction_started_at) {
+            return back()->withErrors(['error' => 'Cannot remove team after auction has started. Use replace instead.']);
+        }
+
         $leagueTeam->delete();
 
         return redirect()
             ->route('league-teams.index', $league)
             ->with('success', 'Team removed from league successfully!');
+    }
+
+    /**
+     * Replace a league team with another team.
+     */
+    public function replace(Request $request, League $league, LeagueTeam $leagueTeam)
+    {
+        // Check if auction has started
+        if ($league->auction_started_at) {
+            return back()->withErrors(['error' => 'Cannot replace team after auction has started.']);
+        }
+
+        $request->validate([
+            'new_team_id' => 'required|exists:teams,id|unique:league_teams,team_id,NULL,id,league_id,' . $league->id,
+        ]);
+
+        \DB::transaction(function () use ($leagueTeam, $request) {
+            $oldTeamName = $leagueTeam->team->name;
+            
+            // Update the team_id
+            $leagueTeam->update(['team_id' => $request->new_team_id]);
+            
+            // Update all related league players slugs (they contain team name)
+            $leagueTeam->leaguePlayers()->each(function($player) {
+                $player->slug = null;
+                $player->save(); // Will regenerate slug with new team name
+            });
+        });
+
+        return redirect()
+            ->route('league-teams.index', $league)
+            ->with('success', 'Team replaced successfully!');
     }
 
     /**

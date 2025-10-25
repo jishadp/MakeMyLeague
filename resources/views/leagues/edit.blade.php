@@ -6,6 +6,12 @@
     <div class="max-w-6xl mx-auto py-6 sm:py-12 px-4 sm:px-6 lg:px-10">
         <h1 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-10 text-gray-800">🏆 Edit League</h1>
 
+
+@php
+    $hasTeams = $league->leagueTeams()->count() > 0;
+    $hasPlayers = $league->leaguePlayers()->count() > 0;
+    $isAdmin = auth()->user()->isAdmin();
+@endphp
         <form action="{{ route('leagues.update', $league) }}" method="POST" id="leagueForm" class="space-y-6 sm:space-y-10">
             @csrf
             @method('PUT')
@@ -62,7 +68,7 @@
                     </div>
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
-                        <select id="status" name="status" required
+                        <select id="status" name="status" {{ !$isAdmin ? "disabled" : "" }} required
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4">
                             <option value="pending" {{ old('status', $league->status) == 'pending' ? 'selected' : '' }}>
                                 Pending</option>
@@ -74,6 +80,9 @@
                                 {{ old('status', $league->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
                         @error('status')
+                        @if(!$isAdmin)
+                            <p class="text-yellow-600 text-xs mt-1">⚠️ Only admins can change league status</p>
+                        @endif
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -320,23 +329,29 @@
                     <div>
                         <label for="max_teams" class="block text-sm font-medium text-gray-700 mb-1">Maximum Teams
                             *</label>
-                        <input type="number" id="max_teams" name="max_teams"
+                        <input type="number" id="max_teams" name="max_teams" {{ $hasTeams ? "readonly" : "" }}
                             value="{{ old('max_teams', $league->max_teams) }}" min="2" required
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4"
                             onchange="updateTotalPlayers()">
                         @error('max_teams')
+                        @if($hasTeams)
+                            <p class="text-yellow-600 text-xs mt-1">⚠️ Cannot edit: {{ $league->leagueTeams()->count() }} teams already added</p>
+                        @endif
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label for="max_team_players" class="block text-sm font-medium text-gray-700 mb-1">Players per
                             Team *</label>
-                        <input type="number" id="max_team_players" name="max_team_players"
+                        <input type="number" id="max_team_players" name="max_team_players" {{ $hasPlayers ? "readonly" : "" }}
                             value="{{ old('max_team_players', $league->max_team_players) }}" min="1" required
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm py-3 px-4"
                             onchange="updateTotalPlayers()">
                         <p class="text-sm text-gray-500 mt-1">Total players capacity: <span id="total-players">{{ $league->max_teams * $league->max_team_players }}</span></p>
                         @error('max_team_players')
+                        @if($hasPlayers)
+                            <p class="text-yellow-600 text-xs mt-1">⚠️ Cannot edit: {{ $league->leaguePlayers()->count() }} players already added</p>
+                        @endif
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
