@@ -50,7 +50,7 @@
                     <select name="status" id="status" required
                             class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('status') border-red-500 @enderror">
                         <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="available" {{ old('status') === 'available' ? 'selected' : '' }}>Available</option>
+                        <option value="available" {{ old('status', 'available') === 'available' ? 'selected' : '' }}>Available</option>
                     </select>
                     @error('status')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

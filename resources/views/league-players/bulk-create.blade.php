@@ -106,8 +106,8 @@
                                            id="base_price" 
                                            min="0"
                                            step="0.01"
-                                           value="{{ old('base_price', 1000) }}"
-                                           placeholder="1000.00"
+                                           value="{{ old('base_price', $league->team_wallet_limit * 0.01) }}"
+                                           placeholder="{{ number_format($league->team_wallet_limit * 0.01, 2) }}"
                                            required
                                            class="w-full pl-10 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 @error('base_price') border-red-500 @enderror">
                                 </div>

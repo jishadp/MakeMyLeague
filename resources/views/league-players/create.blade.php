@@ -102,7 +102,7 @@
                                id="base_price" 
                                min="0"
                                step="0.01"
-                               value="{{ old('base_price', 1000) }}"
+                               value="{{ old('base_price', $league->team_wallet_limit * 0.01) }}"
                                placeholder="1000.00"
                                class="w-full pl-8 border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('base_price') border-red-500 @enderror">
                     </div>
@@ -124,7 +124,7 @@
                     <select name="status" id="status" required
                             class="select2 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 @error('status') border-red-500 @enderror">
                         <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="available" {{ old('status') === 'available' ? 'selected' : '' }}>Available</option>
+                        <option value="available" {{ old('status', 'available') === 'available' ? 'selected' : '' }}>Available</option>
                         <option value="sold" {{ old('status') === 'sold' ? 'selected' : '' }}>Sold</option>
                         <option value="unsold" {{ old('status') === 'unsold' ? 'selected' : '' }}>Unsold</option>
                         <option value="skip" {{ old('status') === 'skip' ? 'selected' : '' }}>Skip</option>
