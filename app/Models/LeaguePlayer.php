@@ -79,10 +79,10 @@ class LeaguePlayer extends Model
             if ($leagueTeam && $leagueTeam->team) {
                 // Player assigned to a team
                 $teamName = $leagueTeam->team->name;
-                $slug = Str::slug($user->name . '-' . $teamName);
+                $slug = Str::slug($user->name . '-' . $teamName . '-' . $this->league_id);
             } else {
                 // Player available for auction (no team)
-                $slug = Str::slug($user->name . '-available');
+                $slug = Str::slug($user->name . '-available-' . $this->league_id);
             }
         }
         

@@ -193,24 +193,31 @@ class LeagueController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        // Check if league has teams or players
-        if ($league->leagueTeams()->count() > 0 || $league->leaguePlayers()->count() > 0) {
-            return redirect()->route('admin.leagues.index')
-                ->with('error', 'Cannot delete league. It has registered teams or players.');
-        }
+        \DB::transaction(function () use ($league) {
+            // Delete all related data
+            $league->leaguePlayers()->delete();
+            $league->leagueTeams()->delete();
+            $league->fixtures()->delete();
+            $league->leagueGroups()->delete();
+            $league->finances()->delete();
+            $league->organizers()->delete();
+            \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
+            \DB::table('auction_logs')->where('league_id', $league->id)->delete();
+            \DB::table('auctions')->where('league_id', $league->id)->delete();
+            
+            // Delete associated files
+            if ($league->logo && Storage::disk('public')->exists($league->logo)) {
+                Storage::disk('public')->delete($league->logo);
+            }
+            if ($league->banner && Storage::disk('public')->exists($league->banner)) {
+                Storage::disk('public')->delete($league->banner);
+            }
 
-        // Delete associated files
-        if ($league->logo && Storage::disk('public')->exists($league->logo)) {
-            Storage::disk('public')->delete($league->logo);
-        }
-        if ($league->banner && Storage::disk('public')->exists($league->banner)) {
-            Storage::disk('public')->delete($league->banner);
-        }
-
-        $league->delete();
+            $league->delete();
+        });
 
         return redirect()->route('admin.leagues.index')
-            ->with('success', 'League deleted successfully!');
+            ->with('success', 'League and all related data deleted successfully!');
     }
 
     /**
