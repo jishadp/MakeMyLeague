@@ -79,6 +79,18 @@
                     </div>
                 </a>
 
+                <a href="{{ route('admin.league-players.index') }}" class="flex items-center p-4 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors">
+                    <div class="bg-purple-100 rounded-full p-2 mr-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-purple-900">League Players</h4>
+                        <p class="text-sm text-purple-700">View all league players</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('admin.players.index') }}" class="flex items-center p-4 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors">
                     <div class="bg-purple-100 rounded-full p-2 mr-3">
                         <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">

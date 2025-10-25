@@ -214,6 +214,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'destroy'])->name('leagues.destroy');
         Route::get('leagues/districts-by-state', [\App\Http\Controllers\Admin\LeagueController::class, 'getDistrictsByState'])->name('leagues.districts-by-state');
         Route::get('leagues/local-bodies-by-district', [\App\Http\Controllers\Admin\LeagueController::class, 'getLocalBodiesByDistrict'])->name('leagues.local-bodies-by-district');
+        Route::get('league-players', [\App\Http\Controllers\Admin\LeaguePlayerController::class, 'index'])->name('league-players.index');
     });
 
     // Auction access request route (placed before resource routes to avoid conflicts)

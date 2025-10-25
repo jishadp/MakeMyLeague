@@ -194,6 +194,12 @@ class LeagueController extends Controller
         }
 
         \DB::transaction(function () use ($league) {
+            // Delete auctions first (via league_player_id)
+            $leaguePlayerIds = $league->leaguePlayers()->pluck('id');
+            if ($leaguePlayerIds->isNotEmpty()) {
+                \DB::table('auctions')->whereIn('league_player_id', $leaguePlayerIds)->delete();
+            }
+            
             // Delete all related data
             $league->leaguePlayers()->delete();
             $league->leagueTeams()->delete();
@@ -203,7 +209,6 @@ class LeagueController extends Controller
             \DB::table('league_organizers')->where('league_id', $league->id)->delete();
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
             \DB::table('auction_logs')->where('league_id', $league->id)->delete();
-            \DB::table('auctions')->where('league_id', $league->id)->delete();
             
             // Delete associated files
             if ($league->logo && Storage::disk('public')->exists($league->logo)) {
@@ -326,28 +331,23 @@ class LeagueController extends Controller
         }
 
         \DB::transaction(function () use ($league) {
-            // Delete all league players
+            // Delete auctions first (via league_player_id)
+            $leaguePlayerIds = $league->leaguePlayers()->pluck('id');
+            if ($leaguePlayerIds->isNotEmpty()) {
+                \DB::table('auctions')->whereIn('league_player_id', $leaguePlayerIds)->delete();
+            }
+            
+            // Delete all related data (same as delete)
             $league->leaguePlayers()->delete();
-            
-            // Delete all league teams
             $league->leagueTeams()->delete();
-            
-            // Delete all fixtures
             $league->fixtures()->delete();
-            
-            // Delete all league groups
             $league->leagueGroups()->delete();
-            
-            // Delete all finances
             $league->finances()->delete();
-            
-            // Delete organizers and auctioneers
             \DB::table('league_organizers')->where('league_id', $league->id)->delete();
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
             \DB::table('auction_logs')->where('league_id', $league->id)->delete();
-            \DB::table('auctions')->where('league_id', $league->id)->delete();
             
-            // Reset auction status
+            // Reset league to fresh state
             $league->update([
                 'auction_active' => false,
                 'auction_started_at' => null,
@@ -359,7 +359,7 @@ class LeagueController extends Controller
         });
 
         return redirect()->route('admin.leagues.index')
-            ->with('success', 'League restarted successfully! All teams, players, and auction data have been cleared.');
+            ->with('success', 'League restarted successfully! All teams, players, organizers, and auction data have been cleared.');
     }
 }
 
