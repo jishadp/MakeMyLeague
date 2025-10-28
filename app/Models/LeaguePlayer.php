@@ -56,8 +56,12 @@ class LeaguePlayer extends Model
         if (!$this->relationLoaded('user')) {
             $this->load('user');
         }
+        if (!$this->relationLoaded('league')) {
+            $this->load('league');
+        }
         
         $user = $this->user;
+        $league = $this->league;
         $leagueTeam = null;
         
         if ($this->league_team_id) {
@@ -68,21 +72,23 @@ class LeaguePlayer extends Model
         }
         
         if (!$user) {
-            // Fallback: load by IDs if relationships still aren't available
             $user = \App\Models\User::find($this->user_id);
         }
+        if (!$league) {
+            $league = \App\Models\League::find($this->league_id);
+        }
         
-        if (!$user) {
-            // Final fallback slug if relationships aren't available
+        if (!$user || !$league) {
             $slug = 'league-player-' . ($this->id ?? uniqid());
         } else {
+            $leagueName = Str::slug($league->name);
+            $season = $league->season;
+            
             if ($leagueTeam && $leagueTeam->team) {
-                // Player assigned to a team
                 $teamName = $leagueTeam->team->name;
-                $slug = Str::slug($user->name . '-' . $teamName . '-' . $this->league_id);
+                $slug = Str::slug($user->name . '-' . $teamName . '-' . $leagueName . '-s' . $season);
             } else {
-                // Player available for auction (no team)
-                $slug = Str::slug($user->name . '-available-' . $this->league_id);
+                $slug = Str::slug($user->name . '-available-' . $leagueName . '-s' . $season);
             }
         }
         
