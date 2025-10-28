@@ -356,8 +356,8 @@
 </div>
 
 <!-- Organizer Management Modal -->
-<div id="organizerModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+<div id="organizerModal" class="hidden fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center p-4" style="backdrop-filter: blur(4px);">
+    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto border border-blue-100">
         <div class="mb-6">
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Manage Organizers</h3>
             <p class="text-sm text-gray-600" id="leagueOrganizerInfo"></p>
@@ -374,20 +374,20 @@
             <label class="block text-sm font-semibold text-gray-700 mb-3">Add New Organizer</label>
             <div class="relative">
                 <input type="text" id="userOrganizerSearch" placeholder="Type to search users..." 
-                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                       class="w-full px-4 py-3 rounded-xl border-0 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-gray-800 placeholder-gray-500 shadow-sm">
                 <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
             </div>
-            <div id="organizerSearchResults" class="mt-3 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl"></div>
+            <div id="organizerSearchResults" class="mt-3 max-h-64 overflow-y-auto bg-white rounded-xl shadow-sm hidden"></div>
         </div>
         
         <!-- Action Buttons -->
         <div class="flex space-x-4">
             <button onclick="closeOrganizerModal()" 
-                    class="flex-1 px-6 py-3 rounded-xl text-gray-700 font-semibold bg-gray-100 hover:bg-gray-200 transition-all">
+                    class="flex-1 px-6 py-3 rounded-xl text-gray-700 font-semibold bg-white hover:bg-gray-50 transition-all shadow-sm">
                 Close
             </button>
         </div>
@@ -424,7 +424,6 @@ function openOrganizerModal(leagueId, leagueName, organizers) {
     document.getElementById('userOrganizerSearch').value = '';
     document.getElementById('organizerSearchResults').classList.add('hidden');
     document.getElementById('organizerModal').classList.remove('hidden');
-    searchUsers('');
 }
 
 function closeOrganizerModal() {
@@ -467,11 +466,20 @@ function addOrganizer(userId, userName) {
     });
 }
 
-function searchUsers(query = '') {
-    fetch(`/admin/leagues/search-users?query=${encodeURIComponent(query)}`, {
+function searchUsers(query) {
+    if (query.length < 2) {
+        document.getElementById('organizerSearchResults').classList.add('hidden');
+        return;
+    }
+    
+    fetch(`/team-transfer/search?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        credentials: 'same-origin',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         }
     })
     .then(response => response.json())
@@ -482,29 +490,28 @@ function searchUsers(query = '') {
         if (data.users && data.users.length > 0) {
             data.users.forEach(user => {
                 resultsDiv.innerHTML += `
-                    <div class="p-3 hover:bg-purple-100 cursor-pointer rounded-lg transition-all" onclick="addOrganizer(${user.id}, '${user.name.replace(/'/g, "\\'")}')">  
+                    <div class="p-3 hover:bg-purple-50 cursor-pointer transition-all border-b border-gray-100 last:border-0" onclick="addOrganizer(${user.id}, '${user.name.replace(/'/g, "\\'")}')">  
                         <div class="font-medium text-gray-800">${user.name}</div>
-                        <div class="text-xs text-gray-500">${user.email || ''}</div>
+                        <div class="text-xs text-gray-500">${user.email || user.phone || ''}</div>
                     </div>
                 `;
             });
             resultsDiv.classList.remove('hidden');
         } else {
-            resultsDiv.innerHTML = '<p class="p-3 text-sm text-gray-500">No users found</p>';
+            resultsDiv.innerHTML = '<p class="p-3 text-sm text-gray-500 text-center">No users found</p>';
             resultsDiv.classList.remove('hidden');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('organizerSearchResults').innerHTML = '<p class="p-3 text-sm text-red-500 text-center">Error loading users</p>';
+        document.getElementById('organizerSearchResults').classList.remove('hidden');
     });
 }
 
 document.getElementById('userOrganizerSearch').addEventListener('input', function(e) {
     const query = e.target.value.trim();
     searchUsers(query);
-});
-
-document.getElementById('userOrganizerSearch').addEventListener('focus', function(e) {
-    if (e.target.value.trim() === '') {
-        searchUsers('');
-    }
 });
 </script>
 @endsection
