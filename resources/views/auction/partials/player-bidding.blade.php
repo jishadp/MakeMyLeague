@@ -133,13 +133,13 @@
                                 Select a Player
                             @endif
                         </p>
-                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2">₹ <span class="currentBid">
+                        <p class="font-bold text-2xl sm:text-3xl lg:text-4xl text-blue-600 mb-2"><span class="currentBid">
                             @if(isset($currentHighestBid) && $currentHighestBid)
-                                {{ $currentHighestBid->amount }}
+                                ₹{{ $currentHighestBid->amount }}
                             @elseif(isset($currentPlayer))
-                                {{ $currentPlayer->base_price ?? 0 }}
+                                ₹{{ $currentPlayer->base_price ?? 0 }}
                             @else
-                                0
+                                ₹0
                             @endif
                         </span></p>
                         <p class="text-gray-600 text-sm font-medium bidTeam">
