@@ -203,6 +203,7 @@
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">League</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Game</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Organizer</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Season</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Teams/Players</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
@@ -245,6 +246,16 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $league->localBody->name }}</div>
                                 <div class="text-xs text-gray-500">{{ $league->localBody->district->name }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($league->approvedOrganizers->isNotEmpty())
+                                    <div class="text-sm text-gray-900">{{ $league->approvedOrganizers->first()->name }}</div>
+                                    @if($league->approvedOrganizers->count() > 1)
+                                        <div class="text-xs text-gray-500">+{{ $league->approvedOrganizers->count() - 1 }} more</div>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-gray-400">No organizer</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <span class="text-sm font-medium text-gray-900">{{ $league->season }}</span>
@@ -316,7 +327,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="text-gray-400 text-lg">No leagues found</div>
                             </td>
                         </tr>

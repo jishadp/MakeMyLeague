@@ -41,7 +41,7 @@ class LeagueController extends Controller
         ];
 
         // Build query with filters
-        $query = League::with(['game', 'localBody.district.state', 'leagueTeams', 'leaguePlayers']);
+        $query = League::with(['game', 'localBody.district.state', 'leagueTeams', 'leaguePlayers', 'approvedOrganizers']);
 
         // Filter by status
         if ($request->filled('status')) {
