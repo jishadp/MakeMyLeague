@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class LeagueController extends Controller
 {
@@ -330,19 +331,25 @@ class LeagueController extends Controller
             abort(403, 'Unauthorized access');
         }
 
+        // Check for duplicate slugs
+        $duplicates = \DB::select(
+            'SELECT slug, COUNT(*) as count FROM league_players WHERE league_id = ? GROUP BY slug HAVING count > 1',
+            [$league->id]
+        );
+
+        if (!empty($duplicates)) {
+            return redirect()->route('admin.leagues.duplicates', $league)
+                ->with('warning', 'Duplicate player entries found. Please clean them first.');
+        }
+
         \DB::transaction(function () use ($league) {
-            // Get league player IDs before deletion
             $leaguePlayerIds = \DB::table('league_players')->where('league_id', $league->id)->pluck('id');
             
-            // Delete auctions
             if ($leaguePlayerIds->isNotEmpty()) {
                 \DB::table('auctions')->whereIn('league_player_id', $leaguePlayerIds)->delete();
             }
             
-            // Delete team auctioneers first (foreign key)
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
-            
-            // Delete all related data using raw queries
             \DB::statement('DELETE FROM league_players WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM league_teams WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM fixtures WHERE league_id = ?', [$league->id]);
@@ -351,7 +358,6 @@ class LeagueController extends Controller
             \DB::statement('DELETE FROM league_organizers WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM auction_logs WHERE league_id = ?', [$league->id]);
             
-            // Reset league to fresh state
             $league->update([
                 'auction_active' => false,
                 'auction_started_at' => null,
@@ -363,7 +369,48 @@ class LeagueController extends Controller
         });
 
         return redirect()->route('admin.leagues.index')
-            ->with('success', 'League restarted successfully! All teams, players, organizers, and auction data have been cleared.');
+            ->with('success', 'League restarted successfully!');
+    }
+
+    /**
+     * Show duplicate players for a league.
+     */
+    public function duplicates(League $league)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $duplicatePlayers = \DB::table('league_players as lp1')
+            ->join('users', 'lp1.user_id', '=', 'users.id')
+            ->select('lp1.id', 'lp1.slug', 'lp1.user_id', 'users.name', 'lp1.status', 'lp1.base_price', 'lp1.created_at')
+            ->whereIn('lp1.slug', function($query) use ($league) {
+                $query->select('slug')
+                    ->from('league_players')
+                    ->where('league_id', $league->id)
+                    ->groupBy('slug')
+                    ->havingRaw('COUNT(*) > 1');
+            })
+            ->where('lp1.league_id', $league->id)
+            ->orderBy('lp1.slug')
+            ->orderBy('lp1.created_at')
+            ->get();
+
+        return view('admin.leagues.duplicates', compact('league', 'duplicatePlayers'));
+    }
+
+    /**
+     * Delete a specific league player.
+     */
+    public function deletePlayer(League $league, $playerId)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        \DB::statement('DELETE FROM league_players WHERE id = ? AND league_id = ?', [$playerId, $league->id]);
+
+        return redirect()->back()->with('success', 'Player deleted successfully!');
     }
 }
 
