@@ -312,8 +312,8 @@ class AuctionController extends Controller
         \Cache::put("auction_current_bid_{$leaguePlayer->id}", $bidData, now()->addHours(12));
         \Cache::put("auction_latest_bid_{$leaguePlayer->league_id}", $bidData, now()->addHours(12));
         
-        // Broadcast the new bid with comprehensive data - using broadcastNow for immediate delivery
-        event(new AuctionPlayerBidCall($newBid, $bidTeam->id, $leaguePlayer->id));
+        // Broadcast the new bid with comprehensive data - using broadcast for immediate delivery
+        broadcast(new AuctionPlayerBidCall($newBid, $bidTeam->id, $leaguePlayer->id))->toOthers();
 
         return response()->json([
             'success' => true,
