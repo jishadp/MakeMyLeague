@@ -1,13 +1,19 @@
-var pusher = new Pusher('b62b3b015a81d2d28278', { 
-    cluster: 'ap2',
+// Pusher credentials will be injected from Laravel blade template
+if (typeof PUSHER_KEY === 'undefined' || typeof PUSHER_CLUSTER === 'undefined') {
+    console.error('Pusher credentials not found. Please ensure they are set in .env file.');
+    throw new Error('Pusher configuration missing');
+}
+
+var pusher = new Pusher(PUSHER_KEY, { 
+    cluster: PUSHER_CLUSTER,
     forceTLS: true,
     enabledTransports: ['ws', 'wss']
 });
 
-// Enable Pusher logging for debugging
-Pusher.logToConsole = true;
+// Enable Pusher logging for debugging in non-production environments
+Pusher.logToConsole = PUSHER_LOG_TO_CONSOLE;
 
-console.log('Pusher initialized with key: b62b3b015a81d2d28278');
+console.log('Pusher initialized with key:', PUSHER_KEY);
 
 // Subscribe to the general auctions channel
 var channel = pusher.subscribe('auctions');

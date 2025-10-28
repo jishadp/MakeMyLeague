@@ -200,6 +200,12 @@
 <script src="{{ asset('js/auction-access.js') }}?v=1"></script>
 <script src="{{ asset('js/auction.js') }}?v=15"></script>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script>
+    // Inject Pusher credentials from Laravel environment
+    const PUSHER_KEY = '{{ config('broadcasting.connections.pusher.key') }}';
+    const PUSHER_CLUSTER = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
+    const PUSHER_LOG_TO_CONSOLE = {{ config('app.debug') ? 'true' : 'false' }};
+</script>
 <script src="{{ asset('js/pusher-main.js') }}?v={{ time() + 1 }}"></script>
 
 <script>
