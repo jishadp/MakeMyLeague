@@ -208,8 +208,8 @@ Route::middleware('auth')->group(function () {
         Route::get('leagues/search-users', [\App\Http\Controllers\Admin\LeagueController::class, 'searchUsers'])->name('leagues.search-users');
         Route::get('leagues/districts-by-state', [\App\Http\Controllers\Admin\LeagueController::class, 'getDistrictsByState'])->name('leagues.districts-by-state');
         Route::get('leagues/local-bodies-by-district', [\App\Http\Controllers\Admin\LeagueController::class, 'getLocalBodiesByDistrict'])->name('leagues.local-bodies-by-district');
-        Route::post('leagues/{league}/organizers', [\App\Http\Controllers\Admin\LeagueController::class, 'addOrganizer'])->name('leagues.add-organizer');
-        Route::delete('leagues/{league}/organizers/{user}', [\App\Http\Controllers\Admin\LeagueController::class, 'removeOrganizer'])->name('leagues.remove-organizer');
+        Route::post('leagues/{league:slug}/organizers', [\App\Http\Controllers\Admin\LeagueController::class, 'addOrganizer'])->name('leagues.add-organizer');
+        Route::delete('leagues/{league:slug}/organizers/{user:slug}', [\App\Http\Controllers\Admin\LeagueController::class, 'removeOrganizer'])->name('leagues.remove-organizer');
         Route::get('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'show'])->name('leagues.show');
         Route::get('leagues/{league}/flow', [\App\Http\Controllers\Admin\LeagueController::class, 'flow'])->name('leagues.flow');
         Route::get('leagues/{league}/edit', [\App\Http\Controllers\Admin\LeagueController::class, 'edit'])->name('leagues.edit');

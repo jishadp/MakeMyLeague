@@ -259,7 +259,7 @@
                                             <span class="text-xs text-gray-400">No organizer</span>
                                         @endif
                                     </div>
-                                    <button onclick="openOrganizerModal({{ $league->id }}, '{{ $league->name }}', {{ json_encode($league->approvedOrganizers) }})" class="text-purple-600 hover:text-purple-800">
+                                    <button onclick="openOrganizerModal('{{ $league->slug }}', '{{ $league->name }}', {{ json_encode($league->approvedOrganizers) }})" class="text-purple-600 hover:text-purple-800">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                         </svg>
@@ -395,10 +395,10 @@
 </div>
 
 <script>
-let currentLeagueId = null;
+let currentLeagueSlug = null;
 
-function openOrganizerModal(leagueId, leagueName, organizers) {
-    currentLeagueId = leagueId;
+function openOrganizerModal(leagueSlug, leagueName, organizers) {
+    currentLeagueSlug = leagueSlug;
     document.getElementById('leagueOrganizerInfo').textContent = `League: ${leagueName}`;
     
     const currentOrganizersDiv = document.getElementById('currentOrganizers');
@@ -411,7 +411,7 @@ function openOrganizerModal(leagueId, leagueName, organizers) {
             currentOrganizersDiv.innerHTML += `
                 <div class="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
                     <span class="text-sm font-medium text-gray-800">${org.name}</span>
-                    <button onclick="removeOrganizer(${org.id})" class="text-red-600 hover:text-red-800">
+                    <button onclick="removeOrganizer('${org.slug}')" class="text-red-600 hover:text-red-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -431,10 +431,10 @@ function closeOrganizerModal() {
     location.reload();
 }
 
-function removeOrganizer(userId) {
+function removeOrganizer(userSlug) {
     if (!confirm('Remove this organizer?')) return;
     
-    fetch(`/admin/leagues/${currentLeagueId}/organizers/${userId}`, {
+    fetch(`/admin/leagues/${currentLeagueSlug}/organizers/${userSlug}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -450,7 +450,7 @@ function removeOrganizer(userId) {
 }
 
 function addOrganizer(userId, userName) {
-    fetch(`/admin/leagues/${currentLeagueId}/organizers`, {
+    fetch(`/admin/leagues/${currentLeagueSlug}/organizers`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
