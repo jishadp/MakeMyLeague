@@ -342,13 +342,12 @@ class LeagueController extends Controller
             // Delete team auctioneers first (foreign key)
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
             
-            // Delete all related data using raw queries
+            // Delete all related data using raw queries (except organizers)
             \DB::statement('DELETE FROM league_players WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM league_teams WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM fixtures WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM league_groups WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM league_finances WHERE league_id = ?', [$league->id]);
-            \DB::statement('DELETE FROM league_organizers WHERE league_id = ?', [$league->id]);
             \DB::statement('DELETE FROM auction_logs WHERE league_id = ?', [$league->id]);
             
             // Reset league to fresh state
@@ -363,7 +362,7 @@ class LeagueController extends Controller
         });
 
         return redirect()->route('admin.leagues.index')
-            ->with('success', 'League restarted successfully! All teams, players, organizers, and auction data have been cleared.');
+            ->with('success', 'League restarted successfully! All teams, players, and auction data have been cleared. Organizers retained.');
     }
 
     /**
