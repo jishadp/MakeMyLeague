@@ -331,21 +331,25 @@ class LeagueController extends Controller
         }
 
         \DB::transaction(function () use ($league) {
-            // Delete auctions first
-            $leaguePlayerIds = $league->leaguePlayers()->pluck('id');
+            // Get league player IDs before deletion
+            $leaguePlayerIds = \DB::table('league_players')->where('league_id', $league->id)->pluck('id');
+            
+            // Delete auctions
             if ($leaguePlayerIds->isNotEmpty()) {
                 \DB::table('auctions')->whereIn('league_player_id', $leaguePlayerIds)->delete();
             }
             
-            // Force delete to bypass soft deletes and slug constraints
-            \DB::table('league_players')->where('league_id', $league->id)->delete();
-            \DB::table('league_teams')->where('league_id', $league->id)->delete();
-            \DB::table('fixtures')->where('league_id', $league->id)->delete();
-            \DB::table('league_groups')->where('league_id', $league->id)->delete();
-            \DB::table('league_finances')->where('league_id', $league->id)->delete();
-            \DB::table('league_organizers')->where('league_id', $league->id)->delete();
+            // Delete team auctioneers first (foreign key)
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
-            \DB::table('auction_logs')->where('league_id', $league->id)->delete();
+            
+            // Delete all related data using raw queries
+            \DB::statement('DELETE FROM league_players WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM league_teams WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM fixtures WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM league_groups WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM league_finances WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM league_organizers WHERE league_id = ?', [$league->id]);
+            \DB::statement('DELETE FROM auction_logs WHERE league_id = ?', [$league->id]);
             
             // Reset league to fresh state
             $league->update([
