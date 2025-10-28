@@ -331,18 +331,18 @@ class LeagueController extends Controller
         }
 
         \DB::transaction(function () use ($league) {
-            // Delete auctions first (via league_player_id)
+            // Delete auctions first
             $leaguePlayerIds = $league->leaguePlayers()->pluck('id');
             if ($leaguePlayerIds->isNotEmpty()) {
                 \DB::table('auctions')->whereIn('league_player_id', $leaguePlayerIds)->delete();
             }
             
-            // Delete all related data (same as delete)
-            $league->leaguePlayers()->delete();
-            $league->leagueTeams()->delete();
-            $league->fixtures()->delete();
-            $league->leagueGroups()->delete();
-            $league->finances()->delete();
+            // Force delete to bypass soft deletes and slug constraints
+            \DB::table('league_players')->where('league_id', $league->id)->delete();
+            \DB::table('league_teams')->where('league_id', $league->id)->delete();
+            \DB::table('fixtures')->where('league_id', $league->id)->delete();
+            \DB::table('league_groups')->where('league_id', $league->id)->delete();
+            \DB::table('league_finances')->where('league_id', $league->id)->delete();
             \DB::table('league_organizers')->where('league_id', $league->id)->delete();
             \DB::table('team_auctioneers')->where('league_id', $league->id)->delete();
             \DB::table('auction_logs')->where('league_id', $league->id)->delete();
