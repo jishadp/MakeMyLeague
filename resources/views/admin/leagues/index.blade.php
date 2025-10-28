@@ -356,8 +356,8 @@
 </div>
 
 <!-- Organizer Management Modal -->
-<div id="organizerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+<div id="organizerModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
         <div class="mb-6">
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Manage Organizers</h3>
             <p class="text-sm text-gray-600" id="leagueOrganizerInfo"></p>
@@ -381,7 +381,7 @@
                     </svg>
                 </div>
             </div>
-            <div id="organizerSearchResults" class="mt-3 max-h-48 overflow-y-auto bg-gray-50 rounded-xl hidden"></div>
+            <div id="organizerSearchResults" class="mt-3 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl"></div>
         </div>
         
         <!-- Action Buttons -->
@@ -424,6 +424,7 @@ function openOrganizerModal(leagueId, leagueName, organizers) {
     document.getElementById('userOrganizerSearch').value = '';
     document.getElementById('organizerSearchResults').classList.add('hidden');
     document.getElementById('organizerModal').classList.remove('hidden');
+    searchUsers('');
 }
 
 function closeOrganizerModal() {
@@ -466,15 +467,13 @@ function addOrganizer(userId, userName) {
     });
 }
 
-document.getElementById('userOrganizerSearch').addEventListener('input', function(e) {
-    const query = e.target.value.trim();
-    
-    if (query.length < 2) {
-        document.getElementById('organizerSearchResults').classList.add('hidden');
-        return;
-    }
-    
-    fetch(`/team-transfer/search?query=${encodeURIComponent(query)}`)
+function searchUsers(query = '') {
+    fetch(`/admin/leagues/search-users?query=${encodeURIComponent(query)}`, {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
     .then(response => response.json())
     .then(data => {
         const resultsDiv = document.getElementById('organizerSearchResults');
@@ -483,7 +482,7 @@ document.getElementById('userOrganizerSearch').addEventListener('input', functio
         if (data.users && data.users.length > 0) {
             data.users.forEach(user => {
                 resultsDiv.innerHTML += `
-                    <div class="p-3 hover:bg-purple-100 cursor-pointer rounded-lg transition-all" onclick="addOrganizer(${user.id}, '${user.name}')">
+                    <div class="p-3 hover:bg-purple-100 cursor-pointer rounded-lg transition-all" onclick="addOrganizer(${user.id}, '${user.name.replace(/'/g, "\\'")}')">  
                         <div class="font-medium text-gray-800">${user.name}</div>
                         <div class="text-xs text-gray-500">${user.email || ''}</div>
                     </div>
@@ -495,6 +494,17 @@ document.getElementById('userOrganizerSearch').addEventListener('input', functio
             resultsDiv.classList.remove('hidden');
         }
     });
+}
+
+document.getElementById('userOrganizerSearch').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    searchUsers(query);
+});
+
+document.getElementById('userOrganizerSearch').addEventListener('focus', function(e) {
+    if (e.target.value.trim() === '') {
+        searchUsers('');
+    }
 });
 </script>
 @endsection

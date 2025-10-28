@@ -397,5 +397,30 @@ class LeagueController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Search users for organizer assignment.
+     */
+    public function searchUsers(Request $request)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $query = $request->get('query', '');
+        
+        $users = User::when($query, function($q) use ($query) {
+            $q->where(function($subQ) use ($query) {
+                $subQ->where('name', 'like', '%' . $query . '%')
+                     ->orWhere('email', 'like', '%' . $query . '%')
+                     ->orWhere('phone', 'like', '%' . $query . '%');
+            });
+        })
+        ->orderBy('name')
+        ->limit(50)
+        ->get(['id', 'name', 'email']);
+
+        return response()->json(['users' => $users]);
+    }
 }
 

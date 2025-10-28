@@ -216,6 +216,7 @@ Route::middleware('auth')->group(function () {
         Route::get('leagues/local-bodies-by-district', [\App\Http\Controllers\Admin\LeagueController::class, 'getLocalBodiesByDistrict'])->name('leagues.local-bodies-by-district');
         Route::post('leagues/{league}/organizers', [\App\Http\Controllers\Admin\LeagueController::class, 'addOrganizer'])->name('leagues.add-organizer');
         Route::delete('leagues/{league}/organizers/{user}', [\App\Http\Controllers\Admin\LeagueController::class, 'removeOrganizer'])->name('leagues.remove-organizer');
+        Route::get('leagues/search-users', [\App\Http\Controllers\Admin\LeagueController::class, 'searchUsers'])->name('leagues.search-users');
         Route::get('league-players', [\App\Http\Controllers\Admin\LeaguePlayerController::class, 'index'])->name('league-players.index');
     });
 
