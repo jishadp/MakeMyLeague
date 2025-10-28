@@ -248,14 +248,23 @@
                                 <div class="text-xs text-gray-500">{{ $league->localBody->district->name }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                @if($league->approvedOrganizers->isNotEmpty())
-                                    <div class="text-sm text-gray-900">{{ $league->approvedOrganizers->first()->name }}</div>
-                                    @if($league->approvedOrganizers->count() > 1)
-                                        <div class="text-xs text-gray-500">+{{ $league->approvedOrganizers->count() - 1 }} more</div>
-                                    @endif
-                                @else
-                                    <span class="text-xs text-gray-400">No organizer</span>
-                                @endif
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-grow">
+                                        @if($league->approvedOrganizers->isNotEmpty())
+                                            <div class="text-sm text-gray-900">{{ $league->approvedOrganizers->first()->name }}</div>
+                                            @if($league->approvedOrganizers->count() > 1)
+                                                <div class="text-xs text-gray-500">+{{ $league->approvedOrganizers->count() - 1 }} more</div>
+                                            @endif
+                                        @else
+                                            <span class="text-xs text-gray-400">No organizer</span>
+                                        @endif
+                                    </div>
+                                    <button onclick="openOrganizerModal({{ $league->id }}, '{{ $league->name }}', {{ json_encode($league->approvedOrganizers) }})" class="text-purple-600 hover:text-purple-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="text-sm font-medium text-gray-900">{{ $league->season }}</span>
@@ -345,5 +354,148 @@
         </div>
     </div>
 </div>
+
+<!-- Organizer Management Modal -->
+<div id="organizerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div class="mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Manage Organizers</h3>
+            <p class="text-sm text-gray-600" id="leagueOrganizerInfo"></p>
+        </div>
+        
+        <!-- Current Organizers -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Current Organizers</label>
+            <div id="currentOrganizers" class="space-y-2 max-h-32 overflow-y-auto"></div>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Add New Organizer</label>
+            <div class="relative">
+                <input type="text" id="userOrganizerSearch" placeholder="Type to search users..." 
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div id="organizerSearchResults" class="mt-3 max-h-48 overflow-y-auto bg-gray-50 rounded-xl hidden"></div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex space-x-4">
+            <button onclick="closeOrganizerModal()" 
+                    class="flex-1 px-6 py-3 rounded-xl text-gray-700 font-semibold bg-gray-100 hover:bg-gray-200 transition-all">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLeagueId = null;
+
+function openOrganizerModal(leagueId, leagueName, organizers) {
+    currentLeagueId = leagueId;
+    document.getElementById('leagueOrganizerInfo').textContent = `League: ${leagueName}`;
+    
+    const currentOrganizersDiv = document.getElementById('currentOrganizers');
+    currentOrganizersDiv.innerHTML = '';
+    
+    if (organizers.length === 0) {
+        currentOrganizersDiv.innerHTML = '<p class="text-sm text-gray-400">No organizers assigned</p>';
+    } else {
+        organizers.forEach(org => {
+            currentOrganizersDiv.innerHTML += `
+                <div class="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                    <span class="text-sm font-medium text-gray-800">${org.name}</span>
+                    <button onclick="removeOrganizer(${org.id})" class="text-red-600 hover:text-red-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        });
+    }
+    
+    document.getElementById('userOrganizerSearch').value = '';
+    document.getElementById('organizerSearchResults').classList.add('hidden');
+    document.getElementById('organizerModal').classList.remove('hidden');
+}
+
+function closeOrganizerModal() {
+    document.getElementById('organizerModal').classList.add('hidden');
+    location.reload();
+}
+
+function removeOrganizer(userId) {
+    if (!confirm('Remove this organizer?')) return;
+    
+    fetch(`/admin/leagues/${currentLeagueId}/organizers/${userId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeOrganizerModal();
+        }
+    });
+}
+
+function addOrganizer(userId, userName) {
+    fetch(`/admin/leagues/${currentLeagueId}/organizers`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeOrganizerModal();
+        }
+    });
+}
+
+document.getElementById('userOrganizerSearch').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('organizerSearchResults').classList.add('hidden');
+        return;
+    }
+    
+    fetch(`/team-transfer/search?query=${encodeURIComponent(query)}`)
+    .then(response => response.json())
+    .then(data => {
+        const resultsDiv = document.getElementById('organizerSearchResults');
+        resultsDiv.innerHTML = '';
+        
+        if (data.users && data.users.length > 0) {
+            data.users.forEach(user => {
+                resultsDiv.innerHTML += `
+                    <div class="p-3 hover:bg-purple-100 cursor-pointer rounded-lg transition-all" onclick="addOrganizer(${user.id}, '${user.name}')">
+                        <div class="font-medium text-gray-800">${user.name}</div>
+                        <div class="text-xs text-gray-500">${user.email || ''}</div>
+                    </div>
+                `;
+            });
+            resultsDiv.classList.remove('hidden');
+        } else {
+            resultsDiv.innerHTML = '<p class="p-3 text-sm text-gray-500">No users found</p>';
+            resultsDiv.classList.remove('hidden');
+        }
+    });
+});
+</script>
 @endsection
 

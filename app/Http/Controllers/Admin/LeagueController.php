@@ -365,5 +365,37 @@ class LeagueController extends Controller
         return redirect()->route('admin.leagues.index')
             ->with('success', 'League restarted successfully! All teams, players, organizers, and auction data have been cleared.');
     }
+
+    /**
+     * Add organizer to league.
+     */
+    public function addOrganizer(Request $request, League $league)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $request->validate(['user_id' => 'required|exists:users,id']);
+        
+        $league->organizers()->syncWithoutDetaching([
+            $request->user_id => ['status' => 'approved', 'admin_notes' => 'Added by admin']
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Remove organizer from league.
+     */
+    public function removeOrganizer(League $league, User $user)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $league->organizers()->detach($user->id);
+
+        return response()->json(['success' => true]);
+    }
 }
 
