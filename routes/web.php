@@ -295,6 +295,10 @@ Route::middleware('auth')->group(function () {
         Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('live.auction:view');
     });
 
+    // Poster routes
+    Route::get('posters', [\App\Http\Controllers\PosterController::class, 'listAll'])->name('posters.list');
+    Route::get('leagues/{league}/teams/{leagueTeam}/poster', [\App\Http\Controllers\PosterController::class, 'show'])->name('posters.show');
+
     // League Finance routes - organizers manage finances
     Route::prefix('leagues/{league}')->name('league-finances.')->middleware('league.organizer')->group(function () {
         Route::get('finances', [LeagueFinanceController::class, 'index'])->name('index');

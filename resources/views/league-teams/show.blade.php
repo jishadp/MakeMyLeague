@@ -213,6 +213,10 @@
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
                     <div class="space-y-3">
+                        <a href="{{ route('posters.show', [$league, $leagueTeam]) }}" 
+                           class="block w-full text-center px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                            View Team Poster
+                        </a>
                         <a href="{{ route('league-players.index', $league) }}?team={{ $leagueTeam->team->slug }}" 
                            class="block w-full text-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors">
                             View Team Players
