@@ -190,34 +190,41 @@
                         </div>
                     @endif
 
-                    @if($availablePlayers->count() > 0)
-                        <div class="mb-8">
-                            <button onclick="toggleSection('available-{{ $league->id }}')" class="w-full text-left">
-                                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Available Players - {{ $league->localBody->name ?? 'Unknown' }} ({{ $availablePlayers->count() }})</span>
-                                    <svg id="available-{{ $league->id }}-icon" class="w-5 h-5 transition-transform rotate-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </h3>
-                            </button>
-                            <div id="available-{{ $league->id }}" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                @foreach($availablePlayers as $player)
-                                    <div class="bg-white border-2 border-blue-200 rounded-xl p-4 text-center hover:shadow-lg transition-all">
-                                        @if($player->user && $player->user->photo)
-                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-20 h-20 rounded-full object-cover mx-auto mb-2 border-2 border-blue-400">
-                                        @else
-                                            <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2 border-2 border-blue-400">
-                                                <span class="text-2xl font-bold text-blue-600">{{ $player->user ? substr($player->user->name, 0, 1) : '?' }}</span>
-                                            </div>
-                                        @endif
-                                        <p class="font-semibold text-gray-900 truncate">{{ $player->user->name ?? 'Unknown' }}</p>
-                                        @if($player->base_price)
-                                            <p class="text-sm text-blue-600 font-bold mt-1">₹{{ number_format($player->base_price) }}</p>
-                                        @endif
-                                    </div>
-                                @endforeach
+                    @if(isset($groupedPlayers[$league->id]))
+                        @foreach($groupedPlayers[$league->id] as $location => $players)
+                            @php
+                                $availablePlayers = $players->where('status', 'available')->where('retention', false)->sortBy('user.name');
+                            @endphp
+                            @if($availablePlayers->count() > 0)
+                            <div class="mb-8">
+                                <button onclick="toggleSection('available-{{ $league->id }}-{{ Str::slug($location) }}')" class="w-full text-left">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
+                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Available Players - {{ $location }} ({{ $availablePlayers->count() }})</span>
+                                        <svg id="available-{{ $league->id }}-{{ Str::slug($location) }}-icon" class="w-5 h-5 transition-transform rotate-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </h3>
+                                </button>
+                                <div id="available-{{ $league->id }}-{{ Str::slug($location) }}" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    @foreach($availablePlayers as $player)
+                                        <div class="bg-white border-2 border-blue-200 rounded-xl p-4 text-center hover:shadow-lg transition-all">
+                                            @if($player->user && $player->user->photo)
+                                                <img src="{{ Storage::url($player->user->photo) }}" class="w-20 h-20 rounded-full object-cover mx-auto mb-2 border-2 border-blue-400">
+                                            @else
+                                                <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2 border-2 border-blue-400">
+                                                    <span class="text-2xl font-bold text-blue-600">{{ $player->user ? substr($player->user->name, 0, 1) : '?' }}</span>
+                                                </div>
+                                            @endif
+                                            <p class="font-semibold text-gray-900 truncate">{{ $player->user->name ?? 'Unknown' }}</p>
+                                            @if($player->base_price)
+                                                <p class="text-sm text-blue-600 font-bold mt-1">₹{{ number_format($player->base_price) }}</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
+                            @endif
+                        @endforeach
                     @endif
 
                     @if($unsoldPlayers->count() > 0)

@@ -385,13 +385,20 @@ class TeamController extends Controller
      */
     public function leaguePlayers(Request $request): View
     {
-        $allLeagues = League::with(['leaguePlayers.user', 'leaguePlayers.leagueTeam.team', 'game'])
+        $allLeagues = League::with(['leaguePlayers.user.localBody', 'leaguePlayers.leagueTeam.team', 'game'])
             ->whereHas('leaguePlayers')
             ->withCount('leaguePlayers')
             ->latest()
             ->get();
 
-        return view('teams.league-players', compact('allLeagues'));
+        $groupedPlayers = [];
+        foreach ($allLeagues as $league) {
+            $groupedPlayers[$league->id] = $league->leaguePlayers->groupBy(function ($leaguePlayer) {
+                return $leaguePlayer->user->localBody->name ?? 'Unknown';
+            });
+        }
+
+        return view('teams.league-players', compact('allLeagues', 'groupedPlayers'));
     }
 
     /**
