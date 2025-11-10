@@ -363,11 +363,17 @@
                             </div>
                         @endif
                         
-                        <!-- Action Button -->
-                        <a href="{{ route('leagues.show', $league) }}"
-                            class="w-full bg-green-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl block">
-                            View League
-                        </a>
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="{{ route('my-leagues.teams', $league) }}"
+                                class="bg-indigo-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl text-sm">
+                                View Teams
+                            </a>
+                            <a href="{{ route('leagues.show', $league) }}"
+                                class="bg-green-600 text-center py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl text-sm">
+                                View League
+                            </a>
+                        </div>
                     </div>
                 </div>
                 @endforeach

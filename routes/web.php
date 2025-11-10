@@ -87,6 +87,7 @@ Route::middleware('auth')->group(function () {
     
     // My Leagues route
     Route::get('my-leagues', [\App\Http\Controllers\MyLeaguesController::class, 'index'])->name('my-leagues');
+    Route::get('my-leagues/{league}/teams', [\App\Http\Controllers\MyLeaguesController::class, 'showTeams'])->name('my-leagues.teams');
     
     // My Teams route
     Route::get('my-teams', [\App\Http\Controllers\MyTeamsController::class, 'index'])->name('my-teams');

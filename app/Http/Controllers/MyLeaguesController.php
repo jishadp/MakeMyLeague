@@ -63,4 +63,13 @@ class MyLeaguesController extends Controller
         
         return view('my-leagues.index', compact('organizedLeagues', 'playingLeagues', 'requestedLeagues', 'teamOwnerLeagues', 'auctioneerLeagues'));
     }
+
+    public function showTeams($leagueSlug)
+    {
+        $league = \App\Models\League::where('slug', $leagueSlug)
+            ->with(['game', 'leagueTeams.team.owners', 'leagueTeams.leaguePlayers.user'])
+            ->firstOrFail();
+        
+        return view('my-leagues.teams', compact('league'));
+    }
 }
