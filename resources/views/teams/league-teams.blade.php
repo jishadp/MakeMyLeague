@@ -21,10 +21,13 @@
         <div class="bg-white rounded-lg shadow mb-6">
             <div class="border-b border-gray-200 overflow-x-auto">
                 <nav class="flex space-x-4 px-6" aria-label="Tabs">
+                    @php
+                        $activeLeague = $allLeagues->firstWhere('status', 'active') ?? $allLeagues->sortBy('name')->first();
+                    @endphp
                     @foreach($allLeagues->sortBy('name') as $index => $tabLeague)
                         <button onclick="showLeague({{ $tabLeague->id }})" 
                                 id="tab-{{ $tabLeague->id }}"
-                                class="league-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $index === 0 ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} transition-colors">
+                                class="league-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $tabLeague->id === $activeLeague->id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} transition-colors">
                             {{ $tabLeague->name }}
                         </button>
                     @endforeach
@@ -36,7 +39,7 @@
         <div class="flex-1">
 
         @forelse($allLeagues->sortBy('name') as $index => $league)
-            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $index !== 0 ? 'hidden' : '' }}">
+            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $league->id !== $activeLeague->id ? 'hidden' : '' }}">
                 <div class="p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div class="flex items-center">
