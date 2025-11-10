@@ -76,12 +76,6 @@ Route::post('join-league/{league}', [LeagueController::class, 'processJoinLink']
 // League shareable public page
 Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->name('leagues.shareable');
 
-// Public league teams page
-Route::get('{league}/teams', [LeagueController::class, 'publicTeams'])->name('leagues.public-teams');
-
-// Public league players page
-Route::get('{league}/players', [LeagueController::class, 'publicPlayers'])->name('leagues.public-players');
-
 // Public live auction route (no auth required)
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
 
@@ -360,3 +354,9 @@ Route::get('api/leagues/{league}/positions', function(\App\Models\League $league
         })
     ]);
 })->name('api.league-positions');
+
+// Public league teams page (at end to avoid catching admin routes)
+Route::get('{league}/teams', [LeagueController::class, 'publicTeams'])->name('leagues.public-teams');
+
+// Public league players page (at end to avoid catching admin routes)
+Route::get('{league}/players', [LeagueController::class, 'publicPlayers'])->name('leagues.public-players');
