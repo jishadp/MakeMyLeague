@@ -30,11 +30,11 @@
                         <div class="text-center">
                             <div class="font-extrabold text-sm leading-tight {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-white' }} transition-colors duration-1000 line-clamp-2">{{ $tabLeague->name }}</div>
                             <div class="text-xs mt-2 opacity-70 font-semibold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-200' : 'text-gray-400' }}">{{ $tabLeague->leagueTeams->count() }} teams</div>
-                            @php
-                                $daysUntilStart = now()->diffInDays($tabLeague->start_date, false);
-                            @endphp
-                            @if($daysUntilStart > 0)
-                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-emerald-400' }}">{{ $daysUntilStart }} days</div>
+                            @if($tabLeague->start_date->isFuture())
+                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-emerald-400' }}" 
+                                     data-countdown="{{ $tabLeague->start_date->toIso8601String() }}"
+                                     id="countdown-{{ $tabLeague->id }}">
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -78,6 +78,30 @@
             word-break: break-word;
         }
         </style>
+
+        <script>
+        function updateCountdowns() {
+            document.querySelectorAll('[data-countdown]').forEach(el => {
+                const targetDate = new Date(el.dataset.countdown);
+                const now = new Date();
+                const diff = targetDate - now;
+                
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    el.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                } else {
+                    el.textContent = 'Started';
+                }
+            });
+        }
+        
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+        </script>
 
         <!-- Tab Content -->
         <div class="flex-1">
