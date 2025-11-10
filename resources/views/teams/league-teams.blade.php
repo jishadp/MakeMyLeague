@@ -17,41 +17,26 @@
             <p class="text-gray-600 mt-2">Browse teams organized by leagues</p>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sidebar -->
-            <div class="lg:w-64 flex-shrink-0">
-                <div class="bg-white rounded-lg shadow sticky top-8">
-                    <div class="p-4 border-b border-gray-200">
-                        <h3 class="font-bold text-gray-900">All Leagues</h3>
-                        <p class="text-sm text-gray-600">{{ $allLeagues->count() }} leagues</p>
-                    </div>
-                    <div class="max-h-96 overflow-y-auto">
-                        @foreach($allLeagues as $sidebarLeague)
-                            <a href="#league-{{ $sidebarLeague->id }}" class="block p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                                <div class="flex items-center">
-                                    @if($sidebarLeague->logo)
-                                        <img src="{{ Storage::url($sidebarLeague->logo) }}" class="w-8 h-8 rounded-full object-cover mr-3">
-                                    @else
-                                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                                            <span class="text-xs font-bold text-indigo-600">{{ substr($sidebarLeague->name, 0, 1) }}</span>
-                                        </div>
-                                    @endif
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $sidebarLeague->name }}</p>
-                                        <p class="text-xs text-gray-500">{{ $sidebarLeague->league_teams_count }} teams</p>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
+        <!-- Tabs Navigation -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="flex space-x-4 px-6" aria-label="Tabs">
+                    @foreach($allLeagues->sortByDesc('created_at') as $index => $tabLeague)
+                        <button onclick="showLeague({{ $tabLeague->id }})" 
+                                id="tab-{{ $tabLeague->id }}"
+                                class="league-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $index === 0 ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} transition-colors">
+                            {{ $tabLeague->name }}
+                        </button>
+                    @endforeach
+                </nav>
             </div>
+        </div>
 
-            <!-- Main Content -->
-            <div class="flex-1">
+        <!-- Tab Content -->
+        <div class="flex-1">
 
-        @forelse($leagues as $league)
-            <div id="league-{{ $league->id }}" class="bg-white rounded-lg shadow mb-8 scroll-mt-8">
+        @forelse($allLeagues->sortByDesc('created_at') as $index => $league)
+            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $index !== 0 ? 'hidden' : '' }}">
                 <div class="p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div class="flex items-center">
@@ -64,7 +49,7 @@
                             </div>
                         </div>
                         <a href="{{ route('leagues.public-teams', $league) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
-                            View All \u2192
+                            View All →
                         </a>
                     </div>
                 </div>
@@ -177,7 +162,7 @@
                     @if($league->leagueTeams->count() > 6)
                         <div class="mt-4 text-center">
                             <a href="{{ route('leagues.public-teams', $league) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                View all {{ $league->leagueTeams->count() }} teams \u2192
+                                View all {{ $league->leagueTeams->count() }} teams →
                             </a>
                         </div>
                     @endif
@@ -191,18 +176,22 @@
                 <p class="text-gray-500">No league teams found</p>
             </div>
         @endforelse
-
-                <div class="mt-8">
-                    {{ $leagues->links() }}
-                </div>
             </div>
-        </div>
     </div>
 </div>
 
-<style>
-html {
-    scroll-behavior: smooth;
+<script>
+function showLeague(leagueId) {
+    document.querySelectorAll('.league-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.league-tab').forEach(el => {
+        el.classList.remove('border-indigo-500', 'text-indigo-600');
+        el.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    document.getElementById('league-' + leagueId).classList.remove('hidden');
+    const tab = document.getElementById('tab-' + leagueId);
+    tab.classList.add('border-indigo-500', 'text-indigo-600');
+    tab.classList.remove('border-transparent', 'text-gray-500');
 }
-</style>
+</script>
 @endsection
