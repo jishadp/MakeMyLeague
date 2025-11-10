@@ -88,6 +88,9 @@
                             <a href="{{ route('players.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
                                 <span>Players</span>
                             </a>
+                            <a href="{{ route('teams.league-players') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                                <span>League Players</span>
+                            </a>
                         </div>
                     </div>
 

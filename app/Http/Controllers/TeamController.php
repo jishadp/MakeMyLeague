@@ -381,6 +381,20 @@ class TeamController extends Controller
     }
 
     /**
+     * Display league players grouped by league.
+     */
+    public function leaguePlayers(Request $request): View
+    {
+        $allLeagues = League::with(['leaguePlayers.user', 'leaguePlayers.leagueTeam.team', 'game'])
+            ->whereHas('leaguePlayers')
+            ->withCount('leaguePlayers')
+            ->latest()
+            ->get();
+
+        return view('teams.league-players', compact('allLeagues'));
+    }
+
+    /**
      * Assign Team Owner role to a user if they don't already have it.
      */
     private function assignOwnerRoleIfNeeded(User $user)

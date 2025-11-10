@@ -908,4 +908,13 @@ class LeagueController
         
         return view('leagues.public-teams', compact('league'));
     }
+
+    /**
+     * Display public players page for a league.
+     */
+    public function publicPlayers(League $league): View
+    {
+        $league->load(['game', 'leaguePlayers.user', 'leaguePlayers.leagueTeam.team']);
+        return view('leagues.players', compact('league'));
+    }
 }

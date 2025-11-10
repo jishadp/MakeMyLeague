@@ -42,6 +42,7 @@ Route::get('grounds/{ground}', [GroundController::class, 'show'])->name('grounds
 // Team routes with slugs
 Route::get('teams', [TeamController::class, 'index'])->name('teams.index');
 Route::get('teams/league-teams', [TeamController::class, 'leagueTeams'])->name('teams.league-teams');
+Route::get('teams/league-players', [TeamController::class, 'leaguePlayers'])->name('teams.league-players');
 Route::get('teams/create', [TeamController::class, 'create'])->name('teams.create')->middleware('auth');
 Route::post('teams', [TeamController::class, 'store'])->name('teams.store')->middleware('auth');
 Route::get('teams/{team}', [TeamController::class, 'show'])->name('teams.show');
@@ -77,6 +78,9 @@ Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->na
 
 // Public league teams page
 Route::get('{league}/teams', [LeagueController::class, 'publicTeams'])->name('leagues.public-teams');
+
+// Public league players page
+Route::get('{league}/players', [LeagueController::class, 'publicPlayers'])->name('leagues.public-players');
 
 // Public live auction route (no auth required)
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
