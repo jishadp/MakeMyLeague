@@ -4,8 +4,15 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">League Players</h1>
-            <p class="text-gray-600 mt-2">Browse players organized by leagues</p>
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">League Players</h1>
+                    <p class="text-gray-600 mt-2">Browse players organized by leagues</p>
+                </div>
+                <a href="{{ route('teams.league-teams') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    View League Teams →
+                </a>
+            </div>
         </div>
 
         @php
@@ -115,10 +122,10 @@
 
                 <div class="p-6">
                     @php
-                        $soldPlayers = $league->leaguePlayers->where('status', 'sold')->sortBy('user.name');
+                        $soldPlayers = $league->leaguePlayers->where('status', 'sold')->where('retention', false)->sortBy('user.name');
                         $retentionPlayers = $league->leaguePlayers->where('retention', true)->sortBy('user.name');
-                        $availablePlayers = $league->leaguePlayers->where('status', 'available')->sortBy('user.name');
-                        $unsoldPlayers = $league->leaguePlayers->where('status', 'unsold')->sortBy('user.name');
+                        $availablePlayers = $league->leaguePlayers->where('status', 'available')->where('retention', false)->sortBy('user.name');
+                        $unsoldPlayers = $league->leaguePlayers->where('status', 'unsold')->where('retention', false)->sortBy('user.name');
                     @endphp
 
                     @if($soldPlayers->count() > 0)

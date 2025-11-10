@@ -13,8 +13,15 @@
         </div>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">League Teams</h1>
-            <p class="text-gray-600 mt-2">Browse teams organized by leagues</p>
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">League Teams</h1>
+                    <p class="text-gray-600 mt-2">Browse teams organized by leagues</p>
+                </div>
+                <a href="{{ route('teams.league-players') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    View League Players →
+                </a>
+            </div>
         </div>
 
         <!-- Tabs Navigation -->

@@ -20,10 +20,10 @@
 
             <div class="p-6">
                 @php
-                    $soldPlayers = $league->leaguePlayers->where('status', 'sold')->sortBy('user.name');
+                    $soldPlayers = $league->leaguePlayers->where('status', 'sold')->where('retention', false)->sortBy('user.name');
                     $retentionPlayers = $league->leaguePlayers->where('retention', true)->sortBy('user.name');
-                    $availablePlayers = $league->leaguePlayers->where('status', 'available')->sortBy('user.name');
-                    $unsoldPlayers = $league->leaguePlayers->where('status', 'unsold')->sortBy('user.name');
+                    $availablePlayers = $league->leaguePlayers->where('status', 'available')->where('retention', false)->sortBy('user.name');
+                    $unsoldPlayers = $league->leaguePlayers->where('status', 'unsold')->where('retention', false)->sortBy('user.name');
                 @endphp
 
                 @if($soldPlayers->count() > 0)
