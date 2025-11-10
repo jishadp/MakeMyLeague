@@ -218,6 +218,16 @@ Route::middleware('auth')->group(function () {
         Route::post('leagues/{league}/restart', [\App\Http\Controllers\Admin\LeagueController::class, 'restart'])->name('leagues.restart');
         Route::delete('leagues/{league}', [\App\Http\Controllers\Admin\LeagueController::class, 'destroy'])->name('leagues.destroy');
         Route::get('league-players', [\App\Http\Controllers\Admin\LeaguePlayerController::class, 'index'])->name('league-players.index');
+        
+        // Team Management Routes in Admin Panel
+        Route::get('teams', [\App\Http\Controllers\Admin\TeamController::class, 'index'])->name('teams.index');
+        Route::get('teams/{team}/edit', [\App\Http\Controllers\Admin\TeamController::class, 'edit'])->name('teams.edit');
+        Route::put('teams/{team}', [\App\Http\Controllers\Admin\TeamController::class, 'update'])->name('teams.update');
+        Route::delete('teams/{team}', [\App\Http\Controllers\Admin\TeamController::class, 'destroy'])->name('teams.destroy');
+        Route::post('teams/{team}/upload-logo', [\App\Http\Controllers\Admin\TeamController::class, 'uploadLogo'])->name('teams.upload-logo');
+        Route::post('teams/{team}/upload-banner', [\App\Http\Controllers\Admin\TeamController::class, 'uploadBanner'])->name('teams.upload-banner');
+        Route::delete('teams/{team}/remove-logo', [\App\Http\Controllers\Admin\TeamController::class, 'removeLogo'])->name('teams.remove-logo');
+        Route::delete('teams/{team}/remove-banner', [\App\Http\Controllers\Admin\TeamController::class, 'removeBanner'])->name('teams.remove-banner');
     });
 
     // Auction access request route (placed before resource routes to avoid conflicts)
