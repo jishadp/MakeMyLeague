@@ -23,7 +23,9 @@
                 <nav class="flex space-x-4 px-6" aria-label="Tabs">
                     @php
                         $sortedLeagues = $allLeagues->sortBy(function($league) {
-                            return $league->status === 'active' ? 0 : 1;
+                            if ($league->status === 'active') return 0;
+                            if ($league->status === 'completed') return 2;
+                            return 1;
                         })->sortBy('start_date');
                     @endphp
                     @foreach($sortedLeagues as $index => $tabLeague)
