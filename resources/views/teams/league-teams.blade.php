@@ -96,10 +96,10 @@
                                                 <div class="text-center">
                                                     <div class="relative inline-block">
                                                         @if($player->user && $player->user->photo)
-                                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover mb-1 {{ $player->retention ? 'border-yellow-400 border-2 ring-2 ring-yellow-200' : 'border border-gray-200' }}">
+                                                            <img src="{{ Storage::url($player->user->photo) }}" class="{{ $player->retention ? 'w-14 h-14' : 'w-10 h-10' }} rounded-full object-cover mb-1 {{ $player->retention ? 'border-yellow-400 border-2 ring-2 ring-yellow-200' : 'border border-gray-200' }}">
                                                         @else
-                                                            <div class="w-10 h-10 rounded-full flex items-center justify-center mb-1 {{ $player->retention ? 'bg-yellow-100 border-2 border-yellow-400 ring-2 ring-yellow-200' : 'bg-gray-100 border border-gray-200' }}">
-                                                                <span class="text-xs font-bold {{ $player->retention ? 'text-yellow-600' : 'text-gray-600' }}">{{ $player->user ? substr($player->user->name, 0, 1) : '?' }}</span>
+                                                            <div class="{{ $player->retention ? 'w-14 h-14' : 'w-10 h-10' }} rounded-full flex items-center justify-center mb-1 {{ $player->retention ? 'bg-yellow-100 border-2 border-yellow-400 ring-2 ring-yellow-200' : 'bg-gray-100 border border-gray-200' }}">
+                                                                <span class="{{ $player->retention ? 'text-base' : 'text-xs' }} font-bold {{ $player->retention ? 'text-yellow-600' : 'text-gray-600' }}">{{ $player->user ? substr($player->user->name, 0, 1) : '?' }}</span>
                                                             </div>
                                                         @endif
                                                         @if($player->retention)
@@ -108,11 +108,11 @@
                                                             </svg>
                                                         @endif
                                                     </div>
-                                                    <p class="text-xs {{ $player->retention ? 'text-yellow-700 font-semibold' : 'text-gray-900' }} truncate">{{ $player->user ? explode(' ', $player->user->name)[0] : 'Unknown' }}</p>
-                                                    @if($player->bid_price && !$player->retention)
-                                                        <p class="text-xs text-green-600 font-bold">₹{{ number_format($player->bid_price) }}</p>
-                                                    @elseif($player->retention)
+                                                    <p class="{{ $player->retention ? 'text-sm' : 'text-xs' }} {{ $player->retention ? 'text-yellow-700 font-semibold' : 'text-gray-900' }} truncate">{{ $player->user ? explode(' ', $player->user->name)[0] : 'Unknown' }}</p>
+                                                    @if($player->retention)
                                                         <p class="text-xs text-yellow-600 font-semibold">Retained</p>
+                                                    @elseif($player->bid_price)
+                                                        <p class="text-xs text-green-600 font-bold">₹{{ number_format($player->bid_price) }}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
