@@ -133,12 +133,12 @@
                             <button onclick="toggleSection('retention-{{ $league->id }}')" class="w-full text-left">
                                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
                                     <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">Retained Players ({{ $retentionPlayers->count() }})</span>
-                                    <svg id="retention-{{ $league->id }}-icon" class="w-5 h-5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg id="retention-{{ $league->id }}-icon" class="w-5 h-5 transition-transform rotate-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
                                 </h3>
                             </button>
-                            <div id="retention-{{ $league->id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div id="retention-{{ $league->id }}" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 @foreach($retentionPlayers as $player)
                                     <div class="bg-white border-2 border-yellow-200 rounded-xl p-4 text-center hover:shadow-lg transition-all relative">
                                         <svg class="w-6 h-6 text-yellow-500 absolute top-2 right-2 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
@@ -194,13 +194,13 @@
                         <div class="mb-8">
                             <button onclick="toggleSection('available-{{ $league->id }}')" class="w-full text-left">
                                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Available Players ({{ $availablePlayers->count() }})</span>
-                                    <svg id="available-{{ $league->id }}-icon" class="w-5 h-5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Available Players - {{ $league->localBody->name ?? 'Unknown' }} ({{ $availablePlayers->count() }})</span>
+                                    <svg id="available-{{ $league->id }}-icon" class="w-5 h-5 transition-transform rotate-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
                                 </h3>
                             </button>
-                            <div id="available-{{ $league->id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div id="available-{{ $league->id }}" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 @foreach($availablePlayers as $player)
                                     <div class="bg-white border-2 border-blue-200 rounded-xl p-4 text-center hover:shadow-lg transition-all">
                                         @if($player->user && $player->user->photo)
