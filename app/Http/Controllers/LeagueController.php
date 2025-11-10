@@ -896,4 +896,16 @@ class LeagueController
 
         return view('leagues.shareable', compact('league', 'topAuctions', 'teams', 'auctionStats'));
     }
+
+    /**
+     * Display public teams page for a league.
+     */
+    public function publicTeams($leagueSlug): View
+    {
+        $league = League::where('slug', $leagueSlug)
+            ->with(['game', 'leagueTeams.team.owners', 'leagueTeams.leaguePlayers.user'])
+            ->firstOrFail();
+        
+        return view('leagues.public-teams', compact('league'));
+    }
 }

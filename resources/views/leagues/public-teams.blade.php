@@ -1,0 +1,85 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center">
+                    @if($league->logo)
+                        <img src="{{ Storage::url($league->logo) }}" class="w-16 h-16 rounded-full object-cover mr-4">
+                    @endif
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $league->name }}</h1>
+                        <p class="text-gray-600">{{ $league->game->name }} • Season {{ $league->season }}</p>
+                    </div>
+                </div>
+                <span class="px-4 py-2 rounded-full text-sm font-medium
+                    @if($league->status === 'active') bg-green-100 text-green-800
+                    @elseif($league->status === 'completed') bg-blue-100 text-blue-800
+                    @else bg-gray-100 text-gray-800 @endif">
+                    {{ ucfirst($league->status) }}
+                </span>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Teams ({{ $league->leagueTeams->count() }}/{{ $league->max_teams }})</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($league->leagueTeams->sortByDesc('created_at') as $leagueTeam)
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
+                    @if($leagueTeam->team->banner)
+                        <div class="h-32 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
+                    @else
+                        <div class="h-32 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                    @endif
+                    
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            @if($leagueTeam->team->logo)
+                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-12 h-12 rounded-full object-cover mr-3">
+                            @else
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <span class="text-xl font-bold text-gray-600">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">{{ $leagueTeam->team->name }}</h3>
+                                <p class="text-sm text-gray-600">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->where('status', 'sold')->count() }}</div>
+                                <div class="text-xs text-gray-600">Players</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-green-600">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
+                                <div class="text-xs text-gray-600">Wallet</div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                                @if($leagueTeam->status === 'active') bg-green-100 text-green-800
+                                @else bg-gray-100 text-gray-800 @endif">
+                                {{ ucfirst($leagueTeam->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full text-center py-12">
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <p class="text-gray-500">No teams registered yet</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+@endsection

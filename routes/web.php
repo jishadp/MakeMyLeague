@@ -74,6 +74,9 @@ Route::post('join-league/{league}', [LeagueController::class, 'processJoinLink']
 // League shareable public page
 Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->name('leagues.shareable');
 
+// Public league teams page
+Route::get('{league}/teams', [LeagueController::class, 'publicTeams'])->name('leagues.public-teams');}
+
 // Public live auction route (no auth required)
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
 
