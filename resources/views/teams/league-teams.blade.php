@@ -21,18 +21,63 @@
         @php
             $activeLeague = $allLeagues->firstWhere('status', 'active') ?? $allLeagues->sortBy('name')->first();
         @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
             @foreach($allLeagues->sortBy('name') as $index => $tabLeague)
                 <button onclick="showLeague({{ $tabLeague->id }})" 
                         id="tab-{{ $tabLeague->id }}"
-                        class="league-tab p-4 rounded-xl border-2 font-medium text-sm transition-all {{ $tabLeague->id === $activeLeague->id ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-white text-gray-900 border-gray-200 hover:border-indigo-300 hover:shadow-md' }}">
-                    <div class="text-center">
-                        <div class="font-semibold truncate">{{ $tabLeague->name }}</div>
-                        <div class="text-xs mt-1 opacity-80">{{ $tabLeague->leagueTeams->count() }} teams</div>
+                        class="futuristic-card relative p-1 rounded-2xl overflow-visible transition-all duration-500 {{ $tabLeague->id === $activeLeague->id ? 'active' : '' }}">
+                    <div class="card-content bg-gray-900 rounded-xl p-4 h-full flex flex-col justify-center items-center relative z-10 transition-colors duration-1000">
+                        <div class="text-center">
+                            <div class="font-extrabold text-sm leading-tight {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-white' }} transition-colors duration-1000 line-clamp-2">{{ $tabLeague->name }}</div>
+                            <div class="text-xs mt-2 opacity-70 font-semibold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-200' : 'text-gray-400' }}">{{ $tabLeague->leagueTeams->count() }} teams</div>
+                            @php
+                                $daysUntilStart = now()->diffInDays($tabLeague->start_date, false);
+                            @endphp
+                            @if($daysUntilStart > 0)
+                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-emerald-400' }}">{{ $daysUntilStart }} days</div>
+                            @endif
+                        </div>
                     </div>
                 </button>
             @endforeach
         </div>
+
+        <style>
+        .futuristic-card {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            min-height: 100px;
+        }
+        .futuristic-card.active {
+            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
+        }
+        .futuristic-card::after {
+            position: absolute;
+            content: "";
+            top: 30px;
+            left: 0;
+            right: 0;
+            z-index: -1;
+            height: 100%;
+            width: 100%;
+            transform: scale(0.8);
+            filter: blur(25px);
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            transition: opacity 0.5s;
+        }
+        .futuristic-card.active::after {
+            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
+        }
+        .futuristic-card:hover::after {
+            opacity: 0;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+        </style>
 
         <!-- Tab Content -->
         <div class="flex-1">
