@@ -115,6 +115,13 @@
             <span>Teams</span>
         </a>
         
+        <a href="{{ route('teams.league-teams') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 font-medium py-3 px-4 rounded-lg transition-all">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+            </svg>
+            <span>League Teams</span>
+        </a>
+        
         <a href="{{ route('players.index') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 font-medium py-3 px-4 rounded-lg transition-all">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>

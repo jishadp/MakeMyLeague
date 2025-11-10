@@ -59,6 +59,14 @@
                         <span class="font-medium">Teams</span>
                     </a>
 
+                    <!-- League Teams Link -->
+                    <a href="{{ route('teams.league-teams') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                        </svg>
+                        <span class="font-medium">League Teams</span>
+                    </a>
+
                     <!-- Players Link -->
                     <a href="{{ route('players.index') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">

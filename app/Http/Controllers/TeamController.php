@@ -361,6 +361,26 @@ class TeamController extends Controller
     }
 
     /**
+     * Display league teams grouped by league.
+     */
+    public function leagueTeams(Request $request): View
+    {
+        $query = League::with(['leagueTeams.team.owners', 'game'])
+            ->whereHas('leagueTeams')
+            ->latest();
+
+        $leagues = $query->paginate(10);
+        
+        // Get all leagues for sidebar
+        $allLeagues = League::whereHas('leagueTeams')
+            ->withCount('leagueTeams')
+            ->latest()
+            ->get();
+
+        return view('teams.league-teams', compact('leagues', 'allLeagues'));
+    }
+
+    /**
      * Assign Team Owner role to a user if they don't already have it.
      */
     private function assignOwnerRoleIfNeeded(User $user)

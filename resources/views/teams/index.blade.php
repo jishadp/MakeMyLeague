@@ -8,9 +8,16 @@
         
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                Cricket Teams
-            </h1>
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    Cricket Teams
+                </h1>
+                <p class="text-gray-600 mt-2">
+                    <a href="{{ route('teams.league-teams') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                        View League Teams →
+                    </a>
+                </p>
+            </div>
             @auth
                 <a href="{{ route('teams.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base">
