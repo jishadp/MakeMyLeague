@@ -81,54 +81,29 @@
                                     </div>
                                 </div>
 
-                                <!-- Retention Players -->
+                                <!-- All Players -->
                                 @php
-                                    $retentionPlayers = $leagueTeam->leaguePlayers->where('retention', true)->where('status', 'sold')->take(3);
+                                    $allPlayers = $leagueTeam->leaguePlayers->where('status', 'sold')->sortByDesc('retention');
                                 @endphp
-                                @if($retentionPlayers->count() > 0)
-                                    <div class="bg-yellow-50 border-b border-yellow-100 p-3">
-                                        <div class="flex items-center mb-2">
-                                            <svg class="w-4 h-4 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                            </svg>
-                                            <span class="text-xs font-semibold text-yellow-800 uppercase">Retention Players</span>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2">
-                                            @foreach($retentionPlayers as $player)
-                                                <div class="bg-white rounded-lg p-2 text-center">
-                                                    @if($player->user->photo)
-                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover mx-auto mb-1 border-2 border-yellow-400">
-                                                    @else
-                                                        <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-1 border-2 border-yellow-400">
-                                                            <span class="text-sm font-bold text-yellow-600">{{ substr($player->user->name, 0, 1) }}</span>
-                                                        </div>
-                                                    @endif
-                                                    <p class="text-xs font-medium text-gray-900 truncate">{{ $player->user->name }}</p>
-                                                    <p class="text-xs text-yellow-600 font-semibold">₹{{ number_format($player->bid_price/1000, 0) }}K</p>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Regular Players -->
-                                @php
-                                    $regularPlayers = $leagueTeam->leaguePlayers->where('retention', false)->where('status', 'sold')->take(6);
-                                @endphp
-                                @if($regularPlayers->count() > 0)
+                                @if($allPlayers->count() > 0)
                                     <div class="p-3">
                                         <div class="flex items-center justify-between mb-2">
                                             <span class="text-xs font-semibold text-gray-700 uppercase">Squad</span>
-                                            <span class="text-xs text-gray-500">{{ $leagueTeam->leaguePlayers->where('status', 'sold')->count() }} players</span>
+                                            <span class="text-xs text-gray-500">{{ $allPlayers->count() }} players</span>
                                         </div>
                                         <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                            @foreach($regularPlayers as $player)
-                                                <div class="text-center">
+                                            @foreach($allPlayers as $player)
+                                                <div class="text-center relative">
+                                                    @if($player->retention)
+                                                        <svg class="w-3 h-3 text-yellow-500 absolute -top-1 -right-1 z-10" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                        </svg>
+                                                    @endif
                                                     @if($player->user->photo)
-                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover mx-auto mb-1 border border-gray-200">
+                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover mx-auto mb-1 border {{ $player->retention ? 'border-yellow-400 border-2' : 'border-gray-200' }}">
                                                     @else
-                                                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-1 border border-gray-200">
-                                                            <span class="text-xs font-bold text-gray-600">{{ substr($player->user->name, 0, 1) }}</span>
+                                                        <div class="w-10 h-10 rounded-full {{ $player->retention ? 'bg-yellow-100 border-yellow-400 border-2' : 'bg-gray-100 border-gray-200' }} flex items-center justify-center mx-auto mb-1 border">
+                                                            <span class="text-xs font-bold {{ $player->retention ? 'text-yellow-600' : 'text-gray-600' }}">{{ substr($player->user->name, 0, 1) }}</span>
                                                         </div>
                                                     @endif
                                                     <p class="text-xs text-gray-900 truncate">{{ explode(' ', $player->user->name)[0] }}</p>
