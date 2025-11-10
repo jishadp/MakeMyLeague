@@ -75,7 +75,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            <div class="text-2xl font-bold text-white">{{ $leagueTeam->leaguePlayers->where('status', 'sold')->count() }}</div>
+                                            <div class="text-2xl font-bold text-white">{{ $leagueTeam->leaguePlayers->count() }}</div>
                                             <div class="text-xs text-white/80">Players</div>
                                         </div>
                                     </div>
@@ -83,7 +83,7 @@
 
                                 <!-- All Players -->
                                 @php
-                                    $allPlayers = $leagueTeam->leaguePlayers->where('status', 'sold')->sortByDesc('retention');
+                                    $allPlayers = $leagueTeam->leaguePlayers->sortByDesc('retention');
                                 @endphp
                                 @if($allPlayers->count() > 0)
                                     <div class="p-3">
@@ -110,7 +110,7 @@
                                                     </div>
                                                     <p class="text-xs {{ $player->retention ? 'text-yellow-700 font-semibold' : 'text-gray-900' }} truncate">{{ $player->user ? explode(' ', $player->user->name)[0] : 'Unknown' }}</p>
                                                     @if($player->bid_price && !$player->retention)
-                                                        <p class="text-xs text-green-600 font-bold">₹{{ number_format($player->bid_price/1000, 0) }}K</p>
+                                                        <p class="text-xs text-green-600 font-bold">₹{{ number_format($player->bid_price) }}</p>
                                                     @elseif($player->retention)
                                                         <p class="text-xs text-yellow-600 font-semibold">Retained</p>
                                                     @endif
@@ -121,14 +121,17 @@
                                 @endif
 
                                 <!-- Team Stats Footer -->
+                                @php
+                                    $spentAmount = $leagueTeam->leaguePlayers->where('retention', false)->sum('bid_price');
+                                @endphp
                                 <div class="bg-gray-50 border-t border-gray-200 p-3">
                                     <div class="grid grid-cols-3 gap-2 text-center">
                                         <div>
-                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format($leagueTeam->wallet_balance/1000, 0) }}K</div>
+                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
                                             <div class="text-xs text-gray-600">Remaining</div>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format(($league->team_wallet_limit - $leagueTeam->wallet_balance)/1000, 0) }}K</div>
+                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format($spentAmount) }}</div>
                                             <div class="text-xs text-gray-600">Spent</div>
                                         </div>
                                         <div>
