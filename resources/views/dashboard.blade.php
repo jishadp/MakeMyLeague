@@ -337,7 +337,7 @@
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
                     <span class="hidden sm:inline">Auction</span> <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Leaderboard</span>
                 </h2>
-                <p class="text-sm sm:text-base text-gray-600">Top 5 valued players across all leagues</p>
+                <p class="text-sm sm:text-base text-gray-600">Top 3 valued players across all leagues</p>
             </div>
             </div>
 
@@ -352,7 +352,69 @@
             <p class="text-gray-600">Leaderboard will appear after player auctions</p>
                 </div>
             @else
-        <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xl">
+        <!-- Mobile: Podium Cards (Top 3) -->
+        <div class="sm:hidden">
+            @php
+                $topThree = $auctionLeaderboard->take(3)->values();
+                $first = $topThree->get(0);
+                $second = $topThree->get(1);
+                $third = $topThree->get(2);
+            @endphp
+            @if($topThree->isNotEmpty())
+            <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xl p-4">
+                <div class="flex items-end justify-center gap-3">
+                    @if($second)
+                    <div class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm">
+                        <div class="flex flex-col items-center">
+                            <div class="text-xs font-bold text-gray-500 mb-1">2</div>
+                            @if($second->user && $second->user->photo)
+                                <img src="{{ Storage::url($second->user->photo) }}" alt="{{ $second->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                            @else
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $second->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                            @endif
+                            <div class="text-sm font-bold text-gray-900 text-center line-clamp-1">{{ $second->user->name }}</div>
+                            <div class="text-[11px] text-gray-600 line-clamp-1">{{ $second->leagueTeam->team->name ?? 'N/A' }}</div>
+                            <div class="text-sm font-extrabold text-green-600 mt-1">₹{{ number_format($second->bid_price/1000, 1) }}K</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($first)
+                    <div class="flex-[1.2] bg-yellow-50 rounded-2xl p-3 border-2 border-yellow-300 shadow-md translate-y-[-8px]">
+                        <div class="flex flex-col items-center">
+                            <div class="text-xs font-extrabold text-yellow-800 mb-1">1</div>
+                            @if($first->user && $first->user->photo)
+                                <img src="{{ Storage::url($first->user->photo) }}" alt="{{ $first->user->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2">
+                            @else
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $first->user->name ?? 'Player' }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2">
+                            @endif
+                            <div class="text-sm font-black text-gray-900 text-center line-clamp-1">{{ $first->user->name }}</div>
+                            <div class="text-[11px] text-gray-700 line-clamp-1">{{ $first->leagueTeam->team->name ?? 'N/A' }}</div>
+                            <div class="text-base font-black text-green-700 mt-1">₹{{ number_format($first->bid_price/1000, 1) }}K</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($third)
+                    <div class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm">
+                        <div class="flex flex-col items-center">
+                            <div class="text-xs font-bold text-gray-500 mb-1">3</div>
+                            @if($third->user && $third->user->photo)
+                                <img src="{{ Storage::url($third->user->photo) }}" alt="{{ $third->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                            @else
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $third->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                            @endif
+                            <div class="text-sm font-bold text-gray-900 text-center line-clamp-1">{{ $third->user->name }}</div>
+                            <div class="text-[11px] text-gray-600 line-clamp-1">{{ $third->leagueTeam->team->name ?? 'N/A' }}</div>
+                            <div class="text-sm font-extrabold text-green-600 mt-1">₹{{ number_format($third->bid_price/1000, 1) }}K</div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <!-- Desktop/Tablet: Table (Top 3) -->
+        <div class="hidden sm:block bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -366,7 +428,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        @foreach($auctionLeaderboard->take(5) as $index => $player)
+                        @foreach($auctionLeaderboard->take(3) as $index => $player)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
