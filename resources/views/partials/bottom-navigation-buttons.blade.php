@@ -7,26 +7,26 @@
             $isProfile = request()->routeIs('profile.show');
         @endphp
         <div class="nav-container flex justify-between items-center
-                    bg-gray-900/95
-                    border border-white/10 rounded-2xl sm:rounded-full
+                    bg-gradient-to-r from-[#4a90e2]/85 via-[#6bb6ff]/85 to-[#87ceeb]/85
+                    backdrop-blur-lg border border-white/10 rounded-2xl sm:rounded-full
                     shadow-[0_-6px_24px_rgba(0,0,0,0.3)] px-3 py-2 relative">
 
             <!-- Dashboard Button -->
             <a href="{{ route('dashboard') }}"
-               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isDashboard ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white' }}">
+               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isDashboard ? 'bg-blue-600 text-white shadow' : 'text-white/80 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                 </svg>
                 @if($isDashboard)
-                    <span class="text-sm font-semibold ml-2">Home</span>
+                    <span class="text-sm font-semibold ml-2 text-white">Home</span>
                 @endif
             </a>
 
             <!-- My Leagues Button -->
             <a href="{{ route('my-leagues') }}"
-               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isMyLeagues ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white' }}">
+               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isMyLeagues ? 'bg-blue-600 text-white shadow' : 'text-white/80 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6"
                      viewBox="0 0 20 20" fill="currentColor">
@@ -34,7 +34,7 @@
                     <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
                 </svg>
                 @if($isMyLeagues)
-                    <span class="text-sm font-semibold ml-2">Leagues</span>
+                    <span class="text-sm font-semibold ml-2 text-white">Leagues</span>
                 @endif
             </a>
 
@@ -44,9 +44,9 @@
                 <button id="mobile-menu-toggle"
                    class="home-button absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-0
                           flex items-center justify-center rounded-full
-                          bg-white text-[#2563eb] w-14 h-14 sm:w-16 sm:h-16
+                          bg-blue-600 text-white w-14 h-14 sm:w-16 sm:h-16
                           shadow-lg hover:shadow-xl transition-all duration-300
-                          active:scale-95 border-4 border-[#2563eb]/20"
+                          active:scale-95 border-4 border-blue-300/40"
                    aria-label="Toggle menu">
                     <div class="hamburger-menu-small">
                         <span></span>
@@ -60,27 +60,27 @@
             
             <!-- My Teams Button -->
             <a href="{{ route('my-teams') }}"
-               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isMyTeams ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white' }}">
+               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isMyTeams ? 'bg-blue-600 text-white shadow' : 'text-white/80 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                 </svg>
                 @if($isMyTeams)
-                    <span class="text-sm font-semibold ml-2">Teams</span>
+                    <span class="text-sm font-semibold ml-2 text-white">Teams</span>
                 @endif
             </a>
 
             <!-- Profile Button -->
             <a href="{{ route('profile.show') }}"
-               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isProfile ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white' }}">
+               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isProfile ? 'bg-blue-600 text-white shadow' : 'text-white/80 hover:text-white' }}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
                 @if($isProfile)
-                    <span class="text-sm font-semibold ml-2">Profile</span>
+                    <span class="text-sm font-semibold ml-2 text-white">Profile</span>
                 @endif
             </a>
 
