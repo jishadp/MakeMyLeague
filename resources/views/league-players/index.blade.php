@@ -258,14 +258,19 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10">
-                                                @php
-                                                    $playerPhoto = optional($leaguePlayer->player)->photo;
-                                                @endphp
-                                                <img
-                                                    src="{{ $playerPhoto ? asset($playerPhoto) : asset('images/defaultplayer.jpeg') }}"
-                                                    alt="{{ $leaguePlayer->user->name }}"
-                                                    class="h-10 w-10 rounded-full object-cover"
-                                                />
+                                                @if($leaguePlayer->user && $leaguePlayer->user->photo)
+                                                    <img
+                                                        src="{{ Storage::url($leaguePlayer->user->photo) }}"
+                                                        alt="{{ $leaguePlayer->user->name }}"
+                                                        class="h-10 w-10 rounded-full object-cover"
+                                                    />
+                                                else
+                                                    <img
+                                                        src="{{ asset('images/defaultplayer.jpeg') }}"
+                                                        alt="{{ $leaguePlayer->user->name }}"
+                                                        class="h-10 w-10 rounded-full object-cover"
+                                                    />
+                                                @endif
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">
