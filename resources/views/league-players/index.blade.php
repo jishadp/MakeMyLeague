@@ -7,7 +7,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8" x-data="{ open: false }">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">League Players</h1>
@@ -81,6 +81,36 @@
                 </div>
             </div>
         </div>
+
+        @auth
+            @if(auth()->user()->isAdmin() || auth()->user()->isOrganizerForLeague($league->id))
+                <!-- Bulk Base Price Card -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">Bulk Base Price</h2>
+                            <p class="text-sm text-gray-600 mt-1">Set base price for all players with status <span class="font-medium text-blue-700">Available</span>.</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('league-players.bulk-base-price', $league) }}" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        @csrf
+                        <div>
+                            <label for="bulk_base_price" class="block text-sm font-medium text-gray-700 mb-2">New Base Price</label>
+                            <input id="bulk_base_price" type="number" name="base_price" min="0" step="1" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   placeholder="Enter amount">
+                        </div>
+                        <div class="md:col-span-2 flex items-end">
+                            <button type="submit"
+                                    onclick="return confirm('Update base price for all available players?');"
+                                    class="inline-flex items-center px-4 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors text-sm">
+                                Apply New Base Price
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+        @endauth
 
         <!-- Filters -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">

@@ -474,6 +474,23 @@ class LeaguePlayerController extends Controller
     }
 
     /**
+     * Bulk update base price for all available players in the league.
+     */
+    public function bulkUpdateBasePrice(Request $request, League $league)
+    {
+        $data = $request->validate([
+            'base_price' => 'required|numeric|min:0',
+        ]);
+        
+        $updated = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->update(['base_price' => $data['base_price']]);
+        
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', "{$updated} available player(s) updated with new base price.");
+    }
+    /**
      * Handle player registration request for a league.
      */
     public function requestRegistration(Request $request, League $league)
