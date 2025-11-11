@@ -7,19 +7,19 @@
 
             <!-- Dashboard Button -->
             <a href="{{ route('dashboard') }}"
-               class="nav-item flex flex-col items-center justify-center p-2
+               class="nav-item group flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6 drop-shadow"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                 </svg>
-                <span class="text-xs mt-1">Dashboard</span>
+                <span class="text-xs mt-1 hidden group-hover:block sm:block">Dashboard</span>
             </a>
 
             <!-- My Leagues Button -->
             <a href="{{ route('my-leagues') }}"
-               class="nav-item flex flex-col items-center justify-center p-2
+               class="nav-item group flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6 drop-shadow"
@@ -27,7 +27,7 @@
                     <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                     <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
                 </svg>
-                <span class="text-xs mt-1">My Leagues</span>
+                <span class="text-xs mt-1 hidden group-hover:block sm:block">My Leagues</span>
             </a>
 
             <!-- Home Button (Centered & Elevated) -->
@@ -52,26 +52,26 @@
             
             <!-- My Teams Button -->
             <a href="{{ route('my-teams') }}"
-               class="nav-item flex flex-col items-center justify-center p-2
+               class="nav-item group flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6 drop-shadow"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                 </svg>
-                <span class="text-xs mt-1">My Teams</span>
+                <span class="text-xs mt-1 hidden group-hover:block sm:block">My Teams</span>
             </a>
 
             <!-- Profile Button -->
             <a href="{{ route('profile.show') }}"
-               class="nav-item flex flex-col items-center justify-center p-2
+               class="nav-item group flex flex-col items-center justify-center p-2
                       text-white/80 hover:text-white transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-6 w-6 drop-shadow"
                      viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-xs mt-1">Profile</span>
+                <span class="text-xs mt-1 hidden group-hover:block sm:block">Profile</span>
             </a>
 
         </div>

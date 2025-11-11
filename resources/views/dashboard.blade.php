@@ -364,7 +364,7 @@
             <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xl p-4">
                 <div class="flex items-end justify-center gap-3">
                     @if($second)
-                    <div class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm">
+                    <a href="{{ route('players.show', $second->user) }}" class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-bold text-gray-500 mb-1">2</div>
                             @if($second->user && $second->user->photo)
@@ -372,14 +372,23 @@
                             @else
                                 <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $second->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
                             @endif
-                            <div class="text-sm font-bold text-gray-900 text-center line-clamp-1">{{ $second->user->name }}</div>
-                            <div class="text-[11px] text-gray-600 line-clamp-1">{{ $second->leagueTeam->team->name ?? 'N/A' }}</div>
+                            @php $secondFirstName = explode(' ', $second->user->name)[0] ?? $second->user->name; @endphp
+                            <div class="text-sm font-bold text-gray-900 text-center">{{ $secondFirstName }}</div>
+                            <div class="flex items-center gap-1 mt-1">
+                                @if(optional($second->leagueTeam->team)->logo)
+                                    <img src="{{ Storage::url($second->leagueTeam->team->logo) }}" alt="{{ $second->leagueTeam->team->name }}" class="w-4 h-4 rounded object-cover border border-gray-200">
+                                @endif
+                                @if(optional($second->league)->logo)
+                                    <img src="{{ Storage::url($second->league->logo) }}" alt="{{ $second->league->name }}" class="w-4 h-4 rounded object-cover border border-gray-200">
+                                @endif
+                                <span class="text-[10px] text-gray-600">{{ $second->leagueTeam->team->name ?? 'N/A' }}</span>
+                            </div>
                             <div class="text-sm font-extrabold text-green-600 mt-1">₹{{ number_format($second->bid_price/1000, 1) }}K</div>
                         </div>
-                    </div>
+                    </a>
                     @endif
                     @if($first)
-                    <div class="flex-[1.2] bg-yellow-50 rounded-2xl p-3 border-2 border-yellow-300 shadow-md translate-y-[-8px]">
+                    <a href="{{ route('players.show', $first->user) }}" class="flex-[1.2] bg-yellow-50 rounded-2xl p-3 border-2 border-yellow-300 shadow-md translate-y-[-8px] block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-extrabold text-yellow-800 mb-1">1</div>
                             @if($first->user && $first->user->photo)
@@ -387,14 +396,23 @@
                             @else
                                 <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $first->user->name ?? 'Player' }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2">
                             @endif
-                            <div class="text-sm font-black text-gray-900 text-center line-clamp-1">{{ $first->user->name }}</div>
-                            <div class="text-[11px] text-gray-700 line-clamp-1">{{ $first->leagueTeam->team->name ?? 'N/A' }}</div>
+                            @php $firstFirstName = explode(' ', $first->user->name)[0] ?? $first->user->name; @endphp
+                            <div class="text-sm font-black text-gray-900 text-center">{{ $firstFirstName }}</div>
+                            <div class="flex items-center gap-1 mt-1">
+                                @if(optional($first->leagueTeam->team)->logo)
+                                    <img src="{{ Storage::url($first->leagueTeam->team->logo) }}" alt="{{ $first->leagueTeam->team->name }}" class="w-4 h-4 rounded object-cover border border-yellow-300">
+                                @endif
+                                @if(optional($first->league)->logo)
+                                    <img src="{{ Storage::url($first->league->logo) }}" alt="{{ $first->league->name }}" class="w-4 h-4 rounded object-cover border border-yellow-300">
+                                @endif
+                                <span class="text-[10px] text-gray-700">{{ $first->leagueTeam->team->name ?? 'N/A' }}</span>
+                            </div>
                             <div class="text-base font-black text-green-700 mt-1">₹{{ number_format($first->bid_price/1000, 1) }}K</div>
                         </div>
-                    </div>
+                    </a>
                     @endif
                     @if($third)
-                    <div class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm">
+                    <a href="{{ route('players.show', $third->user) }}" class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-bold text-gray-500 mb-1">3</div>
                             @if($third->user && $third->user->photo)
@@ -402,11 +420,20 @@
                             @else
                                 <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $third->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
                             @endif
-                            <div class="text-sm font-bold text-gray-900 text-center line-clamp-1">{{ $third->user->name }}</div>
-                            <div class="text-[11px] text-gray-600 line-clamp-1">{{ $third->leagueTeam->team->name ?? 'N/A' }}</div>
+                            @php $thirdFirstName = explode(' ', $third->user->name)[0] ?? $third->user->name; @endphp
+                            <div class="text-sm font-bold text-gray-900 text-center">{{ $thirdFirstName }}</div>
+                            <div class="flex items-center gap-1 mt-1">
+                                @if(optional($third->leagueTeam->team)->logo)
+                                    <img src="{{ Storage::url($third->leagueTeam->team->logo) }}" alt="{{ $third->leagueTeam->team->name }}" class="w-4 h-4 rounded object-cover border border-gray-200">
+                                @endif
+                                @if(optional($third->league)->logo)
+                                    <img src="{{ Storage::url($third->league->logo) }}" alt="{{ $third->league->name }}" class="w-4 h-4 rounded object-cover border border-gray-200">
+                                @endif
+                                <span class="text-[10px] text-gray-600">{{ $third->leagueTeam->team->name ?? 'N/A' }}</span>
+                            </div>
                             <div class="text-sm font-extrabold text-green-600 mt-1">₹{{ number_format($third->bid_price/1000, 1) }}K</div>
                         </div>
-                    </div>
+                    </a>
                     @endif
                 </div>
             </div>
@@ -457,7 +484,9 @@
                                         />
                                     @endif
                                     <div>
-                                        <div class="font-bold text-gray-900 text-sm sm:text-base">{{ $player->user->name }}</div>
+                                        <a href="{{ route('players.show', $player->user) }}" class="font-bold text-gray-900 text-sm sm:text-base hover:underline">
+                                            {{ $player->user->name }}
+                                        </a>
                                         <div class="text-xs sm:text-sm text-gray-600 hidden sm:block">{{ $player->user->email }}</div>
                                     </div>
                                 </div>
