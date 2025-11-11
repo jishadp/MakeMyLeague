@@ -381,9 +381,19 @@
                             </td>
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold mr-2 sm:mr-3 shadow-md text-xs sm:text-base">
-                                        {{ strtoupper(substr($player->user->name, 0, 2)) }}
-                                    </div>
+                                    @if($player->user && $player->user->photo)
+                                        <img
+                                            src="{{ Storage::url($player->user->photo) }}"
+                                            alt="{{ $player->user->name }}"
+                                            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover mr-2 sm:mr-3 border border-gray-200 shadow-sm"
+                                        />
+                                    @else
+                                        <img
+                                            src="{{ asset('images/defaultplayer.jpeg') }}"
+                                            alt="{{ $player->user->name }}"
+                                            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover mr-2 sm:mr-3 border border-gray-200 shadow-sm"
+                                        />
+                                    @endif
                                     <div>
                                         <div class="font-bold text-gray-900 text-sm sm:text-base">{{ $player->user->name }}</div>
                                         <div class="text-xs sm:text-sm text-gray-600 hidden sm:block">{{ $player->user->email }}</div>
