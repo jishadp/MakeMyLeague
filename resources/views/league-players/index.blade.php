@@ -264,7 +264,7 @@
                                                         alt="{{ $leaguePlayer->user->name }}"
                                                         class="h-10 w-10 rounded-full object-cover"
                                                     />
-                                                else
+                                                @else
                                                     <img
                                                         src="{{ asset('images/defaultplayer.jpeg') }}"
                                                         alt="{{ $leaguePlayer->user->name }}"
