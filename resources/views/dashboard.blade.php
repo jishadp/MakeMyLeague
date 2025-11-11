@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $roleView = request('role', 'player');
+@endphp
+
 <!-- Professional Hero Section -->
 <section class="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 overflow-hidden border-b-2 border-gray-200"> 
     <!-- Animated Background Pattern -->
@@ -47,91 +51,19 @@
                 </div>
             </div>
 
-            <!-- Stats Card - Tabbed Interface -->
-            <div class="stats-crypto-card">
-                <div class="card-header">
-                    <div class="card-logo">MakeMyLeague</div>
-                    <div class="card-open">STATS</div>
+            <!-- Simplified Quick Stats -->
+            <div class="w-full grid grid-cols-3 gap-3">
+                <div class="bg-white border-2 border-blue-200 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-blue-700">{{ $quickStats['active_leagues'] }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 font-semibold">Active Leagues</div>
                 </div>
-
-                <!-- Tab Switcher -->
-                <div class="crypto-switch">
-                    <input type="radio" name="stat-tab" id="leagues" checked>
-                    <label for="leagues">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
-                        </svg>
-                        <span class="hidden sm:inline">Leagues</span>
-                    </label>
-
-                    <input type="radio" name="stat-tab" id="teams">
-                    <label for="teams">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                        </svg>
-                        <span class="hidden sm:inline">Teams</span>
-                    </label>
-
-                    <input type="radio" name="stat-tab" id="players">
-                    <label for="players">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                        </svg>
-                        <span class="hidden sm:inline">Players</span>
-                    </label>
-
-                    <div class="slider"></div>
+                <div class="bg-white border-2 border-purple-200 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-purple-700">{{ number_format($quickStats['total_teams']) }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 font-semibold">Teams</div>
                 </div>
-
-                <!-- Stats Content -->
-                <div class="price-infos">
-                    <!-- Leagues Stats -->
-                    <div class="price-info leagues">
-                        <div class="stat-value stat-leagues">{{ $quickStats['active_leagues'] }}</div>
-                        <div class="stat-label">Active Leagues</div>
-                        <div class="stats">
-                            <span class="text-gray-400 text-sm">Total in platform</span>
-                            <span class="change change-purple">⚡ Live Now</span>
-                        </div>
-                    </div>
-
-                    <!-- Teams Stats -->
-                    <div class="price-info teams">
-                        <div class="stat-value stat-teams">{{ number_format($quickStats['total_teams']) }}</div>
-                        <div class="stat-label">Total Teams</div>
-                        <div class="stats">
-                            <span class="text-gray-400 text-sm">Registered teams</span>
-                            <span class="change change-indigo">+{{ $quickStats['total_teams'] }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Players Stats -->
-                    <div class="price-info players">
-                        <div class="stat-value stat-players">{{ number_format($quickStats['players_registered']) }}</div>
-                        <div class="stat-label">Total Players</div>
-                        <div class="stats">
-                            <span class="text-gray-400 text-sm">Registered users</span>
-                            <span class="change change-pink">+{{ $quickStats['players_registered'] }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chart Visualization -->
-                <div class="chart">
-                    <!-- Leagues Chart -->
-                    <svg id="chart-leagues" viewBox="0 0 320 90" preserveAspectRatio="none">
-                        <path d="M0,70 Q80,20 160,45 T320,30" />
-                    </svg>
-                    
-                    <!-- Teams Chart -->
-                    <svg id="chart-teams" viewBox="0 0 320 90" preserveAspectRatio="none">
-                        <path d="M0,60 Q80,30 160,50 T320,25" />
-                    </svg>
-                    
-                    <!-- Players Chart -->
-                    <svg id="chart-players" viewBox="0 0 320 90" preserveAspectRatio="none">
-                        <path d="M0,65 Q80,35 160,40 T320,20" />
-                    </svg>
+                <div class="bg-white border-2 border-pink-200 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-pink-700">{{ number_format($quickStats['players_registered']) }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 font-semibold">Players</div>
                 </div>
             </div>
             </div>
@@ -178,31 +110,19 @@
                 </a>
             </div>
 
-        <!-- Search Bar -->
+        <!-- Search moved to header -->
+        @if(request('search'))
         <div class="mb-6">
-            <form method="GET" action="{{ route('dashboard') }}" class="relative">
-                <input type="text" 
-                       name="search" 
-                       value="{{ request('search') }}"
-                       placeholder="Search leagues by name, game, or location..." 
-                       class="w-full px-4 sm:px-6 py-3 sm:py-4 pr-12 sm:pr-14 rounded-xl sm:rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all text-sm sm:text-base">
-                <button type="submit" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 sm:p-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                </button>
-            </form>
-            @if(request('search'))
             <div class="mt-3 flex items-center justify-between">
                 <p class="text-sm text-gray-600">
                     Showing results for: <span class="font-semibold text-blue-600">"{{ request('search') }}"</span>
                 </p>
-                <a href="{{ route('dashboard') }}" class="text-sm text-red-600 hover:text-red-700 font-medium">
+                <a href="{{ route('dashboard', array_filter(['role' => request('role')])) }}" class="text-sm text-red-600 hover:text-red-700 font-medium">
                     Clear Search
                 </a>
             </div>
-            @endif
         </div>
+        @endif
 
         @if($availableLeagues->isEmpty())
         <div class="bg-white rounded-3xl shadow-xl p-12 text-center border-2 border-dashed border-gray-200">
@@ -220,8 +140,8 @@
             <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
                 <!-- League Header -->
                 <div class="relative h-48 overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700">
-                                @if($league->banner)
-                        <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
+                        @if($league->banner)
+                        <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                                 @endif
                                 
@@ -236,7 +156,7 @@
                                     <div class="absolute bottom-4 left-4 right-4">
                                         <div class="flex items-center space-x-3">
                                             @if($league->logo)
-                                <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}" class="w-14 h-14 rounded-xl border-2 border-white shadow-lg">
+                                <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}" class="w-14 h-14 rounded-xl border-2 border-white shadow-lg" loading="lazy">
                             @else
                                 <div class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white">
                                     <span class="text-white font-black text-2xl">{{ substr($league->name, 0, 1) }}</span>
@@ -367,10 +287,10 @@
                     <a href="{{ route('players.show', $second->user) }}" class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-bold text-gray-500 mb-1">2</div>
-                            @if($second->user && $second->user->photo)
-                                <img src="{{ Storage::url($second->user->photo) }}" alt="{{ $second->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                                    @if($second->user && $second->user->photo)
+                                <img src="{{ Storage::url($second->user->photo) }}" alt="{{ $second->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2" loading="lazy">
                             @else
-                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $second->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $second->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2" loading="lazy">
                             @endif
                             @php $secondFirstName = explode(' ', $second->user->name)[0] ?? $second->user->name; @endphp
                             <div class="text-sm font-bold text-gray-900 text-center">{{ $secondFirstName }}</div>
@@ -391,10 +311,10 @@
                     <a href="{{ route('players.show', $first->user) }}" class="flex-[1.2] bg-yellow-50 rounded-2xl p-3 border-2 border-yellow-300 shadow-md translate-y-[-8px] block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-extrabold text-yellow-800 mb-1">1</div>
-                            @if($first->user && $first->user->photo)
-                                <img src="{{ Storage::url($first->user->photo) }}" alt="{{ $first->user->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2">
+                                    @if($first->user && $first->user->photo)
+                                <img src="{{ Storage::url($first->user->photo) }}" alt="{{ $first->user->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2" loading="lazy">
                             @else
-                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $first->user->name ?? 'Player' }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2">
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $first->user->name ?? 'Player' }}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-300 shadow mb-2" loading="lazy">
                             @endif
                             @php $firstFirstName = explode(' ', $first->user->name)[0] ?? $first->user->name; @endphp
                             <div class="text-sm font-black text-gray-900 text-center">{{ $firstFirstName }}</div>
@@ -415,10 +335,10 @@
                     <a href="{{ route('players.show', $third->user) }}" class="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-200 shadow-sm block">
                         <div class="flex flex-col items-center">
                             <div class="text-xs font-bold text-gray-500 mb-1">3</div>
-                            @if($third->user && $third->user->photo)
-                                <img src="{{ Storage::url($third->user->photo) }}" alt="{{ $third->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                                    @if($third->user && $third->user->photo)
+                                <img src="{{ Storage::url($third->user->photo) }}" alt="{{ $third->user->name }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2" loading="lazy">
                             @else
-                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $third->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2">
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $third->user->name ?? 'Player' }}" class="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-sm mb-2" loading="lazy">
                             @endif
                             @php $thirdFirstName = explode(' ', $third->user->name)[0] ?? $third->user->name; @endphp
                             <div class="text-sm font-bold text-gray-900 text-center">{{ $thirdFirstName }}</div>
@@ -523,7 +443,7 @@
 </section>
 
 <!-- User's Auction History & Stats -->
-@if($auctionHistory->isNotEmpty())
+@if($auctionHistory->isNotEmpty() && $roleView === 'player')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
@@ -603,7 +523,7 @@
                                 @endif
                                 
 <!-- Upcoming Matches -->
-@if($upcomingMatches->isNotEmpty())
+@if($upcomingMatches->isNotEmpty() && $roleView === 'player')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
@@ -656,7 +576,7 @@
 @endif
 
 <!-- Recent Match Results -->
-@if($recentResults->isNotEmpty())
+@if($recentResults->isNotEmpty() && $roleView === 'player')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
@@ -703,7 +623,7 @@
                                 @endif
                                 
 <!-- My League Participations -->
-@if($userLeagueParticipations->isNotEmpty())
+@if($userLeagueParticipations->isNotEmpty() && $roleView === 'player')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
@@ -758,7 +678,7 @@
                 @endif
 
 <!-- Trending Leagues -->
-@if($trendingLeagues->isNotEmpty())
+@if($trendingLeagues->isNotEmpty() && !request('search'))
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
@@ -771,7 +691,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center border-2 border-blue-300">
                         @if($league->logo)
-                            <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}" class="w-12 h-12 rounded-lg">
+                            <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}" class="w-12 h-12 rounded-lg" loading="lazy">
                         @else
                             <span class="text-blue-600 font-black text-2xl">{{ substr($league->name, 0, 1) }}</span>
             @endif
@@ -807,7 +727,7 @@
     @endif
 
 <!-- Owned Teams (if team owner) -->
-@if($userOwnedTeams->isNotEmpty())
+@if($userOwnedTeams->isNotEmpty() && $roleView === 'team')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
@@ -830,14 +750,14 @@
             <div class="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="relative h-40 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
                         @if($team->banner)
-                        <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        <img src="{{ Storage::url($team->banner) }}" alt="{{ $team->name }}" class="w-full h-full object-cover" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                         @endif
                         
                             <div class="absolute bottom-4 left-4 right-4">
                                 <div class="flex items-center space-x-3">
                                     @if($team->logo)
-                                <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }}" class="w-14 h-14 rounded-xl border-2 border-white shadow-lg">
+                                <img src="{{ Storage::url($team->logo) }}" alt="{{ $team->name }}" class="w-14 h-14 rounded-xl border-2 border-white shadow-lg" loading="lazy">
                             @else
                                 <div class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white">
                                     <span class="text-white font-black text-2xl">{{ substr($team->name, 0, 1) }}</span>
@@ -879,7 +799,7 @@
                             @endif
 
 <!-- Organized Leagues (if organizer) -->
-@if($organizedLeagues->isNotEmpty())
+@if($organizedLeagues->isNotEmpty() && $roleView === 'organizer')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
@@ -902,7 +822,7 @@
             <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="relative h-40 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700">
                     @if($league->banner)
-                        <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover">
+                        <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                     @endif
                     
@@ -942,7 +862,7 @@
     @endif
 
 <!-- Player Profile Summary -->
-                @if($playerInfo)
+                @if($playerInfo && $roleView === 'player')
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div class="max-w-7xl mx-auto">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-8">
@@ -956,9 +876,9 @@
                     <div class="text-center">
                         <div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-white shadow-2xl">
                                     @if($playerInfo->photo)
-                                <img src="{{ asset('storage/' . $playerInfo->photo) }}" alt="{{ $playerInfo->name }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('storage/' . $playerInfo->photo) }}" alt="{{ $playerInfo->name }}" class="w-full h-full object-cover" loading="lazy">
                                     @else
-                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $playerInfo->name }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $playerInfo->name }}" class="w-full h-full object-cover" loading="lazy">
                                     @endif
                 </div>
                         <h3 class="text-2xl font-black text-white mb-2">{{ $playerInfo->name }}</h3>

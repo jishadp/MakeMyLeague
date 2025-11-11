@@ -22,9 +22,9 @@
             </div>
 
             <!-- Sidebar Content -->
-            <div class="p-4 space-y-1 flex-grow">
+            <div class="p-4 space-y-2 flex-grow">
                 <!-- Home Link -->
-                <a href="/" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                <a href="/" class="flex items-center space-x-3 px-4 py-3 rounded-full transition-colors {{ request()->is('/') ? 'bg-white text-[#4a90e2]' : 'text-white/90 hover:bg-white/20 hover:text-white' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                     </svg>
@@ -33,7 +33,7 @@
 
                 @auth
                     <!-- Dashboard Link -->
-                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded-full transition-colors {{ request()->routeIs('dashboard') ? 'bg-white text-[#4a90e2]' : 'text-white/90 hover:bg-white/20 hover:text-white' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                             <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
@@ -56,10 +56,10 @@
                             </svg>
                         </button>
                         <div id="league-group" class="ml-9 space-y-1">
-                            <a href="{{ route('leagues.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Leagues</span>
                             </a>
-                            <a href="{{ route('auctions.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('auctions.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('auctions.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Auctions</span>
                             </a>
                         </div>
@@ -79,16 +79,16 @@
                             </svg>
                         </button>
                         <div id="team-group" class="ml-9 space-y-1">
-                            <a href="{{ route('teams.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('teams.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('teams.index') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Teams</span>
                             </a>
-                            <a href="{{ route('teams.league-teams') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('teams.league-teams') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('teams.league-teams') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Teams</span>
                             </a>
-                            <a href="{{ route('players.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('players.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('players.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Players</span>
                             </a>
-                            <a href="{{ route('teams.league-players') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('teams.league-players') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('teams.league-players') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Players</span>
                             </a>
                         </div>
@@ -108,7 +108,7 @@
                             </svg>
                         </button>
                         <div id="content-group" class="ml-9 space-y-1">
-                            <a href="{{ route('posters.list') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('posters.list') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('posters.list') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Posters</span>
                             </a>
                         </div>
@@ -128,7 +128,7 @@
                             </svg>
                         </button>
                         <div id="request-group" class="ml-9 space-y-1">
-                            <a href="{{ route('organizer-requests.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('organizer-requests.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('organizer-requests.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Organizer Requests</span>
                             </a>
                         </div>
@@ -149,10 +149,10 @@
                             </svg>
                         </button>
                         <div id="admin-group" class="ml-9 space-y-1">
-                            <a href="{{ route('admin.organizer-requests.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('admin.organizer-requests.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Admin Dashboard</span>
                             </a>
-                            <a href="{{ route('admin.leagues.index') }}" class="flex items-center space-x-3 p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm">
+                            <a href="{{ route('admin.leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Management</span>
                             </a>
                         </div>
@@ -160,7 +160,7 @@
                     @endif
 
                     <!-- Profile Link -->
-                    <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
+                    <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 px-4 py-3 rounded-full transition-colors {{ request()->routeIs('profile.show') ? 'bg-white text-[#4a90e2]' : 'text-white/90 hover:bg-white/20 hover:text-white' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
                         </svg>
