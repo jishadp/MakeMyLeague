@@ -342,7 +342,11 @@
                     </div>
                     <div class="invoice-detail-row">
                         <span class="invoice-detail-label">Period:</span>
-                        <span>{{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</span>
+                        @if($startDate && $endDate)
+                            <span>{{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</span>
+                        @else
+                            <span>All Transactions</span>
+                        @endif
                     </div>
                     <div class="invoice-detail-row">
                         <span class="invoice-detail-label">Generated:</span>
@@ -362,7 +366,9 @@
                     <div class="contact-info">
                         <div><strong>Season:</strong> {{ $league->season }}</div>
                         <div><strong>Status:</strong> {{ ucfirst($league->status) }}</div>
-                        <div><strong>Duration:</strong> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</div>
+                        @if($league->start_date && $league->end_date)
+                            <div><strong>Duration:</strong> {{ $league->start_date->format('M d, Y') }} to {{ $league->end_date->format('M d, Y') }}</div>
+                        @endif
                         @if($league->localBody)
                             <div><strong>Location:</strong> {{ $league->localBody->name }}</div>
                         @endif
@@ -422,7 +428,7 @@
             @else
                 <div class="no-data">
                     <div class="no-data-icon">📊</div>
-                    <p>No transactions found for the selected period.</p>
+                    <p>No transactions found for the @if($startDate && $endDate) selected period @else league @endif.</p>
                 </div>
             @endif
 

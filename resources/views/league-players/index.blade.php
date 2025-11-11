@@ -7,7 +7,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8" x-data="{ open: false }">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">League Players</h1>

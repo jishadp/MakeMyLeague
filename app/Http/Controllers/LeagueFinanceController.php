@@ -411,14 +411,16 @@ class LeagueFinanceController extends Controller
             abort(403, 'You are not authorized to access this league\'s finances.');
         }
 
-        $startDate = $request->get('start_date', $league->start_date);
-        $endDate = $request->get('end_date', $league->end_date);
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
 
-        $finances = $league->finances()
-            ->with(['expenseCategory', 'user'])
-            ->dateRange($startDate, $endDate)
-            ->orderBy('transaction_date', 'desc')
-            ->get();
+        $query = $league->finances()->with(['expenseCategory', 'user']);
+
+        if ($startDate && $endDate) {
+            $query->dateRange($startDate, $endDate);
+        }
+
+        $finances = $query->orderBy('transaction_date', 'desc')->get();
 
         $totalIncome = $finances->where('type', 'income')->sum('amount');
         $totalExpenses = $finances->where('type', 'expense')->sum('amount');
@@ -441,7 +443,13 @@ class LeagueFinanceController extends Controller
             'defaultFont' => 'DejaVu Sans'
         ]);
 
-        return $pdf->download("league-finances-{$league->slug}-{$startDate}-to-{$endDate}.pdf");
+        $fileName = "league-finances-{$league->slug}";
+        if ($startDate && $endDate) {
+            $fileName .= "-{$startDate}-to-{$endDate}";
+        }
+        $fileName .= ".pdf";
+
+        return $pdf->download($fileName);
     }
 
     /**
