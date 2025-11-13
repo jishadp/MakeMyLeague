@@ -36,7 +36,7 @@
 
                 <!-- Quick Action Buttons -->
                 <div class="flex flex-wrap gap-3 pt-4">
-                    <a href="#available-leagues" class="px-4 sm:px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
+                    <a href="{{ route('leagues.index') }}" class="px-4 sm:px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold text-sm sm:text-base text-white shadow-lg hover:shadow-xl transition-all">
                         Join League
                     </a>
                     @if($liveAuctions->isNotEmpty())
@@ -91,163 +91,59 @@
 </section>
 @endif
 
-<!-- Available Leagues to Join (PRIMARY NEED) -->
-<section id="available-leagues" class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-        <div class="max-w-7xl mx-auto">
-        <div class="flex items-center justify-between mb-6">
-                <div>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2">
-                    <span class="hidden sm:inline">Available Leagues</span><span class="sm:hidden">Leagues</span>
-                    <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">to Join</span>
+@if($auctionHistory->isNotEmpty())
+@php
+    $recentSales = $auctionHistory->take(12);
+@endphp
+<section class="py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Recent Sales</p>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
+                    Last Sold Player Highlights
                 </h2>
-                <p class="text-sm sm:text-base text-gray-600">Register now and showcase your skills</p>
-                </div>
-            <a href="{{ route('leagues.index') }}" class="hidden sm:inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
-                View All
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                    </svg>
-                </a>
+                <p class="text-sm sm:text-base text-gray-600 mt-1">Track your latest hammer drops at a glance.</p>
             </div>
-
-        <!-- Search moved to header -->
-        @if(request('search'))
-        <div class="mb-6">
-            <div class="mt-3 flex items-center justify-between">
-                <p class="text-sm text-gray-600">
-                    Showing results for: <span class="font-semibold text-blue-600">"{{ request('search') }}"</span>
-                </p>
-                <a href="{{ route('dashboard', array_filter(['role' => request('role')])) }}" class="text-sm text-red-600 hover:text-red-700 font-medium">
-                    Clear Search
-                </a>
+            <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span>{{ $recentSales->count() }} recent {{ $recentSales->count() === 1 ? 'sale' : 'sales' }}</span>
             </div>
         </div>
-        @endif
 
-        @if($availableLeagues->isEmpty())
-        <div class="bg-white rounded-3xl shadow-xl p-12 text-center border-2 border-dashed border-gray-200">
-            <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
+        <div class="relative">
+            <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                @foreach($recentSales as $sale)
+                <article class="flex-none w-1/3 min-w-[140px] sm:w-64 sm:min-w-0 bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-4 snap-start">
+                    <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide mb-3 text-gray-500">
+                        <span>{{ $sale->league->game->name ?? 'League' }}</span>
+                        <span>{{ $sale->updated_at ? $sale->updated_at->diffForHumans() : $sale->created_at->diffForHumans() }}</span>
                     </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">No Available Leagues</h3>
-            <p class="text-gray-600 mb-6">Check back soon for new league opportunities!</p>
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($availableLeagues as $league)
-            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
-                <!-- League Header -->
-                <div class="relative h-48 overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700">
-                        @if($league->banner)
-                        <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }}" class="w-full h-full object-cover" loading="lazy">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                                @endif
-                                
-                                <!-- Status Badge -->
-                                <div class="absolute top-4 left-4">
-                        <span class="inline-flex items-center px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg">
-                            OPEN FOR REGISTRATION
-                                    </span>
-                                </div>
-                                
-                    <!-- League Logo/Name -->
-                                    <div class="absolute bottom-4 left-4 right-4">
-                                        <div class="flex items-center space-x-3">
-                                            @if($league->logo)
-                                <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}" class="w-14 h-14 rounded-xl border-2 border-white shadow-lg" loading="lazy">
-                            @else
-                                <div class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white">
-                                    <span class="text-white font-black text-2xl">{{ substr($league->name, 0, 1) }}</span>
-                                </div>
-                                            @endif
-                                            <div>
-                                <h3 class="text-xl font-black text-white drop-shadow-lg">{{ $league->name }}</h3>
-                                <p class="text-sm text-white/90">{{ $league->game->name }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                            </div>
-                            
-                <!-- League Details -->
-                            <div class="p-6">
-                                <!-- Quick Stats -->
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                            <div class="text-xl font-black text-blue-600">{{ $league->leagueTeams->count() }}/{{ $league->max_teams }}</div>
-                            <div class="text-xs text-gray-600 font-medium">Teams</div>
-                                    </div>
-                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                            <div class="text-xl font-black text-blue-700">{{ $league->leaguePlayers->count() }}</div>
-                            <div class="text-xs text-gray-600 font-medium">Players</div>
-                        </div>
-                        <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                            <div class="text-xl font-black text-blue-800">{{ $league->season }}</div>
-                            <div class="text-xs text-gray-600 font-medium">Season</div>
-                                    </div>
-                                </div>
-                                
-                    <!-- Info -->
-                                <div class="space-y-2 mb-4">
-                                    <div class="flex items-center text-sm text-gray-600">
-                            <svg class="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                                        </svg>
-                            <span class="font-medium">{{ $league->start_date->format('M d') }} - {{ $league->end_date->format('M d, Y') }}</span>
-                                    </div>
-                        @if($league->localBody)
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <span>{{ $league->localBody->name }}, {{ $league->localBody->district->name }}</span>
-                                    </div>
-                                @endif
+                    <div class="space-y-1">
+                        <h3 class="text-lg font-black text-gray-900 leading-tight">{{ $sale->league->name }}</h3>
+                        <p class="text-sm text-gray-600">{{ optional($sale->leagueTeam->team)->name ?? 'No team assigned' }}</p>
                     </div>
-
-                    <!-- Prize Pool -->
-                    @if($league->winner_prize || $league->runner_prize)
-                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-4 mb-4">
-                        <div class="flex items-center justify-between text-white">
-                            <div>
-                                <div class="text-xs font-bold mb-1">PRIZE POOL</div>
-                                <div class="text-2xl font-black">₹{{ number_format(($league->winner_prize + $league->runner_prize)/1000, 0) }}K</div>
-                                        </div>
-                            <div class="text-right">
-                                <div class="text-xs opacity-90">Winner: ₹{{ number_format($league->winner_prize/1000, 0) }}K</div>
-                                <div class="text-xs opacity-90">Runner: ₹{{ number_format($league->runner_prize/1000, 0) }}K</div>
-                                                </div>
-                                        </div>
-                                    </div>
-                                @endif
-                                
-                                <!-- Action Button -->
-                    <div class="flex gap-2">
-                        <a href="{{ route('leagues.show', $league) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 px-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
-                            Register Now →
-                        </a>
-                        <a href="{{ route('leagues.show', $league) }}" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </a>
+                    <div class="mt-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Sold Price</div>
+                        <div class="text-2xl font-black text-green-600">₹{{ number_format($sale->bid_price, 0) }}</div>
                     </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-        
-        <!-- Pagination -->
-        @if($availableLeagues->hasPages())
-        <div class="mt-8 flex justify-center">
-            {{ $availableLeagues->links() }}
-                </div>
-        @endif
-            @endif
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-gray-500">
+                        <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
+                            {{ optional(optional($sale->league->localBody)->district)->name ?? 'Location NA' }}
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                            {{ optional(optional($sale->leagueTeam->team)->localBody)->name ?? 'Team Base' }}
+                        </span>
+                    </div>
+                </article>
+                @endforeach
+            </div>
         </div>
-    </section>
+    </div>
+</section>
+@endif
+
+
 
 <!-- Auction Leaderboard Section -->
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
@@ -571,6 +467,59 @@
             </div>
             @endforeach
         </div>
+    </div>
+</section>
+@endif
+
+@if($userLeagueParticipations->isNotEmpty())
+@php
+    $activeLeagueBanners = $userLeagueParticipations->filter(function($participation) {
+        return optional($participation->league)->status === 'active' && $participation->league->banner;
+    });
+@endphp
+<section class="py-10 px-4 sm:px-6 lg:px-8 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900">Active Leagues</h2>
+                <p class="text-sm text-gray-500">Swipe through your registered leagues</p>
+            </div>
+            <a href="{{ route('my-leagues') }}" class="hidden sm:inline-flex items-center px-5 py-2 bg-gray-900 text-white rounded-xl font-semibold shadow hover:bg-gray-800 transition">
+                Manage Leagues
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+            </a>
+        </div>
+
+        @if($activeLeagueBanners->isEmpty())
+            <div class="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-6 text-center text-gray-500">
+                No active league banners to show yet. Once your leagues upload banners, they will appear here.
+            </div>
+        @else
+            <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                @foreach($activeLeagueBanners as $participation)
+                    @php $league = $participation->league; @endphp
+                    <a href="{{ route('leagues.show', $league) }}"
+                       class="relative min-w-[260px] h-48 rounded-2xl overflow-hidden shadow-xl snap-center group">
+                        <img src="{{ Storage::url($league->banner) }}"
+                             alt="{{ $league->name }}"
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                             loading="lazy">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+                            <p class="text-xs uppercase tracking-widest text-blue-200">Active League</p>
+                            <h3 class="text-lg font-semibold">{{ $league->name }}</h3>
+                            <p class="text-xs text-white/80">{{ $league->game->name ?? 'League' }}</p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
+        <a href="{{ route('my-leagues') }}" class="sm:hidden inline-flex items-center justify-center w-full px-5 py-3 bg-gray-900 rounded-xl font-semibold shadow hover:bg-gray-800 transition">
+            Manage My Leagues
+        </a>
     </div>
 </section>
 @endif
@@ -1597,6 +1546,8 @@ function switchTab(tab) {
 .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
 .animate-grid-move { animation: grid-move 2s linear infinite; }
 .animation-delay-1000 { animation-delay: 1s; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

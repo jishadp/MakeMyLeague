@@ -28,10 +28,7 @@ class DashboardController
             $query->where('status', 'approved');
         })
         ->where('status', 'active')
-        ->where('start_date', '>', now())
-        ->whereDoesntHave('leaguePlayers', function($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
+        ->whereDate('end_date', '>=', now()->toDateString())
         ->when($searchQuery, function($query, $searchQuery) {
             $query->where(function($q) use ($searchQuery) {
                 $q->where('name', 'like', '%' . $searchQuery . '%')
@@ -44,7 +41,13 @@ class DashboardController
             });
         })
         ->with(['game', 'localBody.district', 'leagueTeams', 'leaguePlayers'])
-        ->withCount('leagueTeams', 'leaguePlayers')
+        ->withCount([
+            'leagueTeams',
+            'leaguePlayers',
+            'leaguePlayers as user_registered_count' => function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            },
+        ])
         ->latest()
         ->paginate(6)
         ->appends(['search' => $searchQuery]);
@@ -58,7 +61,19 @@ class DashboardController
                 'league.leagueTeams',
                 'league.leaguePlayers'
             ])
-            ->latest()
+        ->latest()
+        ->get();
+
+        // ============ GLOBAL PLAYER SPOTLIGHT (RANDOM SOLD PLAYERS) ============
+        $playerSpotlight = LeaguePlayer::where('status', 'sold')
+            ->with([
+                'user.position',
+                'league.game',
+                'league.localBody.district',
+                'leagueTeam.team.localBody',
+            ])
+            ->inRandomOrder()
+            ->take(40)
             ->get();
 
         // ============ USER'S AUCTION HISTORY ============
@@ -227,7 +242,8 @@ class DashboardController
             'organizedLeagues',
             'recentActivities',
             'quickStats',
-            'trendingLeagues'
+            'trendingLeagues',
+            'playerSpotlight',
         ));
     }
 
@@ -344,4 +360,3 @@ class DashboardController
         return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams'));
     }
 }
-
