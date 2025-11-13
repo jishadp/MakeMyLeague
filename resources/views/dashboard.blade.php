@@ -91,53 +91,85 @@
 </section>
 @endif
 
-@if($auctionHistory->isNotEmpty())
+@if(isset($playerSpotlight) && $playerSpotlight->isNotEmpty())
 @php
-    $recentSales = $auctionHistory->take(12);
+    $playerSpotlightChunks = $playerSpotlight->chunk(10);
 @endphp
 <section class="py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-                <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Recent Sales</p>
+                <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Global Spotlight</p>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
-                    Last Sold Player Highlights
+                    Recently Sold Players
                 </h2>
-                <p class="text-sm sm:text-base text-gray-600 mt-1">Track your latest hammer drops at a glance.</p>
+                <p class="text-sm sm:text-base text-gray-600 mt-1">Randomized feed — browse 10 new player cards at a time.</p>
             </div>
-            <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span>{{ $recentSales->count() }} recent {{ $recentSales->count() === 1 ? 'sale' : 'sales' }}</span>
+            <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-3">
+                <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-direction="prev" aria-label="Previous players">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-direction="next" aria-label="Next players">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
         <div class="relative">
-            <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
-                @foreach($recentSales as $sale)
-                <article class="flex-none w-1/3 min-w-[140px] sm:w-64 sm:min-w-0 bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-4 snap-start">
-                    <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide mb-3 text-gray-500">
-                        <span>{{ $sale->league->game->name ?? 'League' }}</span>
-                        <span>{{ $sale->updated_at ? $sale->updated_at->diffForHumans() : $sale->created_at->diffForHumans() }}</span>
+            <div class="overflow-hidden">
+                @foreach($playerSpotlightChunks as $index => $chunk)
+                <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-index="{{ $index }}">
+                    <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                        @foreach($chunk as $player)
+                        <article class="flex-none w-1/3 min-w-[140px] sm:w-64 bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-4 snap-start">
+                            <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide mb-3 text-gray-500">
+                                <span>{{ $player->league->game->name ?? 'League' }}</span>
+                                <span>{{ optional($player->updated_at ?? $player->created_at)->diffForHumans() }}</span>
+                            </div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow">
+                                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2)) }}
+                                </div>
+                                <div>
+                                    <p class="text-base font-black text-gray-900">{{ $player->user->name }}</p>
+                                    <p class="text-xs font-semibold text-gray-500">{{ $player->user->position->name ?? 'Position N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="text-sm font-bold text-gray-800">{{ $player->league->name }}</h3>
+                                <p class="text-xs text-gray-600">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location NA' }}</p>
+                                <p class="text-xs text-gray-500">Team: {{ optional(optional($player->leagueTeam)->team)->name ?? 'Not Assigned' }}</p>
+                            </div>
+                            <div class="mt-4">
+                                <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Sold Price</div>
+                                <div class="text-2xl font-black text-green-600">₹{{ number_format($player->bid_price, 0) }}</div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between text-[11px] font-semibold text-gray-500">
+                                <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
+                                    Season {{ $player->league->season }}
+                                </span>
+                                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                                    {{ optional(optional(optional($player->leagueTeam)->team)->localBody)->name ?? 'Home Base' }}
+                                </span>
+                            </div>
+                        </article>
+                        @endforeach
                     </div>
-                    <div class="space-y-1">
-                        <h3 class="text-lg font-black text-gray-900 leading-tight">{{ $sale->league->name }}</h3>
-                        <p class="text-sm text-gray-600">{{ optional($sale->leagueTeam->team)->name ?? 'No team assigned' }}</p>
-                    </div>
-                    <div class="mt-4">
-                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Sold Price</div>
-                        <div class="text-2xl font-black text-green-600">₹{{ number_format($sale->bid_price, 0) }}</div>
-                    </div>
-                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-gray-500">
-                        <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
-                            {{ optional(optional($sale->league->localBody)->district)->name ?? 'Location NA' }}
-                        </span>
-                        <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
-                            {{ optional(optional($sale->leagueTeam->team)->localBody)->name ?? 'Team Base' }}
-                        </span>
-                    </div>
-                </article>
+                </div>
                 @endforeach
             </div>
+
+            @if($playerSpotlightChunks->count() > 1)
+            <div class="flex justify-center mt-4 gap-2">
+                @foreach($playerSpotlightChunks as $index => $_)
+                    <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-target-index="{{ $index }}" aria-label="Show batch {{ $index + 1 }}"></button>
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 </section>
@@ -484,7 +516,7 @@
                 <h2 class="text-2xl font-black text-gray-900">Active Leagues</h2>
                 <p class="text-sm text-gray-500">Swipe through your registered leagues</p>
             </div>
-            <a href="{{ route('my-leagues') }}" class="hidden sm:inline-flex items-center px-5 py-2 bg-gray-900 text-white rounded-xl font-semibold shadow hover:bg-gray-800 transition">
+            <a href="{{ route('my-leagues') }}" class="hidden sm:inline-flex items-center px-5 py-2 bg-gray-900 rounded-xl font-semibold shadow hover:bg-gray-800 transition">
                 Manage Leagues
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -1575,4 +1607,61 @@ function switchTab(tab) {
 }
     </style>
 
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chunks = Array.from(document.querySelectorAll('[data-player-chunk]'));
+    if (!chunks.length) {
+        return;
+    }
+
+    let activeIndex = 0;
+    const dots = Array.from(document.querySelectorAll('.player-spotlight-dot'));
+
+    const setActiveChunk = (index) => {
+        if (index < 0 || index >= chunks.length) return;
+        chunks[activeIndex].classList.add('hidden');
+        if (dots[activeIndex]) dots[activeIndex].classList.remove('bg-blue-600');
+
+        activeIndex = index;
+
+        chunks[activeIndex].classList.remove('hidden');
+        if (dots[activeIndex]) dots[activeIndex].classList.add('bg-blue-600');
+        dots.forEach((dot, idx) => {
+            if (idx !== activeIndex) {
+                dot.classList.remove('bg-blue-600');
+                dot.classList.add('bg-gray-300');
+            }
+        });
+        if (dots[activeIndex]) {
+            dots[activeIndex].classList.remove('bg-gray-300');
+            dots[activeIndex].classList.add('bg-blue-600');
+        }
+    };
+
+    document.querySelectorAll('.player-spotlight-nav').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const direction = btn.dataset.direction === 'prev' ? -1 : 1;
+            let nextIndex = activeIndex + direction;
+            if (nextIndex < 0) {
+                nextIndex = chunks.length - 1;
+            } else if (nextIndex >= chunks.length) {
+                nextIndex = 0;
+            }
+            setActiveChunk(nextIndex);
+        });
+    });
+
+    dots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+            const target = Number(dot.dataset.targetIndex);
+            if (!Number.isNaN(target)) {
+                setActiveChunk(target);
+            }
+        });
+    });
+});
+</script>
 @endsection
