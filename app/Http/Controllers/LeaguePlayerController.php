@@ -27,9 +27,6 @@ class LeaguePlayerController extends Controller
                     $query->where('status', $status);
                 }
             })
-            ->when(request('retention'), function($query, $retention) {
-                $query->where('retention', $retention === 'true');
-            })
             ->when(request('team') && request('team') !== 'unassigned', function($query, $teamSlug) {
                 $query->whereHas('leagueTeam.team', function($subQuery) use ($teamSlug) {
                     $subQuery->where('slug', $teamSlug);
@@ -37,7 +34,30 @@ class LeaguePlayerController extends Controller
             })
             ->when(request('team') === 'unassigned', function($query) {
                 $query->whereNull('league_team_id');
+            })
+            ->when(request('search'), function($query, $search) {
+                $query->whereHas('user', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
             });
+
+        $retentionFilter = request('retention');
+        if (is_array($retentionFilter)) {
+            $normalized = array_values(array_filter($retentionFilter, function ($value) {
+                return $value !== null && $value !== '';
+            }));
+
+            if (!empty($normalized)) {
+                $boolValues = array_map(function ($value) {
+                    return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                }, $normalized);
+
+                $query->whereIn('retention', $boolValues);
+            }
+        } elseif ($retentionFilter !== null && $retentionFilter !== '') {
+            $query->where('retention', filter_var($retentionFilter, FILTER_VALIDATE_BOOLEAN));
+        }
 
         $leaguePlayers = $query->join('users', 'league_players.user_id', '=', 'users.id')
             ->orderBy('users.name', 'asc')

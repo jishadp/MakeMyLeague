@@ -113,81 +113,158 @@
         @endauth
 
         <!-- Filters -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" id="status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">All Statuses</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="available" {{ request('status') === 'available' ? 'selected' : '' }}>Available</option>
-                        <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>Sold</option>
-                        <option value="unsold" {{ request('status') === 'unsold' ? 'selected' : '' }}>Unsold</option>
-                        <option value="skip" {{ request('status') === 'skip' ? 'selected' : '' }}>Skip</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="retention" class="block text-sm font-medium text-gray-700 mb-2">Retention</label>
-                    <select name="retention" id="retention" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">All Players</option>
-                        <option value="true" {{ request('retention') === 'true' ? 'selected' : '' }}>Retained</option>
-                        <option value="false" {{ request('retention') === 'false' ? 'selected' : '' }}>Not Retained</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="team" class="block text-sm font-medium text-gray-700 mb-2">Team</label>
-                    <select name="team" id="team" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">All Teams</option>
-                        <option value="unassigned" {{ request('team') == 'unassigned' ? 'selected' : '' }}>
-                            Unassigned (Auction Pool)
-                        </option>
-                        @foreach($teams as $team)
-                            <option value="{{ $team->slug }}" {{ request('team') == $team->slug ? 'selected' : '' }}>
-                                {{ $team->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Mobile: Filter buttons in 2 columns -->
-                <div class="md:hidden grid grid-cols-2 gap-3">
-                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        Apply Filters
-                    </button>
-                    <a href="{{ route('league-players.index', $league) }}" 
-                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Clear
-                    </a>
-                </div>
-                
-                <!-- Desktop: Original layout -->
-                <div class="hidden md:flex items-end">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        Filter
-                    </button>
-                </div>
-                
-                <div class="hidden md:flex items-end">
-                    <a href="{{ route('league-players.index', $league) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Clear
-                    </a>
-                </div>
-            </form>
+        <div class="mb-8">
+            <div class="bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-blue-500/15 p-1 rounded-2xl shadow-lg">
+                @php
+                    $statusOptions = [
+                        '' => 'All Statuses',
+                        'pending' => 'Pending',
+                        'available' => 'Available',
+                        'sold' => 'Sold',
+                        'unsold' => 'Unsold',
+                        'skip' => 'Skip',
+                    ];
+
+                    $retentionOptions = [
+                        'true' => 'Retained',
+                        'false' => 'Not Retained',
+                    ];
+
+                    $retentionSelection = request('retention');
+                    $selectedRetentions = is_array($retentionSelection)
+                        ? array_values(array_filter($retentionSelection, fn($value) => $value !== '' && $value !== null))
+                        : (($retentionSelection !== null && $retentionSelection !== '') ? [$retentionSelection] : []);
+
+                    $statusActiveClasses = 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200';
+                    $statusInactiveClasses = 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-700';
+
+                    $retentionActiveClasses = 'bg-green-600 text-white border-green-600 shadow-lg shadow-green-200';
+                    $retentionInactiveClasses = 'border-gray-200 text-gray-600 hover:border-green-300 hover:text-green-700';
+                @endphp
+                <form method="GET" class="bg-white rounded-2xl p-6 space-y-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div>
+                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold uppercase tracking-wide">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Smart Filters
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mt-2">Filter & Search Players</h3>
+                            <p class="text-sm text-gray-500">
+                                Refine the roster by status, retention, and teams or quickly search by name/email.
+                            </p>
+                        </div>
+                        <div class="w-full lg:w-80">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    value="{{ request('search') }}"
+                                    placeholder="Search players..."
+                                    class="pl-11 w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-6 gap-4">
+                        <div class="lg:col-span-3 p-4 rounded-xl border border-gray-100 bg-gray-50/80 hover:border-indigo-200 transition-all duration-200">
+                            <p class="text-sm font-semibold text-gray-800 mb-3">Status</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                @foreach($statusOptions as $value => $label)
+                                    @php
+                                        $isSelected = (request('status') ?? '') === $value;
+                                    @endphp
+                                    <label
+                                        class="filter-chip flex items-center justify-center px-3 py-2 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 {{ $isSelected ? $statusActiveClasses : $statusInactiveClasses }}"
+                                        data-filter-group="status"
+                                        data-active-class="{{ $statusActiveClasses }}"
+                                        data-inactive-class="{{ $statusInactiveClasses }}"
+                                    >
+                                        <input type="radio"
+                                               name="status"
+                                               value="{{ $value }}"
+                                               class="sr-only"
+                                               {{ $isSelected ? 'checked' : '' }}>
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 p-4 rounded-xl border border-gray-100 bg-gray-50/80 hover:border-indigo-200 transition-all duration-200">
+                            <p class="text-sm font-semibold text-gray-800 mb-3">Retention</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($retentionOptions as $value => $label)
+                                    @php
+                                        $isChecked = in_array($value, $selectedRetentions, true);
+                                    @endphp
+                                    <label
+                                        class="filter-chip flex items-center px-3 py-2 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 {{ $isChecked ? $retentionActiveClasses : $retentionInactiveClasses }}"
+                                        data-filter-group="retention"
+                                        data-active-class="{{ $retentionActiveClasses }}"
+                                        data-inactive-class="{{ $retentionInactiveClasses }}"
+                                    >
+                                        <input type="checkbox"
+                                               name="retention[]"
+                                               value="{{ $value }}"
+                                               class="sr-only"
+                                               {{ $isChecked ? 'checked' : '' }}>
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Select one or both retention states.</p>
+                        </div>
+
+                        <div class="lg:col-span-1 p-4 rounded-xl border border-gray-100 bg-gray-50/80 hover:border-indigo-200 transition-all duration-200">
+                            <label for="team" class="block text-sm font-semibold text-gray-800 mb-2">Team</label>
+                            <div class="relative">
+                                <select name="team" id="team" class="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">All Teams</option>
+                                    <option value="unassigned" {{ request('team') == 'unassigned' ? 'selected' : '' }}>
+                                        Unassigned (Auction Pool)
+                                    </option>
+                                    @foreach($teams as $team)
+                                        <option value="{{ $team->slug }}" {{ request('team') == $team->slug ? 'selected' : '' }}>
+                                            {{ $team->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <svg class="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.832.445l4.5 6a1 1 0 01-.832 1.555H5.5a1 1 0 01-.832-1.555l4.5-6A1 1 0 0110 3zm0 14a1 1 0 01-.832-.445l-4.5-6A1 1 0 015.5 9h9.999a1 1 0 01.832 1.555l-4.5 6A1 1 0 0110 17z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                            <button type="submit" class="inline-flex items-center justify-center px-5 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Apply Filters
+                            </button>
+                            <a href="{{ route('league-players.index', $league) }}" class="inline-flex items-center justify-center px-5 py-3 bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-all duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Clear Filters
+                            </a>
+                        </div>
+                        <p class="text-sm text-gray-500">
+                            Showing <span class="font-semibold text-gray-900">{{ $leaguePlayers->total() }}</span> players in {{ $league->name }}
+                        </p>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Stats Summary -->
@@ -383,6 +460,36 @@
             @endif
         </div>
         
-    </div>
 </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const groups = ['status', 'retention'];
+
+    const classListFromString = (value = '') => value.split(' ').filter(Boolean);
+
+    const applyChipStyles = (group) => {
+        document.querySelectorAll(`[data-filter-group="${group}"]`).forEach((label) => {
+            const input = label.querySelector('input');
+            if (!input) return;
+
+            const activeClasses = classListFromString(label.dataset.activeClass);
+            const inactiveClasses = classListFromString(label.dataset.inactiveClass);
+
+            label.classList.remove(...activeClasses, ...inactiveClasses);
+            label.classList.add(...(input.checked ? activeClasses : inactiveClasses));
+        });
+    };
+
+    groups.forEach((group) => {
+        applyChipStyles(group);
+        document.querySelectorAll(`[data-filter-group="${group}"] input`).forEach((input) => {
+            input.addEventListener('change', () => applyChipStyles(group));
+        });
+    });
+});
+</script>
 @endsection
