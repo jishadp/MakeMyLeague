@@ -91,9 +91,12 @@
 </section>
 @endif
 
-@if(isset($playerSpotlight) && $playerSpotlight->isNotEmpty())
 @php
-    $playerSpotlightChunks = $playerSpotlight->chunk(10);
+    $playerSpotlightExists = isset($playerSpotlight) && $playerSpotlight->isNotEmpty();
+@endphp
+@if($playerSpotlightExists || $trendingLeagues->isNotEmpty())
+@php
+    $playerSpotlightChunks = $playerSpotlightExists ? $playerSpotlight->chunk(10) : collect();
 @endphp
 <section class="py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
     <div class="max-w-7xl mx-auto">
@@ -104,25 +107,35 @@
                     Recently Sold Players
                 </h2>
             </div>
-            <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-3">
-                <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-direction="prev" aria-label="Previous players">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-direction="next" aria-label="Next players">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
+            <div class="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
+                <div class="inline-flex rounded-full border border-gray-200 overflow-hidden">
+                    <button type="button" class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none active" data-spotlight-tab="last-sold">
+                        Last Sold
+                    </button>
+                    <button type="button" class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none" data-spotlight-tab="leagues">
+                        Leagues
+                    </button>
+                </div>
+                <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-3">
+                    <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-player-nav data-direction="prev" aria-label="Previous players">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-player-nav data-direction="next" aria-label="Next players">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
         </div>
 
         <div class="relative">
+            <div data-spotlight-panel="last-sold">
             <div class="overflow-hidden">
-                @foreach($playerSpotlightChunks as $index => $chunk)
+                @forelse($playerSpotlightChunks as $index => $chunk)
                 <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-index="{{ $index }}">
-                    <div class="flex gap-2 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                    <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
                         @foreach($chunk as $player)
                         @php
                             $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
@@ -146,23 +159,23 @@
                                 $teamShort = 'N/A';
                             }
                         @endphp
-                        <article class="flex-none w-1/3 min-w-[110px] max-w-[140px] sm:w-48 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-3 snap-start">
+                        <article class="flex-none w-1/3 min-w-[110px] max-w-[140px] sm:w-48 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 px-3 pt-4 pb-3 snap-start">
                             <div class="flex items-center text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
                                 <span>{{ $leagueAcronym }}</span>
                             </div>
-                            <div class="flex flex-col items-center mb-3">
+                            <a href="{{ route('players.show', $player->user) }}" class="flex flex-col items-center mb-3 group focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-2xl">
                                 @if($playerPhoto)
-                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow" loading="lazy">
+                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow group-hover:scale-105 transition-transform" loading="lazy">
                                 @else
-                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow group-hover:scale-105 transition-transform">
                                     {{ $playerInitials }}
                                 </div>
                                 @endif
                                 <div class="text-center mt-1">
-                                    <p class="text-sm font-black text-gray-900 truncate">{{ $player->user->name }}</p>
+                                    <p class="text-sm font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors">{{ $player->user->name }}</p>
                                     <p class="text-[10px] font-semibold text-gray-500 truncate">{{ $player->user->position->name ?? 'Position N/A' }}</p>
                                 </div>
-                            </div>
+                            </a>
                             <div class="space-y-1 text-[11px] leading-tight">
                                 <p class="font-bold text-gray-800 truncate">{{ $leagueAcronym }}</p>
                                 <p class="text-gray-600 truncate">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location' }}</p>
@@ -184,16 +197,62 @@
                         @endforeach
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
+                    No recent sales available.
+                </div>
+                @endforelse
             </div>
-
             @if($playerSpotlightChunks->count() > 1)
-            <div class="flex justify-center mt-4 gap-2">
+            <div class="flex justify-center mt-4 gap-2" data-player-dots>
                 @foreach($playerSpotlightChunks as $index => $_)
                     <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-target-index="{{ $index }}" aria-label="Show batch {{ $index + 1 }}"></button>
                 @endforeach
             </div>
             @endif
+            </div>
+
+            <div class="hidden" data-spotlight-panel="leagues">
+                <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide">
+                    @forelse($trendingLeagues as $league)
+                    @php
+                        $leagueLogo = $league->logo ? Storage::url($league->logo) : null;
+                        $leagueAcronym = collect(explode(' ', trim($league->name)))
+                            ->filter()
+                            ->map(fn($word) => \Illuminate\Support\Str::substr($word, 0, 1))
+                            ->implode('');
+                        $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
+                    @endphp
+                    <article class="flex-none w-1/2 min-w-[150px] sm:w-64 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 px-4 py-5 snap-start">
+                        <div class="flex items-center gap-3 mb-3">
+                            @if($leagueLogo)
+                                <img src="{{ $leagueLogo }}" alt="{{ $league->name }}" class="w-12 h-12 rounded-xl object-cover border border-white shadow" loading="lazy">
+                            @else
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 text-white font-black text-lg flex items-center justify-center shadow">
+                                    {{ $leagueAcronym }}
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-sm font-black text-gray-900 truncate">{{ $league->name }}</p>
+                                <p class="text-[11px] font-semibold text-gray-500 truncate">{{ $league->game->name ?? 'Game' }}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 mb-3">
+                            <p class="font-semibold text-gray-800">{{ optional(optional($league->localBody)->district)->name ?? 'Location' }}</p>
+                            <p>Teams: {{ $league->league_teams_count ?? $league->leagueTeams->count() }}</p>
+                            <p>Players: {{ $league->league_players_count ?? $league->leaguePlayers->count() }}</p>
+                        </div>
+                        <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-bold uppercase tracking-wide text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition">
+                            View League
+                        </a>
+                    </article>
+                    @empty
+                    <div class="text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl w-full">
+                        No leagues to display right now.
+                    </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -1636,6 +1695,63 @@ function switchTab(tab) {
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    initSpotlightTabs();
+    initPlayerSpotlightCarousel();
+});
+
+function initSpotlightTabs() {
+    const tabButtons = Array.from(document.querySelectorAll('.spotlight-tab-btn'));
+    const panels = Array.from(document.querySelectorAll('[data-spotlight-panel]'));
+    if (!tabButtons.length || !panels.length) {
+        return;
+    }
+
+    const navButtons = document.querySelectorAll('[data-player-nav]');
+    const dotsWrapper = document.querySelector('[data-player-dots]');
+    const hasPlayerChunks = !!document.querySelector('[data-player-chunk]');
+
+    const toggleNavVisibility = (show) => {
+        const shouldShow = show && hasPlayerChunks;
+        navButtons.forEach((btn) => {
+            btn.classList.toggle('opacity-30', !shouldShow);
+            btn.classList.toggle('pointer-events-none', !shouldShow);
+        });
+        if (dotsWrapper) {
+            dotsWrapper.classList.toggle('hidden', !shouldShow || !dotsWrapper.querySelectorAll('button').length);
+        }
+    };
+
+    const updateButtonStyles = (button, active) => {
+        button.classList.toggle('bg-blue-600', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('shadow-md', active);
+        button.classList.toggle('text-gray-600', !active);
+        button.classList.toggle('bg-white', !active);
+    };
+
+    const setActivePanel = (target) => {
+        panels.forEach((panel) => {
+            panel.classList.toggle('hidden', panel.dataset.spotlightPanel !== target);
+        });
+        tabButtons.forEach((btn) => {
+            updateButtonStyles(btn, btn.dataset.spotlightTab === target);
+        });
+        toggleNavVisibility(target === 'last-sold');
+    };
+
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.spotlightTab;
+            if (target) {
+                setActivePanel(target);
+            }
+        });
+    });
+
+    setActivePanel('last-sold');
+}
+
+function initPlayerSpotlightCarousel() {
     const chunks = Array.from(document.querySelectorAll('[data-player-chunk]'));
     if (!chunks.length) {
         return;
@@ -1646,19 +1762,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const setActiveChunk = (index) => {
         if (index < 0 || index >= chunks.length) return;
+
         chunks[activeIndex].classList.add('hidden');
-        if (dots[activeIndex]) dots[activeIndex].classList.remove('bg-blue-600');
+        if (dots[activeIndex]) {
+            dots[activeIndex].classList.remove('bg-blue-600');
+            dots[activeIndex].classList.add('bg-gray-300');
+        }
 
         activeIndex = index;
 
         chunks[activeIndex].classList.remove('hidden');
-        if (dots[activeIndex]) dots[activeIndex].classList.add('bg-blue-600');
-        dots.forEach((dot, idx) => {
-            if (idx !== activeIndex) {
-                dot.classList.remove('bg-blue-600');
-                dot.classList.add('bg-gray-300');
-            }
-        });
         if (dots[activeIndex]) {
             dots[activeIndex].classList.remove('bg-gray-300');
             dots[activeIndex].classList.add('bg-blue-600');
@@ -1686,6 +1799,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-});
+}
 </script>
 @endsection
