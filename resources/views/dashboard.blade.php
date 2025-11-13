@@ -103,7 +103,6 @@
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
                     Recently Sold Players
                 </h2>
-                <p class="text-sm sm:text-base text-gray-600 mt-1">Randomized feed — browse 10 new player cards at a time.</p>
             </div>
             <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-3">
                 <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-direction="prev" aria-label="Previous players">
@@ -128,11 +127,28 @@
                         @php
                             $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
                             $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                            $leagueName = $player->league->name ?? '';
+                            $leagueWords = preg_split('/\s+/', trim($leagueName));
+                            $leagueAcronym = '';
+                            if ($leagueWords) {
+                                foreach ($leagueWords as $word) {
+                                    if (!empty($word)) {
+                                        $leagueAcronym .= \Illuminate\Support\Str::substr($word, 0, 1);
+                                    }
+                                }
+                            }
+                            $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
+                            $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'N/A';
+                            $teamShort = trim($teamFullName);
+                            if ($teamShort !== '') {
+                                $teamShort = explode(' ', $teamShort)[0];
+                            } else {
+                                $teamShort = 'N/A';
+                            }
                         @endphp
                         <article class="flex-none w-1/3 min-w-[110px] max-w-[140px] sm:w-48 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-3 snap-start">
-                            <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
-                                <span class="truncate">{{ $player->league->game->name ?? 'League' }}</span>
-                                <span>{{ optional($player->updated_at ?? $player->created_at)->diffForHumans(null, true) }}</span>
+                            <div class="flex items-center text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
+                                <span>{{ $leagueAcronym }}</span>
                             </div>
                             <div class="flex items-center gap-2 mb-2">
                                 @if($playerPhoto)
@@ -148,13 +164,13 @@
                                 </div>
                             </div>
                             <div class="space-y-1 text-[11px] leading-tight">
-                                <p class="font-bold text-gray-800 truncate">{{ $player->league->name }}</p>
+                                <p class="font-bold text-gray-800 truncate">{{ $leagueAcronym }}</p>
                                 <p class="text-gray-600 truncate">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location' }}</p>
-                                <p class="text-gray-500 truncate">Team: {{ optional(optional($player->leagueTeam)->team)->name ?? 'N/A' }}</p>
+                                <p class="text-gray-500 truncate">Team: {{ $teamShort }}</p>
                             </div>
                             <div class="mt-3">
                                 <div class="text-[9px] font-semibold text-gray-500 uppercase mb-0.5">Sold Price</div>
-                                <div class="text-xl font-black text-green-600">₹{{ number_format($player->bid_price/1000, 1) }}K</div>
+                                <div class="text-xl font-black text-green-600">₹{{ number_format($player->bid_price, 0) }}</div>
                             </div>
                             <div class="mt-3 flex items-center justify-between text-[9px] font-semibold text-gray-500">
                                 <span class="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
