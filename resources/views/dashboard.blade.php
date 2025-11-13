@@ -150,15 +150,15 @@
                             <div class="flex items-center text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
                                 <span>{{ $leagueAcronym }}</span>
                             </div>
-                            <div class="flex items-center gap-2 mb-2">
+                            <div class="flex flex-col items-center mb-3">
                                 @if($playerPhoto)
-                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-10 h-10 rounded-xl object-cover border border-white shadow" loading="lazy">
+                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow" loading="lazy">
                                 @else
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-sm flex items-center justify-center shadow">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow">
                                     {{ $playerInitials }}
                                 </div>
                                 @endif
-                                <div class="min-w-0">
+                                <div class="text-center mt-1">
                                     <p class="text-sm font-black text-gray-900 truncate">{{ $player->user->name }}</p>
                                     <p class="text-[10px] font-semibold text-gray-500 truncate">{{ $player->user->position->name ?? 'Position N/A' }}</p>
                                 </div>
