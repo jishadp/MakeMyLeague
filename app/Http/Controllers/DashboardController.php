@@ -72,9 +72,11 @@ class DashboardController
                 'league.localBody.district',
                 'leagueTeam.team.localBody',
             ])
-            ->inRandomOrder()
+            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
             ->take(40)
             ->get();
+        $playerSpotlightRandom = $playerSpotlight->shuffle();
 
         // ============ USER'S AUCTION HISTORY ============
         $auctionHistory = LeaguePlayer::where('user_id', $user->id)
@@ -244,6 +246,7 @@ class DashboardController
             'quickStats',
             'trendingLeagues',
             'playerSpotlight',
+            'playerSpotlightRandom',
         ));
     }
 

@@ -94,171 +94,157 @@
 @php
     $playerSpotlightExists = isset($playerSpotlight) && $playerSpotlight->isNotEmpty();
 @endphp
-@if($playerSpotlightExists || $trendingLeagues->isNotEmpty())
+@if($playerSpotlightExists)
 @php
-    $playerSpotlightChunks = $playerSpotlightExists ? $playerSpotlight->chunk(10) : collect();
+    $spotlightRecentChunks = $playerSpotlight->chunk(10);
+    $spotlightRandomChunks = (isset($playerSpotlightRandom) ? $playerSpotlightRandom : $playerSpotlight->shuffle())->chunk(10);
 @endphp
 <section class="py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-                <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Global Spotlight</p>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
-                    Recently Sold Players
-                </h2>
-            </div>
-            <div class="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
-                <div class="inline-flex rounded-full border border-gray-200 overflow-hidden">
-                    <button type="button" class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none active" data-spotlight-tab="last-sold">
-                        Last Sold
-                    </button>
-                    <button type="button" class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none" data-spotlight-tab="leagues">
-                        Leagues
-                    </button>
-                </div>
-                <div class="hidden sm:flex items-center text-sm text-gray-600 space-x-3">
-                    <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-player-nav data-direction="prev" aria-label="Previous players">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <button type="button" class="player-spotlight-nav flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition" data-player-nav data-direction="next" aria-label="Next players">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                </div>
+
+    <!-- LEFT — TITLE BLOCK -->
+    <div class="w-full">
+        <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Global Spotlight</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
+            Sold Players
+        </h2>
+    </div>
+
+    <!-- RIGHT — TABS BLOCK -->
+    <div class="w-full sm:w-auto flex justify-start sm:justify-end">
+        <div class="inline-flex rounded-full border border-gray-200 overflow-hidden w-full sm:w-auto">
+            <button type="button" 
+                class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-white bg-blue-600 shadow-md focus:outline-none flex-1 sm:flex-none" 
+                data-spotlight-tab="recent">
+                Recent
+            </button>
+
+            <button type="button" 
+                class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none flex-1 sm:flex-none" 
+                data-spotlight-tab="random">
+                Random
+            </button>
         </div>
+    </div>
+
+</div>
+
 
         <div class="relative">
-            <div data-spotlight-panel="last-sold">
-            <div class="overflow-hidden">
-                @forelse($playerSpotlightChunks as $index => $chunk)
-                <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-index="{{ $index }}">
-                    <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
-                        @foreach($chunk as $player)
-                        @php
-                            $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
-                            $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
-                            $leagueName = $player->league->name ?? '';
-                            $leagueWords = preg_split('/\s+/', trim($leagueName));
-                            $leagueAcronym = '';
-                            if ($leagueWords) {
-                                foreach ($leagueWords as $word) {
-                                    if (!empty($word)) {
-                                        $leagueAcronym .= \Illuminate\Support\Str::substr($word, 0, 1);
+            <div data-spotlight-panel="recent">
+                <div class="overflow-hidden">
+                    @forelse($spotlightRecentChunks as $index => $chunk)
+                    <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-panel="recent" data-index="{{ $index }}">
+                        <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                            @foreach($chunk as $player)
+                            @php
+                                $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
+                                $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                                $leagueName = $player->league->name ?? '';
+                                $leagueWords = preg_split('/\s+/', trim($leagueName));
+                                $leagueAcronym = '';
+                                if ($leagueWords) {
+                                    foreach ($leagueWords as $word) {
+                                        if (!empty($word)) {
+                                            $leagueAcronym .= \Illuminate\Support\Str::substr($word, 0, 1);
+                                        }
                                     }
                                 }
-                            }
-                            $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
-                            $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'N/A';
-                            $teamShort = trim($teamFullName);
-                            if ($teamShort !== '') {
-                                $teamShort = explode(' ', $teamShort)[0];
-                            } else {
-                                $teamShort = 'N/A';
-                            }
-                        @endphp
-                        <article class="flex-none w-1/3 min-w-[110px] max-w-[140px] sm:w-48 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 px-3 pt-4 pb-3 snap-start">
-                            <div class="flex items-center text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
-                                <span>{{ $leagueAcronym }}</span>
-                            </div>
-                            <a href="{{ route('players.show', $player->user) }}" class="flex flex-col items-center mb-3 group focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-2xl">
-                                @if($playerPhoto)
-                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow group-hover:scale-105 transition-transform" loading="lazy">
-                                @else
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow group-hover:scale-105 transition-transform">
-                                    {{ $playerInitials }}
-                                </div>
-                                @endif
-                                <div class="text-center mt-1">
-                                    <p class="text-sm font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors">{{ $player->user->name }}</p>
-                                    <p class="text-[10px] font-semibold text-gray-500 truncate">{{ $player->user->position->name ?? 'Position N/A' }}</p>
-                                </div>
-                            </a>
-                            <div class="space-y-1 text-[11px] leading-tight">
-                                <p class="font-bold text-gray-800 truncate">{{ $leagueAcronym }}</p>
-                                <p class="text-gray-600 truncate">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location' }}</p>
-                                <p class="text-gray-500 truncate">Team: {{ $teamShort }}</p>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-[9px] font-semibold text-gray-500 uppercase mb-0.5">Sold Price</div>
-                                <div class="text-xl font-black text-green-600">₹{{ number_format($player->bid_price, 0) }}</div>
-                            </div>
-                            <div class="mt-3 flex items-center justify-between text-[9px] font-semibold text-gray-500">
-                                <span class="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
-                                    S{{ $player->league->season }}
-                                </span>
-                                <span class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded-full truncate">
-                                    {{ optional(optional(optional($player->leagueTeam)->team)->localBody)->name ?? 'Home' }}
-                                </span>
-                            </div>
-                        </article>
-                        @endforeach
+                                $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
+                                $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'N/A';
+                                $teamShort = trim($teamFullName);
+                                if ($teamShort !== '') {
+                                    $teamShort = explode(' ', $teamShort)[0];
+                                } else {
+                                    $teamShort = 'N/A';
+                                }
+                                $timestampLabel = optional($player->updated_at ?? $player->created_at)->diffForHumans(null, true);
+                            @endphp
+                            @include('dashboard.partials.player-spotlight-card', [
+                                'playerModel' => $player,
+                                'leagueAcronym' => $leagueAcronym,
+                                'playerPhoto' => $playerPhoto,
+                                'playerInitials' => $playerInitials,
+                                'teamShort' => $teamShort,
+                                'timestampLabel' => $timestampLabel,
+                            ])
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-                @empty
-                <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
-                    No recent sales available.
-                </div>
-                @endforelse
-            </div>
-            @if($playerSpotlightChunks->count() > 1)
-            <div class="flex justify-center mt-4 gap-2" data-player-dots>
-                @foreach($playerSpotlightChunks as $index => $_)
-                    <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-target-index="{{ $index }}" aria-label="Show batch {{ $index + 1 }}"></button>
-                @endforeach
-            </div>
-            @endif
-            </div>
-
-            <div class="hidden" data-spotlight-panel="leagues">
-                <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide">
-                    @forelse($trendingLeagues as $league)
-                    @php
-                        $leagueLogo = $league->logo ? Storage::url($league->logo) : null;
-                        $leagueAcronym = collect(explode(' ', trim($league->name)))
-                            ->filter()
-                            ->map(fn($word) => \Illuminate\Support\Str::substr($word, 0, 1))
-                            ->implode('');
-                        $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
-                    @endphp
-                    <article class="flex-none w-1/2 min-w-[150px] sm:w-64 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 px-4 py-5 snap-start">
-                        <div class="flex items-center gap-3 mb-3">
-                            @if($leagueLogo)
-                                <img src="{{ $leagueLogo }}" alt="{{ $league->name }}" class="w-12 h-12 rounded-xl object-cover border border-white shadow" loading="lazy">
-                            @else
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 text-white font-black text-lg flex items-center justify-center shadow">
-                                    {{ $leagueAcronym }}
-                                </div>
-                            @endif
-                            <div>
-                                <p class="text-sm font-black text-gray-900 truncate">{{ $league->name }}</p>
-                                <p class="text-[11px] font-semibold text-gray-500 truncate">{{ $league->game->name ?? 'Game' }}</p>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-600 mb-3">
-                            <p class="font-semibold text-gray-800">{{ optional(optional($league->localBody)->district)->name ?? 'Location' }}</p>
-                            <p>Teams: {{ $league->league_teams_count ?? $league->leagueTeams->count() }}</p>
-                            <p>Players: {{ $league->league_players_count ?? $league->leaguePlayers->count() }}</p>
-                        </div>
-                        <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-bold uppercase tracking-wide text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition">
-                            View League
-                        </a>
-                    </article>
                     @empty
-                    <div class="text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl w-full">
-                        No leagues to display right now.
+                    <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
+                        No recent sales available.
                     </div>
                     @endforelse
                 </div>
+                @if($spotlightRecentChunks->count() > 1)
+                <div class="flex justify-center mt-4 gap-2" data-player-dots="recent">
+                    @foreach($spotlightRecentChunks as $index => $_)
+                        <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-panel="recent" data-target-index="{{ $index }}" aria-label="Show recent batch {{ $index + 1 }}"></button>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+
+            <div class="hidden" data-spotlight-panel="random">
+                <div class="overflow-hidden">
+                    @forelse($spotlightRandomChunks as $index => $chunk)
+                    <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-panel="random" data-index="{{ $index }}">
+                        <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                            @foreach($chunk as $player)
+                            @php
+                                $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
+                                $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                                $leagueName = $player->league->name ?? '';
+                                $leagueWords = preg_split('/\s+/', trim($leagueName));
+                                $leagueAcronym = '';
+                                if ($leagueWords) {
+                                    foreach ($leagueWords as $word) {
+                                        if (!empty($word)) {
+                                            $leagueAcronym .= \Illuminate\Support\Str::substr($word, 0, 1);
+                                        }
+                                    }
+                                }
+                                $leagueAcronym = $leagueAcronym ? \Illuminate\Support\Str::upper($leagueAcronym) : 'LG';
+                                $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'N/A';
+                                $teamShort = trim($teamFullName);
+                                if ($teamShort !== '') {
+                                    $teamShort = explode(' ', $teamShort)[0];
+                                } else {
+                                    $teamShort = 'N/A';
+                                }
+                                $timestampLabel = optional($player->updated_at ?? $player->created_at)->diffForHumans(null, true);
+                            @endphp
+                            @include('dashboard.partials.player-spotlight-card', [
+                                'playerModel' => $player,
+                                'leagueAcronym' => $leagueAcronym,
+                                'playerPhoto' => $playerPhoto,
+                                'playerInitials' => $playerInitials,
+                                'teamShort' => $teamShort,
+                                'timestampLabel' => $timestampLabel,
+                            ])
+                            @endforeach
+                        </div>
+                    </div>
+                    @empty
+                    <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
+                        No players to show in random order.
+                    </div>
+                    @endforelse
+                </div>
+                @if($spotlightRandomChunks->count() > 1)
+                <div class="flex justify-center mt-4 gap-2 hidden" data-player-dots="random">
+                    @foreach($spotlightRandomChunks as $index => $_)
+                        <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-panel="random" data-target-index="{{ $index }}" aria-label="Show random.batch {{ $index + 1 }}"></button>
+                    @endforeach
+                </div>
+                @endif
             </div>
         </div>
     </div>
 </section>
 @endif
-
-
 
 <!-- Auction Leaderboard Section -->
 <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
@@ -1695,31 +1681,31 @@ function switchTab(tab) {
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    initSpotlightTabs();
-    initPlayerSpotlightCarousel();
+    initSpotlightShowcase();
 });
 
-function initSpotlightTabs() {
+function initSpotlightShowcase() {
     const tabButtons = Array.from(document.querySelectorAll('.spotlight-tab-btn'));
     const panels = Array.from(document.querySelectorAll('[data-spotlight-panel]'));
     if (!tabButtons.length || !panels.length) {
         return;
     }
 
-    const navButtons = document.querySelectorAll('[data-player-nav]');
-    const dotsWrapper = document.querySelector('[data-player-dots]');
-    const hasPlayerChunks = !!document.querySelector('[data-player-chunk]');
+    const navButtons = Array.from(document.querySelectorAll('[data-player-nav]'));
+    const dotContainers = Array.from(document.querySelectorAll('[data-player-dots]'));
+    const chunkGroups = {};
 
-    const toggleNavVisibility = (show) => {
-        const shouldShow = show && hasPlayerChunks;
-        navButtons.forEach((btn) => {
-            btn.classList.toggle('opacity-30', !shouldShow);
-            btn.classList.toggle('pointer-events-none', !shouldShow);
-        });
-        if (dotsWrapper) {
-            dotsWrapper.classList.toggle('hidden', !shouldShow || !dotsWrapper.querySelectorAll('button').length);
+    document.querySelectorAll('[data-player-chunk]').forEach((chunk) => {
+        const panelKey = chunk.dataset.panel || 'recent';
+        if (!chunkGroups[panelKey]) {
+            chunkGroups[panelKey] = {
+                chunks: [],
+                dots: Array.from(document.querySelectorAll(`[data-player-dots="${panelKey}"] .player-spotlight-dot`)),
+                active: 0,
+            };
         }
-    };
+        chunkGroups[panelKey].chunks.push(chunk);
+    });
 
     const updateButtonStyles = (button, active) => {
         button.classList.toggle('bg-blue-600', active);
@@ -1729,14 +1715,58 @@ function initSpotlightTabs() {
         button.classList.toggle('bg-white', !active);
     };
 
-    const setActivePanel = (target) => {
+    const toggleDotsVisibility = (panelKey) => {
+        dotContainers.forEach((container) => {
+            const matches = container.dataset.playerDots === panelKey;
+            const hasMultiple = (chunkGroups[panelKey]?.chunks.length || 0) > 1;
+            container.classList.toggle('hidden', !matches || !hasMultiple);
+        });
+    };
+
+    const toggleNavAvailability = (panelKey) => {
+        const hasMultiple = (chunkGroups[panelKey]?.chunks.length || 0) > 1;
+        navButtons.forEach((btn) => {
+            btn.classList.toggle('opacity-30', !hasMultiple);
+            btn.classList.toggle('pointer-events-none', !hasMultiple);
+        });
+    };
+
+    const setActiveChunk = (panelKey, index) => {
+        const group = chunkGroups[panelKey];
+        if (!group || !group.chunks.length) {
+            return;
+        }
+
+        const safeIndex = ((index % group.chunks.length) + group.chunks.length) % group.chunks.length;
+        group.chunks[group.active].classList.add('hidden');
+        if (group.dots[group.active]) {
+            group.dots[group.active].classList.remove('bg-blue-600');
+            group.dots[group.active].classList.add('bg-gray-300');
+        }
+
+        group.active = safeIndex;
+        group.chunks[group.active].classList.remove('hidden');
+        if (group.dots[group.active]) {
+            group.dots[group.active].classList.remove('bg-gray-300');
+            group.dots[group.active].classList.add('bg-blue-600');
+        }
+    };
+
+    let activePanel = 'recent';
+
+    const setActivePanel = (panelKey) => {
+        activePanel = panelKey;
         panels.forEach((panel) => {
-            panel.classList.toggle('hidden', panel.dataset.spotlightPanel !== target);
+            panel.classList.toggle('hidden', panel.dataset.spotlightPanel !== panelKey);
         });
         tabButtons.forEach((btn) => {
-            updateButtonStyles(btn, btn.dataset.spotlightTab === target);
+            updateButtonStyles(btn, btn.dataset.spotlightTab === panelKey);
         });
-        toggleNavVisibility(target === 'last-sold');
+        toggleNavAvailability(panelKey);
+        toggleDotsVisibility(panelKey);
+        if (chunkGroups[panelKey]) {
+            setActiveChunk(panelKey, chunkGroups[panelKey].active);
+        }
     };
 
     tabButtons.forEach((btn) => {
@@ -1748,57 +1778,29 @@ function initSpotlightTabs() {
         });
     });
 
-    setActivePanel('last-sold');
-}
-
-function initPlayerSpotlightCarousel() {
-    const chunks = Array.from(document.querySelectorAll('[data-player-chunk]'));
-    if (!chunks.length) {
-        return;
-    }
-
-    let activeIndex = 0;
-    const dots = Array.from(document.querySelectorAll('.player-spotlight-dot'));
-
-    const setActiveChunk = (index) => {
-        if (index < 0 || index >= chunks.length) return;
-
-        chunks[activeIndex].classList.add('hidden');
-        if (dots[activeIndex]) {
-            dots[activeIndex].classList.remove('bg-blue-600');
-            dots[activeIndex].classList.add('bg-gray-300');
-        }
-
-        activeIndex = index;
-
-        chunks[activeIndex].classList.remove('hidden');
-        if (dots[activeIndex]) {
-            dots[activeIndex].classList.remove('bg-gray-300');
-            dots[activeIndex].classList.add('bg-blue-600');
-        }
-    };
-
-    document.querySelectorAll('.player-spotlight-nav').forEach((btn) => {
+    navButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
             const direction = btn.dataset.direction === 'prev' ? -1 : 1;
-            let nextIndex = activeIndex + direction;
-            if (nextIndex < 0) {
-                nextIndex = chunks.length - 1;
-            } else if (nextIndex >= chunks.length) {
-                nextIndex = 0;
+            const group = chunkGroups[activePanel];
+            if (!group || group.chunks.length <= 1) {
+                return;
             }
-            setActiveChunk(nextIndex);
+            setActiveChunk(activePanel, group.active + direction);
         });
     });
 
-    dots.forEach((dot) => {
+    Array.from(document.querySelectorAll('.player-spotlight-dot')).forEach((dot) => {
         dot.addEventListener('click', () => {
+            const panelKey = dot.dataset.panel || activePanel;
             const target = Number(dot.dataset.targetIndex);
             if (!Number.isNaN(target)) {
-                setActiveChunk(target);
+                setActivePanel(panelKey);
+                setActiveChunk(panelKey, target);
             }
         });
     });
+
+    setActivePanel('recent');
 }
 </script>
 @endsection
