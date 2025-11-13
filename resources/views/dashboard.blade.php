@@ -123,37 +123,45 @@
             <div class="overflow-hidden">
                 @foreach($playerSpotlightChunks as $index => $chunk)
                 <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-player-chunk data-index="{{ $index }}">
-                    <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                    <div class="flex gap-2 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" role="list">
                         @foreach($chunk as $player)
-                        <article class="flex-none w-1/3 min-w-[140px] sm:w-64 bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-4 snap-start">
-                            <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide mb-3 text-gray-500">
-                                <span>{{ $player->league->game->name ?? 'League' }}</span>
-                                <span>{{ optional($player->updated_at ?? $player->created_at)->diffForHumans() }}</span>
+                        @php
+                            $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
+                            $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                        @endphp
+                        <article class="flex-none w-1/3 min-w-[110px] max-w-[140px] sm:w-48 bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-3 snap-start">
+                            <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-wide mb-2 text-gray-500">
+                                <span class="truncate">{{ $player->league->game->name ?? 'League' }}</span>
+                                <span>{{ optional($player->updated_at ?? $player->created_at)->diffForHumans(null, true) }}</span>
                             </div>
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-lg flex items-center justify-center shadow">
-                                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2)) }}
+                            <div class="flex items-center gap-2 mb-2">
+                                @if($playerPhoto)
+                                <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-10 h-10 rounded-xl object-cover border border-white shadow" loading="lazy">
+                                @else
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-black text-sm flex items-center justify-center shadow">
+                                    {{ $playerInitials }}
                                 </div>
-                                <div>
-                                    <p class="text-base font-black text-gray-900">{{ $player->user->name }}</p>
-                                    <p class="text-xs font-semibold text-gray-500">{{ $player->user->position->name ?? 'Position N/A' }}</p>
+                                @endif
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black text-gray-900 truncate">{{ $player->user->name }}</p>
+                                    <p class="text-[10px] font-semibold text-gray-500 truncate">{{ $player->user->position->name ?? 'Position N/A' }}</p>
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <h3 class="text-sm font-bold text-gray-800">{{ $player->league->name }}</h3>
-                                <p class="text-xs text-gray-600">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location NA' }}</p>
-                                <p class="text-xs text-gray-500">Team: {{ optional(optional($player->leagueTeam)->team)->name ?? 'Not Assigned' }}</p>
+                            <div class="space-y-1 text-[11px] leading-tight">
+                                <p class="font-bold text-gray-800 truncate">{{ $player->league->name }}</p>
+                                <p class="text-gray-600 truncate">{{ optional(optional($player->league->localBody)->district)->name ?? 'Location' }}</p>
+                                <p class="text-gray-500 truncate">Team: {{ optional(optional($player->leagueTeam)->team)->name ?? 'N/A' }}</p>
                             </div>
-                            <div class="mt-4">
-                                <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Sold Price</div>
-                                <div class="text-2xl font-black text-green-600">₹{{ number_format($player->bid_price, 0) }}</div>
+                            <div class="mt-3">
+                                <div class="text-[9px] font-semibold text-gray-500 uppercase mb-0.5">Sold Price</div>
+                                <div class="text-xl font-black text-green-600">₹{{ number_format($player->bid_price/1000, 1) }}K</div>
                             </div>
-                            <div class="mt-4 flex items-center justify-between text-[11px] font-semibold text-gray-500">
-                                <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
-                                    Season {{ $player->league->season }}
+                            <div class="mt-3 flex items-center justify-between text-[9px] font-semibold text-gray-500">
+                                <span class="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
+                                    S{{ $player->league->season }}
                                 </span>
-                                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
-                                    {{ optional(optional(optional($player->leagueTeam)->team)->localBody)->name ?? 'Home Base' }}
+                                <span class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded-full truncate">
+                                    {{ optional(optional(optional($player->leagueTeam)->team)->localBody)->name ?? 'Home' }}
                                 </span>
                             </div>
                         </article>
