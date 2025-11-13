@@ -4,7 +4,6 @@
             $isDashboard = request()->routeIs('dashboard');
             $isMyLeagues = request()->routeIs('my-leagues');
             $isMyTeams = request()->routeIs('my-teams');
-            $isProfile = request()->routeIs('profile.show');
         @endphp
         <div class="nav-container flex justify-between items-center
                     bg-gradient-to-r from-[#4a90e2]/85 via-[#6bb6ff]/85 to-[#87ceeb]/85
@@ -71,17 +70,13 @@
                 @endif
             </a>
 
-            <!-- Profile Button -->
-            <a href="{{ route('profile.show') }}"
-               class="nav-item flex items-center justify-center px-2 sm:px-3 py-1.5 rounded-full transition-all duration-300 {{ $isProfile ? 'bg-blue-600 text-white shadow' : 'text-white/80 hover:text-white' }}">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="h-6 w-6"
-                     viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
-                @if($isProfile)
-                    <span class="text-sm font-semibold ml-2 text-white">Profile</span>
-                @endif
+            <!-- WhatsApp Help Button -->
+            <a href="https://wa.me/918301867613"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="nav-item flex items-center justify-center px-3 py-1.5 rounded-full transition-all duration-300 text-white/90 hover:text-white"
+               aria-label="Contact MakeMyLegeu Help on WhatsApp">
+                <i class="fa-brands fa-whatsapp text-2xl"></i>
             </a>
 
         </div>
