@@ -619,7 +619,7 @@
     }
     @media (max-width: 640px) {
         .football-grid {
-            grid-template-columns: repeat(1, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
         .team-match-stats {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1330,7 +1330,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="football-info">
                                     <p class="football-name">{{ $player->user->name }}</p>
-                                    <p class="football-price">₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</p>
+                                    @if($player->retention)
+                                        <p class="football-price">∞ Retained</p>
+                                    @else
+                                        <p class="football-price">₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</p>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
