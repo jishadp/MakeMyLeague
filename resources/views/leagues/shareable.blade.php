@@ -456,8 +456,12 @@
 }
 .team-match-head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-between;
     gap: 1rem;
+}
+.team-match-meta {
+    flex: 1;
 }
 .team-match-logo {
     width: 64px;
@@ -489,8 +493,30 @@
     .team-name-row {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: space-between;
+        gap: 0.75rem;
         flex-wrap: wrap;
+    }
+    .team-inline-logo {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #eef2ff;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+    .team-inline-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .team-inline-logo span {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #4338ca;
     }
     .team-retained-pill {
         padding: 0.2rem 0.6rem;
@@ -551,29 +577,31 @@
         border-radius: 18px;
         padding: 0.65rem;
         display: flex;
+        flex-direction: column;
         gap: 0.5rem;
-        align-items: center;
     }
     .football-card.retained {
         background: linear-gradient(135deg, #fffceb, #fff7d6);
         border-color: rgba(250, 204, 21, 0.5);
     }
     .football-photo {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+        width: 100%;
+        padding-top: 80%;
+        border-radius: 14px;
         overflow: hidden;
         background: #e0e7ff;
         position: relative;
     }
     .football-photo img {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
     .football-photo span {
-        width: 100%;
-        height: 100%;
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -593,7 +621,7 @@
         border: 2px solid #fff;
     }
     .football-info {
-        flex: 1;
+        text-align: center;
     }
     .football-name {
         margin: 0;
@@ -601,16 +629,17 @@
         color: #0f172a;
         font-size: 0.85rem;
     }
-    .football-role {
-        margin: 0;
-        font-size: 0.7rem;
-        color: #475569;
+    .football-price-row {
+        text-align: center;
     }
     .football-price {
-        margin: 0.15rem 0 0;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: #2563eb;
         font-weight: 600;
+        display: inline-block;
+    }
+    .football-price.retained {
+        color: #92400e;
     }
     @media (max-width: 1024px) {
         .football-grid {
@@ -1285,13 +1314,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 @endphp
                 <article class="team-match-card">
                     <header class="team-match-head">
-                        <div class="team-match-logo">
-                            @if($team->team->logo)
-                                <img src="{{ Storage::url($team->team->logo) }}" alt="{{ $team->team->name }}">
-                            @else
-                                <span>{{ substr($team->team->name, 0, 1) }}</span>
-                            @endif
-                        </div>
                         <div class="team-match-meta">
                             <div class="team-name-row">
                                 <h3>{{ $team->team->name }}</h3>
@@ -1330,10 +1352,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="football-info">
                                     <p class="football-name">{{ $player->user->name }}</p>
+                                </div>
+                                <div class="football-price-row">
                                     @if($player->retention)
-                                        <p class="football-price">∞ Retained</p>
+                                        <span class="football-price retained">∞ Retained</span>
                                     @else
-                                        <p class="football-price">₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</p>
+                                        <span class="football-price">₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</span>
                                     @endif
                                 </div>
                             </div>
