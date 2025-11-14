@@ -1,120 +1,318 @@
-<section id="features" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
-    <!-- Background decoration -->
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%236366f1" fill-opacity="0.03"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
-    
-    <div class="relative max-w-7xl mx-auto">
-        <div class="text-center mb-20">
-            <div class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-800 text-sm font-medium mb-6">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                Powerful Features
-            </div>
-            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 tracking-tight">
-                Everything You Need for
-                <span class="block">Professional Cricket Leagues</span>
-            </h2>
-            <p class="text-xl sm:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                From live auctions to real-time statistics — manage every aspect of your cricket league with our comprehensive platform
-            </p>
+@php
+    $flowSteps = [
+        ['title' => 'Create League','copy' => 'Spin up a compliant season with wallets, fee slabs, and organizer approvals in minutes.','meta' => number_format($stats['leagues'] ?? 0) . ' total seasons'],
+        ['title' => 'Add Teams','copy' => 'Invite franchises or club teams, lock their slots, and share digital contracts instantly.','meta' => number_format($stats['teams'] ?? 0) . ' teams onboarded'],
+        ['title' => 'Add Players','copy' => 'Players self-register or get bulk imported with verified IDs and skill tags.','meta' => number_format($stats['players'] ?? 0) . ' registered players'],
+        ['title' => 'Run Auction','copy' => 'Push paddles, cap wallets, and publish winning bids so owners see exactly what they paid.','meta' => $liveAuctionLeague ? ($liveAuctionLeague->name . ' · Wallet ₹' . number_format($liveAuctionLeague->team_wallet_limit ?? 0, 0)) : 'Activate auction mode when ready'],
+        ['title' => 'Make Fixtures','copy' => 'Auto-generate fixtures by group or knockout and update venues in one grid.','meta' => number_format($stats['matches'] ?? 0) . ' fixtures logged'],
+        ['title' => 'Manage Finance','copy' => 'Record franchise fees, sponsor payouts, and vendor expenses with audit-ready logs.','meta' => number_format($opsMetrics['teamsThisWeek'] ?? 0) . ' payouts logged this week'],
+        ['title' => 'See Progress','copy' => 'Dashboards highlight standings, dues, deliverables, and broadcast-readiness.','meta' => 'Synced ' . now()->format('M d, H:i')],
+    ];
+    $availableLeagues = ($recentLeagues ?? collect())->take(4);
+@endphp
+
+<section id="features" class="feature-shell">
+    <div class="feature-inner">
+        <div class="feature-heading">
+            <p class="feature-pill">Manage your league in a professional way</p>
+            <h2>Organize your league with a single, user-first flow</h2>
+            <p>Every workflow card plugs into real data so organizers, teams, and players always see the same source of truth.</p>
         </div>
-        
-        <!-- Statistics Section -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 grid-mobile">
-            <div class="text-center">
-                <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-                <div class="text-4xl font-bold text-indigo-600 mb-2" data-count="{{ $stats['leagues'] ?? 0 }}">0</div>
-                <div class="text-lg font-medium text-gray-900">Active Leagues</div>
-                <p class="text-sm text-gray-500 mt-1">Cricket tournaments organized</p>
-            </div>
-            
-            <div class="text-center">
-                <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                    </svg>
-                </div>
-                <div class="text-4xl font-bold text-indigo-600 mb-2" data-count="{{ $stats['teams'] ?? 0 }}">0</div>
-                <div class="text-lg font-medium text-gray-900">Registered Teams</div>
-                <p class="text-sm text-gray-500 mt-1">Teams competing in leagues</p>
-            </div>
-            
-            <div class="text-center">
-                <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-                <div class="text-4xl font-bold text-indigo-600 mb-2" data-count="{{ $stats['players'] ?? 0 }}">0</div>
-                <div class="text-lg font-medium text-gray-900">Active Players</div>
-                <p class="text-sm text-gray-500 mt-1">Cricket players in the system</p>
-            </div>
-        </div>
-        
-        <!-- Features Grid -->
-        <div class="flex justify-center mb-16">
-            <!-- Real-time Auctions -->
-            <div class="group relative p-8 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-500 ease-out transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 max-w-md card-mobile">
-                <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative z-10">
-                    <div class="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Real-time Auctions</h3>
-                    <p class="text-slate-600 text-lg mb-6 leading-relaxed">Conduct live IPL-style player auctions with real-time bidding, instant notifications, and automated bid tracking</p>
-                    <div class="inline-flex items-center text-cyan-600 font-semibold text-sm group-hover:text-cyan-700 transition-colors">
-                        Experience Auctions
-                        <svg class="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                    </div>
+
+        <div class="feature-body">
+            <div class="flow-scroll">
+                <div class="flow-track">
+                    @foreach($flowSteps as $index => $step)
+                        <div class="flow-step">
+                            <div class="flow-count">{{ $index + 1 }}</div>
+                            <h3>{{ $step['title'] }}</h3>
+                            <p>{{ $step['copy'] }}</p>
+                            <span class="flow-meta">{{ $step['meta'] }}</span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
-        </div>
+            <div class="insight-scroll">
+                <div class="market-card">
+                    <div class="market-card__header">
+                        <h3>Auction room</h3>
+                        <span class="status-pill">
+                            @if($liveAuctionLeague)
+                                Live
+                            @elseif($upcomingLeague)
+                                Incoming
+                            @else
+                                Idle
+                            @endif
+                        </span>
+                    </div>
+                    @if($liveAuctionLeague)
+                        <p class="market-subtitle">{{ $liveAuctionLeague->name }} • {{ $liveAuctionLeague->teams_count }} teams</p>
+                        <div class="market-stats">
+                            <div>
+                                <p class="label">Wallet cap</p>
+                                <p class="value">₹{{ number_format($liveAuctionLeague->team_wallet_limit ?? 0, 0) }}</p>
+                            </div>
+                            <div>
+                                <p class="label">Started</p>
+                                <p class="value">{{ optional($liveAuctionLeague->auction_started_at)->diffForHumans() ?? 'Now' }}</p>
+                            </div>
+                        </div>
+                    @elseif($upcomingLeague)
+                        <p class="market-subtitle">{{ $upcomingLeague->name }} starts {{ optional($upcomingLeague->start_date)->format('d M Y') ?? 'soon' }}</p>
+                        <p class="text-xs text-slate-200">Wallet cap ₹{{ number_format($upcomingLeague->team_wallet_limit ?? 0, 0) }} · Registration ₹{{ number_format($upcomingLeague->team_reg_fee ?? 0, 0) }}</p>
+                    @else
+                        <p class="market-subtitle text-slate-200">Launch a league to start recording bids and payouts.</p>
+                    @endif
+                </div>
 
+                <div class="market-card">
+                    <div class="market-card__header">
+                        <h3>Leagues available to play</h3>
+                        <a href="{{ route('leagues.index') }}" class="link-arrow">View all</a>
+                    </div>
+                    <div class="league-scroll">
+                        <div class="league-track">
+                            @forelse($availableLeagues as $league)
+                                @php $slots = max(($league->max_teams ?? 0) - $league->teams_count, 0); @endphp
+                                <div class="league-card">
+                                    <div class="league-row">
+                                        <div>
+                                            <p class="league-name">{{ $league->name }}</p>
+                                            <p class="league-meta">Starts {{ optional($league->start_date)->format('d M Y') ?? 'TBA' }} • {{ optional($league->localBody)->name ?? 'Location TBA' }}</p>
+                                        </div>
+                                        <span class="league-season">Season {{ $league->season ?? '—' }}</span>
+                                    </div>
+                                    <div class="league-foot">
+                                        <span>{{ $league->teams_count }} / {{ $league->max_teams ?? '∞' }} teams locked</span>
+                                        <span class="slots-open">{{ $slots }} slots open</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-slate-300">No public leagues yet. Add one to surface it here.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-card">
+                    <h3>Player-side view</h3>
+                    <p class="market-subtitle">Players instantly see their auction receipts, dues, and open leagues ready to join.</p>
+                    <ul class="player-points">
+                        <li>Auction receipts stay attached to every player profile.</li>
+                        <li>Open leagues highlight wallet caps, venues, and match counts.</li>
+                        <li>Progress boards sync with scoring and finance data automatically.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- Counter Animation Script -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const counters = document.querySelectorAll('[data-count]');
-    
-    const animateCounter = (counter) => {
-        const target = parseInt(counter.getAttribute('data-count'));
-        const duration = 2000; // 2 seconds
-        const increment = target / (duration / 16); // 60fps
-        let current = 0;
-        
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= target) {
-                counter.textContent = target;
-                clearInterval(timer);
-            } else {
-                counter.textContent = Math.floor(current);
-            }
-        }, 16);
-    };
-    
-    // Use Intersection Observer to trigger animation when section is visible
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const counter = entry.target;
-                animateCounter(counter);
-                observer.unobserve(counter);
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    counters.forEach(counter => observer.observe(counter));
-});
-</script>
+<style>
+    .feature-shell {
+        background: radial-gradient(circle at top, rgba(15, 19, 52, 0.95), #010312);
+        color: #e5edff;
+        padding: 5rem 1rem;
+    }
+    .feature-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+    .feature-heading {
+        text-align: center;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    .feature-pill {
+        display: inline-flex;
+        padding: 0.35rem 1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        letter-spacing: 0.25em;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: rgba(229, 237, 255, 0.75);
+        margin-bottom: 1rem;
+    }
+    .feature-heading h2 {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    .feature-heading p {
+        color: rgba(229, 237, 255, 0.75);
+    }
+    .feature-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+    .flow-scroll {
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+    .flow-track {
+        display: flex;
+        gap: 1rem;
+        min-width: 100%;
+    }
+    .flow-step {
+        min-width: 260px;
+        background: rgba(7, 12, 34, 0.85);
+        border-radius: 22px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+    .flow-count {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #2563eb, #0ea5e9);
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .flow-step h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .flow-step p {
+        color: rgba(229, 237, 255, 0.75);
+        font-size: 0.95rem;
+    }
+    .flow-meta {
+        font-size: 0.75rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(125, 211, 252, 0.8);
+    }
+    .insight-scroll {
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+    .market-card {
+        min-width: 280px;
+        background: rgba(5, 9, 26, 0.9);
+        border-radius: 30px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+    .market-card__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    .market-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .market-subtitle {
+        color: rgba(229, 237, 255, 0.75);
+        margin-bottom: 1rem;
+    }
+    .market-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    .label {
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: 0.7rem;
+        color: rgba(229, 237, 255, 0.6);
+    }
+    .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    .status-pill {
+        padding: 0.25rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+    }
+    .league-scroll {
+        overflow-x: auto;
+    }
+    .league-track {
+        display: flex;
+        gap: 1rem;
+    }
+    .league-card {
+        min-width: 240px;
+        background: rgba(10, 14, 36, 0.9);
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+    }
+    .league-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .league-name {
+        font-weight: 600;
+    }
+    .league-meta {
+        color: rgba(229, 237, 255, 0.6);
+        font-size: 0.85rem;
+    }
+    .league-season {
+        font-size: 0.75rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(229, 237, 255, 0.5);
+    }
+    .league-foot {
+        margin-top: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: rgba(229, 237, 255, 0.6);
+    }
+    .slots-open {
+        color: #34d399;
+        font-weight: 600;
+    }
+    .link-arrow {
+        color: #93c5fd;
+        font-weight: 600;
+    }
+    .player-points {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: rgba(229, 237, 255, 0.7);
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .player-points li::before {
+        content: '•';
+        margin-right: 0.4rem;
+        color: rgba(125, 211, 252, 0.9);
+    }
+    @media (max-width: 768px) {
+        .flow-step { min-width: 220px; }
+        .market-card { min-width: 240px; }
+    }
+</style>

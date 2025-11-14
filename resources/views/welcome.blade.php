@@ -145,10 +145,6 @@
 
     @include('web.features')
     
-    @include('web.how-it-works')
-    
-    @include('web.demo')
-    
     @include('web.grounds')
 
     @include('web.teams')
