@@ -87,6 +87,11 @@ class LeaguePlayerController extends Controller
         $unassignedCount = LeaguePlayer::whereNull('league_team_id')
             ->count();
 
+        $league->loadMissing([
+            'leaguePlayers.user.localBody',
+            'leaguePlayers.leagueTeam.team',
+        ]);
+
         return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts', 'unassignedCount'));
     }
 

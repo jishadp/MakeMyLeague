@@ -3,6 +3,13 @@
 @section('title', $league->name . ' - Share Page')
 
 @section('content')
+<div id="share-page-loader">
+    <div class="loader-bubble">
+        <div class="loader-ring"></div>
+        <p>Loading league showcase…</p>
+    </div>
+</div>
+
 <!-- Hero Section with League Banner -->
 <section class="relative overflow-hidden">
     @if($league->banner)
@@ -66,6 +73,511 @@
     </div>
 </section>
 
+@if($availablePlayers->count() > 0)
+@php
+    $availableByLocation = $availablePlayers->groupBy(function ($player) {
+        return optional(optional($player->user)->localBody)->name ?? 'Free Agents';
+    });
+    $locationKeys = $availableByLocation->keys();
+@endphp
+<section class="available-shell" id="available-players">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="available-heading">
+            <div>
+                <p class="available-pill">Auction pool preview</p>
+                <h2>Available players ready to sign</h2>
+                <p>Share this roster with scouts and managers to finish retention calls before bidding starts.</p>
+            </div>
+            <div class="available-cta">
+                <div class="available-tabs">
+                    @foreach($locationKeys as $index => $location)
+                        <button
+                            type="button"
+                            class="available-tab {{ $index === 0 ? 'active' : '' }}"
+                            data-location="location-{{ \Illuminate\Support\Str::slug($location) }}">
+                            {{ strtoupper($location) }}
+                            <span>{{ $availableByLocation[$location]->count() }}</span>
+                        </button>
+                    @endforeach
+                </div>
+                <span class="available-count">
+                    <strong>{{ $availablePlayers->count() }}</strong>
+                    <small>Total Available</small>
+                </span>
+            </div>
+        </div>
+        <div class="location-panels">
+            @foreach($availableByLocation as $location => $playersGroup)
+                <div class="location-panel {{ $loop->first ? 'active' : '' }}"
+                     data-location-panel="location-{{ \Illuminate\Support\Str::slug($location) }}">
+                    <header class="location-head">
+                        <div>
+                            <p class="location-label">{{ strtoupper($location) }}</p>
+                            <h3>{{ $playersGroup->count() }} player{{ $playersGroup->count() > 1 ? 's' : '' }}</h3>
+                        </div>
+                        <span class="location-chip">
+                            Wallet sync · {{ $league->start_date ? $league->start_date->format('d M') : 'On demand' }}
+                        </span>
+                    </header>
+                    <div class="player-scroll">
+                        @foreach($playersGroup as $player)
+                            @php
+                                $playerName = optional($player->user)->name ?? 'Player TBD';
+                                $role = optional(optional($player->user)->position)->name ?? 'All-rounder';
+                                $phone = optional($player->user)->phone;
+                                $phoneLink = $phone ? preg_replace('/\D+/', '', $phone) : null;
+                                $district = optional(optional(optional($player->user)->localBody)->district)->name ?? 'District TBA';
+                            @endphp
+                            <article class="match-card">
+                                <header class="match-card__head">
+                                    <div class="match-avatar">
+                                        @if($player->user?->photo)
+                                            <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $playerName }}">
+                                        @else
+                                            <span>{{ strtoupper(substr($playerName, 0, 1)) }}</span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="match-name">{{ $playerName }}</p>
+                                        <p class="match-role">{{ $role }}</p>
+                                    </div>
+                                    @if($phoneLink)
+                                        <a href="tel:{{ $phoneLink }}" class="match-phone" aria-label="Call {{ $playerName }}">📞</a>
+                                    @endif
+                                </header>
+                                <div class="match-card__body">
+                                    <div>
+                                        <span class="match-label">Location</span>
+                                        <p>{{ $location }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="match-label">District</span>
+                                        <p>{{ $district }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="match-label">Base Price</span>
+                                        <p>₹{{ number_format($player->base_price ?? 0) }}</p>
+                                    </div>
+                                </div>
+                                <footer class="match-card__foot">
+                                    <span class="match-pill">Wallet ready</span>
+                                    <span class="match-pill light">Updated {{ optional($player->updated_at)->diffForHumans(null, true) ?? 'recently' }}</span>
+                                </footer>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+<style>
+    #share-page-loader {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at top, #020617, #030712);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #share-page-loader.loaded {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+    .loader-bubble {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        color: #e4edff;
+        text-align: center;
+    }
+    .loader-ring {
+        width: 64px;
+        height: 64px;
+        border-radius: 999px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #38bdf8;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .available-shell {
+        background: linear-gradient(180deg, #020617 0%, #0f172a 60%, #030712 100%);
+        color: #e4edff;
+    }
+    .available-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .available-heading h2 {
+        font-size: clamp(1.8rem, 3vw, 2.8rem);
+        font-weight: 700;
+    }
+    .available-pill {
+        display: inline-flex;
+        padding: 0.25rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    .available-cta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .available-tabs {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+    }
+    .available-tab {
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        color: rgba(226, 232, 240, 0.8);
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.6);
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+    }
+    .available-tab span {
+        font-size: 0.75rem;
+        color: #38bdf8;
+    }
+    .available-tab.active {
+        border-color: #38bdf8;
+        color: #0f172a;
+        background: #38bdf8;
+    }
+    .available-count {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+    }
+    .available-count strong {
+        font-size: clamp(2rem, 4vw, 3rem);
+    }
+    .available-link {
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        background: #38bdf8;
+        color: #0f172a;
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .available-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35);
+    }
+    .location-panels {
+        margin-top: 1rem;
+    }
+    .location-panel { display: none; }
+    .location-panel.active { display: block; }
+    .player-scroll {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        scroll-snap-type: x mandatory;
+    }
+    .match-card {
+        min-width: 240px;
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.6);
+    }
+    .match-card__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .match-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .match-role {
+        font-size: 0.85rem;
+        color: rgba(148, 163, 184, 0.85);
+    }
+    .match-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(148, 163, 184, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.5rem;
+    }
+    .match-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .match-avatar span {
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .match-phone {
+        text-decoration: none;
+        font-size: 1.3rem;
+    }
+    .match-card__body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+        font-size: 0.9rem;
+    }
+    .match-label {
+        display: block;
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.8);
+        margin-bottom: 0.2rem;
+    }
+    .match-card__foot {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+    .match-pill {
+        padding: 0.2rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.15);
+        color: rgba(56, 189, 248, 0.9);
+        font-size: 0.75rem;
+    }
+    .match-pill.light {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(226, 232, 240, 0.9);
+    }
+    .location-panel {
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.6);
+        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.45);
+    }
+    .location-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .location-label {
+        letter-spacing: 0.4em;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.9);
+    }
+    .location-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .location-chip {
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.15);
+        font-size: 0.85rem;
+        color: rgba(226, 232, 240, 0.8);
+    }
+    @media (max-width: 768px) {
+        .available-heading {
+            text-align: left;
+        }
+        .available-cta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .match-card__body {
+            grid-template-columns: 1fr;
+        }
+    .match-card {
+        min-width: 80%;
+    }
+    .available-tabs {
+        width: 100%;
+    }
+    }
+.team-shell {
+    background: linear-gradient(120deg, #f8fafc, #eef2ff);
+}
+.team-heading h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+}
+.team-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+.team-match-card {
+    background: #fff;
+    border-radius: 28px;
+    padding: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.team-match-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.team-match-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: #eef2ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.team-match-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+.team-match-logo span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4338ca;
+}
+.team-match-meta h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+.team-match-meta p {
+    color: #475569;
+    font-size: 0.9rem;
+    margin: 0.15rem 0 0;
+}
+.team-match-chip {
+    margin-left: auto;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(79, 70, 229, 0.1);
+    color: #4338ca;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.team-match-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+}
+.team-match-stats span {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #94a3b8;
+    margin-bottom: 0.2rem;
+}
+.team-match-stats strong {
+    font-size: 1.2rem;
+    color: #0f172a;
+}
+.team-chip-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.team-chip {
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    font-size: 0.85rem;
+    color: #312e81;
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.team-chip small {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: #475569;
+}
+.team-chip.retained {
+    background: rgba(250, 204, 21, 0.15);
+    border-color: rgba(250, 204, 21, 0.4);
+    color: #92400e;
+}
+@media (max-width: 768px) {
+    .team-match-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .team-match-chip {
+        margin-left: 0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('share-page-loader');
+    const hideLoader = () => loader && loader.classList.add('loaded');
+    if (loader) {
+        window.addEventListener('load', hideLoader, { once: true });
+        setTimeout(hideLoader, 2000);
+    }
+
+    document.querySelectorAll('.available-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.location;
+            document.querySelectorAll('.available-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('[data-location-panel]').forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.locationPanel === target);
+            });
+        });
+    });
+});
+</script>
 <!-- Prize Pool & Winners Section with 3D Glass Card Design -->
 @if($league->winner_prize || $league->runner_prize || $league->winner_team_id || $league->runner_team_id)
 <style>
@@ -679,133 +1191,73 @@
 @endif
 
 <!-- All Teams Section -->
-<section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 flex items-center justify-center gap-3">
-                <svg class="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                </svg>
-                League Teams
-            </h2>
-            <p class="text-gray-600 text-lg">Complete squad breakdown for all participating teams</p>
+<section class="team-shell">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="team-heading">
+            <div>
+                <p class="available-pill">Match-ready lineups</p>
+                <h2>League teams and live rosters</h2>
+                <p>Get a glance of who is match-fit, retained, or still available across every franchise.</p>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="team-card-grid">
             @foreach($teams as $team)
-                <div class="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 animate-fade-in">
-                    <!-- Team Header -->
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
-                        <div class="flex items-center gap-4">
+                @php
+                    $sortedPlayers = $team->leaguePlayers->sortBy([
+                        fn($a, $b) => $b->retention <=> $a->retention,
+                        fn($a, $b) => ($b->bid_price ?? 0) <=> ($a->bid_price ?? 0)
+                    ]);
+                @endphp
+                <article class="team-match-card">
+                    <header class="team-match-head">
+                        <div class="team-match-logo">
                             @if($team->team->logo)
-                                <img src="{{ Storage::url($team->team->logo) }}" alt="{{ $team->team->name }}" 
-                                     class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-4 border-white shadow-lg">
+                                <img src="{{ Storage::url($team->team->logo) }}" alt="{{ $team->team->name }}">
                             @else
-                                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl font-bold">
-                                    {{ substr($team->team->name, 0, 1) }}
-                                </div>
+                                <span>{{ substr($team->team->name, 0, 1) }}</span>
                             @endif
-                            <div class="flex-1">
-                                <h3 class="text-2xl md:text-3xl font-bold text-white mb-1">{{ $team->team->name }}</h3>
-                                <div class="flex items-center gap-4 text-white/90 text-sm">
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                        </svg>
-                                        {{ $team->leaguePlayers->count() }} Players
-                                    </span>
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
-                                        </svg>
-                                        ₹{{ number_format($team->wallet_balance) }} Remaining
-                                    </span>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="team-match-meta">
+                            <h3>{{ $team->team->name }}</h3>
+                            <p>{{ optional($team->team->homeGround)->name ?? 'Home venue TBA' }}</p>
+                        </div>
+                        <div class="team-match-chip">
+                            {{ ucfirst($league->status) }}
+                        </div>
+                    </header>
+                    <div class="team-match-stats">
+                        <div>
+                            <span>Players</span>
+                            <strong>{{ $team->leaguePlayers->count() }}</strong>
+                        </div>
+                        <div>
+                            <span>Retained</span>
+                            <strong>{{ $team->leaguePlayers->where('retention', true)->count() }}</strong>
+                        </div>
+                        <div>
+                            <span>Wallet</span>
+                            <strong>₹{{ number_format($team->wallet_balance ?? 0) }}</strong>
                         </div>
                     </div>
-
-                    <!-- Team Players - Football Formation Style -->
-                    <div class="p-4">
-                        @if($team->leaguePlayers->count() > 0)
-                            @php
-                                // Sort: Retention players first, then by bid price (highest first)
-                                $sortedPlayers = $team->leaguePlayers->sortBy([
-                                    fn($a, $b) => $b->retention <=> $a->retention,
-                                    fn($a, $b) => ($b->bid_price ?? 0) <=> ($a->bid_price ?? 0)
-                                ]);
-                            @endphp
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                @foreach($sortedPlayers as $player)
-                                    <!-- Football Formation Card -->
-                                    <div class="relative group">
-                                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-3 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
-                                            <!-- Retention Badge -->
-                                            @if($player->retention)
-                                                <div class="absolute -top-2 -right-2 z-10">
-                                                    <div class="bg-yellow-400 text-yellow-900 text-xs font-black px-2 py-1 rounded-full border-2 border-white shadow-lg">
-                                                        R
-                                                    </div>
-                                                </div>
-                                            @endif
-                                            
-                                            <!-- Player Photo -->
-                                            <div class="relative mb-2">
-                                                @if($player->user->photo)
-                                                    <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}" 
-                                                         class="w-full aspect-square rounded-xl object-cover border-2 border-white/50">
-                                                @else
-                                                    <div class="w-full aspect-square rounded-xl bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center">
-                                                        <span class="text-white text-3xl font-bold">{{ substr($player->user->name, 0, 1) }}</span>
-                                                    </div>
-                                                @endif
-                                                
-                                                <!-- Position Badge -->
-                                                <div class="absolute bottom-1 left-1 right-1">
-                                                    <div class="bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-lg text-center truncate">
-                                                        {{ $player->user->position->name ?? 'PLR' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Player Name -->
-                                            <h4 class="text-white font-bold text-sm text-center truncate mb-1">
-                                                {{ $player->user->name }}
-                                            </h4>
-                                            
-                                            <!-- Price/Status -->
-                                            @if($player->status === 'sold' && $player->bid_price)
-                                                <div class="bg-green-400 text-green-900 text-xs font-black py-1 px-2 rounded-lg text-center">
-                                                    ₹{{ number_format($player->bid_price) }}
-                                                </div>
-                                            @elseif($player->retention)
-                                                <div class="bg-blue-400 text-blue-900 text-xs font-bold py-1 px-2 rounded-lg text-center">
-                                                    RETAINED
-                                                </div>
-                                            @else
-                                                <div class="bg-gray-400 text-gray-900 text-xs font-bold py-1 px-2 rounded-lg text-center">
-                                                    UNSOLD
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center py-8 text-gray-500">
-                                <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                                <p class="font-medium">No players yet</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+                    @if($sortedPlayers->count())
+                        <div class="team-chip-scroll">
+                            @foreach($sortedPlayers as $player)
+                                <span class="team-chip {{ $player->retention ? 'retained' : '' }}">
+                                    {{ $player->user->name }}
+                                    <small>₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</small>
+                                </span>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-gray-500 text-sm">Roster not announced yet.</p>
+                    @endif
+                </article>
             @endforeach
         </div>
     </div>
 </section>
+
 
 <!-- Share Section -->
 <section class="py-16 bg-gradient-to-br from-indigo-600 to-purple-600">
@@ -973,4 +1425,3 @@ html {
 }
 </style>
 @endsection
-

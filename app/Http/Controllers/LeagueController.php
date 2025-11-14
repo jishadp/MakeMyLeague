@@ -11,6 +11,7 @@ use App\Models\LocalBody;
 use App\Models\State;
 use App\Models\District;
 use App\Models\LeaguePlayer;
+use App\Models\User;
 use App\Models\LeagueFinance;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
@@ -880,6 +881,17 @@ class LeagueController
             ->with(['team', 'leaguePlayers.user.position'])
             ->get();
 
+        // Available players ahead of auction
+        $availablePlayers = $league->leaguePlayers()
+            ->where('status', 'available')
+            ->where('retention', false)
+            ->with(['user.localBody.district', 'user.position', 'leagueTeam.team'])
+            ->orderBy(
+                User::select('name')
+                    ->whereColumn('users.id', 'league_players.user_id')
+            )
+            ->get();
+
         // Get auction statistics
         $auctionStats = [
             'total_players' => $league->leaguePlayers()->count(),
@@ -894,7 +906,7 @@ class LeagueController
                 ->avg('bid_price'),
         ];
 
-        return view('leagues.shareable', compact('league', 'topAuctions', 'teams', 'auctionStats'));
+        return view('leagues.shareable', compact('league', 'topAuctions', 'teams', 'auctionStats', 'availablePlayers'));
     }
 
     /**
@@ -914,7 +926,11 @@ class LeagueController
      */
     public function publicPlayers(League $league): View
     {
-        $league->load(['game', 'leaguePlayers.user', 'leaguePlayers.leagueTeam.team']);
+        $league->load([
+            'game',
+            'leaguePlayers.user.localBody',
+            'leaguePlayers.leagueTeam.team',
+        ]);
         return view('leagues.players', compact('league'));
     }
 }

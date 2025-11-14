@@ -68,6 +68,13 @@
                     
                     <!-- Hero Image Section -->
                     <div class="relative h-48 overflow-hidden">
+                        <a href="{{ route('leagues.shareable', $league) }}"
+                           class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/85 text-indigo-700 flex items-center justify-center shadow-lg hover:bg-white transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="2.5" stroke-width="1.5"></circle>
+                            </svg>
+                        </a>
                         @if($league->banner)
                             <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
                                  class="w-full h-full object-cover">
@@ -237,6 +244,13 @@
                     
                     <!-- Hero Image Section -->
                     <div class="relative h-48 overflow-hidden">
+                        <a href="{{ route('leagues.shareable', $league) }}"
+                           class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/85 text-indigo-700 flex items-center justify-center shadow-lg hover:bg-white transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="2.5" stroke-width="1.5"></circle>
+                            </svg>
+                        </a>
                         @if($league->banner)
                             <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
                                  class="w-full h-full object-cover">
@@ -398,6 +412,13 @@
                     
                     <!-- Hero Image Section -->
                     <div class="relative h-48 overflow-hidden">
+                        <a href="{{ route('leagues.shareable', $league) }}"
+                           class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/85 text-indigo-700 flex items-center justify-center shadow-lg hover:bg-white transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="2.5" stroke-width="1.5"></circle>
+                            </svg>
+                        </a>
                         @if($league->banner)
                             <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
                                  class="w-full h-full object-cover">
@@ -520,10 +541,12 @@
                         @endif
                         
                         <!-- Action Button -->
-                        <a href="{{ route('leagues.show', $league) }}"
-                            class="w-full bg-yellow-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-lg hover:shadow-xl block">
-                            View League
-                        </a>
+                        <div class="space-y-2">
+                            <a href="{{ route('leagues.show', $league) }}"
+                                class="w-full bg-yellow-600 text-black text-center py-3 px-4 rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-lg hover:shadow-xl block">
+                                View League
+                            </a>
+                        </div>
                     </div>
                 </div>
                 @endforeach
@@ -548,6 +571,13 @@
                     
                     <!-- Hero Image Section -->
                     <div class="relative h-48 overflow-hidden">
+                        <a href="{{ route('leagues.shareable', $league) }}"
+                           class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/85 text-indigo-700 flex items-center justify-center shadow-lg hover:bg-white transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="2.5" stroke-width="1.5"></circle>
+                            </svg>
+                        </a>
                         @if($league->banner)
                             <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
                                  class="w-full h-full object-cover">
@@ -820,6 +850,13 @@
                     
                     <!-- Hero Image Section -->
                     <div class="relative h-48 overflow-hidden">
+                        <a href="{{ route('leagues.shareable', $league) }}"
+                           class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/85 text-indigo-700 flex items-center justify-center shadow-lg hover:bg-white transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="2.5" stroke-width="1.5"></circle>
+                            </svg>
+                        </a>
                         @if($league->banner)
                             <img src="{{ Storage::url($league->banner) }}" alt="{{ $league->name }} Banner" 
                                  class="w-full h-full object-cover">

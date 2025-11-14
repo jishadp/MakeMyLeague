@@ -151,7 +151,15 @@
                                             <p class="league-name">{{ $league->name }}</p>
                                             <p class="league-meta">Starts {{ optional($league->start_date)->format('d M Y') ?? 'TBA' }} • {{ optional($league->localBody)->name ?? 'Location TBA' }}</p>
                                         </div>
-                                        <span class="league-season">Season {{ $league->season ?? '—' }}</span>
+                                        <div class="league-actions">
+                                            <span class="league-season">Season {{ $league->season ?? '—' }}</span>
+                                            <a href="{{ route('leagues.shareable', $league) }}" class="league-eye" title="Preview share page">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M1.5 12s3.5-7 10.5-7 10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                                                </svg>
+                                            </a>
+                                        </div>
                                     </div>
                                     <div class="league-foot">
                                         <span>{{ $league->teams_count }} / {{ $league->max_teams ?? '∞' }} teams locked</span>
@@ -391,6 +399,12 @@
         justify-content: space-between;
         gap: 1rem;
     }
+    .league-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.4rem;
+    }
     .league-name {
         font-weight: 600;
     }
@@ -403,6 +417,26 @@
         letter-spacing: 0.3em;
         text-transform: uppercase;
         color: rgba(229, 237, 255, 0.5);
+    }
+    .league-eye {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #93c5fd;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .league-eye svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+    }
+    .league-eye:hover {
+        background: rgba(147, 197, 253, 0.15);
+        transform: translateY(-1px);
     }
     .league-foot {
         margin-top: 0.6rem;

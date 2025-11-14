@@ -5,6 +5,94 @@
 @section('content')
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        @php
+            $sharePlayers = $league->leaguePlayers ?? collect();
+            if (method_exists($sharePlayers, 'loadMissing')) {
+                $sharePlayers = $sharePlayers->loadMissing(['user.localBody', 'leagueTeam.team']);
+            }
+            $retentionPlayersShare = $sharePlayers->where('retention', true)->sortBy('leagueTeam.team.name');
+            $soldPlayersShare = $sharePlayers->where('status', 'sold')->where('retention', false)->sortByDesc('bid_price');
+            $availablePlayersShare = $sharePlayers->where('status', 'available')->where('retention', false)->sortBy('user.name');
+            $unsoldPlayersShare = $sharePlayers->where('status', 'unsold')->where('retention', false)->sortBy('user.name');
+            $availableByLocationShare = $availablePlayersShare->groupBy(function ($player) {
+                return optional(optional($player->user)->localBody)->name ?? 'Unknown';
+            })->sortKeys();
+            $shareInitials = \Illuminate\Support\Str::upper(collect(explode(' ', $league->name))
+                ->filter()
+                ->map(fn ($word) => \Illuminate\Support\Str::substr($word, 0, 1))
+                ->implode(''));
+            if (\Illuminate\Support\Str::length($shareInitials) < 2) {
+                $shareInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($league->name, 0, 3));
+            }
+            $shareLines = [
+                "⭐ {$shareInitials} – {$league->name} (Season {$league->season}) ⭐",
+                "────────────────────────────────────────",
+                '',
+            ];
+            $shareCounter = 1;
+            if ($retentionPlayersShare->count() > 0) {
+                $shareLines[] = "📍 RETAINED PLAYERS ({$retentionPlayersShare->count()})";
+                $shareLines[] = '';
+                foreach ($retentionPlayersShare as $player) {
+                    $line = $shareCounter . '. ' . (optional($player->user)->name ?? 'Unknown');
+                    if (optional($player->user)->phone) {
+                        $line .= ' – 📞 ' . optional($player->user)->phone;
+                    }
+                    $shareLines[] = $line;
+                    $shareCounter++;
+                }
+                $shareLines[] = '';
+            }
+            if ($soldPlayersShare->count() > 0) {
+                $shareLines[] = "📍 SOLD PLAYERS ({$soldPlayersShare->count()})";
+                $shareLines[] = '';
+                foreach ($soldPlayersShare as $player) {
+                    $line = optional($player->user)->name ?? 'Unknown';
+                    if (optional($player->user)->phone) {
+                        $line .= ' – 📞 ' . optional($player->user)->phone;
+                    }
+                    if ($player->leagueTeam?->team?->name) {
+                        $line .= ' – ' . $player->leagueTeam->team->name;
+                    }
+                    if ($player->bid_price) {
+                        $line .= ' (₹' . number_format($player->bid_price) . ')';
+                    }
+                    $shareLines[] = $shareCounter . '. ' . $line;
+                    $shareCounter++;
+                }
+                $shareLines[] = '';
+            }
+            foreach ($availableByLocationShare as $location => $playersByLocation) {
+                $shareLines[] = "📍 AVAILABLE – " . \Illuminate\Support\Str::upper($location) . " ({$playersByLocation->count()})";
+                $shareLines[] = '';
+                foreach ($playersByLocation as $player) {
+                    $line = $shareCounter . '. ' . (optional($player->user)->name ?? 'Unknown');
+                    if (optional($player->user)->phone) {
+                        $line .= ' – 📞 ' . optional($player->user)->phone;
+                    }
+                    $shareLines[] = $line;
+                    $shareCounter++;
+                }
+                $shareLines[] = '';
+            }
+            if ($unsoldPlayersShare->count() > 0) {
+                $shareLines[] = "📍 UNSOLD ({$unsoldPlayersShare->count()})";
+                $shareLines[] = '';
+                foreach ($unsoldPlayersShare as $player) {
+                    $line = $shareCounter . '. ' . (optional($player->user)->name ?? 'Unknown');
+                    if (optional($player->user)->phone) {
+                        $line .= ' – 📞 ' . optional($player->user)->phone;
+                    }
+                    $shareLines[] = $line;
+                    $shareCounter++;
+                }
+                $shareLines[] = '';
+            }
+            $shareLines[] = "────────────────────────────────────────";
+            $shareLines[] = route('leagues.public-players', $league);
+            $shareText = trim(implode("\n", array_filter($shareLines, fn ($line) => $line !== null)));
+        @endphp
+        <textarea id="share-text-{{ $league->id }}" class="hidden">{{ $shareText }}</textarea>
         
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
@@ -12,6 +100,16 @@
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">League Players</h1>
                     <p class="text-gray-600 mt-2">{{ $league->name }} - Managing {{ $leaguePlayers->total() }} players</p>
+                </div>
+                <div class="w-full sm:w-auto flex justify-stretch sm:justify-end">
+                    <button type="button"
+                            class="whatsapp-share-btn inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition-colors w-full sm:w-auto"
+                            data-share-target="share-text-{{ $league->id }}">
+                        <svg class="w-4 h-4 mr-2" viewBox="0 0 32 32" fill="currentColor">
+                            <path d="M16.03 4c-6.63 0-12 5.23-12 11.67 0 2.29.69 4.43 1.89 6.2L4 28l6.33-1.99c1.72.94 3.69 1.47 5.7 1.47 6.63 0 12-5.23 12-11.67C28.03 9.23 22.66 4 16.03 4zm7.05 16.03c-.29.81-1.7 1.59-2.39 1.69-.61.09-1.41.13-2.28-.14-.53-.17-1.21-.39-2.08-.77-3.67-1.58-6.06-5.22-6.23-5.46-.18-.24-1.49-1.98-1.49-3.77 0-1.79.95-2.67 1.29-3.03.34-.36.74-.45.99-.45.25 0 .5.01.72.02.23.01.53-.08.83.63.29.71.99 2.44 1.07 2.62.09.18.14.39.03.63-.11.24-.17.39-.34.6-.18.21-.36.47-.51.63-.17.18-.34.37-.15.73.21.36.95 1.57 2.04 2.55 1.4 1.25 2.57 1.65 2.93 1.83.36.18.57.15.78-.09.21-.24.9-1.05 1.14-1.41.24-.36.48-.3.81-.18.33.12 2.1 1 2.46 1.18.36.18.6.27.69.42.09.15.09.84-.2 1.65z"/>
+                        </svg>
+                        Share to WhatsApp
+                    </button>
                 </div>
                 <!-- Mobile: 2 buttons per row -->
                 <div class="grid grid-cols-2 gap-3 sm:hidden">
@@ -488,6 +586,29 @@ document.addEventListener('DOMContentLoaded', function () {
         applyChipStyles(group);
         document.querySelectorAll(`[data-filter-group="${group}"] input`).forEach((input) => {
             input.addEventListener('change', () => applyChipStyles(group));
+        });
+    });
+
+    document.querySelectorAll('.whatsapp-share-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.shareTarget;
+            const source = document.getElementById(targetId);
+            if (!source) {
+                return;
+            }
+
+            const shareText = source.value.trim();
+            if (!shareText) {
+                return;
+            }
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+            if (navigator.share) {
+                navigator.share({ text: shareText }).catch(() => window.open(whatsappUrl, '_blank'));
+            } else {
+                window.open(whatsappUrl, '_blank');
+            }
         });
     });
 });
