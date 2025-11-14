@@ -480,17 +480,35 @@
     font-weight: 700;
     color: #4338ca;
 }
-.team-match-meta h3 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-}
-.team-match-meta p {
-    color: #475569;
-    font-size: 0.9rem;
-    margin: 0.15rem 0 0;
-}
+    .team-match-meta h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .team-name-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .team-retained-pill {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.15);
+        color: #475569;
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+    }
+    .team-match-meta p {
+        color: #475569;
+        font-size: 0.9rem;
+        margin: 0.15rem 0 0;
+    }
+    .team-match-meta .team-owner {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
 .team-match-chip {
     margin-left: auto;
     padding: 0.35rem 0.9rem;
@@ -521,41 +539,39 @@
     font-size: 1.2rem;
     color: #0f172a;
 }
-    .team-player-scroll {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
+    .football-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-top: 1.25rem;
     }
-    .team-player-card {
-        min-width: 200px;
+    .football-card {
+        background: #f8fafc;
         border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 20px;
-        padding: 0.9rem;
+        border-radius: 18px;
+        padding: 0.65rem;
         display: flex;
-        gap: 0.8rem;
+        gap: 0.5rem;
         align-items: center;
-        background: #fff;
-        box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.5);
     }
-    .team-player-card.retained {
+    .football-card.retained {
+        background: linear-gradient(135deg, #fffceb, #fff7d6);
         border-color: rgba(250, 204, 21, 0.5);
-        background: linear-gradient(135deg, #fffceb, #fffdf3);
     }
-    .team-player-photo {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
+    .football-photo {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
         overflow: hidden;
-        background: #eef2ff;
+        background: #e0e7ff;
         position: relative;
     }
-    .team-player-photo img {
+    .football-photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
-    .team-player-photo span {
+    .football-photo span {
         width: 100%;
         height: 100%;
         display: flex;
@@ -564,50 +580,52 @@
         font-weight: 700;
         color: #4338ca;
     }
-    .team-player-badge {
+    .football-badge {
         position: absolute;
-        bottom: -4px;
-        right: -4px;
+        bottom: -3px;
+        right: -3px;
         background: #facc15;
         color: #78350f;
-        font-size: 0.65rem;
         font-weight: 700;
+        font-size: 0.6rem;
         border-radius: 999px;
-        padding: 0.1rem 0.35rem;
+        padding: 0.1rem 0.3rem;
         border: 2px solid #fff;
     }
-    .team-player-body {
+    .football-info {
         flex: 1;
     }
-    .team-player-name {
-        font-weight: 600;
+    .football-name {
         margin: 0;
+        font-weight: 600;
         color: #0f172a;
+        font-size: 0.85rem;
     }
-    .team-player-role {
-        margin: 0.1rem 0;
-        font-size: 0.8rem;
+    .football-role {
+        margin: 0;
+        font-size: 0.7rem;
         color: #475569;
     }
-    .team-player-meta {
-        display: flex;
-        justify-content: space-between;
+    .football-price {
+        margin: 0.15rem 0 0;
         font-size: 0.75rem;
-        color: #64748b;
+        color: #2563eb;
+        font-weight: 600;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
+        .football-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 640px) {
+        .football-grid {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
         .team-match-stats {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .team-match-chip {
             margin-left: 0;
-        }
-        .team-player-scroll {
-            scroll-snap-type: x mandatory;
-        }
-        .team-player-card {
-            min-width: 85%;
-            scroll-snap-align: center;
         }
     }
 </style>
@@ -1263,6 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         fn($a, $b) => $b->retention <=> $a->retention,
                         fn($a, $b) => ($b->bid_price ?? 0) <=> ($a->bid_price ?? 0)
                     ]);
+                    $retainedCount = $team->leaguePlayers->where('retention', true)->count();
                 @endphp
                 <article class="team-match-card">
                     <header class="team-match-head">
@@ -1274,8 +1293,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             @endif
                         </div>
                         <div class="team-match-meta">
-                            <h3>{{ $team->team->name }}</h3>
+                            <div class="team-name-row">
+                                <h3>{{ $team->team->name }}</h3>
+                                <span class="team-retained-pill">{{ $retainedCount }} RET</span>
+                            </div>
                             <p>{{ optional($team->team->homeGround)->name ?? 'Home venue TBA' }}</p>
+                            <p class="team-owner">Owner: {{ optional($team->team->owners->first())->name ?? 'TBA' }}</p>
                         </div>
                         <div class="team-match-chip">
                             {{ ucfirst($league->status) }}
@@ -1288,41 +1311,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div>
                             <span>Retained</span>
-                            <strong>{{ $team->leaguePlayers->where('retention', true)->count() }}</strong>
+                            <strong>{{ $retainedCount }}</strong>
                         </div>
                         <div>
                             <span>Wallet</span>
                             <strong>₹{{ number_format($team->wallet_balance ?? 0) }}</strong>
                         </div>
                     </div>
-                    @if($sortedPlayers->count())
-                        <div class="team-player-scroll">
-                            @foreach($sortedPlayers as $player)
-                                <article class="team-player-card {{ $player->retention ? 'retained' : '' }}">
-                                    <div class="team-player-photo">
-                                        @if($player->user?->photo)
-                                            <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}">
-                                        @else
-                                            <span>{{ strtoupper(substr($player->user->name ?? 'P', 0, 1)) }}</span>
-                                        @endif
-                                        @if($player->retention)
-                                            <span class="team-player-badge">R</span>
-                                        @endif
-                                    </div>
-                                    <div class="team-player-body">
-                                        <p class="team-player-name">{{ $player->user->name }}</p>
-                                        <p class="team-player-role">{{ $player->user->position->name ?? 'All-rounder' }}</p>
-                                        <div class="team-player-meta">
-                                            <span>₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</span>
-                                            <span>{{ optional($player->user->localBody)->name ?? 'Location TBA' }}</span>
-                                        </div>
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-gray-500 text-sm">Roster not announced yet.</p>
-                    @endif
+                    <div class="football-grid">
+                        @foreach($sortedPlayers as $player)
+                            <div class="football-card {{ $player->retention ? 'retained' : '' }}">
+                                <div class="football-photo">
+                                    @if($player->user?->photo)
+                                        <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}">
+                                    @else
+                                        <span>{{ strtoupper(substr($player->user->name ?? 'P', 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                                <div class="football-info">
+                                    <p class="football-name">{{ $player->user->name }}</p>
+                                    <p class="football-price">₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </article>
             @endforeach
         </div>
