@@ -17,6 +17,75 @@
             <p class="feature-pill">Manage your league in a professional way</p>
             <h2>Organize your league with a single, user-first flow</h2>
             <p>Every workflow card plugs into real data so organizers, teams, and players always see the same source of truth.</p>
+
+            <div class="feature-video-card">
+                <div class="feature-video-frame">
+                    <video autoplay muted loop playsinline poster="{{ asset('images/hero.jpg') }}">
+                        <source src="{{ asset('videos/hero-auction.mp4') }}" type="video/mp4">
+                        <source src="{{ asset('videos/hero-stadium.mp4') }}" type="video/mp4">
+                    </video>
+                    <div class="feature-video-overlay">
+                        <span class="video-status">
+                            @if($liveAuctionLeague)
+                                Live auction
+                            @elseif($upcomingLeague)
+                                Countdown
+                            @else
+                                Highlight reel
+                            @endif
+                        </span>
+                        @if($liveAuctionLeague)
+                            <p class="video-headline">{{ $liveAuctionLeague->name }} bidding floor is active right now.</p>
+                            <div class="feature-video-meta">
+                                <div>
+                                    <span class="label">Wallet cap</span>
+                                    <strong>₹{{ number_format($liveAuctionLeague->team_wallet_limit ?? 0, 0) }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Teams in room</span>
+                                    <strong>{{ $liveAuctionLeague->teams_count }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Started</span>
+                                    <strong>{{ optional($liveAuctionLeague->auction_started_at)->diffForHumans() ?? 'Moments ago' }}</strong>
+                                </div>
+                            </div>
+                        @elseif($upcomingLeague)
+                            <p class="video-headline">{{ $upcomingLeague->name }} staging gets underway {{ optional($upcomingLeague->start_date)->format('d M Y') ?? 'soon' }}.</p>
+                            <div class="feature-video-meta">
+                                <div>
+                                    <span class="label">Wallet cap</span>
+                                    <strong>₹{{ number_format($upcomingLeague->team_wallet_limit ?? 0, 0) }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Season</span>
+                                    <strong>{{ $upcomingLeague->season ?? 'New' }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Teams ready</span>
+                                    <strong>{{ $upcomingLeague->teams_count ?? 0 }}</strong>
+                                </div>
+                            </div>
+                        @else
+                            <p class="video-headline">Clips from real auctions, fixtures, and venue preps powered by {{ config('app.name') }}.</p>
+                            <div class="feature-video-meta">
+                                <div>
+                                    <span class="label">Players</span>
+                                    <strong>{{ number_format($stats['players'] ?? 0) }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Leagues</span>
+                                    <strong>{{ number_format($stats['leagues'] ?? 0) }}</strong>
+                                </div>
+                                <div>
+                                    <span class="label">Fixtures</span>
+                                    <strong>{{ number_format($stats['matches'] ?? 0) }}</strong>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="feature-body">
@@ -146,6 +215,60 @@
     }
     .feature-heading p {
         color: rgba(229, 237, 255, 0.75);
+    }
+    .feature-video-card {
+        margin-top: 2rem;
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(2, 5, 21, 0.85);
+        overflow: hidden;
+        box-shadow: 0 25px 45px rgba(1, 3, 18, 0.6);
+    }
+    .feature-video-frame {
+        position: relative;
+        border-radius: inherit;
+        overflow: hidden;
+    }
+    .feature-video-frame video {
+        width: 100%;
+        height: 360px;
+        object-fit: cover;
+        display: block;
+    }
+    .feature-video-overlay {
+        position: absolute;
+        inset: 0;
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 1rem;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.65) 100%);
+    }
+    .video-status {
+        align-self: flex-start;
+        padding: 0.3rem 1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(2, 6, 23, 0.4);
+    }
+    .video-headline {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .feature-video-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+        text-align: left;
+    }
+    .feature-video-meta strong {
+        display: block;
+        font-size: 1.1rem;
     }
     .feature-body {
         display: flex;
@@ -314,5 +437,6 @@
     @media (max-width: 768px) {
         .flow-step { min-width: 220px; }
         .market-card { min-width: 240px; }
+        .feature-video-frame video { height: 260px; }
     }
 </style>
