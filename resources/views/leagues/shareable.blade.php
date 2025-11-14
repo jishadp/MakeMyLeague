@@ -497,10 +497,13 @@
         gap: 0.75rem;
         flex-wrap: wrap;
     }
+    .team-name-stack {
+        flex: 1;
+    }
     .team-inline-logo {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
         background: #eef2ff;
         overflow: hidden;
         display: flex;
@@ -515,7 +518,7 @@
     }
     .team-inline-logo span {
         font-weight: 700;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         color: #4338ca;
     }
     .team-retained-pill {
@@ -1316,11 +1319,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     <header class="team-match-head">
                         <div class="team-match-meta">
                             <div class="team-name-row">
-                                <h3>{{ $team->team->name }}</h3>
-                                <span class="team-retained-pill">{{ $retainedCount }} RET</span>
+                                <div class="team-name-stack">
+                                    <h3>{{ $team->team->name }}</h3>
+                                    <p>{{ optional($team->team->homeGround)->name ?? 'Home venue TBA' }}</p>
+                                    <p class="team-owner">Owner: {{ optional($team->team->owners->first())->name ?? 'TBA' }}</p>
+                                </div>
+                                <div class="team-inline-logo">
+                                    @if($team->team->logo)
+                                        <img src="{{ Storage::url($team->team->logo) }}" alt="{{ $team->team->name }}">
+                                    @else
+                                        <span>{{ substr($team->team->name, 0, 1) }}</span>
+                                    @endif
+                                </div>
                             </div>
-                            <p>{{ optional($team->team->homeGround)->name ?? 'Home venue TBA' }}</p>
-                            <p class="team-owner">Owner: {{ optional($team->team->owners->first())->name ?? 'TBA' }}</p>
+                            <span class="team-retained-pill">{{ $retainedCount }} RET</span>
                         </div>
                         <div class="team-match-chip">
                             {{ ucfirst($league->status) }}
