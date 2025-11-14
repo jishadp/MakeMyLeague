@@ -134,7 +134,7 @@
                                         @if($player->user?->photo)
                                             <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $playerName }}">
                                         @else
-                                            <span>{{ strtoupper(substr($playerName, 0, 1)) }}</span>
+                                            <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $playerName }}">
                                         @endif
                                     </div>
                                     <div>
@@ -1214,7 +1214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 @endif
 
-<!-- Top 3 Auction Highlights -->
+<!-- Global Spotlight -->
 @if($topAuctions->count() > 0)
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1226,7 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>
                 Top 3 Auction Highlights
             </h2>
-            <p class="text-gray-600 text-lg">Most valuable signings of the league</p>
+            <p class="text-gray-600 text-lg">Global Spotlight · Sold Players</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1359,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     @if($player->user?->photo)
                                         <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}">
                                     @else
-                                        <span>{{ strtoupper(substr($player->user->name ?? 'P', 0, 1)) }}</span>
+                                        <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="{{ $player->user->name ?? 'Player' }}">
                                     @endif
                                 </div>
                                 <div class="football-info">

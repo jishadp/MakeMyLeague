@@ -387,19 +387,11 @@
                             </td>
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
-                                    @if($player->user && $player->user->photo)
                                         <img
-                                            src="{{ Storage::url($player->user->photo) }}"
+                                            src="{{ $player->user && $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}"
                                             alt="{{ $player->user->name }}"
                                             class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover mr-2 sm:mr-3 border border-gray-200 shadow-sm"
                                         />
-                                    @else
-                                        <img
-                                            src="{{ asset('images/defaultplayer.jpeg') }}"
-                                            alt="{{ $player->user->name }}"
-                                            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover mr-2 sm:mr-3 border border-gray-200 shadow-sm"
-                                        />
-                                    @endif
                                     <div>
                                         <a href="{{ route('players.show', $player->user) }}" class="font-bold text-gray-900 text-sm sm:text-base hover:underline">
                                             {{ $player->user->name }}
@@ -1774,6 +1766,11 @@ function initSpotlightShowcase() {
             const target = btn.dataset.spotlightTab;
             if (target) {
                 setActivePanel(target);
+                const group = chunkGroups[target];
+                if (group && group.chunks.length > 1) {
+                    const nextIndex = (group.active + 1) % group.chunks.length;
+                    setActiveChunk(target, nextIndex);
+                }
             }
         });
     });
