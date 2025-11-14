@@ -521,40 +521,95 @@
     font-size: 1.2rem;
     color: #0f172a;
 }
-.team-chip-scroll {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-.team-chip {
-    padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    font-size: 0.85rem;
-    color: #312e81;
-    display: inline-flex;
-    flex-direction: column;
-    line-height: 1.2;
-}
-.team-chip small {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    color: #475569;
-}
-.team-chip.retained {
-    background: rgba(250, 204, 21, 0.15);
-    border-color: rgba(250, 204, 21, 0.4);
-    color: #92400e;
-}
-@media (max-width: 768px) {
-    .team-match-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .team-player-scroll {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
     }
-    .team-match-chip {
-        margin-left: 0;
+    .team-player-card {
+        min-width: 200px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        padding: 0.9rem;
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.5);
     }
-}
+    .team-player-card.retained {
+        border-color: rgba(250, 204, 21, 0.5);
+        background: linear-gradient(135deg, #fffceb, #fffdf3);
+    }
+    .team-player-photo {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #eef2ff;
+        position: relative;
+    }
+    .team-player-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .team-player-photo span {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #4338ca;
+    }
+    .team-player-badge {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: #facc15;
+        color: #78350f;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 0.1rem 0.35rem;
+        border: 2px solid #fff;
+    }
+    .team-player-body {
+        flex: 1;
+    }
+    .team-player-name {
+        font-weight: 600;
+        margin: 0;
+        color: #0f172a;
+    }
+    .team-player-role {
+        margin: 0.1rem 0;
+        font-size: 0.8rem;
+        color: #475569;
+    }
+    .team-player-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    @media (max-width: 768px) {
+        .team-match-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .team-match-chip {
+            margin-left: 0;
+        }
+        .team-player-scroll {
+            scroll-snap-type: x mandatory;
+        }
+        .team-player-card {
+            min-width: 85%;
+            scroll-snap-align: center;
+        }
+    }
 </style>
 
 <script>
@@ -1241,12 +1296,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     @if($sortedPlayers->count())
-                        <div class="team-chip-scroll">
+                        <div class="team-player-scroll">
                             @foreach($sortedPlayers as $player)
-                                <span class="team-chip {{ $player->retention ? 'retained' : '' }}">
-                                    {{ $player->user->name }}
-                                    <small>₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</small>
-                                </span>
+                                <article class="team-player-card {{ $player->retention ? 'retained' : '' }}">
+                                    <div class="team-player-photo">
+                                        @if($player->user?->photo)
+                                            <img src="{{ Storage::url($player->user->photo) }}" alt="{{ $player->user->name }}">
+                                        @else
+                                            <span>{{ strtoupper(substr($player->user->name ?? 'P', 0, 1)) }}</span>
+                                        @endif
+                                        @if($player->retention)
+                                            <span class="team-player-badge">R</span>
+                                        @endif
+                                    </div>
+                                    <div class="team-player-body">
+                                        <p class="team-player-name">{{ $player->user->name }}</p>
+                                        <p class="team-player-role">{{ $player->user->position->name ?? 'All-rounder' }}</p>
+                                        <div class="team-player-meta">
+                                            <span>₹{{ number_format($player->bid_price ?? $player->base_price ?? 0) }}</span>
+                                            <span>{{ optional($player->user->localBody)->name ?? 'Location TBA' }}</span>
+                                        </div>
+                                    </div>
+                                </article>
                             @endforeach
                         </div>
                     @else
