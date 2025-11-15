@@ -175,6 +175,8 @@ Route::middleware('auth')->group(function () {
         
         // Player Management Routes
         Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
+        Route::get('players/export/{format}', [\App\Http\Controllers\Admin\PlayerController::class, 'export'])
+            ->name('players.export');
         Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
         Route::post('players/{player:slug}/update-photo', [\App\Http\Controllers\Admin\PlayerController::class, 'updatePhoto'])->name('players.update-photo');
         

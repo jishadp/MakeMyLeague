@@ -18,9 +18,15 @@ class PosterController extends Controller
 
     public function show(League $league, LeagueTeam $leagueTeam)
     {
-        $leagueTeam->load(['team.owners', 'players.user.position']);
+        $leagueTeam->load([
+            'team.owners',
+            'team.homeGround',
+            'players.user.position',
+        ]);
         $owner = $leagueTeam->team->owners->where('role', 'owner')->first();
+        $players = $leagueTeam->players->sortBy(fn ($player) => $player->user->name);
         
-        return view('posters.show', compact('league', 'leagueTeam', 'owner'));
+        return view('posters.show', compact('league', 'leagueTeam', 'owner', 'players'));
     }
+
 }

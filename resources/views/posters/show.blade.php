@@ -3,142 +3,167 @@
 @section('title', $leagueTeam->team->name . ' Poster')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-4 flex justify-between items-center">
-            <a href="{{ route('posters.list') }}" class="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 text-sm">
-                ← Back
+<div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 py-6 px-3 sm:py-10 sm:px-6">
+    <div class="max-w-4xl mx-auto space-y-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <a href="{{ route('posters.list') }}" class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 hover:text-white hover:border-white/40 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to posters
             </a>
-            <button onclick="downloadPoster()" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-                Download
-            </button>
+            <div class="flex flex-col gap-2 sm:items-end">
+                <button onclick="downloadPoster(event)" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/>
+                    </svg>
+                    Download PNG
+                </button>
+            </div>
         </div>
 
-        <!-- Mobile-Friendly Poster -->
-        <div id="poster" class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl overflow-hidden">
-            
-            <!-- Header -->
-            <div class="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4">
-                <div class="flex items-center justify-between">
-                    @if($league->logo)
-                        <img src="{{ Storage::url($league->logo) }}" class="h-12 w-12 object-contain">
-                    @else
-                        <div class="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center text-white font-bold">
-                            {{ substr($league->name, 0, 1) }}
-                        </div>
-                    @endif
-                    <div class="flex-1 text-center px-2">
-                        <h1 class="text-lg sm:text-xl font-bold text-white">{{ $league->name }}</h1>
-                        <p class="text-white/80 text-xs">Season {{ date('Y') }}</p>
-                    </div>
-                    <div class="h-12 w-12"></div>
-                </div>
+        <div id="poster" class="relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-900 shadow-[0_25px_90px_rgba(15,23,42,0.75)]">
+            <div class="pointer-events-none absolute inset-0 opacity-70">
+                <div class="absolute -top-32 right-0 h-64 w-64 bg-pink-500/30 blur-[120px]"></div>
+                <div class="absolute bottom-0 left-0 h-72 w-72 bg-indigo-500/40 blur-[120px]"></div>
             </div>
 
-            <!-- Team & Owner Section -->
-            <div class="relative p-6">
-                <!-- Decorative Elements -->
-                <div class="absolute top-4 left-4 opacity-10">
-                    <svg class="w-8 h-8 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                </div>
-                <div class="absolute top-4 right-4 opacity-10">
-                    <svg class="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                </div>
-
-                <!-- Team Logo -->
-                <div class="text-center relative z-10">
-                    @if($leagueTeam->team->logo)
-                        <img src="{{ Storage::url($leagueTeam->team->logo) }}" 
-                             class="w-20 h-20 mx-auto rounded-full object-cover border-4 border-white/20 shadow-xl">
-                    @else
-                        <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl border-4 border-white/20 shadow-xl">
-                            {{ substr($leagueTeam->team->name, 0, 2) }}
-                        </div>
-                    @endif
-                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-4">{{ $leagueTeam->team->name }}</h2>
-                    
-                    @if($owner)
-                        <div class="mt-3 inline-flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2 rounded-full">
-                            <svg class="w-4 h-4 text-slate-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <div class="text-left">
-                                <p class="text-xs font-semibold text-slate-900">OWNER</p>
-                                <p class="text-sm font-bold text-slate-900">{{ $owner->user->name }}</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Players Squad -->
-            <div class="px-4 pb-6">
-                <div class="bg-slate-800/50 rounded-xl p-4 backdrop-blur border border-white/10">
-                    <div class="flex items-center justify-center mb-4">
-                        <div class="h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent flex-1"></div>
-                        <h3 class="text-xl font-bold text-white px-4">SQUAD</h3>
-                        <div class="h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent flex-1"></div>
+            <div class="relative z-10 space-y-8 p-6 sm:p-10">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="space-y-3">
+                        <p class="text-xs uppercase tracking-[0.4em] text-slate-300">{{ $league->name }}</p>
+                        <h1 class="text-4xl font-black text-white sm:text-5xl">{{ $leagueTeam->team->name }}</h1>
+                        <p class="text-sm text-white/80">{{ $leagueTeam->team->homeGround->name ?? 'Home Ground TBD' }} • Season {{ $league->season ?? date('Y') }}</p>
                     </div>
-                    
-                    @if($leagueTeam->players->count() > 0)
-                        <div class="grid grid-cols-3 gap-2">
-                            @foreach($leagueTeam->players->sortBy('user.name') as $player)
-                                <div class="bg-gradient-to-br from-slate-700/80 to-slate-800/80 rounded-lg p-2 border border-white/5 hover:border-indigo-500/50 transition-all">
-                                    <div class="flex flex-col items-center text-center">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mb-2 shadow-lg">
-                                            {{ substr($player->user->name, 0, 1) }}
-                                        </div>
-                                        <p class="text-white font-semibold text-xs leading-tight mb-1">{{ $player->user->name }}</p>
-                                        <span class="inline-block px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-[10px] font-medium">
+                    <div class="flex items-center gap-4">
+                        <div class="rounded-3xl border border-white/10 bg-white/10 p-3 backdrop-blur">
+                            @if($league->logo)
+                                <img src="{{ Storage::url($league->logo) }}" class="h-14 w-14 object-contain" loading="lazy" crossorigin="anonymous">
+                            @else
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-xl font-bold text-white">
+                                    {{ strtoupper(substr($league->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="rounded-full border border-white/20 bg-white/10 p-3 backdrop-blur">
+                            @if($leagueTeam->team->logo)
+                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-20 w-20 rounded-full object-cover" loading="lazy" crossorigin="anonymous">
+                            @else
+                                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-black text-white">
+                                    {{ strtoupper(substr($leagueTeam->team->name, 0, 2)) }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if($owner)
+                    <div class="flex items-center gap-3 rounded-2xl border border-amber-200/40 bg-amber-100/10 px-5 py-3 text-amber-100">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a6 6 0 00-6 6v2.586l-.707.707A1 1 0 004 13h12a1 1 0 00.707-1.707L16 10.586V8a6 6 0 00-6-6z"/>
+                            <path d="M15 13v1a3 3 0 01-3 3H8a3 3 0 01-3-3v-1h10z"/>
+                        </svg>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.35em]">Team Owner</p>
+                            <p class="text-base font-semibold text-white">{{ $owner->user->name }}</p>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
+                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Squad Size</p>
+                        <p class="text-3xl font-black text-white">{{ $players->count() }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
+                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">League</p>
+                        <p class="text-xl font-bold text-white">{{ $league->short_name ?? $league->name }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
+                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Season</p>
+                        <p class="text-2xl font-black text-white">{{ $league->season ?? date('Y') }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Squad</p>
+                            <h2 class="text-2xl font-bold text-white">Featured Players</h2>
+                        </div>
+                        <div class="flex h-px flex-1 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+                    </div>
+
+                    @if($players->isEmpty())
+                        <div class="rounded-2xl border border-dashed border-white/20 py-10 text-center text-white/60">
+                            Squad will be revealed soon.
+                        </div>
+                    @else
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($players as $player)
+                                @php
+                                    $photoUrl = $player->user->photo
+                                        ? asset('storage/' . $player->user->photo)
+                                        : asset('images/defaultplayer.jpeg');
+                                @endphp
+                                <div class="group rounded-2xl border border-white/10 bg-white/5 p-3 text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-1 hover:border-indigo-400/60">
+                                    <div class="relative mb-3">
+                                        <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="h-32 w-full rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
+                                        <div class="absolute inset-0 rounded-xl bg-gradient-to-t from-slate-950/80 via-transparent"></div>
+                                        <div class="absolute bottom-2 left-1.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-white backdrop-blur">
                                             {{ $player->user->position->name ?? 'Player' }}
-                                        </span>
+                                        </div>
                                     </div>
+                                    <p class="text-lg font-semibold leading-tight">{{ $player->user->name }}</p>
+                                    @if($player->retention)
+                                        <p class="text-xs uppercase tracking-[0.35em] text-amber-300">Retained</p>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
-                    @else
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 text-gray-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <p class="text-gray-400 text-sm">No players yet</p>
-                        </div>
                     @endif
                 </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-3 text-center">
-                <p class="text-white font-semibold text-sm">{{ $league->name }} • {{ date('Y') }}</p>
+                <div class="flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-5 py-3 text-sm text-white/70">
+                    <span>{{ $league->name }} • Powered by MakeMyLeague</span>
+                    <span class="text-white/40">{{ now()->format('M d, Y') }}</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" referrerpolicy="no-referrer"></script>
 <script>
-function downloadPoster() {
+function downloadPoster(event) {
     const poster = document.getElementById('poster');
-    const button = event.target;
-    button.textContent = 'Generating...';
+    const button = event.currentTarget;
+    const originalLabel = button.innerHTML;
+    button.innerHTML = '<span class="animate-pulse">Rendering…</span>';
     button.disabled = true;
-    
+
+    const scale = Math.max(2, window.devicePixelRatio);
+
     html2canvas(poster, {
-        scale: 3,
-        backgroundColor: '#0f172a',
-        logging: false,
-        useCORS: true
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = '{{ Str::slug($leagueTeam->team->name) }}-poster.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        button.textContent = 'Download';
+        backgroundColor: '#020617',
+        scale,
+        useCORS: true,
+        logging: false
+    }).then(function(canvas) {
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = '{{ Str::slug($leagueTeam->team->name) }}-poster.png';
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            button.innerHTML = originalLabel;
+            button.disabled = false;
+        }, 'image/png');
+    }).catch(function() {
+        button.innerHTML = originalLabel;
         button.disabled = false;
+        alert('Unable to generate poster image automatically. Please take a screenshot instead.');
     });
 }
 </script>

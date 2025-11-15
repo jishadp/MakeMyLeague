@@ -124,7 +124,7 @@
                     Filter Players
                 </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                     <!-- Search -->
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
@@ -154,6 +154,19 @@
                             @foreach($localBodies as $localBody)
                                 <option value="{{ $localBody->id }}" {{ request('local_body_id') == $localBody->id ? 'selected' : '' }}>
                                     {{ $localBody->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- League Filter -->
+                    <div>
+                        <label for="league_id" class="block text-sm font-medium text-gray-700 mb-2">League</label>
+                        <select name="league_id" id="league_id" class="w-full h-12 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3">
+                            <option value="">All Leagues</option>
+                            @foreach($leagues as $league)
+                                <option value="{{ $league->id }}" {{ request('league_id') == $league->id ? 'selected' : '' }}>
+                                    {{ $league->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -191,8 +204,26 @@
 
         <!-- Players Table -->
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
+            @php
+                $exportQuery = request()->query();
+            @endphp
+            <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <h2 class="text-lg font-semibold text-gray-900">Players List ({{ $players->total() }} total)</h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Export:</span>
+                    <a href="{{ route('admin.players.export', array_merge(['format' => 'json'], $exportQuery)) }}"
+                       class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        JSON
+                    </a>
+                    <a href="{{ route('admin.players.export', array_merge(['format' => 'csv'], $exportQuery)) }}"
+                       class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        CSV
+                    </a>
+                    <a href="{{ route('admin.players.export', array_merge(['format' => 'pdf'], $exportQuery)) }}"
+                       class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        PDF
+                    </a>
+                </div>
             </div>
             
             @if($players->isEmpty())
