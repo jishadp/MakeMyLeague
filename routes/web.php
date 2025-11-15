@@ -288,6 +288,7 @@ Route::middleware('auth')->group(function () {
     // Auction routes - organizers manage, team owners and auctioneers can bid
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('live.auction:view');
+        Route::get('control-room', [AuctionController::class, 'controlRoom'])->name('control-room')->middleware(['auth', 'league.organizer']);
         Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('live.auction:auctioneer');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('live.auction:organizer');
         Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('live.auction:organizer');

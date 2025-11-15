@@ -155,6 +155,9 @@
                             <a href="{{ route('admin.leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Management</span>
                             </a>
+                            <a href="{{ url('/leagues/kavumannam-premier-league/auction/control-room') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->is('leagues/*/auction/control-room') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
+                                <span>Live Auction Control</span>
+                            </a>
                         </div>
                     </div>
                     @endif

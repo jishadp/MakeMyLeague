@@ -91,6 +91,97 @@ class AuctionController extends Controller
     }
 
     /**
+     * Show the organizer/admin control room for managing live auctions.
+     */
+    public function controlRoom(League $league)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->canManageLeague($league->id)) {
+            abort(403, 'Only league organizers or admins can access the auction control room.');
+        }
+
+        $this->authorize('viewAuctionPanel', $league);
+
+        $league->load(['game', 'localBody.district']);
+        $league->loadCount('leagueTeams');
+
+        $currentPlayer = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'auctioning')
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->first();
+
+        $currentHighestBid = null;
+
+        if ($currentPlayer) {
+            $currentHighestBid = Auction::where('league_player_id', $currentPlayer->id)
+                ->with(['leagueTeam.team'])
+                ->latest('created_at')
+                ->first();
+        }
+
+        $recentBids = Auction::with(['leagueTeam.team', 'leaguePlayer.player'])
+            ->whereHas('leaguePlayer', function ($query) use ($league) {
+                $query->where('league_id', $league->id);
+            })
+            ->latest('created_at')
+            ->take(12)
+            ->get();
+
+        $availablePlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->with(['player.position'])
+            ->orderBy('updated_at', 'asc')
+            ->take(8)
+            ->get();
+
+        $teams = LeagueTeam::where('league_id', $league->id)
+            ->with(['team', 'teamAuctioneer.auctioneer'])
+            ->withCount([
+                'leaguePlayers as total_players_count',
+                'leaguePlayers as sold_players_count' => function ($query) {
+                    $query->where('status', 'sold');
+                }
+            ])
+            ->withSum([
+                'leaguePlayers as spent_amount' => function ($query) {
+                    $query->where('status', 'sold');
+                }
+            ], 'bid_price')
+            ->orderBy('team_id')
+            ->get();
+
+        $auctionStats = [
+            'total_players' => $league->leaguePlayers()->count(),
+            'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+            'available_players' => $league->leaguePlayers()->where('status', 'available')->count(),
+            'unsold_players' => $league->leaguePlayers()->where('status', 'unsold')->count(),
+            'wallet_spent' => $league->leaguePlayers()->where('status', 'sold')->sum('bid_price'),
+            'wallet_remaining' => $teams->sum(fn ($team) => $team->wallet_balance ?? 0),
+        ];
+
+        $progressPercentage = $auctionStats['total_players'] > 0
+            ? round(($auctionStats['sold_players'] / $auctionStats['total_players']) * 100)
+            : 0;
+
+        $bidIncrements = $league->bid_increment_type === 'predefined' && !empty($league->predefined_increments)
+            ? $league->predefined_increments
+            : [500, 1000, 2000, 5000];
+
+        return view('auction.back-controller', [
+            'league' => $league,
+            'currentPlayer' => $currentPlayer,
+            'currentHighestBid' => $currentHighestBid,
+            'availablePlayers' => $availablePlayers,
+            'teams' => $teams,
+            'recentBids' => $recentBids,
+            'auctionStats' => $auctionStats,
+            'progressPercentage' => $progressPercentage,
+            'bidIncrements' => $bidIncrements,
+        ]);
+    }
+
+    /**
      * Start the auction.
      */
     public function start(Request $request)
@@ -215,29 +306,44 @@ class AuctionController extends Controller
         }
         
         $this->authorize('placeBid', $leaguePlayer->league);
-        
-        \App\Models\AuctionLog::logAction(
-            $leaguePlayer->league_id,
-            auth()->id(),
-            'bid_placed',
-            'LeaguePlayer',
-            $leaguePlayer->id,
-            ['amount' => $request->base_price + $request->increment]
-        );
-        $newBid = $request->base_price + $request->increment;
+
         $user = auth()->user();
+        $newBid = $request->base_price + $request->increment;
 
-        // Use the new access control service to validate bid access
-        $accessValidation = $this->auctionAccessService->validateBidAccess($user, $leaguePlayer);
-        
-        if (!$accessValidation['valid']) {
-            return response()->json([
-                'success' => false,
-                'message' => $accessValidation['message']
-            ], 403);
+        $bidTeam = null;
+
+        if ($request->filled('league_team_id')) {
+            if (!$user->canManageLeague($leaguePlayer->league_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only organizers or admins can place bids on behalf of other teams.'
+                ], 403);
+            }
+
+            $selectedTeamId = (int) $request->league_team_id;
+            $bidTeam = LeagueTeam::where('league_id', $leaguePlayer->league_id)
+                ->where('id', $selectedTeamId)
+                ->first();
+
+            if (!$bidTeam) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected team is not part of this league.'
+                ], 422);
+            }
+        } else {
+            // Use the new access control service to validate bid access
+            $accessValidation = $this->auctionAccessService->validateBidAccess($user, $leaguePlayer);
+            
+            if (!$accessValidation['valid']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $accessValidation['message']
+                ], 403);
+            }
+
+            $bidTeam = $accessValidation['league_team'];
         }
-
-        $bidTeam = $accessValidation['league_team'];
 
         // Check if bid team exists
         if (!$bidTeam) {
@@ -246,6 +352,15 @@ class AuctionController extends Controller
                 'message' => 'You need to own a team in this league to place bids. Please register a team first.'
             ], 400);
         }
+
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'bid_placed',
+            'LeaguePlayer',
+            $leaguePlayer->id,
+            ['amount' => $newBid]
+        );
 
         // Check if team has sufficient balance
         if ($bidTeam->wallet_balance < $newBid) {
