@@ -12,14 +12,6 @@
                 </svg>
                 Back to posters
             </a>
-            <div class="flex flex-col gap-2 sm:items-end">
-                <button onclick="downloadPoster(event)" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/>
-                    </svg>
-                    Download PNG
-                </button>
-            </div>
         </div>
 
         <div id="poster" class="relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-900 shadow-[0_25px_90px_rgba(15,23,42,0.75)]">
@@ -70,20 +62,25 @@
                     </div>
                 @endif
 
-                <div class="grid gap-3 sm:grid-cols-3">
-                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
-                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Squad Size</p>
-                        <p class="text-3xl font-black text-white">{{ $players->count() }}</p>
+                <div class="hidden sm:grid sm:grid-cols-3 sm:gap-2">
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-white text-center">
+                        <p class="text-[10px] uppercase tracking-[0.35em] text-slate-400 mb-2">Squad Size</p>
+                        <p class="text-3xl font-black">{{ $players->count() }}</p>
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
-                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">League</p>
-                        <p class="text-xl font-bold text-white">{{ $league->short_name ?? $league->name }}</p>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-white text-center">
+                        <p class="text-[10px] uppercase tracking-[0.35em] text-slate-400 mb-2">League</p>
+                        <p class="text-sm font-bold">{{ $league->short_name ?? $league->name }}</p>
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-center">
-                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Season</p>
-                        <p class="text-2xl font-black text-white">{{ $league->season ?? date('Y') }}</p>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-white text-center">
+                        <p class="text-[10px] uppercase tracking-[0.35em] text-slate-400 mb-2">Season</p>
+                        <p class="text-2xl font-black">{{ $league->season ?? date('Y') }}</p>
                     </div>
                 </div>
+
+                @php
+                    $retainedPlayers = $players->filter(fn($player) => $player->retention);
+                    $nonRetainedPlayers = $players->reject(fn($player) => $player->retention);
+                @endphp
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
@@ -99,8 +96,31 @@
                             Squad will be revealed soon.
                         </div>
                     @else
-                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach($players as $player)
+                        @if($retainedPlayers->isNotEmpty())
+                            <div class="rounded-2xl border border-amber-200/20 bg-amber-200/5 p-4">
+                                <p class="text-xs uppercase tracking-[0.35em] text-amber-200 mb-3">Retained Stars</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    @foreach($retainedPlayers as $player)
+                                        @php
+                                            $photoUrl = $player->user->photo
+                                                ? asset('storage/' . $player->user->photo)
+                                                : asset('images/defaultplayer.jpeg');
+                                        @endphp
+                                        <div class="group rounded-2xl border border-white/10 bg-white/5 p-3 text-white transition hover:-translate-y-1 hover:border-amber-300/70">
+                                            <div class="relative mb-2">
+                                                <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="w-full aspect-square rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
+                                                <span class="absolute top-2 left-2 rounded-full bg-amber-300/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-900">Retained</span>
+                                            </div>
+                                            <p class="text-sm font-semibold leading-tight text-center">{{ $player->user->name }}</p>
+                                            <p class="text-[10px] uppercase tracking-[0.3em] text-center text-amber-200 mt-1">{{ $player->user->position->name ?? 'Player' }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+                            @foreach($nonRetainedPlayers as $player)
                                 @php
                                     $photoUrl = $player->user->photo
                                         ? asset('storage/' . $player->user->photo)
@@ -108,7 +128,7 @@
                                 @endphp
                                 <div class="group rounded-2xl border border-white/10 bg-white/5 p-3 text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-1 hover:border-indigo-400/60">
                                     <div class="relative mb-3">
-                                        <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="h-32 w-full rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
+                                        <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="w-full aspect-square rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
                                         <div class="absolute inset-0 rounded-xl bg-gradient-to-t from-slate-950/80 via-transparent"></div>
                                         <div class="absolute bottom-2 left-1.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-white backdrop-blur">
                                             {{ $player->user->position->name ?? 'Player' }}
@@ -133,38 +153,4 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" referrerpolicy="no-referrer"></script>
-<script>
-function downloadPoster(event) {
-    const poster = document.getElementById('poster');
-    const button = event.currentTarget;
-    const originalLabel = button.innerHTML;
-    button.innerHTML = '<span class="animate-pulse">Rendering…</span>';
-    button.disabled = true;
-
-    const scale = Math.max(2, window.devicePixelRatio);
-
-    html2canvas(poster, {
-        backgroundColor: '#020617',
-        scale,
-        useCORS: true,
-        logging: false
-    }).then(function(canvas) {
-        canvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = '{{ Str::slug($leagueTeam->team->name) }}-poster.png';
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-            button.innerHTML = originalLabel;
-            button.disabled = false;
-        }, 'image/png');
-    }).catch(function() {
-        button.innerHTML = originalLabel;
-        button.disabled = false;
-        alert('Unable to generate poster image automatically. Please take a screenshot instead.');
-    });
-}
-</script>
 @endsection
