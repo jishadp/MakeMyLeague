@@ -21,7 +21,7 @@
             </div>
 
             <div class="relative z-10 space-y-8 p-6 sm:p-10">
-                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div class="hidden sm:flex sm:flex-col sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div class="space-y-3">
                         <p class="text-xs uppercase tracking-[0.4em] text-slate-300">{{ $league->name }}</p>
                         <h1 class="text-4xl font-black text-white sm:text-5xl">{{ $leagueTeam->team->name }}</h1>
@@ -45,6 +45,23 @@
                                     {{ strtoupper(substr($leagueTeam->team->name, 0, 2)) }}
                                 </div>
                             @endif
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sm:hidden space-y-4">
+                    <div class="flex items-center gap-3">
+                        @if($leagueTeam->team->logo)
+                            <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-16 w-16 rounded-2xl object-cover border border-white/20" loading="lazy" crossorigin="anonymous">
+                        @else
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-black text-white border border-white/20">
+                                {{ strtoupper(substr($leagueTeam->team->name, 0, 2)) }}
+                            </div>
+                        @endif
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-slate-300">{{ $league->name }}</p>
+                            <h1 class="text-2xl font-black text-white">{{ $leagueTeam->team->name }}</h1>
+                            <p class="text-xs text-white/70">{{ $leagueTeam->team->homeGround->name ?? 'Home Ground TBD' }}</p>
                         </div>
                     </div>
                 </div>
@@ -99,7 +116,7 @@
                         @if($retainedPlayers->isNotEmpty())
                             <div class="rounded-2xl border border-amber-200/20 bg-amber-200/5 p-4">
                                 <p class="text-xs uppercase tracking-[0.35em] text-amber-200 mb-3">Retained Stars</p>
-                                <div class="grid grid-cols-3 gap-3">
+                                <div class="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
                                     @foreach($retainedPlayers as $player)
                                         @php
                                             $photoUrl = $player->user->photo
@@ -111,8 +128,7 @@
                                                 <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="w-full aspect-square rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
                                                 <span class="absolute top-2 left-2 rounded-full bg-amber-300/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-900">Retained</span>
                                             </div>
-                                            <p class="text-sm font-semibold leading-tight text-center">{{ $player->user->name }}</p>
-                                            <p class="text-[10px] uppercase tracking-[0.3em] text-center text-amber-200 mt-1">{{ $player->user->position->name ?? 'Player' }}</p>
+                                            <p class="text-xs font-semibold leading-tight text-center sm:text-sm">{{ $player->user->name }}</p>
                                         </div>
                                     @endforeach
                                 </div>
@@ -129,12 +145,9 @@
                                 <div class="group rounded-2xl border border-white/10 bg-white/5 p-3 text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-1 hover:border-indigo-400/60">
                                     <div class="relative mb-3">
                                         <img src="{{ $photoUrl }}" alt="{{ $player->user->name }}" class="w-full aspect-square rounded-xl object-cover" loading="lazy" crossorigin="anonymous">
-                                        <div class="absolute inset-0 rounded-xl bg-gradient-to-t from-slate-950/80 via-transparent"></div>
-                                        <div class="absolute bottom-2 left-1.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-white backdrop-blur">
-                                            {{ $player->user->position->name ?? 'Player' }}
-                                        </div>
+                                        <div class="absolute inset-0 rounded-xl bg-gradient-to-t from-slate-950/60 via-transparent"></div>
                                     </div>
-                                    <p class="text-lg font-semibold leading-tight">{{ $player->user->name }}</p>
+                                    <p class="text-sm font-semibold leading-tight sm:text-lg">{{ $player->user->name }}</p>
                                     @if($player->retention)
                                         <p class="text-xs uppercase tracking-[0.35em] text-amber-300">Retained</p>
                                     @endif
