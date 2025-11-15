@@ -398,7 +398,19 @@ class TeamController extends Controller
             });
         }
 
-        return view('teams.league-players', compact('allLeagues', 'groupedPlayers'));
+        $requestedLeagueSlug = $request->query('league');
+        $activeLeague = null;
+
+        if ($requestedLeagueSlug) {
+            $activeLeague = $allLeagues->firstWhere('slug', $requestedLeagueSlug);
+        }
+
+        if (!$activeLeague) {
+            $activeLeague = $allLeagues->firstWhere('status', 'active')
+                ?? $allLeagues->sortBy('name')->first();
+        }
+
+        return view('teams.league-players', compact('allLeagues', 'groupedPlayers', 'activeLeague'));
     }
 
     /**

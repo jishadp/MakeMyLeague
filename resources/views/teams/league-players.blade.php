@@ -16,19 +16,20 @@
         </div>
 
         @php
-            $activeLeague = $allLeagues->firstWhere('status', 'active') ?? $allLeagues->sortBy('name')->first();
+            $activeLeague = $activeLeague ?? $allLeagues->firstWhere('status', 'active') ?? $allLeagues->sortBy('name')->first();
+            $activeLeagueId = optional($activeLeague)->id;
         @endphp
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
             @foreach($allLeagues->sortBy('name') as $tabLeague)
                 <button onclick="showLeague({{ $tabLeague->id }})" 
                         id="tab-{{ $tabLeague->id }}"
-                        class="futuristic-card relative p-1 rounded-2xl overflow-visible transition-all duration-500 {{ $tabLeague->id === $activeLeague->id ? 'active' : '' }}">
+                        class="futuristic-card relative p-1 rounded-2xl overflow-visible transition-all duration-500 {{ $tabLeague->id === $activeLeagueId ? 'active' : '' }}">
                     <div class="card-content bg-gray-900 rounded-xl p-4 h-full flex flex-col justify-center items-center relative z-10 transition-colors duration-1000">
                         <div class="text-center">
-                            <div class="font-extrabold text-sm leading-tight {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-white' }} transition-colors duration-1000 line-clamp-2">{{ $tabLeague->name }}</div>
-                            <div class="text-xs mt-2 opacity-70 font-semibold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-200' : 'text-gray-400' }}">{{ $tabLeague->leaguePlayers->count() }} players</div>
+                            <div class="font-extrabold text-sm leading-tight {{ $tabLeague->id === $activeLeagueId ? 'text-cyan-300' : 'text-white' }} transition-colors duration-1000 line-clamp-2">{{ $tabLeague->name }}</div>
+                            <div class="text-xs mt-2 opacity-70 font-semibold {{ $tabLeague->id === $activeLeagueId ? 'text-cyan-200' : 'text-gray-400' }}">{{ $tabLeague->leaguePlayers->count() }} players</div>
                             @if($tabLeague->start_date->isFuture())
-                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-emerald-400' }}" 
+                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeagueId ? 'text-cyan-300' : 'text-emerald-400' }}" 
                                      data-countdown="{{ $tabLeague->start_date->toIso8601String() }}"
                                      id="countdown-{{ $tabLeague->id }}">
                                 </div>
@@ -102,7 +103,7 @@
 
         <div class="flex-1">
         @forelse($allLeagues->sortBy('name') as $league)
-            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $league->id !== $activeLeague->id ? 'hidden' : '' }}">
+            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $league->id !== $activeLeagueId ? 'hidden' : '' }}">
                 <div class="p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div class="flex items-center">
@@ -123,7 +124,7 @@
                                 </svg>
                                 Share
                             </button>
-                            <a href="{{ route('leagues.public-players', $league) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                            <a href="{{ route('teams.league-players', ['league' => $league->slug]) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
                                 View All →
                             </a>
                         </div>
@@ -197,7 +198,7 @@
                             $shareLines[] = '';
                         }
                         $shareLines[] = "────────────────────────────────────────";
-                        $shareLines[] = route('leagues.public-players', $league);
+                        $shareLines[] = route('teams.league-players', ['league' => $league->slug]);
                         $shareText = trim(implode("\n", array_filter($shareLines, fn ($line) => $line !== null)));
                     @endphp
                     <textarea id="share-text-{{ $league->id }}" class="hidden">{{ $shareText }}</textarea>

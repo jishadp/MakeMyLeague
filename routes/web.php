@@ -361,4 +361,6 @@ Route::get('api/leagues/{league}/positions', function(\App\Models\League $league
 Route::get('{league}/teams', [LeagueController::class, 'publicTeams'])->name('leagues.public-teams');
 
 // Public league players page (at end to avoid catching admin routes)
-Route::get('{league}/players', [LeagueController::class, 'publicPlayers'])->name('leagues.public-players');
+Route::get('{league}/players', function (\App\Models\League $league) {
+    return redirect()->route('teams.league-players', ['league' => $league->slug]);
+})->name('leagues.public-players');

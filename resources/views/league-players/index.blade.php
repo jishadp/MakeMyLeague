@@ -89,7 +89,7 @@
                 $shareLines[] = '';
             }
             $shareLines[] = "────────────────────────────────────────";
-            $shareLines[] = route('leagues.public-players', $league);
+            $shareLines[] = route('teams.league-players', ['league' => $league->slug]);
             $shareText = trim(implode("\n", array_filter($shareLines, fn ($line) => $line !== null)));
         @endphp
         <textarea id="share-text-{{ $league->id }}" class="hidden">{{ $shareText }}</textarea>
