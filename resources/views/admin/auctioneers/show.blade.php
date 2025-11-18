@@ -83,12 +83,12 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onclick="openAssignModal({{ $leagueTeam->id }}, '{{ $leagueTeam->team->name }}')" 
+                                    <button onclick='openAssignModal(@json($leagueTeam->slug), @json($leagueTeam->team->name))' 
                                             class="text-blue-600 hover:text-blue-900 mr-3">
                                         {{ $leagueTeam->teamAuctioneer ? 'Change' : 'Assign' }}
                                     </button>
                                     @if($leagueTeam->teamAuctioneer)
-                                        <button onclick="removeAuctioneer({{ $leagueTeam->id }})" 
+                                        <button onclick='removeAuctioneer(@json($leagueTeam->slug))' 
                                                 class="text-red-600 hover:text-red-900">
                                             Remove
                                         </button>
@@ -127,10 +127,10 @@
 </div>
 
 <script>
-let currentLeagueTeamId = null;
+let currentLeagueTeamSlug = null;
 
-function openAssignModal(leagueTeamId, teamName) {
-    currentLeagueTeamId = leagueTeamId;
+function openAssignModal(leagueTeamSlug, teamName) {
+    currentLeagueTeamSlug = leagueTeamSlug;
     document.getElementById('modalTitle').textContent = `Assign Auctioneer for ${teamName}`;
     document.getElementById('assignModal').classList.remove('hidden');
 }
@@ -138,6 +138,7 @@ function openAssignModal(leagueTeamId, teamName) {
 function closeAssignModal() {
     document.getElementById('assignModal').classList.add('hidden');
     document.getElementById('auctioneerSelect').value = '';
+    currentLeagueTeamSlug = null;
 }
 
 function confirmAssign() {
@@ -147,7 +148,7 @@ function confirmAssign() {
         return;
     }
 
-    fetch(`/admin/auctioneers/leagues/{{ $league->id }}/teams/${currentLeagueTeamId}/assign`, {
+    fetch(`/admin/auctioneers/leagues/{{ $league->slug }}/teams/${currentLeagueTeamSlug}/assign`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -169,12 +170,12 @@ function confirmAssign() {
     });
 }
 
-function removeAuctioneer(leagueTeamId) {
+function removeAuctioneer(leagueTeamSlug) {
     if (!confirm('Are you sure you want to remove this auctioneer?')) {
         return;
     }
 
-    fetch(`/admin/auctioneers/leagues/{{ $league->id }}/teams/${leagueTeamId}/remove`, {
+    fetch(`/admin/auctioneers/leagues/{{ $league->slug }}/teams/${leagueTeamSlug}/remove`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -196,4 +197,3 @@ function removeAuctioneer(leagueTeamId) {
 }
 </script>
 @endsection
-
