@@ -89,13 +89,24 @@
                             <span class="text-red-600 font-semibold">LIVE</span>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        <div class="text-left sm:text-right">
                             <p class="text-sm text-gray-500">Last Updated</p>
                             <p class="text-sm font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
+                            <p class="text-xs text-gray-400" id="autoRefreshNote">Auto refreshes every 5s</p>
                         </div>
+                        <button
+                            type="button"
+                            id="refreshButton"
+                            aria-label="Refresh auction data"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-full sm:w-auto">
+                            <svg id="refreshIcon" class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
+                            </svg>
+                            <span class="text-sm hidden sm:inline">Refresh</span>
+                        </button>
                         <a href="{{ route('auctions.index') }}" 
-                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-center w-full sm:w-auto">
                             Back to Auctions
                         </a>
                     </div>
@@ -339,14 +350,53 @@ document.addEventListener('DOMContentLoaded', function() {
     var leagueChannel = pusher.subscribe(`auctions.league.${leagueId}`);
     console.log(`Subscribed to league channel: auctions.league.${leagueId}`);
     
+    const refreshButton = document.getElementById('refreshButton');
+    const refreshIcon = document.getElementById('refreshIcon');
+    const autoRefreshRateMs = 5000;
+    let refreshInFlight = false;
+
+    function performSoftRefresh(source = 'auto') {
+        if (refreshInFlight && source === 'auto') {
+            return;
+        }
+
+        refreshInFlight = true;
+
+        if (refreshButton && source === 'manual') {
+            refreshButton.classList.add('opacity-70', 'cursor-wait');
+            refreshButton.setAttribute('aria-disabled', 'true');
+        }
+        if (refreshIcon && source === 'manual') {
+            refreshIcon.classList.add('animate-spin');
+        }
+
+        Promise.allSettled([
+            Promise.resolve(updateLastUpdated()),
+            fetchRecentBids(),
+            refreshTeamBalances()
+        ]).finally(() => {
+            refreshInFlight = false;
+            if (refreshButton) {
+                refreshButton.classList.remove('opacity-70', 'cursor-wait');
+                refreshButton.removeAttribute('aria-disabled');
+            }
+            if (refreshIcon) {
+                refreshIcon.classList.remove('animate-spin');
+            }
+        });
+    }
+
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => performSoftRefresh('manual'));
+    }
+    
     // Use a more efficient approach to update content instead of full page refresh
-    console.log('🔄 Live view: Auto-updating specific content (every 8 seconds)');
-    let autoRefreshInterval = setInterval(function() {
-        console.log('🔄 Updating specific components...');
-        updateLastUpdated();
-        fetchRecentBids();
-        refreshTeamBalances();
-    }, 8000);
+    console.log('🔄 Live view: Auto-updating specific content every 5 seconds');
+    setInterval(function() {
+        if (!document.hidden) {
+            performSoftRefresh();
+        }
+    }, autoRefreshRateMs);
     
     // Listen to sold/unsold events to update data
     channel.bind('player-sold', function(data) {
@@ -574,7 +624,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateLastUpdated() {
         const lastUpdated = document.getElementById('lastUpdated');
-        lastUpdated.textContent = new Date().toLocaleTimeString();
+        if (lastUpdated) {
+            lastUpdated.textContent = new Date().toLocaleTimeString();
+        }
     }
     
     function refreshTeamBalances() {
@@ -582,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const leagueSlug = document.getElementById('league-slug').value;
         
         // Make an AJAX call to get updated balances
-        fetch(`/api/auctions/league/${leagueSlug}/team-balances`)
+        return fetch(`/api/auctions/league/${leagueSlug}/team-balances`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.teams) {
@@ -631,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const leagueSlug = document.getElementById('league-slug').value;
         
         // Fetch recent bids via AJAX instead of refreshing the entire page
-        fetch(`/api/auctions/league/${leagueSlug}/recent-bids`)
+        return fetch(`/api/auctions/league/${leagueSlug}/recent-bids`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.bids && data.bids.length > 0) {
