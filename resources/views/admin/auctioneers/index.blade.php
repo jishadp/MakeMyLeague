@@ -31,7 +31,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Total Leagues</p>
-                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $stats['total_leagues'] }}</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $stats['total_leagues'] ?? 0 }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -45,7 +45,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Total Teams</p>
-                        <p class="text-3xl font-bold text-green-600 mt-2">{{ $stats['total_teams'] }}</p>
+                        <p class="text-3xl font-bold text-green-600 mt-2">{{ $stats['total_teams'] ?? 0 }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -59,7 +59,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Active Assignments</p>
-                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ $stats['total_assignments'] }}</p>
+                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ $stats['total_assignments'] ?? 0 }}</p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
@@ -74,7 +74,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Active Auctions</p>
-                        <p class="text-3xl font-bold text-orange-600 mt-2">{{ $stats['leagues_with_auctions'] }}</p>
+                        <p class="text-3xl font-bold text-orange-600 mt-2">{{ $stats['leagues_with_auctions'] ?? 0 }}</p>
                     </div>
                     <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                         <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
@@ -188,4 +188,3 @@
     </div>
 </div>
 @endsection
-
