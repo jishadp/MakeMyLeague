@@ -156,9 +156,15 @@ class AuctionController extends Controller
             ->pluck('base_price')
             ->map(fn ($price) => max((float) $price, 0))
             ->values();
-        $maxTeamPlayers = $league->max_team_players ?? 0;
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $maxTeamPlayers, $league) {
-            $playersNeeded = max($maxTeamPlayers - ($team->sold_players_count ?? 0), 0);
+        $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->groupBy('league_team_id')
+            ->select('league_team_id', DB::raw('count(*) as count'))
+            ->pluck('count', 'league_team_id');
+        $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts) {
+            $retainedCount = $retainedCounts[$team->id] ?? 0;
+            $playersNeeded = max($auctionSlotsPerTeam - (($team->sold_players_count ?? 0) + $retainedCount), 0);
             $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
             $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
             $availableWallet = max($baseWallet - ($team->spent_amount ?? 0), 0);
@@ -167,6 +173,7 @@ class AuctionController extends Controller
             $team->reserve_amount = $reserveAmount;
             $team->max_bid_cap = $maxBidCap;
             $team->display_wallet = $availableWallet;
+            $team->retained_players_count = $retainedCount;
             return $team;
         });
         $availableBasePrices = $league->leaguePlayers()
