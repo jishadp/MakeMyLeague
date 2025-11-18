@@ -57,16 +57,44 @@
                             @endif
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <a href="{{ route('auction.index', $league) }}" class="inline-flex items-center px-5 py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 transition">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"></path>
-                            </svg>
-                            Open Auction Page
-                        </a>
-                        <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center px-5 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-white">
-                            League Overview
-                        </a>
+                    <div class="flex flex-col lg:items-end gap-4 w-full lg:w-auto">
+                        @if(isset($switchableLeagues) && $switchableLeagues->count() > 0)
+                            <div class="w-full sm:w-80">
+                                <label for="leagueSwitchSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                                    Switch League
+                                </label>
+                                <div class="relative">
+                                    <select
+                                        id="leagueSwitchSelect"
+                                        class="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-2.5 pl-4 pr-10 text-sm font-semibold text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        onchange="if (this.value) window.location.href = this.value;"
+                                    >
+                                        @foreach($switchableLeagues as $switchLeague)
+                                            <option
+                                                value="{{ route('auction.control-room', $switchLeague) }}"
+                                                @selected($switchLeague->id === $league->id)
+                                            >
+                                                {{ $switchLeague->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <a href="{{ route('auction.index', $league) }}" class="inline-flex items-center px-5 py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"></path>
+                                </svg>
+                                Open Auction Page
+                            </a>
+                            <a href="{{ route('leagues.show', $league) }}" class="inline-flex items-center px-5 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-white">
+                                League Overview
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

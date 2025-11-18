@@ -168,6 +168,10 @@ class AuctionController extends Controller
             ? $league->predefined_increments
             : [500, 1000, 2000, 5000];
 
+        $switchableLeagues = $user->isAdmin()
+            ? League::orderBy('name')->get(['id', 'name', 'slug'])
+            : $user->approvedOrganizedLeagues()->orderBy('name')->get();
+
         return view('auction.back-controller', [
             'league' => $league,
             'currentPlayer' => $currentPlayer,
@@ -178,6 +182,7 @@ class AuctionController extends Controller
             'auctionStats' => $auctionStats,
             'progressPercentage' => $progressPercentage,
             'bidIncrements' => $bidIncrements,
+            'switchableLeagues' => $switchableLeagues,
         ]);
     }
 
