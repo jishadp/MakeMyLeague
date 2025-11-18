@@ -310,6 +310,9 @@ class AuctionController extends Controller
             return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
         }
         
+        $leaguePlayer->loadMissing('league');
+        $league = $leaguePlayer->league;
+        
         $this->authorize('placeBid', $leaguePlayer->league);
 
         $user = auth()->user();
@@ -366,6 +369,28 @@ class AuctionController extends Controller
             $leaguePlayer->id,
             ['amount' => $newBid]
         );
+        
+        $currentHighestBidRecord = Auction::where('league_player_id', $leaguePlayer->id)
+            ->latest('id')
+            ->first();
+        $refundableAmount = ($currentHighestBidRecord && $currentHighestBidRecord->league_team_id === $bidTeam->id)
+            ? $currentHighestBidRecord->amount
+            : 0;
+        $projectedBalance = ($bidTeam->wallet_balance + $refundableAmount) - $newBid;
+        $securedPlayers = $this->getSecuredRosterCount($bidTeam);
+        $rosterValidation = $this->validateRosterBudget(
+            $bidTeam,
+            $league,
+            $projectedBalance,
+            $securedPlayers + 1
+        );
+        
+        if (!$rosterValidation['ok']) {
+            return response()->json([
+                'success' => false,
+                'message' => $rosterValidation['message']
+            ], 422);
+        }
 
         // Check if team has sufficient balance
         if ($bidTeam->wallet_balance < $newBid) {
@@ -452,6 +477,8 @@ class AuctionController extends Controller
             return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
         }
         
+        $leaguePlayer->loadMissing('league');
+        
         $this->authorize('markSoldUnsold', $leaguePlayer->league);
         
         \App\Models\AuctionLog::logAction(
@@ -466,8 +493,53 @@ class AuctionController extends Controller
         $teamId = $request->team_id;
         $overrideAmount = $request->override_amount;
         
+        $team = LeagueTeam::find($teamId);
+        if (!$team || $team->league_id !== $leaguePlayer->league_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid team selection for this league.'
+            ], 422);
+        }
+        
+        $winningBidPreview = Auction::where('league_player_id', $leaguePlayerId)
+            ->where('league_team_id', $teamId)
+            ->latest('id')
+            ->first();
+        
+        if ($overrideAmount !== null && $overrideAmount !== '') {
+            $bidPrice = floatval($overrideAmount);
+        } elseif ($winningBidPreview) {
+            $bidPrice = $winningBidPreview->amount;
+        } else {
+            $bidPrice = 0;
+        }
+        
+        $currentRosterCount = $this->getSecuredRosterCount($team);
+        $projectedRosterCount = $currentRosterCount + 1;
+        if ($winningBidPreview) {
+            $balanceAdjustmentPreview = $winningBidPreview->amount - $bidPrice;
+            $projectedBalance = $team->wallet_balance + $balanceAdjustmentPreview;
+        } else {
+            $balanceAdjustmentPreview = -$bidPrice;
+            $projectedBalance = $team->wallet_balance - $bidPrice;
+        }
+        
+        $rosterValidation = $this->validateRosterBudget(
+            $team,
+            $leaguePlayer->league,
+            $projectedBalance,
+            $projectedRosterCount
+        );
+        
+        if (!$rosterValidation['ok']) {
+            return response()->json([
+                'success' => false,
+                'message' => $rosterValidation['message']
+            ], 422);
+        }
+
         // Use database transaction for atomic operations
-        DB::transaction(function () use ($leaguePlayerId, $teamId, $overrideAmount) {
+        DB::transaction(function () use ($leaguePlayerId, $teamId, $overrideAmount, $bidPrice) {
             // Mark the winning bid as 'won'
             $winningBid = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('league_team_id', $teamId)
@@ -490,25 +562,19 @@ class AuctionController extends Controller
                     ->increment('wallet_balance', $bid->amount);
                 $bid->update(['status' => 'lost']);
             }
-            
-            // Determine the bid price - use override amount if provided, otherwise use winning bid amount
-            $bidPrice = null;
-            if ($overrideAmount !== null && $overrideAmount !== '') {
-                $bidPrice = floatval($overrideAmount);
-            } elseif ($winningBid) {
-                $bidPrice = $winningBid->amount;
-            } else {
-                $bidPrice = 0;
-            }
-            
             // Adjust winning team's balance if override amount is different from bid
-            if ($winningBid && $overrideAmount !== null && $overrideAmount !== '') {
-                $balanceAdjustment = $winningBid->amount - $bidPrice;
-                if ($balanceAdjustment != 0) {
-                    // If override is less than bid, refund difference
-                    // If override is more than bid, deduct extra
-                    LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
+            if ($winningBid) {
+                if ($overrideAmount !== null && $overrideAmount !== '') {
+                    $balanceAdjustment = $winningBid->amount - $bidPrice;
+                    if ($balanceAdjustment != 0) {
+                        // If override is less than bid, refund difference
+                        // If override is more than bid, deduct extra
+                        LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
+                    }
                 }
+            } elseif ($bidPrice > 0) {
+                // No bid existed – deduct the manual sale amount directly
+                LeagueTeam::find($teamId)->decrement('wallet_balance', $bidPrice);
             }
             
             // Update the league player status to 'sold' and assign to team
@@ -684,5 +750,81 @@ class AuctionController extends Controller
             ] : null,
             'auction_stats' => $stats
         ]);
+    }
+
+    /**
+     * Determine the minimum roster size a team must plan for.
+     */
+    protected function getMinimumRosterSize(League $league): int
+    {
+        $perTeamTarget = (int) ($league->max_team_players ?? 0);
+        
+        if ($perTeamTarget > 0) {
+            return max(11, $perTeamTarget);
+        }
+        
+        return 11;
+    }
+
+    /**
+     * Count players already secured (sold or retained) by the team.
+     */
+    protected function getSecuredRosterCount(LeagueTeam $team): int
+    {
+        return $team->leaguePlayers()
+            ->where(function ($query) {
+                $query->whereIn('status', ['sold', 'retained'])
+                    ->orWhere('retention', true);
+            })
+            ->count();
+    }
+
+    /**
+     * Ensure a team keeps enough balance to finish its roster with available players.
+     */
+    protected function validateRosterBudget(LeagueTeam $team, League $league, float $projectedBalance, int $projectedRosterCount): array
+    {
+        $minimumRosterSize = $this->getMinimumRosterSize($league);
+        $remainingSlots = max($minimumRosterSize - $projectedRosterCount, 0);
+
+        if ($projectedBalance < 0) {
+            return [
+                'ok' => false,
+                'message' => 'Insufficient wallet balance for this action.'
+            ];
+        }
+
+        if ($remainingSlots === 0) {
+            return ['ok' => true];
+        }
+
+        $availablePrices = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->orderBy('base_price')
+            ->limit($remainingSlots)
+            ->pluck('base_price');
+
+        if ($availablePrices->count() < $remainingSlots) {
+            return [
+                'ok' => false,
+                'message' => 'Only ' . $availablePrices->count() . ' available players remain, but '
+                    . $remainingSlots . ' roster slots are still required to hit the minimum of '
+                    . $minimumRosterSize . '.'
+            ];
+        }
+
+        $minimumBudgetNeeded = $availablePrices->map(fn ($price) => (float) ($price ?? 0))->sum();
+
+        if ($projectedBalance < $minimumBudgetNeeded) {
+            return [
+                'ok' => false,
+                'message' => 'This action would leave ₹' . number_format($projectedBalance)
+                    . ', but at least ₹' . number_format($minimumBudgetNeeded)
+                    . ' is needed to sign the remaining ' . $remainingSlots
+                    . ' players at their base prices.'
+            ];
+        }
+
+        return ['ok' => true];
     }
 }

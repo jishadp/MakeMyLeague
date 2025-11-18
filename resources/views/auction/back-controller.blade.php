@@ -132,7 +132,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                                 <div class="flex items-center gap-4">
                                     <div class="w-20 h-20 rounded-3xl overflow-hidden border border-white shadow-lg">
-                                        <img src="{{ $currentPlayer->player?->photo ? asset($currentPlayer->player->photo) : asset('images/defaultplayer.jpeg') }}" alt="{{ $currentPlayer->player?->name }}" class="w-full h-full object-cover">
+                                        <img src="{{ $currentPlayer->player?->photo ? Storage::url($currentPlayer->player->photo) : asset('images/defaultplayer.jpeg') }}" alt="{{ $currentPlayer->player?->name }}" class="w-full h-full object-cover">
                                     </div>
                                     <div>
                                         <p class="text-sm text-slate-500">Role</p>
