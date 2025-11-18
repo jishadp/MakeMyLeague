@@ -359,6 +359,27 @@ class DashboardController
                 $query->where('status', 'sold'); // Only count sold players
             }])
             ->get();
+        $availableBasePrices = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->orderBy('base_price')
+            ->pluck('base_price')
+            ->map(fn ($price) => max((float) $price, 0))
+            ->values();
+        $maxTeamPlayers = $league->max_team_players ?? 0;
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $maxTeamPlayers, $league) {
+            $soldCount = $team->league_players_count ?? 0;
+            $playersNeeded = max($maxTeamPlayers - $soldCount, 0);
+            $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
+            $spentAmount = $team->leaguePlayers->sum('bid_price');
+            $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
+            $availableWallet = max($baseWallet - $spentAmount, 0);
+            $maxBidCap = max($availableWallet - $reserveAmount, 0);
+            $team->players_needed = $playersNeeded;
+            $team->reserve_amount = $reserveAmount;
+            $team->max_bid_cap = $maxBidCap;
+            $team->display_wallet = $availableWallet;
+            return $team;
+        });
 
         return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams'));
     }

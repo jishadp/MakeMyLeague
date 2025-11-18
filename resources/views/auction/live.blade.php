@@ -122,6 +122,12 @@
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Current Player</h2>
                     <div id="currentPlayerCard" class="text-center py-8">
                         @if(isset($currentPlayer) && $currentPlayer)
+                            @php
+                                $leadingBudget = null;
+                                if ($currentHighestBid) {
+                                    $leadingBudget = $teams->firstWhere('id', $currentHighestBid->league_team_id);
+                                }
+                            @endphp
                             <!-- Glassmorphism Card Style -->
                             <div class="card-container relative rounded-3xl overflow-hidden shadow-2xl">
                                 <!-- Animated Background Blobs -->
@@ -203,6 +209,24 @@
                                                 @endif
                                             </p>
                                         </div>
+                                        @if($leadingBudget)
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-sm text-gray-700">
+                                                <div class="rounded-xl bg-white/80 px-3 py-2">
+                                                    <p class="text-xs uppercase text-gray-500">Players Needed</p>
+                                                    <p class="font-semibold">{{ $leadingBudget->players_needed }}</p>
+                                                </div>
+                                                <div class="rounded-xl bg-white/80 px-3 py-2">
+                                                    <p class="text-xs uppercase text-gray-500">Reserve Funds</p>
+                                                    <p class="font-semibold">₹{{ number_format($leadingBudget->reserve_amount) }}</p>
+                                                </div>
+                                                <div class="rounded-xl bg-white/80 px-3 py-2">
+                                                    <p class="text-xs uppercase text-gray-500">Max Bid This Player</p>
+                                                    <p class="font-semibold text-emerald-600">₹{{ number_format($leadingBudget->max_bid_cap) }}</p>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <p class="text-xs text-gray-400 text-center">Bid to unlock team budget info for this player.</p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -254,9 +278,13 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-lg font-bold">₹{{ number_format($team->wallet_balance) }}</p>
-                                        <p class="text-xs text-blue-100">Balance</p>
+                                    <div class="text-right space-y-1">
+                                        <div>
+                                            <p class="text-lg font-bold">₹{{ number_format($team->display_wallet ?? $team->wallet_balance) }}</p>
+                                            <p class="text-xs text-blue-100">Balance</p>
+                                        </div>
+                                        <p class="text-[11px] text-blue-100">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
+                                        <p class="text-[11px] text-emerald-200">Max bid now ₹{{ number_format($team->max_bid_cap) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -391,10 +419,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Use a more efficient approach to update content instead of full page refresh
-    console.log('🔄 Live view: Auto-updating specific content every 5 seconds');
+    console.log('🔄 Live view: Auto-refreshing page every 5 seconds');
     setInterval(function() {
         if (!document.hidden) {
-            performSoftRefresh();
+            window.location.reload();
         }
     }, autoRefreshRateMs);
     
