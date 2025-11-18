@@ -22,6 +22,19 @@
 @section('content')
 @php
     $currentBidAmount = $currentHighestBid->amount ?? ($currentPlayer->base_price ?? 0);
+    $bidIncrementValues = collect($bidIncrements ?? [])
+        ->map(function ($increment) {
+            if (is_numeric($increment)) {
+                return (int) $increment;
+            }
+            if (is_array($increment) && isset($increment['value']) && is_numeric($increment['value'])) {
+                return (int) $increment['value'];
+            }
+            return null;
+        })
+        ->filter(fn($increment) => !is_null($increment))
+        ->values();
+    $firstBidIncrement = $bidIncrementValues->first() ?? 0;
 @endphp
 <div class="min-h-screen control-surface py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -172,7 +185,7 @@
                                 <label class="text-sm font-semibold text-slate-600">Custom Bid Amount</label>
                                 <div class="mt-2 flex items-center gap-3">
                                     <div class="flex-1">
-                                        <input id="controller-custom-amount" type="number" min="0" class="w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter amount" value="{{ $currentBidAmount > 0 ? $currentBidAmount + ($bidIncrements[0] ?? 0) : '' }}">
+                                        <input id="controller-custom-amount" type="number" min="0" class="w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter amount" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
                                     </div>
                                     <div class="text-right">
                                         <p class="text-xs text-slate-500">Target Bid</p>
@@ -183,8 +196,8 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-slate-600 mb-3">Quick increments</p>
-                            <div class="flex flex-wrap gap-3">
-                                @foreach($bidIncrements as $increment)
+                                <div class="flex flex-wrap gap-3">
+                                    @foreach($bidIncrementValues as $increment)
                                     <button type="button" class="px-4 py-2 rounded-2xl border border-slate-200 text-slate-700 hover:border-indigo-500 hover:text-indigo-600" data-ctrl-increment="{{ $increment }}">
                                         +₹{{ number_format($increment) }}
                                     </button>
