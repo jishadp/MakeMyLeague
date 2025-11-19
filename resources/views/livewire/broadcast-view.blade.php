@@ -276,3 +276,59 @@
     </div>
 </section>
 </div>
+
+@once
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+@endonce
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        const componentId = '{{ $this->id() }}';
+        const leagueId = {{ $leagueModel->id }};
+
+        window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
+        if (window.__broadcastPusherSetup[componentId]) {
+            return;
+        }
+        window.__broadcastPusherSetup[componentId] = true;
+
+        const ensureComponent = (callback) => {
+            const component = window.Livewire.find(componentId);
+            if (component) {
+                callback(component);
+                return;
+            }
+            setTimeout(() => ensureComponent(callback), 150);
+        };
+
+        ensureComponent(() => {
+            if (!window.Pusher) {
+                console.warn('Pusher not found');
+                return;
+            }
+
+            const pusher = new Pusher('464d2f6144ab8dafa4df', {
+                cluster: 'ap2',
+                forceTLS: true,
+            });
+
+            const channels = [
+                pusher.subscribe('auctions'),
+                pusher.subscribe(`auctions.league.${leagueId}`),
+            ];
+
+            const refreshComponent = () => {
+                const component = window.Livewire.find(componentId);
+                if (component) {
+                    component.call('refreshData');
+                }
+            };
+
+            ['player-sold', 'player-unsold', 'new-player-started', 'new-player-bid-call'].forEach(eventName => {
+                channels.forEach(channel => {
+                    channel.bind(eventName, refreshComponent);
+                });
+            });
+        });
+    });
+</script>
