@@ -37,12 +37,14 @@ class WelcomeController extends Controller
             'matches' => Fixture::count(),
         ];
 
-        $liveAuctionLeague = League::withCount('teams')
+        $liveAuctionLeague = League::with(['game'])
+            ->withCount('teams')
             ->where('auction_active', true)
             ->orderByDesc('auction_started_at')
             ->first();
 
-        $upcomingLeague = League::withCount('teams')
+        $upcomingLeague = League::with(['game'])
+            ->withCount('teams')
             ->whereDate('start_date', '>=', now())
             ->orderBy('start_date')
             ->first();

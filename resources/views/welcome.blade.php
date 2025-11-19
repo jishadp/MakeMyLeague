@@ -143,6 +143,8 @@
 
     @include('web.hero')
 
+    @include('web.auctions')
+
     @include('web.features')
     
     @include('web.grounds')
