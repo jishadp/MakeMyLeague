@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController
 {
@@ -393,6 +394,17 @@ class DashboardController
             return $team;
         });
 
-        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams'));
+        $viewerKey = "live_viewers:{$league->id}";
+        $sessionId = session()->getId();
+        $viewerSessions = Cache::get($viewerKey, []);
+        $viewerSessions[$sessionId] = now()->timestamp;
+        $threshold = now()->subMinutes(5)->timestamp;
+        $viewerSessions = array_filter($viewerSessions, function ($timestamp) use ($threshold) {
+            return $timestamp >= $threshold;
+        });
+        Cache::put($viewerKey, $viewerSessions, now()->addMinutes(10));
+        $liveViewers = count($viewerSessions);
+
+        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers'));
     }
 }

@@ -18,15 +18,21 @@
                 <h1 class="text-4xl sm:text-5xl xl:text-6xl font-extrabold leading-tight mb-4"></h1>
 
                 <div class="flex flex-wrap gap-4 mb-6">
-                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold text-lg shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/40 transition-all duration-300">
-                        Join {{ config('app.name') }}
-                    </a>
-                    <a href="{{ route('login') }}" class="btn-border inline-flex items-center justify-center px-8 py-4 rounded-2xl font-semibold text-lg gap-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                        </svg>
-                        Sign In
-                    </a>
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-500 font-semibold text-lg shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300">
+                            Go to Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold text-lg shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/40 transition-all duration-300">
+                            Join {{ config('app.name') }}
+                        </a>
+                        <a href="{{ route('login') }}" class="btn-border inline-flex items-center justify-center px-8 py-4 rounded-2xl font-semibold text-lg gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
+                            Sign In
+                        </a>
+                    @endauth
                 </div>
 
                 <div class="hero-stats">

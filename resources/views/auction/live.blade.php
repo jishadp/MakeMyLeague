@@ -95,11 +95,21 @@
                             <p class="text-sm font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
                             <p class="text-xs text-gray-400" id="autoRefreshNote">Auto refreshes every 5s</p>
                         </div>
-                        <button
-                            type="button"
-                            id="refreshButton"
-                            aria-label="Refresh auction data"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-full sm:w-auto">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            @if(isset($liveViewers))
+                                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm">
+                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span>{{ $liveViewers }} watching</span>
+                                </div>
+                            @endif
+                            <button
+                                type="button"
+                                id="refreshButton"
+                                aria-label="Refresh auction data"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-full sm:w-auto">
                             <svg id="refreshIcon" class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
                             </svg>
