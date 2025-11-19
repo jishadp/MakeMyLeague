@@ -115,6 +115,27 @@ class LiveAuctionDataService
             ->take(8)
             ->get();
 
+        $soldPlayersBaseQuery = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->with([
+                'user',
+                'user.position',
+                'league',
+                'league.localBody.district',
+                'leagueTeam.team.localBody',
+            ]);
+
+        $recentSoldPlayers = (clone $soldPlayersBaseQuery)
+            ->latest('updated_at')
+            ->take(30)
+            ->get();
+
+        $topSoldPlayers = (clone $soldPlayersBaseQuery)
+            ->orderByDesc('bid_price')
+            ->orderByDesc('updated_at')
+            ->take(30)
+            ->get();
+
         return compact(
             'league',
             'currentBids',
@@ -123,7 +144,9 @@ class LiveAuctionDataService
             'teams',
             'liveViewers',
             'lastSoldPlayer',
-            'recentBids'
+            'recentBids',
+            'recentSoldPlayers',
+            'topSoldPlayers'
         );
     }
 }

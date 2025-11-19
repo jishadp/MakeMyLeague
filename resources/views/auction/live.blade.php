@@ -75,13 +75,30 @@
     .budget-metrics::-webkit-scrollbar {
         display: none;
     }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
 @endsection
 
 @section('content')
 <input type="hidden" id="league-id" value="{{ $league->id }}">
 <input type="hidden" id="league-slug" value="{{ $league->slug }}">
-<div class="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+<button
+    type="button"
+    id="focusCurrentPlayerButton"
+    aria-label="Jump to current player"
+    class="fixed z-40 bottom-24 right-4 sm:bottom-6 sm:right-6 inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600/60 text-white shadow-lg shadow-indigo-400/40 backdrop-blur focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white hover:bg-indigo-500/70 transition-transform duration-300 motion-safe:animate-bounce">
+    <span class="sr-only">Current player</span>
+    <i class="fa-solid fa-stamp text-xl" aria-hidden="true"></i>
+</button>
+<div class="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12 pb-32 lg:pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 lg:space-y-8">
         <!-- Header -->
         <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100">
@@ -446,6 +463,149 @@
             </div>
         </div>
 
+        @php
+            $liveSpotlightRecent = ($recentSoldPlayers ?? collect());
+            $liveSpotlightTop = ($topSoldPlayers ?? collect());
+            $liveSpotlightRecentChunks = $liveSpotlightRecent->chunk(10);
+            $liveSpotlightTopChunks = $liveSpotlightTop->chunk(10);
+            $hasLiveSpotlight = $liveSpotlightRecent->isNotEmpty() || $liveSpotlightTop->isNotEmpty();
+        @endphp
+        @if($hasLiveSpotlight)
+        <div id="livePlayerSpotlight" class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Player Spotlight</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Sold Players</h2>
+                    <p class="text-sm text-gray-500">Swipe through the latest signings and top buys.</p>
+                </div>
+                <div class="inline-flex rounded-full border border-gray-200 overflow-hidden w-full sm:w-auto">
+                    <button type="button"
+                        class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-white bg-blue-600 shadow-md focus:outline-none flex-1 sm:flex-none"
+                        data-live-spotlight-tab="recent">
+                        Recent
+                    </button>
+                    <button type="button"
+                        class="spotlight-tab-btn px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-600 bg-white focus:outline-none flex-1 sm:flex-none"
+                        data-live-spotlight-tab="top">
+                        Top
+                    </button>
+                </div>
+            </div>
+            <div class="relative">
+                <div data-live-spotlight-panel="recent">
+                    <div class="overflow-hidden">
+                        @forelse($liveSpotlightRecentChunks as $index => $chunk)
+                        <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-live-player-chunk data-panel="recent" data-index="{{ $index }}">
+                            <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                                @foreach($chunk as $player)
+                                @php
+                                    $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
+                                    $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                                    $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'Team TBA';
+                                    $teamShort = \Illuminate\Support\Str::limit($teamFullName, 18);
+                                    $posterUrl = ($player->league && $player->leagueTeam) ? route('posters.show', [$player->league, $player->leagueTeam]) : null;
+                                @endphp
+                                <article class="live-spotlight-card flex-none w-[44%] min-w-[130px] max-w-[150px] sm:w-48 sm:max-w-[200px] snap-start snap-center bg-white border border-gray-100 rounded-2xl shadow-sm p-3 text-center relative">
+                                    <div class="rounded-2xl bg-gray-50 p-2 flex justify-center">
+                                        @if($playerPhoto)
+                                            <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow" loading="lazy">
+                                        @else
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-bold text-xl sm:text-2xl flex items-center justify-center shadow">
+                                                {{ $playerInitials }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="mt-3 space-y-1">
+                                        <p class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ $player->user->name }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ $teamShort }}</p>
+                                        <p class="text-base sm:text-lg font-bold text-emerald-600">₹{{ number_format($player->bid_price, 0) }}</p>
+                                    </div>
+                                    @if($posterUrl)
+                                        <a href="{{ $posterUrl }}" class="mt-2 inline-flex items-center justify-center w-full text-[11px] font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl py-1 transition-colors" aria-label="View {{ $teamFullName }} poster">
+                                            Team Poster
+                                        </a>
+                                    @else
+                                        <span class="mt-2 inline-flex items-center justify-center w-full text-[11px] font-semibold text-gray-400 bg-gray-100 rounded-xl py-1">
+                                            Poster Unavailable
+                                        </span>
+                                    @endif
+                                </article>
+                                @endforeach
+                            </div>
+                        </div>
+                        @empty
+                        <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
+                            No recent sales yet.
+                        </div>
+                        @endforelse
+                    </div>
+                    @if($liveSpotlightRecentChunks->count() > 1)
+                    <div class="flex justify-center mt-4 gap-2" data-live-player-dots="recent">
+                        @foreach($liveSpotlightRecentChunks as $index => $_)
+                        <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-panel="recent" data-target-index="{{ $index }}" aria-label="Show recent batch {{ $index + 1 }}"></button>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+                <div class="hidden" data-live-spotlight-panel="top">
+                    <div class="overflow-hidden">
+                        @forelse($liveSpotlightTopChunks as $index => $chunk)
+                        <div class="player-spotlight-chunk {{ $index === 0 ? '' : 'hidden' }}" data-live-player-chunk data-panel="top" data-index="{{ $index }}">
+                            <div class="flex gap-3 overflow-x-auto px-3 py-4 snap-x snap-mandatory scrollbar-hide" role="list">
+                                @foreach($chunk as $player)
+                                @php
+                                    $playerPhoto = $player->user && $player->user->photo ? Storage::url($player->user->photo) : null;
+                                    $playerInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($player->user->name, 0, 2));
+                                    $teamFullName = optional(optional($player->leagueTeam)->team)->name ?? 'Team TBA';
+                                    $teamShort = \Illuminate\Support\Str::limit($teamFullName, 18);
+                                    $posterUrl = ($player->league && $player->leagueTeam) ? route('posters.show', [$player->league, $player->leagueTeam]) : null;
+                                @endphp
+                                <article class="live-spotlight-card flex-none w-[44%] min-w-[130px] max-w-[150px] sm:w-48 sm:max-w-[200px] snap-start snap-center bg-white border border-gray-100 rounded-2xl shadow-sm p-3 text-center relative">
+                                    <div class="rounded-2xl bg-gray-50 p-2 flex justify-center">
+                                        @if($playerPhoto)
+                                            <img src="{{ $playerPhoto }}" alt="{{ $player->user->name }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow" loading="lazy">
+                                        @else
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-bold text-xl sm:text-2xl flex items-center justify-center shadow">
+                                                {{ $playerInitials }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="mt-3 space-y-1">
+                                        <p class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ $player->user->name }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ $teamShort }}</p>
+                                        <p class="text-base sm:text-lg font-bold text-emerald-600">₹{{ number_format($player->bid_price, 0) }}</p>
+                                    </div>
+                                    @if($posterUrl)
+                                        <a href="{{ $posterUrl }}" class="mt-2 inline-flex items-center justify-center w-full text-[11px] font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl py-1 transition-colors" aria-label="View {{ $teamFullName }} poster">
+                                            Team Poster
+                                        </a>
+                                    @else
+                                        <span class="mt-2 inline-flex items-center justify-center w-full text-[11px] font-semibold text-gray-400 bg-gray-100 rounded-xl py-1">
+                                            Poster Unavailable
+                                        </span>
+                                    @endif
+                                </article>
+                                @endforeach
+                            </div>
+                        </div>
+                        @empty
+                        <div class="player-spotlight-empty text-center py-10 text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl">
+                            No top sales yet.
+                        </div>
+                        @endforelse
+                    </div>
+                    @if($liveSpotlightTopChunks->count() > 1)
+                    <div class="flex justify-center mt-4 gap-2" data-live-player-dots="top">
+                        @foreach($liveSpotlightTopChunks as $index => $_)
+                        <button type="button" class="player-spotlight-dot w-2.5 h-2.5 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-panel="top" data-target-index="{{ $index }}" aria-label="Show top batch {{ $index + 1 }}"></button>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Recent Bids -->
         <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -488,8 +648,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const autoRefreshRateMs = 5000;
     let refreshInFlight = false;
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
+    const focusToggleButton = document.getElementById('focusCurrentPlayerButton');
 
-    focusCurrentPlayerCard();
+    initLiveSpotlightShowcase();
 
     teamToggleButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -514,6 +675,125 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    if (focusToggleButton) {
+        focusToggleButton.addEventListener('click', () => {
+            focusToggleButton.classList.add('animate-pulse');
+            focusCurrentPlayerCard();
+            setTimeout(() => focusToggleButton.classList.remove('animate-pulse'), 600);
+        });
+    }
+
+    function initLiveSpotlightShowcase() {
+        const spotlightWrapper = document.getElementById('livePlayerSpotlight');
+        if (!spotlightWrapper) {
+            return;
+        }
+
+        const tabButtons = Array.from(spotlightWrapper.querySelectorAll('[data-live-spotlight-tab]'));
+        const panels = Array.from(spotlightWrapper.querySelectorAll('[data-live-spotlight-panel]'));
+        if (!tabButtons.length || !panels.length) {
+            return;
+        }
+
+        const dotContainers = Array.from(spotlightWrapper.querySelectorAll('[data-live-player-dots]'));
+        const chunkGroups = {};
+
+        const ensureGroup = (panelKey) => {
+            if (!chunkGroups[panelKey]) {
+                chunkGroups[panelKey] = {
+                    chunks: [],
+                    dots: [],
+                    active: 0,
+                };
+            }
+            return chunkGroups[panelKey];
+        };
+
+        spotlightWrapper.querySelectorAll('[data-live-player-chunk]').forEach((chunk) => {
+            const panelKey = chunk.dataset.panel || 'recent';
+            ensureGroup(panelKey).chunks.push(chunk);
+        });
+
+        dotContainers.forEach((container) => {
+            const panelKey = container.dataset.livePlayerDots;
+            ensureGroup(panelKey).dots = Array.from(container.querySelectorAll('.player-spotlight-dot'));
+        });
+
+        const updateButtonStyles = (button, isActive) => {
+            button.classList.toggle('bg-blue-600', isActive);
+            button.classList.toggle('text-white', isActive);
+            button.classList.toggle('shadow-md', isActive);
+            button.classList.toggle('text-gray-600', !isActive);
+            button.classList.toggle('bg-white', !isActive);
+        };
+
+        const setActiveChunk = (panelKey, nextIndex) => {
+            const group = chunkGroups[panelKey];
+            if (!group || !group.chunks.length) {
+                return;
+            }
+
+            const previousChunk = group.chunks[group.active];
+            if (previousChunk) {
+                previousChunk.classList.add('hidden');
+            }
+            if (group.dots[group.active]) {
+                group.dots[group.active].classList.remove('bg-blue-600');
+                group.dots[group.active].classList.add('bg-gray-300');
+            }
+
+            const safeIndex = ((nextIndex % group.chunks.length) + group.chunks.length) % group.chunks.length;
+            group.active = safeIndex;
+
+            const nextChunk = group.chunks[group.active];
+            if (nextChunk) {
+                nextChunk.classList.remove('hidden');
+            }
+            if (group.dots[group.active]) {
+                group.dots[group.active].classList.remove('bg-gray-300');
+                group.dots[group.active].classList.add('bg-blue-600');
+            }
+        };
+
+        const setActivePanel = (panelKey) => {
+            panels.forEach((panel) => {
+                panel.classList.toggle('hidden', panel.dataset.liveSpotlightPanel !== panelKey);
+            });
+            tabButtons.forEach((button) => {
+                updateButtonStyles(button, button.dataset.liveSpotlightTab === panelKey);
+            });
+            const group = chunkGroups[panelKey];
+            if (group && group.chunks.length) {
+                setActiveChunk(panelKey, group.active);
+            }
+        };
+
+        tabButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const panelKey = button.dataset.liveSpotlightTab;
+                if (panelKey) {
+                    setActivePanel(panelKey);
+                }
+            });
+        });
+
+        spotlightWrapper.querySelectorAll('.player-spotlight-dot').forEach((dot) => {
+            dot.addEventListener('click', () => {
+                const panelKey = dot.dataset.panel || 'recent';
+                const target = Number(dot.dataset.targetIndex);
+                if (!Number.isNaN(target)) {
+                    setActivePanel(panelKey);
+                    setActiveChunk(panelKey, target);
+                }
+            });
+        });
+
+        const defaultPanel = tabButtons.find(btn => btn.dataset.liveSpotlightTab === 'recent')
+            ? 'recent'
+            : (tabButtons[0]?.dataset.liveSpotlightTab || 'recent');
+        setActivePanel(defaultPanel);
+    }
 
     function performSoftRefresh(source = 'auto') {
         if (refreshInFlight && source === 'auto') {
@@ -752,8 +1032,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.textContent = data.league_player.base_price;
             }
         });
-
-        focusCurrentPlayerCard();
     }
     
     // Add image error handler function
