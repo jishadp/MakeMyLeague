@@ -176,23 +176,6 @@ class AuctionController extends Controller
             $team->retained_players_count = $retainedCount;
             return $team;
         });
-        $availableBasePrices = $league->leaguePlayers()
-            ->where('status', 'available')
-            ->orderBy('base_price')
-            ->pluck('base_price')
-            ->map(fn ($price) => max((float) $price, 0))
-            ->values();
-        $maxTeamPlayers = $league->max_team_players ?? 0;
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $maxTeamPlayers) {
-            $playersNeeded = max($maxTeamPlayers - ($team->sold_players_count ?? 0), 0);
-            $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
-            $maxBidCap = max(($team->wallet_balance ?? 0) - $reserveAmount, 0);
-            $team->players_needed = $playersNeeded;
-            $team->reserve_amount = $reserveAmount;
-            $team->max_bid_cap = $maxBidCap;
-            return $team;
-        });
-
         $auctionStats = [
             'total_players' => $league->leaguePlayers()->count(),
             'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
