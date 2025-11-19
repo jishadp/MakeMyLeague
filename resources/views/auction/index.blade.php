@@ -16,6 +16,7 @@
 <input type="hidden" id="is-organizer-or-admin" value="{{ auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin() ? 'true' : 'false' }}">
 <input type="hidden" id="user-role" value="{{ $userRole }}">
 <input type="hidden" id="user-team-id" value="{{ $userTeamId ?? '' }}">
+<input type="hidden" id="auction-start-url" value="{{ route('auction.start') }}">
 
 <div class="min-h-screen auction-bg py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -388,6 +389,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function createQueueItem(player) {
+        const queueLeagueId = document.getElementById('league-id')?.value || '';
+        const queueStartUrl = document.getElementById('auction-start-url')?.value || '';
         const queueItem = document.createElement('div');
         queueItem.className = 'glass-card p-4 hover:shadow-lg transition-all duration-300 player-card queue-item group';
         queueItem.setAttribute('data-player-id', player.id);
@@ -417,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             
             <div class="flex space-x-2">
-                <button onclick="startBidding('${player.user_id}', '${player.id}', '${player.player_name}', '${player.base_price}', '${player.position}')"
+                <button onclick="startBidding('${player.user_id}', '${player.id}', '${player.player_name}', '${player.base_price}', '${player.position}', '${queueLeagueId}', '${queueStartUrl}')"
                         class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center group-hover:shadow-md">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>

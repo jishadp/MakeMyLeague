@@ -2,14 +2,22 @@
 function startBidding(playerId, leaguePlayerId, playerName, basePrice, playerRole, leagueId, startAuctionUrl) {
     // Get CSRF token
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const resolvedLeagueId = leagueId || document.getElementById('league-id')?.value;
+    const resolvedStartUrl = startAuctionUrl || document.getElementById('auction-start-url')?.value;
+
+    if (!resolvedLeagueId || !resolvedStartUrl) {
+        console.error('Unable to resolve auction configuration', { leagueId: resolvedLeagueId, startAuctionUrl: resolvedStartUrl });
+        alert('Unable to start auction. Missing required configuration.');
+        return;
+    }
     
     // Make AJAX call to start auction
     $.ajax({
-        url: startAuctionUrl,
+        url: resolvedStartUrl,
         type: "post",
         headers: {'X-CSRF-TOKEN': token},
         data: {
-            league_id: leagueId,
+            league_id: resolvedLeagueId,
             player_id: playerId,
             league_player_id: leaguePlayerId
         },
