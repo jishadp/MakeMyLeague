@@ -24,7 +24,7 @@
                 <p class="text-slate-500 mt-2">Review the live player card before exporting it as a PDF.</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ $backRoute }}" class="inline-flex items-center px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:border-indigo-200 hover:text-indigo-600 transition-colors">
+                <a href="{{ $backRoute }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-slate-700 text-slate-100 font-semibold hover:bg-slate-900 transition-colors">
                     Back to documents
                 </a>
                 <a href="{{ $downloadRoute }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">

@@ -184,8 +184,10 @@ Route::middleware('auth')->group(function () {
         
         // Documents & printable assets
         Route::get('documents', [AdminDocumentController::class, 'index'])->name('documents.index');
+        Route::get('documents/leagues/preview', [AdminDocumentController::class, 'previewLeagueRoster'])->name('documents.leagues.preview');
         Route::get('documents/players/{player:slug}', [AdminDocumentController::class, 'showPlayerCard'])->name('documents.players.show');
         Route::get('documents/players/{player:slug}/download', [AdminDocumentController::class, 'downloadPlayerCard'])->name('documents.players.download');
+        Route::get('documents/leagues/download', [AdminDocumentController::class, 'downloadLeagueRoster'])->name('documents.leagues.download');
         
         // Analytics Routes
         Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class DocumentController extends Controller
@@ -31,6 +32,11 @@ class DocumentController extends Controller
             'leagues' => League::orderBy('name')->get(),
             'filters' => [
                 'search' => $request->input('search', ''),
+                'league_id' => $request->input('league_id'),
+            ],
+            'retentionFilters' => $this->retentionFilterOptions(),
+            'rosterFilters' => [
+                'retention_filter' => $request->input('retention_filter', 'all'),
                 'league_id' => $request->input('league_id'),
             ],
         ]);
@@ -63,11 +69,123 @@ class DocumentController extends Controller
 
         $pdf = Pdf::loadView('admin.documents.player-card-pdf', array_merge($viewData, [
             'generatedAt' => now(),
-        ]))->setPaper('a4', 'portrait');
+        ]))
+            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setPaper('a4', 'portrait');
 
         $filename = 'player-card-' . Str::slug($player->name) . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Preview the consolidated league roster prior to PDF export.
+     */
+    public function previewLeagueRoster(Request $request): View
+    {
+        $payload = $this->prepareLeagueRosterData($request);
+        $query = array_filter([
+            'search' => $payload['filters']['search'] ?? null,
+            'league_id' => $payload['filters']['league_id'] ?? null,
+            'retention_filter' => $payload['filters']['retention_filter'] ?? null,
+        ], fn ($value) => filled($value));
+
+        return view('admin.documents.league-roster-preview', array_merge($payload, [
+            'backUrl' => route('admin.documents.index', $query),
+            'downloadUrl' => route('admin.documents.leagues.download', $query),
+            'hideChrome' => true,
+        ]));
+    }
+
+    /**
+     * Download a consolidated PDF of league players.
+     */
+    public function downloadLeagueRoster(Request $request): Response
+    {
+        $payload = $this->prepareLeagueRosterData($request);
+
+        $pdf = Pdf::loadView('admin.documents.league-roster-pdf', $payload)
+            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setPaper('a4', 'landscape');
+
+        $league = $payload['league'] ?? null;
+        $seasonSegment = $league && $league->season ? '-s' . $league->season : '';
+        $filenameLeagueSegment = $league
+            ? Str::slug(($league->name ?? 'league') . $seasonSegment)
+            : 'all-leagues';
+        $filenameLeagueSegment = $filenameLeagueSegment ?: 'league';
+
+        $filename = 'league-roster-' . $filenameLeagueSegment . '-' . now()->format('Ymd-His') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+    
+    /**
+     * Prepare data set shared between the roster preview and PDF.
+     */
+    protected function prepareLeagueRosterData(Request $request): array
+    {
+        $validated = $request->validate([
+            'league_id' => ['nullable', 'integer', 'exists:leagues,id'],
+            'search' => ['nullable', 'string', 'max:255'],
+            'retention_filter' => ['nullable', Rule::in(array_keys($this->retentionFilterOptions()))],
+        ]);
+
+        $leagueId = $validated['league_id'] ?? null;
+        $search = isset($validated['search']) ? trim($validated['search']) : null;
+        $retentionFilter = $validated['retention_filter'] ?? 'all';
+
+        $playerQuery = LeaguePlayer::query()
+            ->with([
+                'player.position',
+                'player.localBody.district.state',
+                'league',
+                'leagueTeam.team',
+            ])
+            ->when($leagueId, fn (Builder $query) => $query->where('league_id', $leagueId))
+            ->when($search, function (Builder $query) use ($search) {
+                $query->whereHas('player', function (Builder $playerQuery) use ($search) {
+                    $playerQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('mobile', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+
+        switch ($retentionFilter) {
+            case 'only_retention':
+                $playerQuery->where('retention', true);
+                break;
+            case 'exclude_retention':
+                $playerQuery->where(function (Builder $query) {
+                    $query->where('retention', false)
+                        ->orWhereNull('retention');
+                });
+                break;
+        }
+
+        $leaguePlayers = $playerQuery
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+
+        $rosterEntries = $this->buildLeagueRosterEntries($leaguePlayers);
+        $league = $leagueId ? League::find($leagueId) : null;
+
+        return [
+            'players' => $rosterEntries,
+            'league' => $league,
+            'generatedAt' => now(),
+            'retentionFilterLabel' => $this->retentionFilterOptions()[$retentionFilter] ?? 'All league players',
+            'retentionFilterKey' => $retentionFilter,
+            'searchTerm' => $search,
+            'playerCount' => $rosterEntries->count(),
+            'leagueBadge' => $this->formatLeagueBadge($league),
+            'filters' => [
+                'league_id' => $leagueId,
+                'search' => $search,
+                'retention_filter' => $retentionFilter,
+            ],
+        ];
     }
 
     /**
@@ -125,6 +243,35 @@ class DocumentController extends Controller
     }
 
     /**
+     * Prepare roster entries for the consolidated PDF.
+     */
+    protected function buildLeagueRosterEntries(Collection $leaguePlayers): Collection
+    {
+        return $leaguePlayers
+            ->filter(fn (LeaguePlayer $leaguePlayer) => $leaguePlayer->player instanceof User)
+            ->values()
+            ->map(function (LeaguePlayer $leaguePlayer, int $index) {
+                $player = $leaguePlayer->player;
+                $photoSources = $this->resolvePhotoSources($player);
+
+                return [
+                    'serial' => $index + 1,
+                    'name' => $player->name,
+                    'role' => optional($player->position)->name ?? 'Not assigned',
+                    'place' => $this->formatPlayerLocation($player),
+                    'phone' => $this->formatPlayerPhone($player),
+                    'photo' => $photoSources['data_uri'] ?? $photoSources['web'],
+                    'team' => optional(optional($leaguePlayer->leagueTeam)->team)->name,
+                    'league_name' => optional($leaguePlayer->league)->name,
+                    'league_short' => $this->formatLeagueBadge($leaguePlayer->league) ?? optional($leaguePlayer->league)->name,
+                    'season' => optional($leaguePlayer->league)->season,
+                    'retained' => (bool) $leaguePlayer->retention,
+                    'joined_at' => $leaguePlayer->created_at,
+                ];
+            });
+    }
+
+    /**
      * Pick the most relevant league player entry for document context.
      */
     protected function resolveLeaguePlayerContext(User $player, ?int $leagueId = null): ?LeaguePlayer
@@ -164,6 +311,36 @@ class DocumentController extends Controller
     }
 
     /**
+     * Format the player's base location in a single line.
+     */
+    protected function formatPlayerLocation(User $player): string
+    {
+        $localBody = optional($player->localBody)->name;
+        $district = optional(optional($player->localBody)->district)->name;
+        $state = optional(optional(optional($player->localBody)->district)->state)->name;
+
+        $parts = collect([$localBody, $district, $state])->filter();
+
+        return $parts->isNotEmpty() ? $parts->implode(', ') : 'No location submitted';
+    }
+
+    /**
+     * Format the player's phone number for display.
+     */
+    protected function formatPlayerPhone(User $player): string
+    {
+        $number = trim((string) ($player->formatted_phone_number ?? ''));
+
+        if ($number === '') {
+            $parts = collect([$player->country_code, $player->mobile])
+                ->filter(fn ($value) => filled($value));
+            $number = trim($parts->implode(' '));
+        }
+
+        return $number !== '' ? $number : 'Not provided';
+    }
+
+    /**
      * Resolve both web and PDF friendly photo sources.
      */
     protected function resolvePhotoSources(User $player): array
@@ -195,6 +372,48 @@ class DocumentController extends Controller
             'web' => $webUrl,
             'data_uri' => $dataUri ?: $webUrl,
         ];
+    }
+
+    /**
+     * Provide readable options for retention filter states.
+     */
+    protected function retentionFilterOptions(): array
+    {
+        return [
+            'all' => 'All league players',
+            'only_retention' => 'Retention players only',
+            'exclude_retention' => 'Exclude retention players',
+        ];
+    }
+
+    /**
+     * Format league name into compact badge text.
+     */
+    protected function formatLeagueBadge(?League $league): ?string
+    {
+        if (!$league) {
+            return null;
+        }
+
+        $name = $league->name ?? '';
+        $season = $league->season ?? null;
+
+        if (stripos($name, 'Premier League') !== false) {
+            $initials = collect(explode(' ', $name))
+                ->filter()
+                ->map(fn ($word) => Str::upper(Str::substr($word, 0, 1)))
+                ->implode('');
+
+            $initials = $initials ?: Str::upper(Str::substr($name, 0, 3));
+
+            if ($season) {
+                return trim($initials . ' ' . $season);
+            }
+
+            return $initials;
+        }
+
+        return $name;
     }
 
     /**

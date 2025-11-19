@@ -14,7 +14,7 @@
                         Export polished PDFs for any registered player. Filter by league or search by name to curate a list of players that need shareable paperwork.
                     </p>
                 </div>
-                <a href="{{ route('admin.players.index') }}" class="inline-flex items-center px-5 py-3 rounded-xl border border-slate-200 text-slate-700 font-medium hover:border-indigo-200 hover:text-indigo-600 transition-colors">
+                <a href="{{ route('admin.players.index') }}" class="inline-flex items-center px-5 py-3 rounded-xl bg-slate-800 text-slate-100 font-medium hover:bg-slate-900 transition-colors">
                     <svg class="w-4 h-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.707 15.707a1 1 0 01-1.414 0L6 10.414l5.293-5.293a1 1 0 011.414 1.414L8.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
                     </svg>
@@ -47,11 +47,49 @@
                     <button type="submit" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
                         Apply
                     </button>
-                    <a href="{{ route('admin.documents.index') }}" class="inline-flex items-center justify-center px-4 py-3 rounded-xl border border-slate-200 text-slate-600 hover:border-indigo-200 hover:text-indigo-600 transition-colors">
+                    <a href="{{ route('admin.documents.index') }}" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-600 text-slate-100 font-semibold hover:bg-slate-700 transition-colors">
                         Reset
                     </a>
                 </div>
             </form>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-indigo-50 space-y-4">
+            <form method="GET" action="{{ route('admin.documents.leagues.download') }}" target="_blank" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                <input type="hidden" name="search" value="{{ $filters['search'] ?? '' }}">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Roster League</label>
+                    <select name="league_id" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
+                        <option value="">All leagues</option>
+                        @foreach($leagues as $league)
+                            <option value="{{ $league->id }}" @selected(($rosterFilters['league_id'] ?? $filters['league_id'] ?? null) == $league->id)>
+                                {{ $league->name }} · S{{ $league->season }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Retention Filter</label>
+                    <select name="retention_filter" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
+                        @foreach($retentionFilters as $value => $label)
+                            <option value="{{ $value }}" @selected(($rosterFilters['retention_filter'] ?? 'all') === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-slate-500 mt-2">Exports all players that match the active search &amp; league filters with serial numbers ordered by league join date.</p>
+                </div>
+                <div class="md:col-span-2 flex flex-col gap-3 md:flex-row md:justify-end">
+                    <button type="submit"
+                        formaction="{{ route('admin.documents.leagues.preview') }}"
+                        formtarget="_blank"
+                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-700 text-slate-100 font-semibold shadow hover:bg-slate-900 transition-colors">
+                        View Roster Preview
+                    </button>
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
+                        Download League Roster PDF
+                    </button>
+                </div>
+            </form>
+            <p class="text-xs text-slate-500">Retention filter applies to both preview and downloads.</p>
         </div>
 
         @php
@@ -148,7 +186,7 @@
                                 </div>
                             </div>
                             <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                                <a href="{{ $previewRoute }}" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold hover:border-indigo-200 hover:text-indigo-600 transition-colors">
+                                <a href="{{ $previewRoute }}" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-700 text-slate-100 font-semibold hover:bg-slate-900 transition-colors">
                                     Preview Printable
                                 </a>
                                 <a href="{{ $downloadRoute }}" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">

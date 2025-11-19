@@ -1,4 +1,9 @@
 <style>
+    .player-doc-wrapper,
+    .player-doc-wrapper * {
+        font-family: "DejaVu Sans";
+    }
+
     .player-doc-wrapper {
         background: #f5f7fb;
         padding: 32px 16px;
@@ -11,7 +16,6 @@
         border-radius: 28px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
-        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
         color: #0f172a;
         overflow: hidden;
     }
