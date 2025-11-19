@@ -82,7 +82,7 @@
         : ($lastSoldPlayer ? ($lastSoldTeamName ? 'Sold to ' . $lastSoldTeamName : 'Sold') : 'Waiting for player');
 @endphp
 
-<div wire:poll.7s="refreshData">
+<div wire:poll.1s="refreshData">
 <section class="broadcast-bg py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
