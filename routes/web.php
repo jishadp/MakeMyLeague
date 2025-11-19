@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\LocationController as AdminLocationController;
 use App\Http\Controllers\Admin\GroundController as AdminGroundController;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\AdminUserController as AdminAdminUserController;
+use App\Http\Controllers\Admin\DocumentController as AdminDocumentController;
 
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PlayerController;
@@ -180,6 +181,11 @@ Route::middleware('auth')->group(function () {
             ->name('players.export');
         Route::post('players/{player:slug}/reset-pin', [\App\Http\Controllers\Admin\PlayerController::class, 'resetPin'])->name('players.reset-pin');
         Route::post('players/{player:slug}/update-photo', [\App\Http\Controllers\Admin\PlayerController::class, 'updatePhoto'])->name('players.update-photo');
+        
+        // Documents & printable assets
+        Route::get('documents', [AdminDocumentController::class, 'index'])->name('documents.index');
+        Route::get('documents/players/{player:slug}', [AdminDocumentController::class, 'showPlayerCard'])->name('documents.players.show');
+        Route::get('documents/players/{player:slug}/download', [AdminDocumentController::class, 'downloadPlayerCard'])->name('documents.players.download');
         
         // Analytics Routes
         Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');

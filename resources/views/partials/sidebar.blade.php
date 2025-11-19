@@ -149,8 +149,11 @@
                             </svg>
                         </button>
                         <div id="admin-group" class="ml-9 space-y-1">
-                            <a href="{{ route('admin.organizer-requests.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
+                            <a href="{{ route('admin.organizer-requests.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.organizer-requests.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Admin Dashboard</span>
+                            </a>
+                            <a href="{{ route('admin.documents.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.documents.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
+                                <span>Documents</span>
                             </a>
                             <a href="{{ route('admin.leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Management</span>
