@@ -48,6 +48,23 @@
     .player-bid {
         text-align: right;
     }
+    .player-actions {
+        width: 100%;
+        border-top: 1px dashed #e2e8f0;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .player-actions__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .player-actions__buttons button {
+        flex: 1;
+    }
     .quick-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -85,23 +102,26 @@
     }
     .team-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.5rem;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 640px) {
         .team-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         }
     }
     .team-pill {
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
-        padding: 0.9rem;
+        padding: 0.6rem 0.55rem;
         text-align: left;
         background: #fff;
-        min-height: 74px;
+        min-height: 60px;
         transition: all 0.2s ease;
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
     }
     .team-pill.active {
         border-color: #10b981;
@@ -113,10 +133,34 @@
     }
     .team-pill__details {
         display: none;
-        margin-top: 0.65rem;
+        margin-top: 0.35rem;
+        font-size: 11px;
+        line-height: 1.25;
     }
-    .team-pill.active .team-pill__details {
-        display: block;
+    .team-pill__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.4rem;
+    }
+    .team-pill__name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.1;
+    }
+    .team-pill__wallet {
+        text-align: right;
+        font-size: 11px;
+        color: #475569;
+        line-height: 1.1;
+    }
+    .team-pill__meta {
+        font-size: 11px;
+        line-height: 1.2;
+        color: #475569;
     }
     .hidden {
         display: none !important;
@@ -271,6 +315,23 @@
                 <p id="controller-current-bid-label" class="text-3xl font-bold text-emerald-600">{{ $currentPlayer ? '₹' . number_format($currentBidAmount) : '—' }}</p>
                 <p class="text-xs text-slate-400 mt-1">{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'No bids yet' }}</p>
             </div>
+            <div class="player-actions">
+                <div class="flex items-center justify-between text-xs text-slate-500">
+                    <span>Manage result for current player</span>
+                    <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
+                        Override amount
+                    </button>
+                </div>
+                <div class="player-actions__buttons">
+                    <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
+                        Sold
+                    </button>
+                    <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                        Unsold
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
+            </div>
         </div>
 
         <div class="control-card space-y-5">
@@ -319,7 +380,7 @@
                 @foreach($teams as $team)
                     @php
                         $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
-                        $teamDisabled = $currentPlayer && $teamMaxBid <= $currentRequiredBid;
+                        $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid <= $currentRequiredBid);
                     @endphp
                     <button type="button"
                         class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
@@ -329,48 +390,36 @@
                         data-team-max="{{ $team->max_bid_cap }}"
                         data-team-needed="{{ $team->players_needed }}"
                         data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
+                        data-team-details="{{ json_encode([
+                            'players' => $team->sold_players_count,
+                            'retained' => $team->retained_players_count ?? 0,
+                            'wallet' => number_format($team->display_wallet ?? $team->wallet_balance ?? 0),
+                            'needs' => $team->players_needed,
+                            'reserve' => number_format($team->reserve_amount),
+                            'max' => number_format($team->max_bid_cap)
+                        ]) }}"
                         {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
-                        <div class="flex items-center justify-between gap-2">
+                        <div class="team-pill__header">
                             <div>
-                                <p class="text-xs text-slate-400 uppercase">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}</p>
-                                <p class="font-semibold text-slate-900">{{ $team->team?->name ?? 'Team #' . $team->id }}</p>
+                                <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
+                                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
+                                </p>
+                                <p class="text-[11px] font-semibold text-slate-700">₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
+                                <p class="text-[10px] text-slate-400">Wallet</p>
                             </div>
                             @if($teamDisabled)
-                                <span class="text-[10px] font-semibold text-rose-500">Max ₹{{ number_format($teamMaxBid) }}</span>
+                                <span class="text-[10px] font-semibold text-rose-500">Cap ₹{{ number_format($teamMaxBid) }}</span>
                             @endif
                         </div>
-                        <div class="team-pill__details">
-                            <p class="text-xs text-slate-500 mb-1">Players {{ $team->sold_players_count }} · Wallet ₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
-                            <p class="text-xs text-emerald-600">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
-                            <p class="text-xs text-indigo-600">Max bid this player: ₹{{ number_format($team->max_bid_cap) }}</p>
-                        </div>
+                        <p class="team-pill__meta">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
+                        <p class="team-pill__meta text-indigo-600 font-semibold">Max ₹{{ number_format($team->max_bid_cap) }}</p>
+                        <div class="team-pill__details" data-team-details-panel></div>
                     </button>
                 @endforeach
             </div>
         </div>
 
-        <div class="control-card space-y-4">
-            <input type="hidden" id="controller-override-amount" value="">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-sm font-semibold text-slate-600">Override Sold Amount</p>
-                    <p class="text-xs text-slate-500" data-override-label>Current override: None</p>
-                </div>
-                <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
-                    Set override
-                </button>
-            </div>
-            <div class="control-footer">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <button type="button" data-controller-sold class="flex-1 px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
-                        Sold
-                    </button>
-                    <button type="button" onclick="markControllerUnsold(this)" class="flex-1 px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                        Unsold
-                    </button>
-                </div>
-            </div>
-        </div>
+        <input type="hidden" id="controller-override-amount" value="">
     </div>
 </div>
 <div id="controller-modal" class="control-modal hidden" role="dialog" aria-modal="true">
@@ -463,6 +512,33 @@
                 button.classList.remove('active');
             }
         });
+        renderTeamDetails(teamId);
+    }
+
+    function renderTeamDetails(teamId) {
+        teamPills.forEach(button => {
+            const panel = button.querySelector('[data-team-details-panel]');
+            if (!panel) {
+                return;
+            }
+            if (button.dataset.teamPill === teamId && button.classList.contains('active')) {
+                const details = button.dataset.teamDetails ? JSON.parse(button.dataset.teamDetails) : null;
+                if (details) {
+                    panel.innerHTML = `
+                        <p>Players ${details.players} · Retained ${details.retained}</p>
+                        <p>Needs ${details.needs} • Reserve ₹${details.reserve}</p>
+                        <p>Max bid ₹${details.max}</p>
+                    `;
+                    panel.style.display = 'block';
+                } else {
+                    panel.innerHTML = '';
+                    panel.style.display = 'none';
+                }
+            } else {
+                panel.innerHTML = '';
+                panel.style.display = 'none';
+            }
+        });
     }
 
     function setTeamSelection(teamId) {
@@ -503,7 +579,11 @@
             if (button.disabled || isTeamDisabled(button)) {
                 return;
             }
-            setTeamSelection(button.dataset.teamPill);
+            if (controllerTeamSelect?.value === button.dataset.teamPill) {
+                clearTeamSelection();
+            } else {
+                setTeamSelection(button.dataset.teamPill);
+            }
         });
     });
 
