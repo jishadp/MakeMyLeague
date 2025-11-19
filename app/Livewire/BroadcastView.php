@@ -10,8 +10,6 @@ class BroadcastView extends Component
 {
     public League $league;
 
-    public array $payload = [];
-
     public string $lastUpdated;
 
     protected LiveAuctionDataService $dataService;
@@ -24,17 +22,24 @@ class BroadcastView extends Component
     public function mount(League $league)
     {
         $this->league = $league;
-        $this->refreshData();
+        $this->lastUpdated = now()->format('H:i:s');
     }
 
     public function refreshData(): void
     {
-        $this->payload = $this->dataService->buildPayload($this->league);
         $this->lastUpdated = now()->format('H:i:s');
+    }
+
+    public function getPayloadProperty(): array
+    {
+        return $this->dataService->buildPayload($this->league);
     }
 
     public function render()
     {
-        return view('livewire.broadcast-view');
+        return view('livewire.broadcast-view', [
+            'payload' => $this->payload,
+            'lastUpdated' => $this->lastUpdated,
+        ]);
     }
 }
