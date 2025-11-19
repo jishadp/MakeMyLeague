@@ -784,12 +784,8 @@ class AuctionController extends Controller
     protected function getMinimumRosterSize(League $league): int
     {
         $perTeamTarget = (int) ($league->max_team_players ?? 0);
-        
-        if ($perTeamTarget > 0) {
-            return max(11, $perTeamTarget);
-        }
-        
-        return 11;
+
+        return max(0, $perTeamTarget);
     }
 
     /**

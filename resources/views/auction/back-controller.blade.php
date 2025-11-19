@@ -107,6 +107,17 @@
         border-color: #10b981;
         background: #ecfdf5;
     }
+    .team-pill--disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+    .team-pill__details {
+        display: none;
+        margin-top: 0.65rem;
+    }
+    .team-pill.active .team-pill__details {
+        display: block;
+    }
     .hidden {
         display: none !important;
     }
@@ -301,20 +312,38 @@
                 <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
             </div>
             <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
+            @php
+                $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
+            @endphp
             <div class="team-grid">
                 @foreach($teams as $team)
+                    @php
+                        $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
+                        $teamDisabled = $currentPlayer && $teamMaxBid <= $currentRequiredBid;
+                    @endphp
                     <button type="button"
-                        class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }}"
+                        class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
                         data-team-pill="{{ $team->id }}"
                         data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
                         data-team-reserve="{{ $team->reserve_amount }}"
                         data-team-max="{{ $team->max_bid_cap }}"
-                        data-team-needed="{{ $team->players_needed }}">
-                        <p class="text-xs text-slate-400 uppercase">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}</p>
-                        <p class="font-semibold text-slate-900">{{ $team->team?->name ?? 'Team #' . $team->id }}</p>
-                        <p class="text-xs text-slate-500">Players {{ $team->sold_players_count }} · Wallet ₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
-                        <p class="text-xs text-emerald-600">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
-                        <p class="text-xs text-indigo-600">Max bid this player: ₹{{ number_format($team->max_bid_cap) }}</p>
+                        data-team-needed="{{ $team->players_needed }}"
+                        data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
+                        {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}</p>
+                                <p class="font-semibold text-slate-900">{{ $team->team?->name ?? 'Team #' . $team->id }}</p>
+                            </div>
+                            @if($teamDisabled)
+                                <span class="text-[10px] font-semibold text-rose-500">Max ₹{{ number_format($teamMaxBid) }}</span>
+                            @endif
+                        </div>
+                        <div class="team-pill__details">
+                            <p class="text-xs text-slate-500 mb-1">Players {{ $team->sold_players_count }} · Wallet ₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
+                            <p class="text-xs text-emerald-600">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
+                            <p class="text-xs text-indigo-600">Max bid this player: ₹{{ number_format($team->max_bid_cap) }}</p>
+                        </div>
                     </button>
                 @endforeach
             </div>
@@ -422,9 +451,13 @@
         }
     }
 
+    function isTeamDisabled(button) {
+        return button?.dataset.teamDisabled === 'true';
+    }
+
     function highlightSelectedTeam(teamId) {
         teamPills.forEach(button => {
-            if (button.dataset.teamPill === teamId) {
+            if (button.dataset.teamPill === teamId && !isTeamDisabled(button)) {
                 button.classList.add('active');
             } else {
                 button.classList.remove('active');
@@ -433,6 +466,10 @@
     }
 
     function setTeamSelection(teamId) {
+        const button = teamId ? getTeamButton(teamId) : null;
+        if (button && isTeamDisabled(button)) {
+            return;
+        }
         if (controllerTeamSelect) {
             controllerTeamSelect.value = teamId || '';
             highlightSelectedTeam(teamId);
@@ -450,22 +487,43 @@
         applyQuickBid();
     }
 
+    function clearTeamSelection() {
+        if (controllerTeamSelect) {
+            controllerTeamSelect.value = '';
+        }
+        highlightSelectedTeam(null);
+        updateTeamBudgetLabels(null);
+        if (selectedTeamLabel) {
+            selectedTeamLabel.textContent = 'None';
+        }
+    }
+
     teamPills.forEach(button => {
         button.addEventListener('click', () => {
+            if (button.disabled || isTeamDisabled(button)) {
+                return;
+            }
             setTeamSelection(button.dataset.teamPill);
         });
     });
 
     if (controllerTeamSelect) {
         if (!controllerTeamSelect.value && controllerDefaultTeam && controllerDefaultTeam.value) {
-            setTeamSelection(controllerDefaultTeam.value);
+            const defaultButton = getTeamButton(controllerDefaultTeam.value);
+            if (defaultButton && !isTeamDisabled(defaultButton)) {
+                setTeamSelection(controllerDefaultTeam.value);
+            } else {
+                clearTeamSelection();
+            }
         } else if (controllerTeamSelect.value) {
-            setTeamSelection(controllerTeamSelect.value);
+            const activeButton = getTeamButton(controllerTeamSelect.value);
+            if (activeButton && !isTeamDisabled(activeButton)) {
+                setTeamSelection(controllerTeamSelect.value);
+            } else {
+                clearTeamSelection();
+            }
         } else {
-            updateTeamBudgetLabels(null);
-        }
-        if (selectedTeamLabel) {
-            selectedTeamLabel.textContent = getSelectedTeamName() || 'None';
+            clearTeamSelection();
         }
     }
     function getTeamButton(teamId) {
