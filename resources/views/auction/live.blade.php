@@ -67,6 +67,14 @@
     .blob {
         filter: blur(40px);
     }
+
+    .budget-metrics {
+        scrollbar-width: none;
+    }
+
+    .budget-metrics::-webkit-scrollbar {
+        display: none;
+    }
 </style>
 @endsection
 
@@ -130,11 +138,19 @@
             <!-- Current Player Card -->
             <div class="space-y-4 lg:col-span-7 xl:col-span-8">
                 <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6 lg:p-8">
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Current Player</h2>
-                        <p class="text-sm text-gray-500">Live roster updates refresh in real-time</p>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Current Player</h2>
+                            <p class="text-sm text-gray-500">Live roster updates refresh in real-time</p>
+                        </div>
+                        @if(isset($currentPlayer) && $currentPlayer)
+                            <div class="inline-flex items-center justify-between gap-3 bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold rounded-2xl px-4 py-2 shadow-sm">
+                                <span class="text-xs uppercase tracking-wide text-indigo-500">Base Price</span>
+                                <span class="text-lg sm:text-xl text-gray-900">₹<span class="basePrice">{{ $currentPlayer->base_price ?? 0 }}</span></span>
+                            </div>
+                        @endif
                     </div>
-                    <div id="currentPlayerCard" class="text-center py-6 sm:py-8">
+                    <div id="currentPlayerCard" class="text-center py-6 sm:py-8" tabindex="-1">
                         @if(isset($currentPlayer) && $currentPlayer)
                             @php
                                 $leadingBudget = null;
@@ -183,31 +199,28 @@
                                             @endif
                                         </div>
                                         <div class="text-center sm:text-left flex-grow w-full">
-                                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
+                                            <p class="text-xs sm:text-sm uppercase tracking-wide text-indigo-500 font-semibold mb-2 playerRole position">
+                                                @if($currentPlayer->player->primaryGameRole && $currentPlayer->player->primaryGameRole->gamePosition)
+                                                    {{ $currentPlayer->player->primaryGameRole->gamePosition->name }}
+                                                @elseif($currentPlayer->player->position)
+                                                    {{ $currentPlayer->player->position->name }}
+                                                @else
+                                                    Player
+                                                @endif
+                                            </p>
+                                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-gray-800 playerName">
                                                 {{ $currentPlayer->player->name }}
                                             </h2>
-                                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
-                                                <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
-                                                    @if($currentPlayer->player->primaryGameRole && $currentPlayer->player->primaryGameRole->gamePosition)
-                                                        {{ $currentPlayer->player->primaryGameRole->gamePosition->name }}
-                                                    @elseif($currentPlayer->player->position)
-                                                        {{ $currentPlayer->player->position->name }}
-                                                    @else
-                                                        Player
-                                                    @endif
-                                                </span>
-                                                <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
-                                                    Base Price ₹<span class="basePrice">{{ $currentPlayer->base_price ?? 0 }}</span>
-                                                </span>
-                                                @if($currentPlayer->retention)
+                                            @if($currentPlayer->retention)
+                                                <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
                                                     <span class="bg-yellow-500 bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-yellow-700 border border-yellow-300 flex items-center gap-1">
                                                         <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                         </svg>
                                                         Retained Player
                                                     </span>
-                                                @endif
-                                            </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -234,18 +247,18 @@
                                             </p>
                                         </div>
                                         @if($leadingBudget)
-                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center text-sm text-gray-700">
-                                                <div class="rounded-xl bg-white/80 px-3 py-2">
-                                                    <p class="text-xs uppercase text-gray-500">Players Needed</p>
-                                                    <p class="font-semibold">{{ $leadingBudget->players_needed }}</p>
+                                            <div class="budget-metrics flex gap-3 sm:gap-4 text-xs sm:text-sm text-gray-700 overflow-x-auto pb-1">
+                                                <div class="mobile-budget-card flex flex-row items-center justify-between sm:flex-col sm:items-center sm:justify-center sm:text-center gap-1 rounded-xl bg-white/80 px-3 py-2 min-w-[140px] flex-shrink-0">
+                                                    <p class="uppercase tracking-wide text-gray-500 text-[10px] sm:text-xs whitespace-nowrap">Players Needed</p>
+                                                    <p class="font-semibold text-gray-900 whitespace-nowrap">{{ $leadingBudget->players_needed }}</p>
                                                 </div>
-                                                <div class="rounded-xl bg-white/80 px-3 py-2">
-                                                    <p class="text-xs uppercase text-gray-500">Reserve Funds</p>
-                                                    <p class="font-semibold">₹{{ number_format($leadingBudget->reserve_amount) }}</p>
+                                                <div class="mobile-budget-card flex flex-row items-center justify-between sm:flex-col sm:items-center sm:justify-center sm:text-center gap-1 rounded-xl bg-white/80 px-3 py-2 min-w-[160px] flex-shrink-0">
+                                                    <p class="uppercase tracking-wide text-gray-500 text-[10px] sm:text-xs whitespace-nowrap">Reserve Funds</p>
+                                                    <p class="font-semibold text-gray-900 whitespace-nowrap">₹{{ number_format($leadingBudget->reserve_amount) }}</p>
                                                 </div>
-                                                <div class="rounded-xl bg-white/80 px-3 py-2">
-                                                    <p class="text-xs uppercase text-gray-500">Max Bid This Player</p>
-                                                    <p class="font-semibold text-emerald-600">₹{{ number_format($leadingBudget->max_bid_cap) }}</p>
+                                                <div class="mobile-budget-card flex flex-row items-center justify-between sm:flex-col sm:items-center sm:justify-center sm:text-center gap-1 rounded-xl bg-white/80 px-3 py-2 min-w-[180px] flex-shrink-0">
+                                                    <p class="uppercase tracking-wide text-gray-500 text-[10px] sm:text-xs whitespace-nowrap">Max Bid This Player</p>
+                                                    <p class="font-semibold text-emerald-600 whitespace-nowrap">₹{{ number_format($leadingBudget->max_bid_cap) }}</p>
                                                 </div>
                                             </div>
                                         @else
@@ -476,6 +489,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let refreshInFlight = false;
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
 
+    focusCurrentPlayerCard();
+
     teamToggleButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetId = button.getAttribute('aria-controls');
@@ -692,10 +707,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <!-- Glassmorphism Content -->
-                <div class="card__content relative z-10 p-6 sm:p-8 lg:p-10">
+                <div class="card__content relative z-10 flex flex-col gap-8 p-6 sm:p-8 lg:p-10">
                     <!-- Player Header -->
-                    <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8">
-                        <div class="relative flex-shrink-0">
+                    <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8 mb-8">
+                        <div class="relative flex-shrink-0 mx-auto sm:mx-0">
                             <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
                                 <img src="${data.player.photo || '/images/defaultplayer.jpeg'}"
                                      alt="${data.player.name}"
@@ -708,19 +723,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             ${retainedStar}
                         </div>
-                        <div class="text-center sm:text-left flex-grow">
-                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
+                        <div class="text-center sm:text-left flex-grow w-full">
+                            <p class="text-xs sm:text-sm uppercase tracking-wide text-indigo-500 font-semibold mb-2 playerRole position">
+                                ${positionName}
+                            </p>
+                            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-gray-800 playerName">
                                 ${data.player.name}
                             </h2>
-                            <div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">
-                                <span class="bg-blue-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-blue-700 border border-blue-300 position">
-                                    ${positionName}
-                                </span>
-                                <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
-                                    Base Price ₹<span class="basePrice">${data.league_player.base_price}</span>
-                                </span>
-                                ${retainedBadge}
-                            </div>
+                            ${isRetained ? `<div class="flex flex-wrap gap-2 justify-center sm:justify-start mb-4">${retainedBadge}</div>` : ''}
                         </div>
                     </div>
 
@@ -736,6 +746,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
+
+        document.querySelectorAll('.basePrice').forEach(element => {
+            if (element) {
+                element.textContent = data.league_player.base_price;
+            }
+        });
+
+        focusCurrentPlayerCard();
     }
     
     // Add image error handler function
@@ -842,6 +860,29 @@ document.addEventListener('DOMContentLoaded', function() {
             return '0';
         }
         return new Intl.NumberFormat('en-IN').format(Math.max(0, value));
+    }
+
+    function focusCurrentPlayerCard() {
+        const playerCardContainer = document.getElementById('currentPlayerCard');
+        if (!playerCardContainer) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            playerCardContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'center'
+            });
+
+            if (typeof playerCardContainer.focus === 'function') {
+                try {
+                    playerCardContainer.focus({ preventScroll: true });
+                } catch (error) {
+                    playerCardContainer.focus();
+                }
+            }
+        });
     }
     
     function fetchRecentBids() {
