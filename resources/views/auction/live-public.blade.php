@@ -81,22 +81,36 @@
 
 @section('content')
 @php
-    $livePlayer = $currentPlayer?->player;
-    $playerPhoto = $livePlayer && $livePlayer->photo ? asset('storage/' . $livePlayer->photo) : asset('images/defaultplayer.jpeg');
-    $playerInitial = $livePlayer ? strtoupper(substr($livePlayer->name, 0, 1)) : '?';
-    $playerRole = $livePlayer?->primaryGameRole?->gamePosition?->name
-        ?? $livePlayer?->position?->name
+    $isShowingLastSold = !$currentPlayer && $lastSoldPlayer;
+    $displayLeaguePlayer = $currentPlayer ?? $lastSoldPlayer;
+    $displayPlayer = $displayLeaguePlayer?->player;
+    $playerPhoto = $displayPlayer && $displayPlayer->photo ? asset('storage/' . $displayPlayer->photo) : asset('images/defaultplayer.jpeg');
+    $playerInitial = $displayPlayer ? strtoupper(substr($displayPlayer->name, 0, 1)) : '?';
+    $playerRole = $displayPlayer?->primaryGameRole?->gamePosition?->name
+        ?? $displayPlayer?->position?->name
         ?? 'Awaiting player';
-    $basePrice = $currentPlayer?->base_price ?? null;
-    $highestAmount = $currentHighestBid?->amount ?? ($basePrice ?? null);
-    $highestTeamName = $currentHighestBid && $currentHighestBid->leagueTeam && $currentHighestBid->leagueTeam->team
-        ? $currentHighestBid->leagueTeam->team->name
-        : ($currentPlayer ? 'Awaiting bids' : 'Auction paused');
-    $bidLabel = $currentHighestBid ? 'Current Bid' : ($currentPlayer ? 'Base Price' : 'Status');
+    $basePrice = $displayLeaguePlayer?->base_price ?? null;
+    $lastSoldTeamName = $lastSoldPlayer?->leagueTeam?->team?->name;
+    $currentBidAmount = $currentHighestBid?->amount ?? null;
+    $soldAmount = $lastSoldPlayer?->bid_price;
+    $highestAmount = $currentPlayer ? ($currentBidAmount ?? $basePrice) : ($soldAmount ?? null);
+    $highestTeamName = $currentPlayer
+        ? ($currentHighestBid && $currentHighestBid->leagueTeam && $currentHighestBid->leagueTeam->team
+            ? $currentHighestBid->leagueTeam->team->name
+            : 'Awaiting bids')
+        : ($lastSoldTeamName ? 'Sold to ' . $lastSoldTeamName : 'Awaiting next player');
+    $bidLabel = $currentPlayer
+        ? ($currentHighestBid ? 'Current Bid' : 'Base Price')
+        : ($lastSoldPlayer ? 'Sold Price' : 'Status');
     $spotlightTeam = null;
     if ($currentHighestBid && $currentHighestBid->leagueTeam) {
         $spotlightTeam = $teams->firstWhere('id', $currentHighestBid->leagueTeam->id);
+    } elseif ($isShowingLastSold && $lastSoldPlayer?->leagueTeam) {
+        $spotlightTeam = $teams->firstWhere('id', $lastSoldPlayer->league_team_id);
     }
+    $playerStatusText = $currentPlayer
+        ? ($currentPlayer->retention ? 'Retained' : 'Auctioning')
+        : ($lastSoldPlayer ? ($lastSoldTeamName ? 'Sold to ' . $lastSoldTeamName : 'Sold') : 'Waiting for player');
 @endphp
 <input type="hidden" id="league-id" value="{{ $league->id }}">
 <input type="hidden" id="league-slug" value="{{ $league->slug }}">
@@ -142,9 +156,9 @@
                         <div class="relative overflow-hidden rounded-3xl border border-slate-700/70 bg-black/30 shadow-2xl">
                             <img
                                 src="{{ $playerPhoto }}"
-                                alt="{{ $livePlayer->name ?? 'Awaiting player' }}"
+                                alt="{{ $displayPlayer->name ?? 'Awaiting player' }}"
                                 id="playerImage"
-                                class="w-full h-[22rem] object-cover {{ $currentPlayer ? '' : 'opacity-50' }}"
+                                class="w-full h-[22rem] object-cover {{ $currentPlayer ? '' : 'opacity-70' }}"
                                 onerror="this.classList.add('hidden'); document.getElementById('playerFallback').classList.remove('hidden');">
                             <div id="playerFallback"
                                  class="absolute inset-0 hidden bg-slate-800/70 flex items-center justify-center text-6xl font-bold">
@@ -155,9 +169,12 @@
 
                     <div class="lg:w-1/2 space-y-6">
                         <div>
-                            <p class="text-slate-400 text-sm tracking-wide uppercase">Current Player</p>
-                            <h2 class="text-3xl font-bold mt-1" id="playerName">{{ $livePlayer->name ?? 'Waiting for next player' }}</h2>
+                            <p class="text-slate-400 text-sm tracking-wide uppercase">{{ $isShowingLastSold ? 'Last Sold Player' : 'Current Player' }}</p>
+                            <h2 class="text-3xl font-bold mt-1" id="playerName">{{ $displayPlayer->name ?? 'Waiting for next player' }}</h2>
                             <p class="text-lg text-slate-300" id="playerRole">{{ $playerRole }}</p>
+                            @if($isShowingLastSold)
+                                <p class="text-sm text-slate-400 mt-2">Waiting for the next player to enter the auction floor.</p>
+                            @endif
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 text-sm">
@@ -170,7 +187,7 @@
                             <div class="bg-slate-800/70 rounded-2xl p-4">
                                 <p class="text-slate-400 uppercase text-xs tracking-wide">Status</p>
                                 <p class="text-2xl font-semibold mt-1" id="playerStatus">
-                                    {{ $currentPlayer && $currentPlayer->retention ? 'Retained' : ($currentPlayer ? 'Auctioning' : 'Paused') }}
+                                    {{ $playerStatusText }}
                                 </p>
                             </div>
                         </div>
@@ -191,17 +208,21 @@
                     <div class="flex items-center justify-between gap-6">
                         <div>
                             <p class="text-slate-400 uppercase text-xs tracking-[0.35em]" id="teamSpotlightLabel">
-                                {{ $spotlightTeam ? 'Leading Bidder' : 'Winner pending' }}
+                                {{ $spotlightTeam ? ($currentPlayer ? 'Leading Bidder' : 'Last Winner') : 'Winner pending' }}
                             </p>
                             <h3 class="text-3xl font-bold mt-2" id="teamSpotlightName">
                                 {{ $spotlightTeam->team->name ?? 'Top bid will appear here' }}
                             </h3>
                             <p class="text-slate-300" id="teamSpotlightMeta">
-                                {{ $spotlightTeam ? 'Holding the floor with Rs ' . number_format($highestAmount) : 'As soon as a team wins, details will be shown' }}
+                                @if($spotlightTeam)
+                                    {{ $currentPlayer ? 'Holding the floor with Rs ' . number_format($highestAmount) : 'Secured the last player for Rs ' . number_format($soldAmount ?? 0) }}
+                                @else
+                                    As soon as a team wins, details will be shown
+                                @endif
                             </p>
                         </div>
                         <div class="rounded-2xl border border-emerald-400/40 px-5 py-3 text-center">
-                            <p class="text-xs uppercase text-emerald-200 tracking-wide">Current Bid</p>
+                            <p class="text-xs uppercase text-emerald-200 tracking-wide" id="teamSpotlightBidLabel">{{ $currentPlayer ? 'Current Bid' : 'Sold Price' }}</p>
                             <p class="text-2xl font-semibold" id="teamSpotlightBid">
                                 {{ $highestAmount ? 'Rs ' . number_format($highestAmount) : '—' }}
                             </p>
@@ -332,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
         label: document.getElementById('teamSpotlightLabel'),
         name: document.getElementById('teamSpotlightName'),
         meta: document.getElementById('teamSpotlightMeta'),
+        bidLabel: document.getElementById('teamSpotlightBidLabel'),
         bid: document.getElementById('teamSpotlightBid'),
         wallet: document.getElementById('teamSpotlightWallet'),
         players: document.getElementById('teamSpotlightPlayers'),
@@ -339,6 +361,7 @@ document.addEventListener('DOMContentLoaded', function () {
         cap: document.getElementById('teamSpotlightCap')
     };
     const defaultPlayerImage = "{{ asset('images/defaultplayer.jpeg') }}";
+    let lastSoldPayload = null;
 
     function setOverlay(overlay, show) {
         if (!overlay) return;
@@ -368,24 +391,28 @@ document.addEventListener('DOMContentLoaded', function () {
         if (bidLabelEl && label) {
             bidLabelEl.textContent = label.toUpperCase();
         }
-        if (bidTeamEl && teamName) {
-            bidTeamEl.textContent = teamName;
+        if (bidTeamEl) {
+            bidTeamEl.textContent = teamName || '—';
         }
     }
 
-    function updatePlayerDetails(playerPayload, leaguePlayerPayload) {
-        if (playerNameEl) playerNameEl.textContent = playerPayload?.name || 'Waiting for next player';
+    function updatePlayerDetails(playerPayload, leaguePlayerPayload, options = {}) {
+        if (playerNameEl) {
+            playerNameEl.textContent = options.nameText || playerPayload?.name || 'Waiting for next player';
+        }
         if (playerRoleEl) {
             let position = playerPayload?.primary_game_role?.game_position?.name
                 || playerPayload?.position?.name
                 || 'Awaiting player';
-            playerRoleEl.textContent = position;
+            playerRoleEl.textContent = options.roleText || position;
         }
         if (playerStatusEl) {
-            playerStatusEl.textContent = leaguePlayerPayload?.retention ? 'Retained' : (playerPayload ? 'Auctioning' : 'Paused');
+            playerStatusEl.textContent = options.statusText
+                || (leaguePlayerPayload?.retention ? 'Retained' : (playerPayload ? 'Auctioning' : 'Paused'));
         }
         if (playerBaseEl) {
-            playerBaseEl.textContent = formatCurrency(leaguePlayerPayload?.base_price ?? null);
+            const base = options.basePrice ?? leaguePlayerPayload?.base_price ?? null;
+            playerBaseEl.textContent = formatCurrency(base);
         }
         if (playerImageEl) {
             if (playerPayload && playerPayload.photo) {
@@ -416,6 +443,9 @@ document.addEventListener('DOMContentLoaded', function () {
             spotlight.label.textContent = meta?.label || 'Leading Bidder';
             spotlight.name.textContent = teamPayload.team?.name || teamPayload.name || 'Team';
             spotlight.meta.textContent = meta?.message || 'Holding the live floor';
+            if (spotlight.bidLabel && meta?.bidLabel) {
+                spotlight.bidLabel.textContent = meta.bidLabel;
+            }
             spotlight.bid.textContent = formatCurrency(meta?.bid ?? null);
             spotlight.wallet.textContent = formatCurrency(teamPayload.wallet_balance ?? meta?.wallet ?? null);
             spotlight.players.textContent = (meta?.players ?? teamPayload.league_players_count) ?? '—';
@@ -425,6 +455,9 @@ document.addEventListener('DOMContentLoaded', function () {
             spotlight.label.textContent = 'Winner Pending';
             spotlight.name.textContent = 'Top bid will appear here';
             spotlight.meta.textContent = 'As soon as a player is sold the team appears automatically';
+            if (spotlight.bidLabel) {
+                spotlight.bidLabel.textContent = 'Current Bid';
+            }
             spotlight.bid.textContent = '—';
             spotlight.wallet.textContent = '—';
             spotlight.players.textContent = '—';
@@ -572,22 +605,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleSoldEvent(payload) {
         setOverlay(soldOverlay, true);
-        updateBidDisplay(payload.league_player?.bid_price ?? null, 'SOLD', payload.team?.team?.name || 'Team');
+        const soldTeamName = payload.team?.team?.name ? `Sold to ${payload.team.team.name}` : 'Sold';
+        updatePlayerDetails(payload.league_player?.player, payload.league_player, {
+            statusText: soldTeamName,
+        });
+        updateBidDisplay(payload.league_player?.bid_price ?? null, 'Sold Price', soldTeamName);
         updateTeamSpotlight(payload.team, {
             label: 'Sold To',
             bid: payload.league_player?.bid_price ?? null,
             message: `${payload.team?.team?.name || 'A team'} wins the player`,
             wallet: payload.team?.wallet_balance,
             players: payload.team?.league_players_count,
+            bidLabel: 'Sold Price',
         });
         highlightTeamCard(payload.team?.id);
         fetchRecentBids();
         refreshTeamBalances();
         updateLastUpdated();
+        lastSoldPayload = payload;
     }
 
     function handleUnsoldEvent(payload) {
         setOverlay(unsoldOverlay, true);
+        updatePlayerDetails(payload.league_player?.player, payload.league_player, {
+            statusText: 'Marked unsold'
+        });
         updateBidDisplay(null, 'UNSOLD', payload.league_player?.player?.name || 'No sale');
         updateTeamSpotlight(null);
         fetchRecentBids();
@@ -601,6 +643,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setOverlay(soldOverlay, false);
         setOverlay(unsoldOverlay, false);
         updateLastUpdated();
+        lastSoldPayload = null;
     }
 
     [globalChannel, leagueChannel].forEach(channel => {

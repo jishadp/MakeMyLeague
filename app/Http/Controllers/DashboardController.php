@@ -418,6 +418,12 @@ class DashboardController
         Cache::put($viewerKey, $viewerSessions, now()->addMinutes(10));
         $liveViewers = count($viewerSessions);
 
-        return compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers');
+        $lastSoldPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->with(['player.position', 'player.primaryGameRole.gamePosition', 'leagueTeam.team'])
+            ->latest('updated_at')
+            ->first();
+
+        return compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers', 'lastSoldPlayer');
     }
 }
