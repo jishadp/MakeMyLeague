@@ -418,6 +418,29 @@ class AuctionController extends Controller
             ], 422);
         }
 
+        // Ensure team keeps enough balance for future auction slots based on reserve logic
+        $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
+        $soldCount = $bidTeam->leaguePlayers()->where('status', 'sold')->count();
+        $futureSlots = max($auctionSlotsPerTeam - ($soldCount + 1), 0);
+        if ($futureSlots > 0) {
+            $availableBasePrices = $league->leaguePlayers()
+                ->where('status', 'available')
+                ->orderBy('base_price')
+                ->pluck('base_price')
+                ->map(fn ($price) => max((float) $price, 0))
+                ->values();
+            $reserveAmount = $availableBasePrices->take($futureSlots)->sum();
+
+            if ($projectedBalance < $reserveAmount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This bid would leave ₹' . number_format($projectedBalance)
+                        . ', but at least ₹' . number_format($reserveAmount)
+                        . ' is required to fill the remaining ' . $futureSlots . ' slots at base price.'
+                ], 422);
+            }
+        }
+
         // Check if team has sufficient balance
         if ($bidTeam->wallet_balance < $newBid) {
             return response()->json([
