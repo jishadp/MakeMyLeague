@@ -46,6 +46,8 @@
     <!-- Include CDN Links for Select2 and Bootstrap Datepicker -->
     @include('partials.cdn-links')
 
+    @livewireStyles
+
     @yield('styles')
 </head>
 
@@ -73,6 +75,8 @@
     <!-- External JavaScript -->
     <script src="{{ asset('js/main.js') }}?v={{ time() }}" defer></script>
     <script src="{{ asset('js/scripts.js') }}?v={{ time() }}" defer></script>
+
+    @livewireScripts
 
     @yield('scripts')
 </body>

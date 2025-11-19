@@ -13,11 +13,14 @@ use App\Models\Fixture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Services\LiveAuctionDataService;
 
 class DashboardController
 {
+    public function __construct(protected LiveAuctionDataService $liveAuctionDataService)
+    {
+    }
     public function view(Request $request)
     {
         $user = Auth::user();
@@ -330,100 +333,6 @@ class DashboardController
      */
     protected function buildLiveAuctionPayload(League $league): array
     {
-        // Only load league teams and the game, do not load all league players
-        $league->load(['game', 'leagueTeams.team']);
-        
-        // Get only the current player being auctioned - do not fall back to available player
-        $currentPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'auctioning')
-            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
-            ->first();
-            
-        // Get current highest bid for the current player if exists
-        $currentHighestBid = null;
-        if ($currentPlayer) {
-            $currentHighestBid = \App\Models\Auction::where('league_player_id', $currentPlayer->id)
-                ->with(['leagueTeam.team'])
-                ->latest('created_at')
-                ->first();
-        }
-        
-        // Get current highest bids for each player
-        $currentBids = \App\Models\Auction::with(['leagueTeam.team', 'leaguePlayer.user'])
-            ->whereHas('leaguePlayer', function($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
-            ->latest()
-            ->get()
-            ->groupBy('league_player_id');
-
-        // Get all teams with their sold + retained players
-        $teams = LeagueTeam::where('league_id', $league->id)
-            ->with([
-                'team',
-                'auctioneer', // Include auctioneer information
-                'teamAuctioneer.auctioneer', // Include active team auctioneer
-                'leaguePlayers' => function($query) {
-                    $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
-                          ->where(function ($q) {
-                              $q->whereIn('status', ['retained', 'sold'])
-                                ->orWhere('retention', true);
-                          })
-                          ->orderByRaw("FIELD(status, 'retained', 'sold')")
-                          ->orderBy('bid_price', 'desc');
-                }
-            ])
-            ->withCount(['leaguePlayers as sold_players_count' => function($query) {
-                $query->where('status', 'sold');
-            }])
-            ->get();
-        $availableBasePrices = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'available')
-            ->orderBy('base_price')
-            ->pluck('base_price')
-            ->map(fn ($price) => max((float) $price, 0))
-            ->values();
-        $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('retention', true)
-            ->groupBy('league_team_id')
-            ->select('league_team_id', DB::raw('count(*) as count'))
-            ->pluck('count', 'league_team_id');
-        $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $league, $retainedCounts, $auctionSlotsPerTeam) {
-            $soldCount = $team->sold_players_count ?? 0;
-            $retainedCount = $retainedCounts[$team->id] ?? 0;
-            $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
-            $futureSlots = max($playersNeeded - 1, 0);
-            $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
-            $spentAmount = $team->leaguePlayers->sum('bid_price');
-            $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
-            $availableWallet = max($baseWallet - $spentAmount, 0);
-            $maxBidCap = max($availableWallet - $reserveAmount, 0);
-            $team->players_needed = $playersNeeded;
-            $team->reserve_amount = $reserveAmount;
-            $team->max_bid_cap = $maxBidCap;
-            $team->display_wallet = $availableWallet;
-            $team->retained_players_count = $retainedCount;
-            return $team;
-        });
-
-        $viewerKey = "live_viewers:{$league->id}";
-        $sessionId = session()->getId();
-        $viewerSessions = Cache::get($viewerKey, []);
-        $viewerSessions[$sessionId] = now()->timestamp;
-        $threshold = now()->subMinutes(5)->timestamp;
-        $viewerSessions = array_filter($viewerSessions, function ($timestamp) use ($threshold) {
-            return $timestamp >= $threshold;
-        });
-        Cache::put($viewerKey, $viewerSessions, now()->addMinutes(10));
-        $liveViewers = count($viewerSessions);
-
-        $lastSoldPlayer = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'sold')
-            ->with(['player.position', 'player.primaryGameRole.gamePosition', 'leagueTeam.team'])
-            ->latest('updated_at')
-            ->first();
-
-        return compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers', 'lastSoldPlayer');
+        return $this->liveAuctionDataService->buildPayload($league);
     }
 }
