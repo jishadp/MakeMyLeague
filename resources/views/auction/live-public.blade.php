@@ -3,5 +3,5 @@
 @section('title', 'Live Broadcast - ' . $league->name)
 
 @section('content')
-    <livewire:broadcast-view :league="$league" />
+    <livewire:broadcast-view :league-id="$league->id" />
 @endsection

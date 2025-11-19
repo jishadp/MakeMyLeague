@@ -8,7 +8,7 @@ use Livewire\Component;
 
 class BroadcastView extends Component
 {
-    public League $league;
+    public int $leagueId;
 
     public string $lastUpdated;
 
@@ -19,9 +19,9 @@ class BroadcastView extends Component
         $this->dataService = $dataService;
     }
 
-    public function mount(League $league)
+    public function mount(int $leagueId)
     {
-        $this->league = $league;
+        $this->leagueId = $leagueId;
         $this->lastUpdated = now()->format('H:i:s');
     }
 
@@ -32,7 +32,8 @@ class BroadcastView extends Component
 
     public function getPayloadProperty(): array
     {
-        return $this->dataService->buildPayload($this->league);
+        $league = League::findOrFail($this->leagueId);
+        return $this->dataService->buildPayload($league);
     }
 
     public function render()
