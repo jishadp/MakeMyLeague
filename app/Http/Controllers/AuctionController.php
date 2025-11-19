@@ -740,16 +740,64 @@ class AuctionController extends Controller
         $cacheDuration = 3; // 3 seconds
         
         $teams = \Cache::remember($cacheKey, $cacheDuration, function() use ($league) {
+            $availableBasePrices = LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'available')
+                ->orderBy('base_price')
+                ->pluck('base_price')
+                ->map(fn ($price) => max((float) $price, 0))
+                ->values();
+
+            $retainedCounts = LeaguePlayer::where('league_id', $league->id)
+                ->where('retention', true)
+                ->groupBy('league_team_id')
+                ->select('league_team_id', DB::raw('count(*) as count'))
+                ->pluck('count', 'league_team_id');
+
+            $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
+
             return LeagueTeam::where('league_id', $league->id)
                 ->with(['team'])
-                ->withCount('leaguePlayers as players_count')
+                ->withCount([
+                    'leaguePlayers as sold_players_count' => function ($query) {
+                        $query->where('status', 'sold');
+                    },
+                    'leaguePlayers as players_count' => function ($query) {
+                        $query->where(function ($q) {
+                            $q->whereIn('status', ['retained', 'sold'])
+                              ->orWhere('retention', true);
+                        });
+                    },
+                ])
+                ->withSum([
+                    'leaguePlayers as spent_amount' => function ($query) {
+                        $query->where(function ($q) {
+                            $q->whereIn('status', ['retained', 'sold'])
+                              ->orWhere('retention', true);
+                        });
+                    },
+                ], 'bid_price')
                 ->get()
-                ->map(function($leagueTeam) {
+                ->map(function ($leagueTeam) use ($availableBasePrices, $league, $retainedCounts, $auctionSlotsPerTeam) {
+                    $soldCount = (int) ($leagueTeam->sold_players_count ?? 0);
+                    $retainedCount = (int) ($retainedCounts[$leagueTeam->id] ?? 0);
+                    $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
+                    $futureSlots = max($playersNeeded - 1, 0);
+                    $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
+                    $spentAmount = (float) ($leagueTeam->spent_amount ?? 0);
+                    $baseWallet = $league->team_wallet_limit ?? ($leagueTeam->wallet_balance ?? 0);
+                    $availableWallet = max($baseWallet - $spentAmount, 0);
+                    $maxBidCap = max($availableWallet - $reserveAmount, 0);
+
                     return [
                         'id' => $leagueTeam->id,
                         'name' => $leagueTeam->team->name,
-                        'wallet_balance' => $leagueTeam->wallet_balance,
-                        'players_count' => $leagueTeam->players_count
+                        'wallet_balance' => $availableWallet,
+                        'players_count' => (int) ($leagueTeam->players_count ?? 0),
+                        'players_needed' => $playersNeeded,
+                        'reserve_amount' => $reserveAmount,
+                        'max_bid_cap' => $maxBidCap,
+                        'retained_players_count' => $retainedCount,
+                        'sold_players_count' => $soldCount,
                     ];
                 });
         });

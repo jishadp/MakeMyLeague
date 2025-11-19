@@ -278,7 +278,7 @@
                     </div>
                     <div class="space-y-4" id="teamsContainer">
                         @foreach($teams as $team)
-                        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white/80 hover:shadow-xl transition-shadow duration-300">
+                        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white/80 hover:shadow-xl transition-shadow duration-300" data-team-card="{{ $team->id }}">
                             <!-- Team Header -->
                             <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
                                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -288,7 +288,7 @@
                                         </div>
                                         <div>
                                             <h3 class="font-bold">{{ $team->team->name }}</h3>
-                                            <p class="text-xs text-blue-100">{{ $team->leaguePlayers->count() }} Players</p>
+                                            <p class="text-xs text-blue-100"><span data-team-players>{{ $team->leaguePlayers->count() }}</span> Players</p>
                                             @php
                                                 $retainedPlayers = $team->leaguePlayers->where('retention', true);
                                                 $boughtPlayers = $team->leaguePlayers->where('retention', false)->where('status', 'sold');
@@ -298,13 +298,13 @@
                                                     <svg class="w-3 h-3 text-yellow-200" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                     </svg>
-                                                    Retained {{ $team->retained_players_count ?? $retainedPlayers->count() }}
+                                                    Retained <span data-team-retained>{{ $team->retained_players_count ?? $retainedPlayers->count() }}</span>
                                                 </span>
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/40">
                                                     <svg class="w-3 h-3 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 13.5a3 3 0 01-2.985 2.7H7.485A3 3 0 014.5 16.5L3 3zm6 6h6m-5 4h4m-6-8V3m6 2V3"></path>
                                                     </svg>
-                                                    Bought {{ $team->sold_players_count ?? $boughtPlayers->count() }}
+                                                    Bought <span data-team-sold>{{ $team->sold_players_count ?? $boughtPlayers->count() }}</span>
                                                 </span>
                                             </div>
                                             @if($team->teamAuctioneer && $team->teamAuctioneer->auctioneer)
@@ -326,11 +326,11 @@
                                     </div>
                                     <div class="text-right space-y-1">
                                         <div>
-                                            <p class="text-lg font-bold">₹{{ number_format($team->display_wallet ?? $team->wallet_balance) }}</p>
+                                            <p class="text-lg font-bold">&#8377; <span data-team-balance>{{ number_format($team->display_wallet ?? $team->wallet_balance) }}</span></p>
                                             <p class="text-xs text-blue-100">Balance</p>
                                         </div>
-                                        <p class="text-[11px] text-blue-100">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
-                                        <p class="text-[11px] text-emerald-200">Max bid now ₹{{ number_format($team->max_bid_cap) }}</p>
+                                        <p class="text-[11px] text-blue-100">Needs <span data-team-needed>{{ $team->players_needed }}</span> | Reserve &#8377; <span data-team-reserve>{{ number_format($team->reserve_amount) }}</span></p>
+                                        <p class="text-[11px] text-emerald-200">Max bid now &#8377; <span data-team-max>{{ number_format($team->max_bid_cap) }}</span></p>
                                     </div>
                                 </div>
                                 <button type="button" data-team-toggle aria-controls="teamRoster-{{ $team->id }}" aria-expanded="false" class="mt-4 inline-flex items-center justify-between gap-3 rounded-xl border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white/90 transition-colors lg:hidden w-full">
@@ -635,14 +635,14 @@ document.addEventListener('DOMContentLoaded', function() {
     channel.bind('new-player-bid-call', function(data) {
         if (data.league_team.league_id === {{ $league->id }}) {
             addRecentBid(data);
-            updateTeamBalances();
+            refreshTeamBalances();
             updateCurrentBid(data);
         }
     });
     
     leagueChannel.bind('new-player-bid-call', function(data) {
         addRecentBid(data);
-        updateTeamBalances();
+        refreshTeamBalances();
         updateCurrentBid(data);
     });
     
@@ -793,52 +793,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function refreshTeamBalances() {
-        // Get the league slug from the hidden input
         const leagueSlug = document.getElementById('league-slug').value;
         
-        // Make an AJAX call to get updated balances
         return fetch(`/api/auctions/league/${leagueSlug}/team-balances`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.teams) {
-                    // Update team balances in the UI
-                    const teamsContainer = document.getElementById('teamsContainer');
-                    if (teamsContainer) {
-                        const teamCards = teamsContainer.querySelectorAll('.border');
-                        data.teams.forEach(team => {
-                            // Find team card by team name
-                            teamCards.forEach(card => {
-                                const teamNameElement = card.querySelector('h3');
-                                if (teamNameElement && teamNameElement.textContent === team.name) {
-                                    // Update balance
-                                    const balanceElement = card.querySelector('.text-lg.font-bold');
-                                    if (balanceElement) {
-                                        balanceElement.textContent = `₹${numberFormat(team.wallet_balance)}`;
-                                    }
-                                    
-                                    // Update player count
-                                    const playerCountElement = card.querySelector('.text-xs.text-blue-100');
-                                    if (playerCountElement) {
-                                        playerCountElement.textContent = `${team.players_count} Players`;
-                                    }
-                                }
-                            });
-                        });
-                    }
+                    data.teams.forEach(updateTeamCardData);
                 }
-                
-                // Update timestamp regardless of API success
                 updateLastUpdated();
             })
             .catch(error => {
                 console.error('Error fetching team balances:', error);
-                updateLastUpdated(); // Still update timestamp on error
+                updateLastUpdated();
             });
+    }
+    
+    function updateTeamCardData(team) {
+        if (!team || !team.id) {
+            return;
+        }
+        const card = document.querySelector(`[data-team-card="${team.id}"]`);
+        if (!card) {
+            return;
+        }
+        
+        const setText = (selector, value, formatter) => {
+            const element = card.querySelector(selector);
+            if (!element || value === undefined || value === null) {
+                return;
+            }
+            element.textContent = formatter ? formatter(value) : value;
+        };
+        
+        setText('[data-team-balance]', team.wallet_balance, numberFormat);
+        setText('[data-team-players]', team.players_count);
+        setText('[data-team-needed]', team.players_needed);
+        setText('[data-team-reserve]', team.reserve_amount, numberFormat);
+        setText('[data-team-max]', team.max_bid_cap, numberFormat);
+        setText('[data-team-retained]', team.retained_players_count);
+        setText('[data-team-sold]', team.sold_players_count);
     }
     
     // Helper function to format numbers with commas
     function numberFormat(number) {
-        return new Intl.NumberFormat('en-IN').format(number);
+        const value = Number(number);
+        if (Number.isNaN(value)) {
+            return '0';
+        }
+        return new Intl.NumberFormat('en-IN').format(Math.max(0, value));
     }
     
     function fetchRecentBids() {

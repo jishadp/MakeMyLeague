@@ -78,6 +78,7 @@ Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->na
 
 // Public live auction route (no auth required)
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
+Route::get('dashboard/auctions/{league}/broadcast', [DashboardController::class, 'liveAuctionPublic'])->name('auctions.live.public');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');

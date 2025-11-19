@@ -314,6 +314,22 @@ class DashboardController
      */
     public function liveAuction(League $league)
     {
+        return view('auction.live', $this->buildLiveAuctionPayload($league));
+    }
+
+    /**
+     * Display the simplified broadcast-friendly public view.
+     */
+    public function liveAuctionPublic(League $league)
+    {
+        return view('auction.live-public', $this->buildLiveAuctionPayload($league));
+    }
+
+    /**
+     * Prepare all dependencies for auction live views.
+     */
+    protected function buildLiveAuctionPayload(League $league): array
+    {
         // Only load league teams and the game, do not load all league players
         $league->load(['game', 'leagueTeams.team']);
         
@@ -322,9 +338,6 @@ class DashboardController
             ->where('status', 'auctioning')
             ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->first();
-            
-        // We don't want to show any other players if there's no auctioning player
-        // So we won't fall back to available players
             
         // Get current highest bid for the current player if exists
         $currentHighestBid = null;
@@ -405,6 +418,6 @@ class DashboardController
         Cache::put($viewerKey, $viewerSessions, now()->addMinutes(10));
         $liveViewers = count($viewerSessions);
 
-        return view('auction.live', compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers'));
+        return compact('league', 'currentBids', 'currentPlayer', 'currentHighestBid', 'teams', 'liveViewers');
     }
 }
