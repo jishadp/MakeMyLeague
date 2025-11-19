@@ -375,10 +375,10 @@ class DashboardController
             ->select('league_team_id', DB::raw('count(*) as count'))
             ->pluck('count', 'league_team_id');
         $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts) {
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $league, $retainedCounts, $auctionSlotsPerTeam) {
             $soldCount = $team->sold_players_count ?? 0;
             $retainedCount = $retainedCounts[$team->id] ?? 0;
-            $playersNeeded = max($auctionSlotsPerTeam - ($soldCount + $retainedCount), 0);
+            $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
             $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
             $spentAmount = $team->leaguePlayers->sum('bid_price');
             $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
