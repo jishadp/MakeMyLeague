@@ -343,7 +343,7 @@ class DashboardController
             ->get()
             ->groupBy('league_player_id');
 
-        // Get all teams with only their sold players (no retained players)
+        // Get all teams with their sold + retained players
         $teams = LeagueTeam::where('league_id', $league->id)
             ->with([
                 'team',
@@ -351,12 +351,16 @@ class DashboardController
                 'teamAuctioneer.auctioneer', // Include active team auctioneer
                 'leaguePlayers' => function($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
-                          ->where('status', 'sold') // Only show sold players, not retained
+                          ->where(function ($q) {
+                              $q->whereIn('status', ['retained', 'sold'])
+                                ->orWhere('retention', true);
+                          })
+                          ->orderByRaw("FIELD(status, 'retained', 'sold')")
                           ->orderBy('bid_price', 'desc');
                 }
             ])
-            ->withCount(['leaguePlayers' => function($query) {
-                $query->where('status', 'sold'); // Only count sold players
+            ->withCount(['leaguePlayers as sold_players_count' => function($query) {
+                $query->where('status', 'sold');
             }])
             ->get();
         $availableBasePrices = \App\Models\LeaguePlayer::where('league_id', $league->id)
@@ -372,7 +376,7 @@ class DashboardController
             ->pluck('count', 'league_team_id');
         $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
         $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts) {
-            $soldCount = $team->league_players_count ?? 0;
+            $soldCount = $team->sold_players_count ?? 0;
             $retainedCount = $retainedCounts[$team->id] ?? 0;
             $playersNeeded = max($auctionSlotsPerTeam - ($soldCount + $retainedCount), 0);
             $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
@@ -384,6 +388,7 @@ class DashboardController
             $team->reserve_amount = $reserveAmount;
             $team->max_bid_cap = $maxBidCap;
             $team->display_wallet = $availableWallet;
+            $team->retained_players_count = $retainedCount;
             return $team;
         });
 

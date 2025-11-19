@@ -160,11 +160,13 @@
                                                     {{ strtoupper(substr($currentPlayer->player->name, 0, 1)) }}
                                                 </div>
                                             </div>
-                                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-                                                <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                </svg>
-                                            </div>
+                                            @if($currentPlayer->retention)
+                                                <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg" title="Retained player" aria-hidden="true">
+                                                    <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="text-center sm:text-left flex-grow">
                                             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
@@ -183,6 +185,14 @@
                                                 <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
                                                     Base Price ₹<span class="basePrice">{{ $currentPlayer->base_price ?? 0 }}</span>
                                                 </span>
+                                                @if($currentPlayer->retention)
+                                                    <span class="bg-yellow-500 bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-yellow-700 border border-yellow-300 flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                        </svg>
+                                                        Retained Player
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -260,7 +270,25 @@
                                         </div>
                                         <div>
                                             <h3 class="font-bold">{{ $team->team->name }}</h3>
-                                            <p class="text-xs text-blue-100">{{ $team->league_players_count }} Players</p>
+                                            <p class="text-xs text-blue-100">{{ $team->leaguePlayers->count() }} Players</p>
+                                            @php
+                                                $retainedPlayers = $team->leaguePlayers->where('retention', true);
+                                                $boughtPlayers = $team->leaguePlayers->where('retention', false)->where('status', 'sold');
+                                            @endphp
+                                            <div class="flex flex-wrap gap-1 mt-1 text-[10px] font-semibold">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-100 border border-yellow-400/40">
+                                                    <svg class="w-3 h-3 text-yellow-200" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                    Retained {{ $team->retained_players_count ?? $retainedPlayers->count() }}
+                                                </span>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/40">
+                                                    <svg class="w-3 h-3 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 13.5a3 3 0 01-2.985 2.7H7.485A3 3 0 014.5 16.5L3 3zm6 6h6m-5 4h4m-6-8V3m6 2V3"></path>
+                                                    </svg>
+                                                    Bought {{ $team->sold_players_count ?? $boughtPlayers->count() }}
+                                                </span>
+                                            </div>
                                             @if($team->teamAuctioneer && $team->teamAuctioneer->auctioneer)
                                                 <p class="text-xs text-blue-200">
                                                     <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,40 +319,71 @@
 
                             <!-- Players List -->
                             @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
-                            <div class="p-2 bg-gray-50 max-h-48 overflow-y-auto">
-                                <div class="space-y-1">
-                                    @foreach($team->leaguePlayers as $index => $leaguePlayer)
-                                    <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="flex items-center justify-center w-5 h-5 bg-blue-600 text-white rounded-full text-xs font-bold flex-shrink-0">
-                                                {{ $index + 1 }}
-                                            </div>
-                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
-                                                <p class="text-xs text-gray-500">
-                                                    @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
-                                                        {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
-                                                    @elseif($leaguePlayer->player->position)
-                                                        {{ $leaguePlayer->player->position->name }}
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            @if($leaguePlayer->status === 'retained')
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                    ⭐ Retained
-                                                </span>
-                                            @else
-                                                <p class="text-xs font-bold text-green-600">₹{{ number_format($leaguePlayer->bid_price ?? 0) }}</p>
-                                            @endif
+                            <div class="p-3 bg-gray-50 space-y-4">
+                                @if($retainedPlayers->isNotEmpty())
+                                    <div>
+                                        <p class="text-xs font-semibold text-yellow-700 uppercase mb-1 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            Retained Players
+                                        </p>
+                                        <div class="space-y-1">
+                                            @foreach($retainedPlayers as $playerIndex => $leaguePlayer)
+                                                <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
+                                                    <div class="flex items-center space-x-2">
+                                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                                                            {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                            <p class="text-[11px] text-gray-500">
+                                                                @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
+                                                                    {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                                                                @elseif($leaguePlayer->player->position)
+                                                                    {{ $leaguePlayer->player->position->name }}
+                                                                @endif
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-[11px] font-semibold text-yellow-600">Retained</span>
+                                                </div>
+                                            @endforeach
                                         </div>
                                     </div>
-                                    @endforeach
-                                </div>
+                                @endif
+                                @if($boughtPlayers->isNotEmpty())
+                                    <div>
+                                        <p class="text-xs font-semibold text-emerald-700 uppercase mb-1 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 13.5a3 3 0 01-2.985 2.7H7.485A3 3 0 014.5 16.5L3 3zm6 6h6m-5 4h4m-6-8V3m6 2V3"></path>
+                                            </svg>
+                                            Bought Players
+                                        </p>
+                                        <div class="space-y-1">
+                                            @foreach($boughtPlayers as $leaguePlayer)
+                                                <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
+                                                    <div class="flex items-center space-x-2">
+                                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                                                            {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                            <p class="text-[11px] text-gray-500">
+                                                                @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
+                                                                    {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                                                                @elseif($leaguePlayer->player->position)
+                                                                    {{ $leaguePlayer->player->position->name }}
+                                                                @endif
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-xs font-bold text-green-600">₹{{ number_format($leaguePlayer->bid_price ?? 0) }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                             @else
                             <div class="p-3 text-center text-gray-500 text-xs">
@@ -541,6 +600,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const playerInitial = data.player.name ? data.player.name.charAt(0).toUpperCase() : 'P';
+        const isRetained = Boolean(
+            data.league_player &&
+            (data.league_player.retention === true ||
+            data.league_player.retention === 1 ||
+            data.league_player.retention === '1')
+        );
+        const retainedStar = isRetained
+            ? `<div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg" title="Retained player" aria-hidden="true">
+                    <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+               </div>`
+            : '';
+        const retainedBadge = isRetained
+            ? `<span class="bg-yellow-500 bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-yellow-700 border border-yellow-300 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                    Retained Player
+               </span>`
+            : '';
         
         playerCard.innerHTML = `
             <!-- Glassmorphism Card Style -->
@@ -568,11 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${playerInitial}
                                 </div>
                             </div>
-                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-                                <svg class="w-4 h-4 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
+                            ${retainedStar}
                         </div>
                         <div class="text-center sm:text-left flex-grow">
                             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
@@ -585,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span class="bg-green-500 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-semibold text-green-700 border border-green-300">
                                     Base Price ₹<span class="basePrice">${data.league_player.base_price}</span>
                                 </span>
+                                ${retainedBadge}
                             </div>
                         </div>
                     </div>
