@@ -456,10 +456,11 @@ class AuctionController extends Controller
                 ->latest('id')
                 ->first();
                 
-            if ($previousBid) {
-                // Refund the previous bidder
+            if ($previousBid && $previousBid->status !== 'refunded') {
+                // Refund the previous bidder only once
                 LeagueTeam::find($previousBid->league_team_id)
                     ->increment('wallet_balance', $previousBid->amount);
+                $previousBid->update(['status' => 'refunded']);
             }
 
             // Deduct new bid from current team
@@ -606,10 +607,14 @@ class AuctionController extends Controller
                 ->get();
             
             foreach ($otherBids as $bid) {
-                // Refund the bid amount to losing teams
-                LeagueTeam::find($bid->league_team_id)
-                    ->increment('wallet_balance', $bid->amount);
-                $bid->update(['status' => 'lost']);
+                // Refund the bid amount to losing teams only if not already refunded
+                if ($bid->status !== 'refunded') {
+                    LeagueTeam::find($bid->league_team_id)
+                        ->increment('wallet_balance', $bid->amount);
+                    $bid->update(['status' => 'refunded']);
+                } else {
+                    $bid->update(['status' => 'lost']);
+                }
             }
             // Adjust winning team's balance if override amount is different from bid
             if ($winningBid) {
@@ -673,9 +678,11 @@ class AuctionController extends Controller
             $bids = Auction::where('league_player_id', $leaguePlayerId)->get();
             
             foreach ($bids as $bid) {
-                // Refund the bid amount to the team
-                LeagueTeam::find($bid->league_team_id)
-                    ->increment('wallet_balance', $bid->amount);
+                // Refund the bid amount to the team only if it has not been refunded yet
+                if ($bid->status !== 'refunded') {
+                    LeagueTeam::find($bid->league_team_id)
+                        ->increment('wallet_balance', $bid->amount);
+                }
                     
                 // Mark bid as refunded
                 $bid->update(['status' => 'refunded']);

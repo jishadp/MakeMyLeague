@@ -1,5 +1,5 @@
-<div class="bottom-navigation-buttons fixed bottom-0 left-0 w-full z-[100] md:hidden">
-    <div class="max-w-md mx-auto px-4 pt-1 pb-[calc(env(safe-area-inset-bottom))]">
+<div class="bottom-navigation-buttons fixed bottom-0 left-0 w-full z-[100]">
+    <div class="max-w-md mx-auto px-4 pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         @php
             $isDashboard = request()->routeIs('dashboard');
             $isMyLeagues = request()->routeIs('my-leagues');
