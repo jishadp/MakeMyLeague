@@ -73,31 +73,31 @@
 @section('content')
 <input type="hidden" id="league-id" value="{{ $league->id }}">
 <input type="hidden" id="league-slug" value="{{ $league->slug }}">
-<div class="min-h-screen bg-gray-50 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 lg:space-y-8">
         <!-- Header -->
-        <div class="bg-white rounded-xl shadow-lg mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div class="flex items-center space-x-4">
+        <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-100/70">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900">{{ $league->name }}</h1>
-                            <p class="text-gray-600">{{ $league->game->name }} League</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $league->name }}</h1>
+                            <p class="text-sm sm:text-base text-gray-600">{{ $league->game->name }} League</p>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2 text-sm font-semibold">
                             <div class="w-3 h-3 bg-red-500 rounded-full live-indicator"></div>
-                            <span class="text-red-600 font-semibold">LIVE</span>
+                            <span class="text-red-600">LIVE</span>
                         </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div class="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
                         <div class="text-left sm:text-right">
-                            <p class="text-sm text-gray-500">Last Updated</p>
-                            <p class="text-sm font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Last Updated</p>
+                            <p class="text-base font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
                             <p class="text-xs text-gray-400" id="autoRefreshNote">Auto refreshes every 5s</p>
                         </div>
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end w-full sm:w-auto">
                             @if(isset($liveViewers))
-                                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm">
+                                <div class="flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-2xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm w-full sm:w-auto">
                                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -109,28 +109,32 @@
                                 type="button"
                                 id="refreshButton"
                                 aria-label="Refresh auction data"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-full sm:w-auto">
-                            <svg id="refreshIcon" class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
-                            </svg>
-                            <span class="text-sm hidden sm:inline">Refresh</span>
-                        </button>
-                        <a href="{{ route('auctions.index') }}" 
-                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-center w-full sm:w-auto">
-                            Back to Auctions
-                        </a>
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all w-full sm:w-auto">
+                                <svg id="refreshIcon" class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
+                                </svg>
+                                <span class="text-sm">Refresh</span>
+                            </button>
+                            <a href="{{ route('auctions.index') }}" 
+                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center w-full sm:w-auto">
+                                Back to Auctions
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Current Player Being Auctioned -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 gap-6 lg:gap-8 lg:grid-cols-12">
             <!-- Current Player Card -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Current Player</h2>
-                    <div id="currentPlayerCard" class="text-center py-8">
+            <div class="space-y-4 lg:col-span-7 xl:col-span-8">
+                <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6 lg:p-8">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Current Player</h2>
+                        <p class="text-sm text-gray-500">Live roster updates refresh in real-time</p>
+                    </div>
+                    <div id="currentPlayerCard" class="text-center py-6 sm:py-8">
                         @if(isset($currentPlayer) && $currentPlayer)
                             @php
                                 $leadingBudget = null;
@@ -149,10 +153,10 @@
                                 </div>
 
                                 <!-- Glassmorphism Content -->
-                                <div class="card__content relative z-10 p-6 sm:p-8 lg:p-10">
+                                <div class="card__content relative z-10 flex flex-col gap-8 p-6 sm:p-8 lg:p-10">
                                     <!-- Player Header -->
-                                    <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-8">
-                                        <div class="relative flex-shrink-0">
+                                    <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+                                        <div class="relative flex-shrink-0 mx-auto sm:mx-0">
                                             <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
                                                 @if($currentPlayer->player && $currentPlayer->player->photo)
                                                     <img src="{{ asset('storage/' . $currentPlayer->player->photo) }}"
@@ -178,7 +182,7 @@
                                                 </div>
                                             @endif
                                         </div>
-                                        <div class="text-center sm:text-left flex-grow">
+                                        <div class="text-center sm:text-left flex-grow w-full">
                                             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-800 playerName">
                                                 {{ $currentPlayer->player->name }}
                                             </h2>
@@ -208,7 +212,7 @@
                                     </div>
 
                                     <!-- Current Bid Row -->
-                                    <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg mb-6">
+                                    <div class="stat-card bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg">
                                         <!-- Current Bid (Main Highlight) -->
                                         <div class="text-center mb-4">
                                             <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2 bidStatus">
@@ -230,7 +234,7 @@
                                             </p>
                                         </div>
                                         @if($leadingBudget)
-                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-sm text-gray-700">
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center text-sm text-gray-700">
                                                 <div class="rounded-xl bg-white/80 px-3 py-2">
                                                     <p class="text-xs uppercase text-gray-500">Players Needed</p>
                                                     <p class="font-semibold">{{ $leadingBudget->players_needed }}</p>
@@ -251,11 +255,12 @@
                                 </div>
                             </div>
                         @else
-                            <div class="text-gray-500">
-                                <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="text-gray-500 flex flex-col items-center justify-center gap-3 py-12">
+                                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                <p class="text-lg">Waiting for next player...</p>
+                                <p class="text-lg font-semibold">Waiting for next player...</p>
+                                <p class="text-sm text-gray-400">Stay tuned, the auctioneer is preparing the next card.</p>
                             </div>
                         @endif
                     </div>
@@ -263,18 +268,21 @@
             </div>
 
             <!-- Team Cards with Players -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">
-                        Teams ({{ count($teams) }})
-                    </h2>
+            <div class="space-y-4 lg:col-span-5 xl:col-span-4">
+                <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6 flex flex-col gap-4">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                            Teams ({{ count($teams) }})
+                        </h2>
+                        <p class="text-sm text-gray-500">Tap a card on mobile to inspect full squad stats, balances, and bids.</p>
+                    </div>
                     <div class="space-y-4" id="teamsContainer">
                         @foreach($teams as $team)
-                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white/80 hover:shadow-xl transition-shadow duration-300">
                             <!-- Team Header -->
-                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-3 text-white">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+                                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold backdrop-blur-sm">
                                             {{ strtoupper(substr($team->team->name, 0, 2)) }}
                                         </div>
@@ -325,86 +333,98 @@
                                         <p class="text-[11px] text-emerald-200">Max bid now ₹{{ number_format($team->max_bid_cap) }}</p>
                                     </div>
                                 </div>
+                                <button type="button" data-team-toggle aria-controls="teamRoster-{{ $team->id }}" aria-expanded="false" class="mt-4 inline-flex items-center justify-between gap-3 rounded-xl border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white/90 transition-colors lg:hidden w-full">
+                                    <span data-toggle-label>View Squad</span>
+                                    <svg class="w-4 h-4 transition-transform duration-200" data-toggle-icon fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
                             </div>
 
-                            <!-- Players List -->
-                            @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
-                            <div class="p-3 bg-gray-50 space-y-4">
-                                @if($retainedPlayers->isNotEmpty())
-                                    <div>
-                                        <p class="text-xs font-semibold text-yellow-700 uppercase mb-1 flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                            </svg>
-                                            Retained Players
-                                        </p>
-                                        <div class="space-y-1">
-                                            @foreach($retainedPlayers as $playerIndex => $leaguePlayer)
-                                                <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
-                                                            {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
-                                                        </div>
-                                                        <div>
-                                                            <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
-                                                            <p class="text-[11px] text-gray-500">
-                                                                @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
-                                                                    {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                            <div id="teamRoster-{{ $team->id }}" class="team-roster hidden lg:block">
+                                <!-- Players List -->
+                                @if($team->leaguePlayers && $team->leaguePlayers->count() > 0)
+                                <div class="p-3 sm:p-4 bg-gray-50 space-y-4">
+                                    @if($retainedPlayers->isNotEmpty())
+                                        <div>
+                                            <p class="text-xs font-semibold text-yellow-700 uppercase mb-1 flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                                Retained Players
+                                            </p>
+                                            <div class="space-y-1.5">
+                                                @foreach($retainedPlayers as $playerIndex => $leaguePlayer)
+                                                    <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                                        <div class="flex items-center space-x-2">
+                                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                            </div>
+                                                            <div>
+                                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                                <p class="text-[11px] text-gray-500">
+                                                                    @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
+                                                                        {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
                                                                 @elseif($leaguePlayer->player->position)
-                                                                    {{ $leaguePlayer->player->position->name }}
-                                                                @endif
-                                                            </p>
+                                                                        {{ $leaguePlayer->player->position->name }}
+                                                                    @else
+                                                                        Player
+                                                                    @endif
+                                                                </p>
+                                                            </div>
                                                         </div>
+                                                        <span class="text-[11px] font-semibold text-yellow-600">Retained</span>
                                                     </div>
-                                                    <span class="text-[11px] font-semibold text-yellow-600">Retained</span>
-                                                </div>
-                                            @endforeach
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
-                                @if($boughtPlayers->isNotEmpty())
-                                    <div>
-                                        <p class="text-xs font-semibold text-emerald-700 uppercase mb-1 flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 13.5a3 3 0 01-2.985 2.7H7.485A3 3 0 014.5 16.5L3 3zm6 6h6m-5 4h4m-6-8V3m6 2V3"></path>
-                                            </svg>
-                                            Bought Players
-                                        </p>
-                                        <div class="space-y-1">
-                                            @foreach($boughtPlayers as $leaguePlayer)
-                                                <div class="flex items-center justify-between p-2 bg-white rounded text-xs">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                                                            {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
-                                                        </div>
-                                                        <div>
-                                                            <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
-                                                            <p class="text-[11px] text-gray-500">
-                                                                @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
-                                                                    {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
+                                    @endif
+                                    @if($boughtPlayers->isNotEmpty())
+                                        <div>
+                                            <p class="text-xs font-semibold text-emerald-700 uppercase mb-1 flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18l-1.5 13.5a3 3 0 01-2.985 2.7H7.485A3 3 0 014.5 16.5L3 3zm6 6h6m-5 4h4m-6-8V3m6 2V3"></path>
+                                                </svg>
+                                                Auction Wins
+                                            </p>
+                                            <div class="space-y-1.5">
+                                                @foreach($boughtPlayers as $leaguePlayer)
+                                                    <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                                        <div class="flex items-center space-x-2">
+                                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                            </div>
+                                                            <div>
+                                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                                <p class="text-[11px] text-gray-500">
+                                                                    @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
+                                                                        {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
                                                                 @elseif($leaguePlayer->player->position)
-                                                                    {{ $leaguePlayer->player->position->name }}
-                                                                @endif
-                                                            </p>
+                                                                        {{ $leaguePlayer->player->position->name }}
+                                                                    @else
+                                                                        Player
+                                                                    @endif
+                                                                </p>
+                                                            </div>
                                                         </div>
+                                                        <p class="text-xs font-bold text-green-600">₹{{ number_format($leaguePlayer->bid_price ?? 0) }}</p>
                                                     </div>
-                                                    <p class="text-xs font-bold text-green-600">₹{{ number_format($leaguePlayer->bid_price ?? 0) }}</p>
-                                                </div>
-                                            @endforeach
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
+                                </div>
+                                @else
+                                <div class="p-4 text-center text-gray-500 bg-gray-50 text-sm">
+                                    <p>No players yet</p>
+                                </div>
                                 @endif
-                            </div>
-                            @else
-                            <div class="p-3 text-center text-gray-500 text-xs">
-                                No players yet
-                            </div>
-                            @endif
 
-                            <!-- Team Stats Footer -->
-                            <div class="bg-gray-100 px-3 py-1.5 flex items-center justify-between text-xs text-gray-600">
-                                <span>Spent: <strong class="text-gray-900">₹{{ number_format($team->leaguePlayers->sum('bid_price') ?? 0) }}</strong></span>
-                                <span>Avg: <strong class="text-gray-900">₹{{ $team->leaguePlayers->count() > 0 ? number_format($team->leaguePlayers->avg('bid_price') ?? 0) : 0 }}</strong></span>
+                                <!-- Team Stats Footer -->
+                                <div class="bg-gray-100 px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-600 gap-1 text-center sm:text-left">
+                                    <span>Spent: <strong class="text-gray-900">₹{{ number_format($team->leaguePlayers->sum('bid_price') ?? 0) }}</strong></span>
+                                    <span>Avg: <strong class="text-gray-900">₹{{ $team->leaguePlayers->count() > 0 ? number_format($team->leaguePlayers->avg('bid_price') ?? 0) : 0 }}</strong></span>
+                                </div>
                             </div>
                         </div>
                         @endforeach
@@ -414,9 +434,12 @@
         </div>
 
         <!-- Recent Bids -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Bids</h2>
-            <div id="recentBids" class="space-y-3">
+        <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-4 sm:p-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Recent Bids</h2>
+                <p class="text-sm text-gray-500">Live feed of the latest 10 bids across the league.</p>
+            </div>
+            <div id="recentBids" class="space-y-3 max-h-[28rem] overflow-y-auto pr-1" aria-live="polite">
                 <div class="text-center text-gray-500 py-4">
                     <p>No recent bids yet...</p>
                 </div>
@@ -451,6 +474,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshIcon = document.getElementById('refreshIcon');
     const autoRefreshRateMs = 5000;
     let refreshInFlight = false;
+    const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
+
+    teamToggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('aria-controls');
+            const rosterPanel = document.getElementById(targetId);
+            if (!rosterPanel) {
+                return;
+            }
+
+            const willShow = rosterPanel.classList.contains('hidden');
+            rosterPanel.classList.toggle('hidden');
+            button.setAttribute('aria-expanded', willShow ? 'true' : 'false');
+
+            const label = button.querySelector('[data-toggle-label]');
+            if (label) {
+                label.textContent = willShow ? 'Hide Squad' : 'View Squad';
+            }
+
+            const icon = button.querySelector('[data-toggle-icon]');
+            if (icon) {
+                icon.classList.toggle('rotate-180', willShow);
+            }
+        });
+    });
 
     function performSoftRefresh(source = 'auto') {
         if (refreshInFlight && source === 'auto') {
@@ -701,15 +749,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function addRecentBid(data) {
         const recentBids = document.getElementById('recentBids');
         const bidElement = document.createElement('div');
-        bidElement.className = 'bid-card bg-gray-50 rounded-lg p-4 border-l-4 border-green-500';
+        bidElement.className = 'bid-card border border-gray-100 bg-white/80 rounded-2xl p-4 sm:p-5 shadow-sm';
         bidElement.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                     <span class="font-semibold text-gray-900">${data.league_team.team.name}</span>
-                    <span class="text-gray-600 ml-2">placed a bid</span>
+                    <span class="text-gray-500">placed a bid</span>
                 </div>
-                <div class="text-right">
-                    <span class="text-xl font-bold text-green-600">₹${data.new_bid}</span>
+                <div class="text-left sm:text-right">
+                    <span class="block text-xl font-bold text-emerald-600">₹${data.new_bid}</span>
                     <p class="text-xs text-gray-500">${new Date().toLocaleTimeString()}</p>
                 </div>
             </div>
@@ -810,15 +858,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Add each bid to the container
                     data.bids.forEach(bid => {
                         const bidElement = document.createElement('div');
-                        bidElement.className = 'bid-card bg-gray-50 rounded-lg p-4 border-l-4 border-green-500';
+                        bidElement.className = 'bid-card border border-gray-100 bg-white/80 rounded-2xl p-4 sm:p-5 shadow-sm';
                         bidElement.innerHTML = `
-                            <div class="flex justify-between items-center">
-                                <div>
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                                     <span class="font-semibold text-gray-900">${bid.league_team.team.name}</span>
-                                    <span class="text-gray-600 ml-2">placed a bid</span>
+                                    <span class="text-gray-500">placed a bid</span>
                                 </div>
-                                <div class="text-right">
-                                    <span class="text-xl font-bold text-green-600">₹${bid.amount}</span>
+                                <div class="text-left sm:text-right">
+                                    <span class="block text-xl font-bold text-emerald-600">₹${bid.amount}</span>
                                     <p class="text-xs text-gray-500">${new Date(bid.created_at).toLocaleTimeString()}</p>
                                 </div>
                             </div>
@@ -829,7 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // If no bids, show the empty state
                     const recentBids = document.getElementById('recentBids');
                     recentBids.innerHTML = `
-                        <div class="text-center text-gray-500 py-4">
+                        <div class="text-center text-gray-500 py-4 text-sm">
                             <p>No recent bids yet...</p>
                         </div>
                     `;
