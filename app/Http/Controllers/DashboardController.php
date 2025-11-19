@@ -379,7 +379,8 @@ class DashboardController
             $soldCount = $team->sold_players_count ?? 0;
             $retainedCount = $retainedCounts[$team->id] ?? 0;
             $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
-            $reserveAmount = $playersNeeded > 0 ? $availableBasePrices->take($playersNeeded)->sum() : 0;
+            $futureSlots = max($playersNeeded - 1, 0);
+            $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
             $spentAmount = $team->leaguePlayers->sum('bid_price');
             $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
             $availableWallet = max($baseWallet - $spentAmount, 0);
