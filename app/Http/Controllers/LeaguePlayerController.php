@@ -7,6 +7,7 @@ use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,13 +20,15 @@ class LeaguePlayerController extends Controller
      */
     public function index(League $league): View
     {
+        $statusFilter = request()->has('status') ? request()->input('status') : 'available';
+
         $query = LeaguePlayer::with(['leagueTeam.team', 'user', 'user.position'])
             ->where('league_id', $league->id)
-            ->when(request('status'), function($query, $status) {
-                if ($status === 'available') {
+            ->when($statusFilter !== '' && $statusFilter !== null, function($query) use ($statusFilter) {
+                if ($statusFilter === 'available') {
                     $query->whereIn('status', ['available', 'auctioning']);
                 } else {
-                    $query->where('status', $status);
+                    $query->where('status', $statusFilter);
                 }
             })
             ->when(request('team') && request('team') !== 'unassigned', function($query, $teamSlug) {
@@ -98,7 +101,22 @@ class LeaguePlayerController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts', 'unassignedCount', 'gamePositions'));
+        $playersWithoutRoleCount = LeaguePlayer::where('league_id', $league->id)
+            ->whereHas('user', function($query) {
+                $query->whereNull('position_id');
+            })
+            ->count();
+
+        return view('league-players.index', compact(
+            'league',
+            'leaguePlayers',
+            'teams',
+            'statusCounts',
+            'unassignedCount',
+            'gamePositions',
+            'statusFilter',
+            'playersWithoutRoleCount'
+        ));
     }
 
     /**
@@ -559,6 +577,44 @@ class LeaguePlayerController extends Controller
         return redirect()
             ->route('league-players.index', $league)
             ->with('success', "{$updated} available player(s) updated with new base price.");
+    }
+
+    /**
+     * Bulk assign "All-rounder" role to every player without a role in this league.
+     */
+    public function bulkAssignDefaultRole(League $league)
+    {
+        $defaultRoleName = 'All-rounder';
+
+        $position = GamePosition::query()
+            ->where('game_id', $league->game_id)
+            ->whereRaw('LOWER(name) = ?', [Str::lower($defaultRoleName)])
+            ->first();
+
+        if (!$position) {
+            return redirect()
+                ->route('league-players.index', $league)
+                ->withErrors(['position_id' => 'The All-rounder role is not available for this league.']);
+        }
+
+        $userIds = LeaguePlayer::where('league_id', $league->id)
+            ->whereHas('user', function($query) {
+                $query->whereNull('position_id');
+            })
+            ->pluck('user_id')
+            ->unique();
+
+        if ($userIds->isEmpty()) {
+            return redirect()
+                ->route('league-players.index', $league)
+                ->with('success', 'All players already have a role.');
+        }
+
+        $updated = User::whereIn('id', $userIds)->update(['position_id' => $position->id]);
+
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', "Assigned {$position->name} role to {$updated} player(s).");
     }
     /**
      * Handle player registration request for a league.

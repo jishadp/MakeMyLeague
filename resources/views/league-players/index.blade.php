@@ -7,6 +7,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @php
             $canManageLeague = auth()->check() && auth()->user()->canManageLeague($league->id);
+            $currentStatusFilter = $statusFilter ?? 'available';
             $sharePlayers = $league->leaguePlayers ?? collect();
             if (method_exists($sharePlayers, 'loadMissing')) {
                 $sharePlayers = $sharePlayers->loadMissing(['user.localBody', 'leagueTeam.team']);
@@ -208,6 +209,30 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Bulk Role Replacement Card -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">Bulk Role Replacement</h2>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Replace <span class="font-semibold text-indigo-700">{{ $playersWithoutRoleCount }}</span> player(s) currently marked as <span class="font-semibold">No Role</span> with the <span class="font-semibold">All-rounder</span> role.
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('league-players.bulk-default-role', $league) }}" class="flex items-end">
+                            @csrf
+                            <button type="submit"
+                                    @if($playersWithoutRoleCount === 0) disabled @endif
+                                    onclick="return confirm('Assign the All-rounder role to all players without a role?');"
+                                    class="inline-flex items-center px-4 py-2 text-white font-medium rounded-lg transition-colors text-sm {{ $playersWithoutRoleCount === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700' }}">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Replace Roles
+                            </button>
+                        </form>
+                    </div>
+                </div>
             @endif
         @endauth
 
@@ -278,7 +303,7 @@
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 @foreach($statusOptions as $value => $label)
                                     @php
-                                        $isSelected = (request('status') ?? '') === $value;
+                                        $isSelected = ($currentStatusFilter ?? '') === $value;
                                     @endphp
                                     <label
                                         class="filter-chip flex items-center justify-center px-3 py-2 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 {{ $isSelected ? $statusActiveClasses : $statusInactiveClasses }}"
