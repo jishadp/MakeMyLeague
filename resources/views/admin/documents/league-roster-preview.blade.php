@@ -4,7 +4,7 @@
     use Illuminate\Support\Str;
 @endphp
 
-@section('title', 'League Roster Preview | ' . config('app.name'))
+@section('title', 'League Roster Preview | S1' . config('app.name'))
 
 @section('styles')
 <style>
