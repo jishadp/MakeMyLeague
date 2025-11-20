@@ -83,6 +83,8 @@ class DocumentController extends Controller
      */
     public function previewLeagueRoster(Request $request): View
     {
+        $layout = $request->input('layout', 'grid');
+        $layout = in_array($layout, ['grid', 'wide'], true) ? $layout : 'grid';
         $payload = $this->prepareLeagueRosterData($request);
         $query = array_filter([
             'search' => $payload['filters']['search'] ?? null,
@@ -94,6 +96,7 @@ class DocumentController extends Controller
             'backUrl' => route('admin.documents.index', $query),
             'downloadUrl' => route('admin.documents.leagues.download', $query),
             'hideChrome' => true,
+            'layout' => $layout,
         ]));
     }
 

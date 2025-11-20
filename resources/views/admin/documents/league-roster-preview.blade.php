@@ -12,13 +12,41 @@
         background: #f1f5f9;
     }
     .print-grid {
+        display: grid;
+        gap: 20px;
+    }
+    .print-grid.compact-layout {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
-    .print-cards .player-card {
+    .print-grid.wide-layout {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .player-card {
         break-inside: avoid;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        gap: 1.5rem;
+    }
+    .player-card.is-wide {
+        flex-direction: row;
+        align-items: stretch;
+    }
+    .player-card__header {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    .player-card.is-wide .player-card__header {
+        flex: 1;
+    }
+    .player-card__meta {
+        display: grid;
+        gap: 0.75rem;
+    }
+    .player-card.is-wide .player-card__meta {
+        width: 240px;
+        flex-shrink: 0;
     }
     @media print {
         @page {
@@ -42,24 +70,34 @@
             box-shadow: none !important;
             border: none !important;
         }
-        .print-grid {
-            display: grid;
+        .print-grid.compact-layout {
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
             gap: 10px !important;
+        }
+        .print-grid.wide-layout {
+            grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
         .player-card {
             border: 1px solid #c7d2fe !important;
             padding: 14px !important;
             min-height: 230px;
         }
-        .player-card:nth-child(12n+1):not(:first-child) {
+        .print-grid.compact-layout .player-card:nth-child(12n+1):not(:first-child) {
             page-break-before: always;
+        }
+        .player-card.is-wide {
+            min-height: auto;
         }
     }
 </style>
 @endsection
 
 @section('content')
+@php
+    $layoutVariant = $layout ?? 'grid';
+    $isWideLayout = $layoutVariant === 'wide';
+    $filterQuery = collect($filters ?? [])->filter(fn ($value) => filled($value))->all();
+@endphp
 <div class="min-h-screen bg-gray-50 py-10">
     <div class="preview-shell max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="print-controls bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -86,6 +124,20 @@
                 <a href="{{ $downloadUrl }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
                     Download PDF
                 </a>
+                <div class="inline-flex items-center rounded-xl border border-slate-200 overflow-hidden">
+                    @foreach(['grid' => 'Compact Grid', 'wide' => 'Wide Detail'] as $variant => $label)
+                        @php
+                            $isActive = $layoutVariant === $variant;
+                            $variantQuery = $variant === 'grid' ? [] : ['layout' => $variant];
+                            $layoutUrl = route('admin.documents.leagues.preview', array_merge($filterQuery, $variantQuery));
+                        @endphp
+                        <a href="{{ $layoutUrl }}"
+                           class="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors {{ $isActive ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-indigo-600' }}"
+                           title="Switch to {{ strtolower($label) }} layout">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -95,10 +147,10 @@
                     No players matched the selected filters.
                 </div>
             @else
-                <div class="print-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 print-cards">
+                <div class="print-grid grid {{ $isWideLayout ? 'wide-layout' : 'compact-layout' }} gap-5 print-cards">
                     @foreach($players as $player)
-                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40">
-                            <div class="flex items-center gap-4">
+                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $isWideLayout ? 'is-wide' : '' }}">
+                            <div class="player-card__header flex items-center gap-4 {{ $isWideLayout ? 'lg:gap-6' : '' }}">
                                 <div class="relative">
                                     @if(!empty($player['photo']))
                                         <img src="{{ $player['photo'] }}" alt="{{ $player['name'] }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200">
@@ -122,7 +174,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 gap-3 text-sm text-slate-600">
+                            <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $isWideLayout ? '' : 'sm:grid-cols-2' }}">
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Place</p>
                                     <p class="font-semibold">{{ $player['place'] }}</p>
