@@ -17,7 +17,11 @@ class LiveAuctionDataService
 
         $currentPlayer = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'auctioning')
-            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->with([
+                'player.position',
+                'player.primaryGameRole.gamePosition',
+                'player.localBody.district.state',
+            ])
             ->first();
 
         $currentHighestBid = null;
@@ -43,6 +47,7 @@ class LiveAuctionDataService
                 'teamAuctioneer.auctioneer',
                 'leaguePlayers' => function ($query) {
                     $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
+                        ->with(['player.localBody.district.state'])
                         ->where(function ($q) {
                             $q->whereIn('status', ['retained', 'sold'])
                                 ->orWhere('retention', true);
@@ -103,7 +108,12 @@ class LiveAuctionDataService
 
         $lastOutcomePlayer = LeaguePlayer::where('league_id', $league->id)
             ->whereIn('status', ['sold', 'unsold'])
-            ->with(['player.position', 'player.primaryGameRole.gamePosition', 'leagueTeam.team'])
+            ->with([
+                'player.position',
+                'player.primaryGameRole.gamePosition',
+                'player.localBody.district.state',
+                'leagueTeam.team',
+            ])
             ->latest('updated_at')
             ->first();
 
