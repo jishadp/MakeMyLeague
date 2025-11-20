@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GamePosition;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
@@ -92,7 +93,12 @@ class LeaguePlayerController extends Controller
             'leaguePlayers.leagueTeam.team',
         ]);
 
-        return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts', 'unassignedCount'));
+        $gamePositions = GamePosition::query()
+            ->when($league->game_id, fn ($query) => $query->where('game_id', $league->game_id))
+            ->orderBy('name')
+            ->get();
+
+        return view('league-players.index', compact('league', 'leaguePlayers', 'teams', 'statusCounts', 'unassignedCount', 'gamePositions'));
     }
 
     /**
@@ -437,6 +443,45 @@ class LeaguePlayerController extends Controller
         }
 
         return back()->with('success', $successMessage);
+    }
+
+    /**
+     * Update a player's primary game role from the league roster.
+     */
+    public function updateRole(Request $request, League $league, LeaguePlayer $leaguePlayer)
+    {
+        if ($leaguePlayer->league_id !== $league->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'position_id' => 'required|exists:game_positions,id',
+        ]);
+
+        $position = GamePosition::query()
+            ->when($league->game_id, fn ($query) => $query->where('game_id', $league->game_id))
+            ->find($validated['position_id']);
+
+        if (!$position) {
+            return redirect()
+                ->route('league-players.index', $league)
+                ->withErrors(['position_id' => 'Selected role is not available for this league.']);
+        }
+
+        $player = $leaguePlayer->user;
+
+        if (!$player) {
+            return redirect()
+                ->route('league-players.index', $league)
+                ->withErrors(['player' => 'Unable to load the selected player.']);
+        }
+
+        $player->position_id = $position->id;
+        $player->save();
+
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', sprintf("%s's role updated to %s.", $player->name, $position->name));
     }
 
     /**

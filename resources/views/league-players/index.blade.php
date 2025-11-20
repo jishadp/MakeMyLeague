@@ -6,6 +6,7 @@
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @php
+            $canManageLeague = auth()->check() && auth()->user()->canManageLeague($league->id);
             $sharePlayers = $league->leaguePlayers ?? collect();
             if (method_exists($sharePlayers, 'loadMissing')) {
                 $sharePlayers = $sharePlayers->loadMissing(['user.localBody', 'leagueTeam.team']);
@@ -465,9 +466,30 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">
-                                            {{ $leaguePlayer->user->position->name ?? 'No Role' }}
-                                        </div>
+                                        @php
+                                            $playerRoleName = optional(optional($leaguePlayer->user)->position)->name ?? 'Assign Role';
+                                            $playerRoleId = optional($leaguePlayer->user)->position_id;
+                                        @endphp
+                                        @if($canManageLeague && $gamePositions->isNotEmpty())
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-sm font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                                                data-role-button
+                                                data-player-name="{{ $leaguePlayer->user->name }}"
+                                                data-current-role-id="{{ $playerRoleId }}"
+                                                data-role-action="{{ route('league-players.update-role', [$league, $leaguePlayer]) }}"
+                                                title="Update role for {{ $leaguePlayer->user->name }}"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M4 13.5V19h5.5l9.268-9.268a1.5 1.5 0 10-2.121-2.121L4 13.5z" />
+                                                </svg>
+                                                <span>{{ $playerRoleName }}</span>
+                                            </button>
+                                        @else
+                                            <div class="text-sm text-gray-900">
+                                                {{ $playerRoleName }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                         ₹{{ number_format($leaguePlayer->base_price) }}
@@ -558,6 +580,45 @@
             @endif
         </div>
         
+        @if($canManageLeague && $gamePositions->isNotEmpty())
+            <div id="playerRoleModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+                    <button type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" data-role-modal-close>
+                        <span class="sr-only">Close</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-indigo-500">Player Role</p>
+                            <h3 class="text-2xl font-semibold text-gray-900 mt-2">Update Role</h3>
+                            <p class="text-sm text-gray-500">Assign a primary role for <span id="rolePlayerName" class="font-semibold text-gray-900">&nbsp;</span>.</p>
+                        </div>
+                        <form id="playerRoleForm" method="POST" class="space-y-5">
+                            @csrf
+                            @method('PATCH')
+                            <div>
+                                <label for="roleSelect" class="text-sm font-medium text-gray-700">Select role</label>
+                                <select id="roleSelect" name="position_id" class="mt-2 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500" required>
+                                    <option value="">Choose a role</option>
+                                    @foreach($gamePositions as $position)
+                                        <option value="{{ $position->id }}">{{ $position->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-end gap-3">
+                                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200" data-role-modal-close>Cancel</button>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+        
 </div>
 </div>
 @endsection
@@ -611,6 +672,69 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    const roleModal = document.getElementById('playerRoleModal');
+    if (roleModal) {
+        const body = document.body;
+        const roleForm = document.getElementById('playerRoleForm');
+        const roleSelect = document.getElementById('roleSelect');
+        const rolePlayerName = document.getElementById('rolePlayerName');
+
+        const closeRoleModal = () => {
+            roleModal.classList.add('hidden');
+            roleModal.classList.remove('flex');
+            body.classList.remove('overflow-hidden');
+            if (roleForm) {
+                roleForm.reset();
+            }
+        };
+
+        document.querySelectorAll('[data-role-button]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const { playerName = '', currentRoleId = '', roleAction = '' } = button.dataset;
+                if (roleForm && roleAction) {
+                    roleForm.action = roleAction;
+                }
+                if (roleSelect) {
+                    roleSelect.value = currentRoleId || '';
+                    if (!roleSelect.value) {
+                        roleSelect.selectedIndex = 0;
+                    }
+                }
+                if (rolePlayerName) {
+                    rolePlayerName.textContent = playerName || 'this player';
+                }
+                roleModal.classList.remove('hidden');
+                roleModal.classList.add('flex');
+                body.classList.add('overflow-hidden');
+                setTimeout(() => {
+                    if (roleSelect) {
+                        roleSelect.focus();
+                    }
+                }, 50);
+            });
+        });
+
+        roleModal.querySelectorAll('[data-role-modal-close]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                closeRoleModal();
+            });
+        });
+
+        roleModal.addEventListener('click', (event) => {
+            if (event.target === roleModal) {
+                closeRoleModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !roleModal.classList.contains('hidden')) {
+                closeRoleModal();
+            }
+        });
+    }
 });
 </script>
 @endsection
