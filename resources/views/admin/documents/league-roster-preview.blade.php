@@ -11,10 +11,20 @@
     .preview-shell {
         background: #f1f5f9;
     }
+    .print-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
     .print-cards .player-card {
         break-inside: avoid;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     @media print {
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
         body {
             background: #fff;
         }
@@ -35,10 +45,15 @@
         .print-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 12px !important;
+            gap: 10px !important;
         }
         .player-card {
             border: 1px solid #c7d2fe !important;
+            padding: 14px !important;
+            min-height: 230px;
+        }
+        .player-card:nth-child(12n+1):not(:first-child) {
+            page-break-before: always;
         }
     }
 </style>
@@ -82,7 +97,7 @@
             @else
                 <div class="print-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 print-cards">
                     @foreach($players as $player)
-                        <div class="border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40">
+                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40">
                             <div class="flex items-center gap-4">
                                 <div class="relative">
                                     @if(!empty($player['photo']))
