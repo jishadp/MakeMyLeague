@@ -18,6 +18,10 @@
     .print-grid.compact-layout {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
+    .print-grid.compact-layout.cards-16 {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
     .print-grid.wide-layout {
         grid-template-columns: repeat(1, minmax(0, 1fr));
     }
@@ -28,6 +32,10 @@
         justify-content: space-between;
         gap: 1.5rem;
     }
+    .player-card.is-dense {
+        padding: 14px;
+        gap: 1rem;
+    }
     .player-card.is-wide {
         flex-direction: row;
         align-items: stretch;
@@ -37,12 +45,19 @@
         gap: 1rem;
         align-items: center;
     }
+    .player-card.is-dense .player-card__header {
+        gap: 0.75rem;
+    }
     .player-card.is-wide .player-card__header {
         flex: 1;
     }
     .player-card__meta {
         display: grid;
         gap: 0.75rem;
+    }
+    .player-card.is-dense .player-card__meta {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
     .player-card.is-wide .player-card__meta {
         width: 240px;
@@ -70,8 +85,12 @@
             box-shadow: none !important;
             border: none !important;
         }
-        .print-grid.compact-layout {
+        .print-grid.compact-layout.cards-12 {
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 12px !important;
+        }
+        .print-grid.compact-layout.cards-16 {
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
             gap: 10px !important;
         }
         .print-grid.wide-layout {
@@ -82,7 +101,14 @@
             padding: 14px !important;
             min-height: 230px;
         }
-        .print-grid.compact-layout .player-card:nth-child(12n+1):not(:first-child) {
+        .print-grid.compact-layout.cards-16 .player-card {
+            min-height: 190px;
+            padding: 12px !important;
+        }
+        .print-grid.compact-layout.cards-12 .player-card:nth-child(12n+1):not(:first-child) {
+            page-break-before: always;
+        }
+        .print-grid.compact-layout.cards-16 .player-card:nth-child(16n+1):not(:first-child) {
             page-break-before: always;
         }
         .player-card.is-wide {
@@ -96,6 +122,9 @@
 @php
     $layoutVariant = $layout ?? 'grid';
     $isWideLayout = $layoutVariant === 'wide';
+    $cardsPerPage = in_array($cardsPerPage ?? null, [12, 16], true) ? (int) $cardsPerPage : 12;
+    $gridLayoutClass = $isWideLayout ? 'wide-layout' : 'compact-layout cards-' . $cardsPerPage;
+    $cardModifierClass = (!$isWideLayout && $cardsPerPage === 16) ? 'is-dense' : '';
     $filterQuery = collect($filters ?? [])->filter(fn ($value) => filled($value))->all();
 @endphp
 <div class="min-h-screen bg-gray-50 py-10">
@@ -129,11 +158,33 @@
                         @php
                             $isActive = $layoutVariant === $variant;
                             $variantQuery = $variant === 'grid' ? [] : ['layout' => $variant];
-                            $layoutUrl = route('admin.documents.leagues.preview', array_merge($filterQuery, $variantQuery));
+                            $cardsQuery = $cardsPerPage === 12 ? [] : ['cards_per_page' => $cardsPerPage];
+                            $layoutUrl = route(
+                                'admin.documents.leagues.preview',
+                                array_filter(array_merge($filterQuery, $variantQuery, $cardsQuery), fn ($value) => filled($value))
+                            );
                         @endphp
                         <a href="{{ $layoutUrl }}"
                            class="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors {{ $isActive ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-indigo-600' }}"
                            title="Switch to {{ strtolower($label) }} layout">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+                <div class="inline-flex items-center rounded-xl border border-slate-200 overflow-hidden">
+                    @foreach([12 => '12 cards · 3x4', 16 => '16 cards · 4x4'] as $cardsOption => $label)
+                        @php
+                            $isCardsActive = $cardsPerPage === $cardsOption;
+                            $cardsQuery = $cardsOption === 12 ? [] : ['cards_per_page' => $cardsOption];
+                            $layoutQuery = $layoutVariant === 'wide' ? ['layout' => 'wide'] : [];
+                            $cardsUrl = route(
+                                'admin.documents.leagues.preview',
+                                array_filter(array_merge($filterQuery, $cardsQuery, $layoutQuery), fn ($value) => filled($value))
+                            );
+                        @endphp
+                        <a href="{{ $cardsUrl }}"
+                           class="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors {{ $isCardsActive ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-indigo-600' }}"
+                           title="Show {{ $label }} per page when printing">
                             {{ $label }}
                         </a>
                     @endforeach
@@ -147,9 +198,9 @@
                     No players matched the selected filters.
                 </div>
             @else
-                <div class="print-grid grid {{ $isWideLayout ? 'wide-layout' : 'compact-layout' }} gap-5 print-cards">
+                <div class="print-grid grid {{ $gridLayoutClass }} print-cards">
                     @foreach($players as $player)
-                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $isWideLayout ? 'is-wide' : '' }}">
+                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $isWideLayout ? 'is-wide' : $cardModifierClass }}">
                             <div class="player-card__header flex items-center gap-4 {{ $isWideLayout ? 'lg:gap-6' : '' }}">
                                 <div class="relative">
                                     @if(!empty($player['photo']))
