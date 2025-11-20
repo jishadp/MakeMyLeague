@@ -94,7 +94,7 @@
                 <h1 class="text-3xl sm:text-4xl font-bold mt-2">{{ $leagueModel->name }}</h1>
                 <p class="text-slate-300 text-lg">{{ $leagueModel->game->name }} League</p>
             </div>
-            <div class="flex flex-wrap gap-6 text-sm">
+            <div class="flex flex-wrap gap-6 text-sm items-center">
                 <div>
                     <p class="text-slate-400 uppercase text-xs tracking-wide">Viewers</p>
                     <p class="text-3xl font-semibold">{{ $liveViewers }}</p>
@@ -103,10 +103,17 @@
                     <p class="text-slate-400 uppercase text-xs tracking-wide">Last Update</p>
                     <p class="text-3xl font-semibold">{{ $lastUpdated ?? now()->format('H:i:s') }}</p>
                 </div>
-                <button type="button" wire:click="refreshData"
-                    class="px-5 py-2.5 rounded-full bg-slate-100 text-slate-900 font-semibold shadow-lg hover:bg-white transition">
-                    Refresh Data
-                </button>
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <button type="button" wire:click="refreshData"
+                        class="px-4 py-2 rounded-full bg-slate-100 text-slate-900 font-semibold shadow-lg hover:bg-white transition">
+                        Refresh Data
+                    </button>
+                    <button type="button"
+                        onclick="window.location.reload()"
+                        class="px-4 py-2 rounded-full border border-slate-500/60 text-slate-200 font-semibold hover:border-white transition">
+                        Reload Page
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -212,21 +219,38 @@
                 <section class="broadcast-panel p-6 sm:p-7">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xl font-semibold">Recent Bids</h3>
-                        <span class="text-slate-400 text-sm">Auto-updating</span>
+                        <div class="flex items-center gap-3 text-slate-400 text-sm">
+                            <span class="hidden sm:inline">Auto-updating</span>
+                            <button type="button"
+                                    wire:click="toggleRecentBids"
+                                    class="inline-flex items-center gap-1 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition hover:border-emerald-400 hover:text-white">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if($recentBidsCollapsed)
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v14m-7-7h14" />
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14" />
+                                    @endif
+                                </svg>
+                                {{ $recentBidsCollapsed ? 'Show' : 'Hide' }}
+                            </button>
+                        </div>
                     </div>
-                    <div class="mt-4 space-y-3 text-sm">
-                        @forelse($recentBids as $bid)
-                            <div class="rounded-2xl border border-slate-700/80 bg-slate-900/30 p-4 flex items-center justify-between gap-4">
-                                <div>
-                                    <p class="text-base font-semibold">{{ $bid->leagueTeam->team->name ?? 'Team' }}</p>
-                                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ $bid->created_at->timezone(config('app.timezone'))->format('h:i:s A') }}</p>
+
+                    @if(!$recentBidsCollapsed)
+                        <div class="mt-4 space-y-3 text-sm">
+                            @forelse($recentBids as $bid)
+                                <div class="rounded-2xl border border-slate-700/80 bg-slate-900/30 p-4 flex items-center justify-between gap-4">
+                                    <div>
+                                        <p class="text-base font-semibold">{{ $bid->leagueTeam->team->name ?? 'Team' }}</p>
+                                        <p class="text-xs uppercase tracking-wide text-slate-400">{{ $bid->created_at->timezone(config('app.timezone'))->format('h:i:s A') }}</p>
+                                    </div>
+                                    <div class="text-2xl font-bold text-emerald-300">Rs {{ number_format($bid->amount) }}</div>
                                 </div>
-                                <div class="text-2xl font-bold text-emerald-300">Rs {{ number_format($bid->amount) }}</div>
-                            </div>
-                        @empty
-                            <p class="text-slate-400">Waiting for live bids...</p>
-                        @endforelse
-                    </div>
+                            @empty
+                                <p class="text-slate-400">Waiting for live bids...</p>
+                            @endforelse
+                        </div>
+                    @endif
                 </section>
             </div>
         </div>
