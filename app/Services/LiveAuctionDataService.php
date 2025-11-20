@@ -101,8 +101,8 @@ class LiveAuctionDataService
         Cache::put($viewerKey, $viewerSessions, now()->addMinutes(10));
         $liveViewers = count($viewerSessions);
 
-        $lastSoldPlayer = LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'sold')
+        $lastOutcomePlayer = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['sold', 'unsold'])
             ->with(['player.position', 'player.primaryGameRole.gamePosition', 'leagueTeam.team'])
             ->latest('updated_at')
             ->first();
@@ -143,7 +143,7 @@ class LiveAuctionDataService
             'currentHighestBid',
             'teams',
             'liveViewers',
-            'lastSoldPlayer',
+            'lastOutcomePlayer',
             'recentBids',
             'recentSoldPlayers',
             'topSoldPlayers'

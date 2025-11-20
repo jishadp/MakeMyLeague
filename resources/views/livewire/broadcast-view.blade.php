@@ -28,16 +28,6 @@
             padding: 1.25rem;
             transition: transform 0.3s ease, border-color 0.3s ease;
         }
-
-        .sale-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.88);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 2rem;
-        }
     </style>
 @endonce
 
@@ -47,11 +37,11 @@
     $currentHighestBid = $payload['currentHighestBid'];
     $teams = $payload['teams'];
     $liveViewers = $payload['liveViewers'];
-    $lastSoldPlayer = $payload['lastSoldPlayer'];
+    $lastOutcomePlayer = $payload['lastOutcomePlayer'];
     $recentBids = $payload['recentBids'];
 
-    $isShowingLastSold = !$currentPlayer && $lastSoldPlayer;
-    $displayLeaguePlayer = $currentPlayer ?? $lastSoldPlayer;
+    $isShowingLastResult = !$currentPlayer && $lastOutcomePlayer;
+    $displayLeaguePlayer = $currentPlayer ?? $lastOutcomePlayer;
     $displayPlayer = $displayLeaguePlayer?->player;
     $playerPhoto = $displayPlayer && $displayPlayer->photo ? asset('storage/' . $displayPlayer->photo) : asset('images/defaultplayer.jpeg');
     $playerInitial = $displayPlayer ? strtoupper(substr($displayPlayer->name, 0, 1)) : '?';
@@ -59,27 +49,34 @@
         ?? $displayPlayer?->position?->name
         ?? 'Awaiting player';
     $basePrice = $displayLeaguePlayer?->base_price ?? null;
-    $lastSoldTeamName = $lastSoldPlayer?->leagueTeam?->team?->name;
+    $lastOutcomeTeamName = $lastOutcomePlayer?->leagueTeam?->team?->name;
     $currentBidAmount = $currentHighestBid?->amount ?? null;
-    $soldAmount = $lastSoldPlayer?->bid_price;
-    $highestAmount = $currentPlayer ? ($currentBidAmount ?? $basePrice) : ($soldAmount ?? null);
+    $soldAmount = $lastOutcomePlayer?->bid_price;
+    $lastOutcomeStatus = $lastOutcomePlayer?->status;
+    $isSoldOutcome = $isShowingLastResult && $lastOutcomeStatus === 'sold';
+    $isUnsoldOutcome = $isShowingLastResult && $lastOutcomeStatus === 'unsold';
+    $highestAmount = $currentPlayer ? ($currentBidAmount ?? $basePrice) : ($isSoldOutcome ? $soldAmount : null);
     $highestTeamName = $currentPlayer
         ? ($currentHighestBid && $currentHighestBid->leagueTeam && $currentHighestBid->leagueTeam->team
             ? $currentHighestBid->leagueTeam->team->name
             : 'Awaiting bids')
-        : ($lastSoldTeamName ? 'Sold to ' . $lastSoldTeamName : 'Awaiting next player');
+        : ($isSoldOutcome
+            ? ($lastOutcomeTeamName ? 'Sold to ' . $lastOutcomeTeamName : 'Sold')
+            : ($isUnsoldOutcome ? 'Unsold - back to pool' : 'Waiting for player'));
     $bidLabel = $currentPlayer
         ? ($currentHighestBid ? 'Current Bid' : 'Base Price')
-        : ($lastSoldPlayer ? 'Sold Price' : 'Status');
+        : ($lastOutcomePlayer ? ($isUnsoldOutcome ? 'Status' : 'Sold Price') : 'Status');
     $spotlightTeam = null;
     if ($currentHighestBid && $currentHighestBid->leagueTeam) {
         $spotlightTeam = $teams->firstWhere('id', $currentHighestBid->leagueTeam->id);
-    } elseif ($isShowingLastSold && $lastSoldPlayer?->leagueTeam) {
-        $spotlightTeam = $teams->firstWhere('id', $lastSoldPlayer->league_team_id);
+    } elseif ($isShowingLastResult && $lastOutcomePlayer?->leagueTeam) {
+        $spotlightTeam = $teams->firstWhere('id', $lastOutcomePlayer->league_team_id);
     }
     $playerStatusText = $currentPlayer
         ? ($currentPlayer->retention ? 'Retained' : 'Auctioning')
-        : ($lastSoldPlayer ? ($lastSoldTeamName ? 'Sold to ' . $lastSoldTeamName : 'Sold') : 'Waiting for player');
+        : ($lastOutcomePlayer
+            ? ($isUnsoldOutcome ? 'Unsold' : ($lastOutcomeTeamName ? 'Sold to ' . $lastOutcomeTeamName : 'Sold'))
+            : 'Waiting for player');
 @endphp
 
 <div wire:poll.1s="refreshData">
@@ -119,30 +116,31 @@
 
         <div class="grid gap-8 xl:grid-cols-2">
             <section class="relative broadcast-panel p-6 sm:p-8">
-                @if($currentPlayer === null && $lastSoldPlayer)
-                    <div class="sale-overlay visible">
-                        <img src="{{ asset('images/auction/sold.png') }}" alt="Sold animation">
-                    </div>
-                @endif
-
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <div class="lg:w-1/2">
                         <div class="relative overflow-hidden rounded-3xl border border-slate-700/70 bg-black/30 shadow-2xl">
                             <img src="{{ $playerPhoto }}" alt="{{ $displayPlayer->name ?? 'Awaiting player' }}"
-                                class="w-full h-[22rem] object-cover {{ $currentPlayer ? '' : 'opacity-70' }}">
+                                class="w-full h-[22rem] object-cover {{ $currentPlayer ? '' : 'opacity-100' }}">
                             <div class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white/40"
                                 @if($displayPlayer) style="display:none" @endif>
                                 {{ $playerInitial }}
                             </div>
+                            @if($isShowingLastResult && ($isSoldOutcome || $isUnsoldOutcome))
+                                <div class="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm pointer-events-none">
+                                    <img src="{{ asset('images/auction/' . ($isUnsoldOutcome ? 'unsold' : 'sold') . '.png') }}"
+                                         alt="{{ $isUnsoldOutcome ? 'Unsold animation' : 'Sold animation' }}"
+                                         class="w-24 sm:w-28 md:w-32 animate-bounce drop-shadow-2xl">
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div class="lg:w-1/2 space-y-6">
                         <div>
-                            <p class="text-slate-400 text-sm tracking-wide uppercase">{{ $isShowingLastSold ? 'Last Sold Player' : 'Current Player' }}</p>
+                            <p class="text-slate-400 text-sm tracking-wide uppercase">{{ $isShowingLastResult ? 'Last Player' : 'Current Player' }}</p>
                             <h2 class="text-3xl font-bold mt-1">{{ $displayPlayer->name ?? 'Waiting for next player' }}</h2>
                             <p class="text-lg text-slate-300">{{ $playerRole }}</p>
-                            @if($isShowingLastSold)
+                            @if($isShowingLastResult)
                                 <p class="text-sm text-slate-400 mt-2">Waiting for the next player to enter the auction floor.</p>
                             @endif
                         </div>
@@ -215,43 +213,6 @@
                         </div>
                     </div>
                 </section>
-
-                <section class="broadcast-panel p-6 sm:p-7">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-semibold">Recent Bids</h3>
-                        <div class="flex items-center gap-3 text-slate-400 text-sm">
-                            <span class="hidden sm:inline">Auto-updating</span>
-                            <button type="button"
-                                    wire:click="toggleRecentBids"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition hover:border-emerald-400 hover:text-white">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    @if($recentBidsCollapsed)
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v14m-7-7h14" />
-                                    @else
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14" />
-                                    @endif
-                                </svg>
-                                {{ $recentBidsCollapsed ? 'Show' : 'Hide' }}
-                            </button>
-                        </div>
-                    </div>
-
-                    @if(!$recentBidsCollapsed)
-                        <div class="mt-4 space-y-3 text-sm">
-                            @forelse($recentBids as $bid)
-                                <div class="rounded-2xl border border-slate-700/80 bg-slate-900/30 p-4 flex items-center justify-between gap-4">
-                                    <div>
-                                        <p class="text-base font-semibold">{{ $bid->leagueTeam->team->name ?? 'Team' }}</p>
-                                        <p class="text-xs uppercase tracking-wide text-slate-400">{{ $bid->created_at->timezone(config('app.timezone'))->format('h:i:s A') }}</p>
-                                    </div>
-                                    <div class="text-2xl font-bold text-emerald-300">Rs {{ number_format($bid->amount) }}</div>
-                                </div>
-                            @empty
-                                <p class="text-slate-400">Waiting for live bids...</p>
-                            @endforelse
-                        </div>
-                    @endif
-                </section>
             </div>
         </div>
 
@@ -296,6 +257,43 @@
                     </div>
                 @endforeach
             </div>
+        </section>
+
+        <section class="broadcast-panel p-6 sm:p-8">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Recent Bids</h3>
+                <div class="flex items-center gap-3 text-slate-400 text-sm">
+                    <span class="hidden sm:inline">Auto-updating</span>
+                    <button type="button"
+                            wire:click="toggleRecentBids"
+                            class="inline-flex items-center gap-1 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition hover:border-emerald-400 hover:text-white">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            @if($recentBidsCollapsed)
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v14m-7-7h14" />
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14" />
+                            @endif
+                        </svg>
+                        {{ $recentBidsCollapsed ? 'Show' : 'Hide' }}
+                    </button>
+                </div>
+            </div>
+
+            @if(!$recentBidsCollapsed)
+                <div class="mt-4 space-y-3 text-sm">
+                    @forelse($recentBids as $bid)
+                        <div class="rounded-2xl border border-slate-700/80 bg-slate-900/30 p-4 flex items-center justify-between gap-4">
+                            <div>
+                                <p class="text-base font-semibold">{{ $bid->leagueTeam->team->name ?? 'Team' }}</p>
+                                <p class="text-xs uppercase tracking-wide text-slate-400">{{ $bid->created_at->timezone(config('app.timezone'))->format('h:i:s A') }}</p>
+                            </div>
+                            <div class="text-2xl font-bold text-emerald-300">Rs {{ number_format($bid->amount) }}</div>
+                        </div>
+                    @empty
+                        <p class="text-slate-400">Waiting for live bids...</p>
+                    @endforelse
+                </div>
+            @endif
         </section>
     </div>
 </section>
