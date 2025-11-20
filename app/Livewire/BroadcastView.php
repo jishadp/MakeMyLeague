@@ -12,8 +12,6 @@ class BroadcastView extends Component
 
     public string $lastUpdated;
 
-    public bool $recentBidsCollapsed = false;
-
     protected LiveAuctionDataService $dataService;
 
     public function boot(LiveAuctionDataService $dataService)
@@ -27,14 +25,10 @@ class BroadcastView extends Component
         $this->lastUpdated = now()->format('H:i:s');
     }
 
-    public function toggleRecentBids(): void
-    {
-        $this->recentBidsCollapsed = ! $this->recentBidsCollapsed;
-    }
-
     public function refreshData(): void
     {
         $this->lastUpdated = now()->format('H:i:s');
+        $this->forgetComputed('payload');
     }
 
     public function getPayloadProperty(): array

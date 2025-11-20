@@ -117,14 +117,6 @@ class LiveAuctionDataService
             ->latest('updated_at')
             ->first();
 
-        $recentBids = Auction::with('leagueTeam.team')
-            ->whereHas('leagueTeam', function ($query) use ($league) {
-                $query->where('league_id', $league->id);
-            })
-            ->latest('created_at')
-            ->take(8)
-            ->get();
-
         $soldPlayersBaseQuery = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'sold')
             ->with([
@@ -154,7 +146,6 @@ class LiveAuctionDataService
             'teams',
             'liveViewers',
             'lastOutcomePlayer',
-            'recentBids',
             'recentSoldPlayers',
             'topSoldPlayers'
         );

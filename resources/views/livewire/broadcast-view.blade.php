@@ -137,7 +137,7 @@
     $teams = $payload['teams'];
     $liveViewers = $payload['liveViewers'];
     $lastOutcomePlayer = $payload['lastOutcomePlayer'];
-    $recentBids = $payload['recentBids'];
+    $recentSoldPlayers = $payload['recentSoldPlayers'];
     $refreshIntervalSeconds = 30;
 
     $isShowingLastResult = !$currentPlayer && $lastOutcomePlayer;
@@ -351,6 +351,66 @@
 
         <section class="broadcast-panel p-6 sm:p-8">
             <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Recent Auctions</p>
+                    <h3 class="text-xl font-semibold mt-1">Player Spotlight</h3>
+                </div>
+                <p class="text-sm text-slate-400">Latest sold players</p>
+            </div>
+            <div class="mt-4 overflow-x-auto pb-2">
+                <div class="flex gap-4 min-w-full">
+                    @forelse($recentSoldPlayers as $sold)
+                        @php
+                            $soldPlayer = $sold->player;
+                            $soldPhoto = $soldPlayer?->photo ? asset('storage/' . $soldPlayer->photo) : asset('images/defaultplayer.jpeg');
+                            $soldTeam = $sold->leagueTeam?->team;
+                            $soldTeamLogoPath = $soldTeam?->logo ?? null;
+                            $soldTeamLogo = $soldTeamLogoPath ? asset('storage/' . $soldTeamLogoPath) : null;
+                            $soldTeamInitial = $soldTeam ? strtoupper(substr($soldTeam->name ?? 'T', 0, 1)) : 'T';
+                            $soldRole = $soldPlayer?->primaryGameRole?->gamePosition?->name ?? $soldPlayer?->position?->name ?? 'Player';
+                        @endphp
+                        <div class="min-w-[16rem] max-w-[18rem] bg-slate-900/40 border border-slate-700/60 rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="player-thumb w-12 h-12">
+                                    <img src="{{ $soldPhoto }}" alt="{{ $soldPlayer->name ?? 'Player' }} photo">
+                                </span>
+                                <div>
+                                    <p class="text-sm uppercase text-slate-400">Sold for</p>
+                                    <p class="text-2xl font-bold text-white">Rs {{ number_format($sold->bid_price ?? 0) }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-400 uppercase tracking-wide">Player</p>
+                                <p class="text-lg font-semibold text-white leading-tight">{{ $soldPlayer->name ?? 'Player' }}</p>
+                                <p class="text-xs text-slate-400">{{ $soldRole }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="team-logo w-10 h-10 rounded-xl" aria-hidden="true">
+                                    @if($soldTeamLogo)
+                                        <img src="{{ $soldTeamLogo }}" alt="{{ $soldTeam->name ?? 'Team' }} logo">
+                                    @else
+                                        {{ $soldTeamInitial }}
+                                    @endif
+                                </span>
+                                <div>
+                                    <p class="text-xs uppercase text-slate-400">Team</p>
+                                    <p class="text-sm font-semibold text-white">{{ $soldTeam->name ?? 'Team TBD' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-400">
+                                <span>Base: Rs {{ number_format($sold->base_price ?? 0) }}</span>
+                                <span>{{ $sold->updated_at?->timezone(config('app.timezone'))->format('d M, H:i') }}</span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-slate-400">No recent auctions yet.</p>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        <section class="broadcast-panel p-6 sm:p-8">
+            <div class="flex items-center justify-between gap-4">
                 <h3 class="text-2xl font-semibold">League Teams</h3>
                 <p class="text-sm text-slate-400">Wallets and roster progress update live</p>
             </div>
@@ -466,42 +526,6 @@
             </div>
         </section>
 
-        <section class="broadcast-panel p-6 sm:p-8">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-semibold">Recent Bids</h3>
-                <div class="flex items-center gap-3 text-slate-400 text-sm">
-                    <span class="hidden sm:inline">Auto-updating</span>
-                    <button type="button"
-                            wire:click="toggleRecentBids"
-                            class="inline-flex items-center gap-1 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition hover:border-emerald-400 hover:text-white">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            @if($recentBidsCollapsed)
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v14m-7-7h14" />
-                            @else
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14" />
-                            @endif
-                        </svg>
-                        {{ $recentBidsCollapsed ? 'Show' : 'Hide' }}
-                    </button>
-                </div>
-            </div>
-
-            @if(!$recentBidsCollapsed)
-                <div class="mt-4 space-y-3 text-sm">
-                    @forelse($recentBids as $bid)
-                        <div class="rounded-2xl border border-slate-700/80 bg-slate-900/30 p-4 flex items-center justify-between gap-4">
-                            <div>
-                                <p class="text-base font-semibold">{{ $bid->leagueTeam->team->name ?? 'Team' }}</p>
-                                <p class="text-xs uppercase tracking-wide text-slate-400">{{ $bid->created_at->timezone(config('app.timezone'))->format('h:i:s A') }}</p>
-                            </div>
-                            <div class="text-2xl font-bold text-emerald-300">Rs {{ number_format($bid->amount) }}</div>
-                        </div>
-                    @empty
-                        <p class="text-slate-400">Waiting for live bids...</p>
-                    @endforelse
-                </div>
-            @endif
-        </section>
     </div>
 </section>
 
