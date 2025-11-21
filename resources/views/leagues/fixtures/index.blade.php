@@ -9,8 +9,17 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-12 relative z-10">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div>
-                    <p class="uppercase tracking-[0.18em] text-xs font-semibold text-green-200/80">Season {{ $league->season }}</p>
-                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">{{ $league->name }} Fixtures</h1>
+                    <div class="flex items-center gap-3">
+                        @if($league->logo)
+                            <div class="w-12 h-12 rounded-2xl bg-white/20 border border-white/40 overflow-hidden">
+                                <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" class="w-full h-full object-cover">
+                            </div>
+                        @endif
+                        <div>
+                            <p class="uppercase tracking-[0.18em] text-xs font-semibold text-green-200/80">Season {{ $league->season }}</p>
+                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">{{ $league->name }} Fixtures</h1>
+                        </div>
+                    </div>
                     <p class="text-green-100/80 mt-2 text-sm sm:text-base">Group breakdown, head-to-head cards with retention cores, and marquee buys.</p>
                     <div class="flex items-center gap-3 mt-4 text-xs text-green-100/70">
                         <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
@@ -32,8 +41,12 @@
             <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach($topBoughtOverall as $player)
                     <div class="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-indigo-500 flex items-center justify-center text-lg font-bold text-slate-900">
-                            {{ strtoupper(substr($player->player->name ?? 'P', 0, 2)) }}
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-indigo-500 flex items-center justify-center text-lg font-bold text-slate-900 overflow-hidden">
+                            @if($player->player?->photo)
+                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 2)) }}
+                            @endif
                         </div>
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-white">{{ $player->player->name ?? 'Player' }}</p>
@@ -92,14 +105,25 @@
                                 <div class="p-4 sm:p-6">
                                     <div class="grid sm:grid-cols-5 gap-4 sm:gap-6 items-center">
                                         <div class="sm:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3">
-                                            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-lg">
-                                                {{ strtoupper(substr($fixture->homeTeam->team->name, 0, 2)) }}
+                                            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-lg overflow-hidden">
+                                                @if($fixture->homeTeam->team->logo)
+                                                    <img src="{{ Storage::url($fixture->homeTeam->team->logo) }}" alt="{{ $fixture->homeTeam->team->name }} Logo" class="w-full h-full object-cover">
+                                                @else
+                                                    {{ strtoupper(substr($fixture->homeTeam->team->name, 0, 2)) }}
+                                                @endif
                                             </div>
                                             <div>
                                                 <p class="text-lg font-bold text-slate-900">{{ $fixture->homeTeam->team->name }}</p>
                                                 <p class="text-xs text-slate-500">Home</p>
                                                 @if($homeTopBuy)
-                                                    <p class="text-xs text-emerald-700 font-semibold mt-1">Top buy: {{ $homeTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($homeTopBuy->bid_price ?? 0) }}</p>
+                                                    <p class="text-xs text-emerald-700 font-semibold mt-1 flex items-center gap-2">
+                                                        @if($homeTopBuy->player?->photo)
+                                                            <span class="inline-flex w-6 h-6 rounded-full overflow-hidden ring-2 ring-emerald-200">
+                                                                <img src="{{ asset('storage/' . $homeTopBuy->player->photo) }}" alt="{{ $homeTopBuy->player->name }}" class="w-full h-full object-cover">
+                                                            </span>
+                                                        @endif
+                                                        <span>Top buy: {{ $homeTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($homeTopBuy->bid_price ?? 0) }}</span>
+                                                    </p>
                                                 @endif
                                             </div>
                                         </div>
@@ -114,14 +138,25 @@
                                         </div>
 
                                         <div class="sm:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end text-right">
-                                            <div class="sm:order-2 w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-lg">
-                                                {{ strtoupper(substr($fixture->awayTeam->team->name, 0, 2)) }}
+                                            <div class="sm:order-2 w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-lg overflow-hidden">
+                                                @if($fixture->awayTeam->team->logo)
+                                                    <img src="{{ Storage::url($fixture->awayTeam->team->logo) }}" alt="{{ $fixture->awayTeam->team->name }} Logo" class="w-full h-full object-cover">
+                                                @else
+                                                    {{ strtoupper(substr($fixture->awayTeam->team->name, 0, 2)) }}
+                                                @endif
                                             </div>
                                             <div class="sm:order-1 text-left sm:text-right">
                                                 <p class="text-lg font-bold text-slate-900">{{ $fixture->awayTeam->team->name }}</p>
                                                 <p class="text-xs text-slate-500">Away</p>
                                                 @if($awayTopBuy)
-                                                    <p class="text-xs text-indigo-700 font-semibold mt-1">Top buy: {{ $awayTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($awayTopBuy->bid_price ?? 0) }}</p>
+                                                    <p class="text-xs text-indigo-700 font-semibold mt-1 flex items-center gap-2 sm:justify-end">
+                                                        @if($awayTopBuy->player?->photo)
+                                                            <span class="inline-flex w-6 h-6 rounded-full overflow-hidden ring-2 ring-indigo-200">
+                                                                <img src="{{ asset('storage/' . $awayTopBuy->player->photo) }}" alt="{{ $awayTopBuy->player->name }}" class="w-full h-full object-cover">
+                                                            </span>
+                                                        @endif
+                                                        <span>Top buy: {{ $awayTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($awayTopBuy->bid_price ?? 0) }}</span>
+                                                    </p>
                                                 @endif
                                             </div>
                                         </div>
@@ -135,8 +170,14 @@
                                             </div>
                                             <div class="flex flex-wrap gap-2">
                                                 @forelse($homeRetention as $player)
-                                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
-                                                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
+                                                        <span class="h-6 w-6 rounded-full bg-emerald-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
+                                                            @if($player->player?->photo)
+                                                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
+                                                            @endif
+                                                        </span>
                                                         {{ $player->player?->name ?? 'Player' }}
                                                     </span>
                                                 @empty
@@ -151,8 +192,14 @@
                                             </div>
                                             <div class="flex flex-wrap gap-2">
                                                 @forelse($awayRetention as $player)
-                                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100">
-                                                        <span class="h-2 w-2 rounded-full bg-indigo-400"></span>
+                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100">
+                                                        <span class="h-6 w-6 rounded-full bg-indigo-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
+                                                            @if($player->player?->photo)
+                                                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
+                                                            @endif
+                                                        </span>
                                                         {{ $player->player?->name ?? 'Player' }}
                                                     </span>
                                                 @empty
