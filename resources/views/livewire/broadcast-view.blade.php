@@ -437,91 +437,41 @@
                         </span>
                     </div>
 
-                    @if($isSoldOutcome && $latestBidCall)
-                        @php
-                            $soldTeam = $latestBidCall->leagueTeam?->team;
-                            $soldTime = $latestBidCall->created_at?->timezone(config('app.timezone'))->format('H:i:s');
-                            $soldAmount = $latestBidCall->amount ?? 0;
-                        @endphp
-                        <div class="mt-6 space-y-4">
-                            <div class="rounded-2xl border border-red-400/60 bg-red-500/10 px-4 py-5 sm:px-6 shadow-lg">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="min-w-0">
-                                        <p class="text-xs uppercase text-red-100">Sold</p>
-                                        <p class="text-base font-semibold text-white truncate">{{ $soldTeam->name ?? 'Team TBD' }}</p>
-                                    </div>
-                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide bg-red-500/20 text-red-100 border border-red-400/60">
-                                        Call 1
+                    <div class="mt-6 space-y-2">
+                        @forelse($recentBidCalls as $call)
+                            @php
+                                $callTeam = $call->leagueTeam?->team;
+                                $callTeamLogoPath = $callTeam?->logo ?? null;
+                                $callTeamLogo = $callTeamLogoPath ? asset('storage/' . $callTeamLogoPath) : null;
+                                $callTeamInitial = $callTeam ? strtoupper(substr($callTeam->name ?? 'T', 0, 1)) : 'T';
+                                $callTime = $call->created_at?->timezone(config('app.timezone'))->format('H:i:s');
+                                $callAmount = $call->amount ?? 0;
+                            @endphp
+                            <div class="flex items-center justify-between gap-4 rounded-xl border {{ $statusTone['bg'] }} px-4 py-3 shadow-sm">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="team-logo w-10 h-10 rounded-xl" aria-hidden="true">
+                                        @if($callTeamLogo)
+                                            <img src="{{ $callTeamLogo }}" alt="{{ $callTeam->name ?? 'Team' }} logo">
+                                        @else
+                                            {{ $callTeamInitial }}
+                                        @endif
                                     </span>
+                                    <div class="min-w-0">
+                                        <p class="text-base font-semibold text-white truncate">{{ $callTeam->name ?? 'Team TBD' }}</p>
+                                    </div>
                                 </div>
-                                <div class="mt-3">
-                                    <p class="text-xs uppercase text-slate-200">Bid Amount</p>
-                                    <p class="text-2xl font-bold text-red-100">Rs {{ number_format($soldAmount) }}</p>
-                                    <p class="text-xs text-slate-200/80 mt-1">at {{ $soldTime ?? '—' }}</p>
+                                <div class="text-right">
+                                    <p class="text-xs uppercase text-slate-400">Rs {{ number_format($callAmount) }}</p>
+                                    <p class="text-[11px] text-slate-500">at {{ $callTime ?? '—' }}</p>
                                 </div>
                             </div>
-
-                            @if($olderBidCalls->isNotEmpty())
-                                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                                    @foreach($olderBidCalls as $call)
-                                        @php
-                                            $callTeam = $call->leagueTeam?->team;
-                                            $callTime = $call->created_at?->timezone(config('app.timezone'))->format('H:i:s');
-                                            $callAmount = $call->amount ?? 0;
-                                        @endphp
-                                        <div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-4 flex flex-col gap-2 shadow-md">
-                                            <div class="min-w-0">
-                                                <p class="text-xs uppercase text-slate-400">Call {{ $loop->iteration + 1 }}</p>
-                                                <p class="text-base font-semibold text-white truncate">{{ $callTeam->name ?? 'Team TBD' }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs uppercase text-slate-400">Bid Amount</p>
-                                                <p class="text-xl font-bold text-slate-100">Rs {{ number_format($callAmount) }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">at {{ $callTime ?? '—' }}</p>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    @else
-                        <div class="grid gap-3 mt-6 sm:grid-cols-2 xl:grid-cols-3">
-                            @forelse($recentBidCalls as $call)
-                                @php
-                                    $callTeam = $call->leagueTeam?->team;
-                                    $callTime = $call->created_at?->timezone(config('app.timezone'))->format('H:i:s');
-                                    $callAmount = $call->amount ?? 0;
-                                    $isCurrentCall = $loop->first && $currentPlayer;
-                                    $cardTone = $isCurrentCall
-                                        ? ['wrapper' => 'bg-emerald-500/10 border-emerald-400/60 shadow-emerald-300/20', 'amount' => 'text-emerald-100']
-                                        : ['wrapper' => $statusTone['bg'], 'amount' => $statusTone['amount']];
-                                @endphp
-                                <div class="rounded-2xl border {{ $cardTone['wrapper'] }} px-4 py-4 flex flex-col gap-3 shadow-lg">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
-                                            <p class="text-xs uppercase text-slate-400">Call {{ $loop->iteration }}</p>
-                                            <p class="text-base font-semibold text-white truncate">{{ $callTeam->name ?? 'Team TBD' }}</p>
-                                        </div>
-                                        @if($isCurrentCall)
-                                            <span class="px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide bg-emerald-500/20 text-emerald-100 border border-emerald-400/50">
-                                                Current
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <p class="text-xs uppercase text-slate-400">Bid Amount</p>
-                                        <p class="text-2xl font-bold {{ $cardTone['amount'] }}">Rs {{ number_format($callAmount) }}</p>
-                                        <p class="text-xs text-slate-500 mt-1">at {{ $callTime ?? '—' }}</p>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-5 py-4 sm:col-span-2 xl:col-span-3">
-                                    <p class="text-sm text-slate-300 font-semibold">No bids have been placed yet.</p>
-                                    <p class="text-xs text-slate-500 mt-1">Status: {{ $statusLabel }}</p>
-                                </div>
-                            @endforelse
-                        </div>
-                    @endif
+                        @empty
+                            <div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-5 py-4 sm:col-span-2 xl:col-span-3">
+                                <p class="text-sm text-slate-300 font-semibold">No bids have been placed yet.</p>
+                                <p class="text-xs text-slate-500 mt-1">Status: {{ $statusLabel }}</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </section>
             </div>
         </div>
