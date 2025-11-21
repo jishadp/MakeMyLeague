@@ -7,6 +7,7 @@ use App\Http\Requests\GenerateFixturesRequest;
 use App\Models\League;
 use App\Models\LeagueGroup;
 use App\Models\Fixture;
+use App\Models\LeaguePlayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -155,9 +156,31 @@ class LeagueMatchController extends Controller
             ->orderBy('league_group_id')
             ->orderBy('created_at')
             ->get()
-            ->groupBy('leagueGroup.name');
+            ->groupBy(function ($fixture) {
+                return $fixture->leagueGroup?->name ?? 'Knockout / Unassigned';
+            });
 
-        return view('leagues.fixtures.index', compact('league', 'fixtures'));
+        $retentionByTeam = LeaguePlayer::where('league_id', $league->id)
+            ->where(function ($q) {
+                $q->where('retention', true)
+                    ->orWhere('status', 'retained');
+            })
+            ->with(['player.position'])
+            ->get()
+            ->groupBy('league_team_id');
+
+        $soldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->with(['player.position', 'leagueTeam.team'])
+            ->orderByDesc('bid_price')
+            ->get();
+
+        $topBoughtOverall = $soldPlayers->take(6);
+        $topBoughtByTeam = $soldPlayers->groupBy('league_team_id')->map(function ($players) {
+            return $players->take(2);
+        });
+
+        return view('leagues.fixtures.index', compact('league', 'fixtures', 'retentionByTeam', 'topBoughtByTeam', 'topBoughtOverall'));
     }
 
     public function createFixture(Request $request, League $league)
