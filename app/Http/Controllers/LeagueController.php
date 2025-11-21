@@ -542,23 +542,35 @@ class LeagueController
                 ->with('error', 'Auction can only be completed when league is active.');
         }
 
-        // Check if all players are sold
-        $unsoldPlayers = $league->leaguePlayers()->where('status', '!=', 'sold')->count();
-        if ($unsoldPlayers > 0) {
-            return redirect()->route('leagues.show', $league)
-                ->with('error', "Cannot complete auction. {$unsoldPlayers} players are still unsold.");
-        }
+        // Mark any remaining non-retention players as unsold and finalize league status
+        $markedUnsold = 0;
+        DB::transaction(function () use ($league, &$markedUnsold) {
+            $remainingQuery = $league->leaguePlayers()
+                ->where('retention', false)
+                ->whereNotIn('status', ['sold', 'unsold']);
 
-        // Update league status to auction_completed
-        $league->update([
-            'status' => 'auction_completed'
-        ]);
+            $markedUnsold = (clone $remainingQuery)->count();
+
+            $remainingQuery->update([
+                'status' => 'unsold',
+                'league_team_id' => null,
+                'bid_price' => null,
+            ]);
+
+            $league->update([
+                'status' => 'auction_completed',
+                'auction_active' => false,
+                'auction_ended_at' => now(),
+            ]);
+        });
 
         // Handle auction completion through service
         app(\App\Services\AuctionAccessService::class)->handleAuctionCompletion($league);
 
         return redirect()->route('leagues.show', $league)
-            ->with('success', 'Auction completed successfully! You can now proceed to match setup.');
+            ->with('success', 'Auction completed successfully! '
+                . ($markedUnsold > 0 ? "{$markedUnsold} remaining players marked as unsold. " : '')
+                . 'You can now proceed to match setup.');
     }
 
     /**
