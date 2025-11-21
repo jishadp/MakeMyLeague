@@ -104,13 +104,35 @@ class LeagueTeamController extends Controller
     {
         $leagueTeam->load(['team', 'team.owner', 'team.homeGround', 'players.user']);
 
+        $playerSpend = $leagueTeam->players
+            ->filter(function ($player) {
+                return in_array($player->status, ['sold', 'retained']) || $player->retention;
+            })
+            ->sum(function ($player) {
+                $price = $player->bid_price ?? $player->base_price ?? 0;
+                return max((float) $price, 0);
+            });
+
+        $baseWallet = $league->team_wallet_limit ?? (($leagueTeam->wallet_balance ?? 0) + $playerSpend);
+        $calculatedBalance = max(($baseWallet - $playerSpend), 0);
+
+        $balanceAudit = [
+            'base_wallet' => $baseWallet,
+            'player_spend' => $playerSpend,
+            'calculated_balance' => $calculatedBalance,
+            'stored_balance' => $leagueTeam->wallet_balance ?? 0,
+            'difference' => $calculatedBalance - ($leagueTeam->wallet_balance ?? 0),
+        ];
+
+        $canAdjustBalance = auth()->check() && auth()->user()->canManageLeague($league->id);
+
         // Get other league players available for auction
         $otherLeaguePlayers = \App\Models\LeaguePlayer::with(['user', 'user.position'])
             ->whereNull('league_team_id')
             ->where('status', 'available')
             ->get();
 
-        return view('league-teams.show', compact('league', 'leagueTeam', 'otherLeaguePlayers'));
+        return view('league-teams.show', compact('league', 'leagueTeam', 'otherLeaguePlayers', 'balanceAudit', 'canAdjustBalance'));
     }
 
     /**
@@ -302,4 +324,3 @@ class LeagueTeamController extends Controller
         return view('league-teams.manage', compact('league', 'leagueTeams', 'teamsByTeam', 'retentionLimit', 'totalTeams', 'totalSoldPlayers', 'totalRetentionPlayers', 'availableRetentionPlayers'));
     }
 }
-

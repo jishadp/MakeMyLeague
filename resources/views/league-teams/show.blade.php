@@ -210,6 +210,63 @@
 
             <!-- Sidebar -->
             <div>
+                @if($canAdjustBalance)
+                @php
+                    $auditDifference = round($balanceAudit['difference'] ?? 0, 2);
+                @endphp
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Balance Audit</h3>
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full {{ $auditDifference == 0 ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700' }}">
+                            {{ $auditDifference == 0 ? 'In Sync' : 'Needs Attention' }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">Calculated from team wallet limit minus sold/retained player spends.</p>
+                    <dl class="space-y-3 text-sm">
+                        <div class="flex items-center justify-between">
+                            <dt class="text-gray-600">Team wallet limit</dt>
+                            <dd class="font-semibold text-gray-900">₹{{ number_format($balanceAudit['base_wallet'] ?? 0) }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-gray-600">Player spend (sold/retained)</dt>
+                            <dd class="font-semibold text-gray-900">₹{{ number_format($balanceAudit['player_spend'] ?? 0) }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-gray-600">Calculated balance</dt>
+                            <dd class="font-semibold text-emerald-600">₹{{ number_format($balanceAudit['calculated_balance'] ?? 0) }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-gray-600">Stored balance</dt>
+                            <dd class="font-semibold text-gray-900">₹{{ number_format($balanceAudit['stored_balance'] ?? 0) }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-gray-600">Difference</dt>
+                            <dd class="font-semibold {{ $auditDifference === 0 ? 'text-gray-700' : ($auditDifference > 0 ? 'text-amber-600' : 'text-red-600') }}">
+                                {{ $auditDifference > 0 ? '+' : '' }}₹{{ number_format($auditDifference, 2) }}
+                            </dd>
+                        </div>
+                    </dl>
+                    <form method="POST" action="{{ route('league-teams.updateWallet', [$league, $leagueTeam]) }}" class="mt-5 space-y-3">
+                        @csrf
+                        @method('PATCH')
+                        <label for="wallet_balance" class="text-sm font-medium text-gray-700">Set team balance</label>
+                        <input
+                            type="number"
+                            name="wallet_balance"
+                            id="wallet_balance"
+                            step="0.01"
+                            min="0"
+                            value="{{ old('wallet_balance', number_format($balanceAudit['calculated_balance'] ?? 0, 2, '.', '')) }}"
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                        >
+                        <p class="text-xs text-gray-500">Prefilled with the calculated balance. Update the amount above to manually adjust if needed.</p>
+                        <button type="submit" class="w-full inline-flex justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Save Balance
+                        </button>
+                    </form>
+                </div>
+                @endif
+
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
                     <div class="space-y-3">
