@@ -85,6 +85,8 @@ class DocumentController extends Controller
     {
         $layout = $request->input('layout', 'grid');
         $layout = in_array($layout, ['grid', 'wide'], true) ? $layout : 'grid';
+        $cardsPerPage = (int) $request->input('cards_per_page', 12);
+        $cardsPerPage = in_array($cardsPerPage, [12, 16], true) ? $cardsPerPage : 12;
         $payload = $this->prepareLeagueRosterData($request);
         $query = array_filter([
             'search' => $payload['filters']['search'] ?? null,
