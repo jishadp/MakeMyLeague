@@ -168,13 +168,21 @@ class AuctionController extends Controller
             $futureSlots = max($playersNeeded - 1, 0);
             $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
             $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
-            $availableWallet = max($baseWallet - ($team->spent_amount ?? 0), 0);
+            $spentAmount = (float) ($team->spent_amount ?? 0);
+            $availableWallet = max($baseWallet - $spentAmount, 0);
             $maxBidCap = max($availableWallet - $reserveAmount, 0);
             $team->players_needed = $playersNeeded;
             $team->reserve_amount = $reserveAmount;
             $team->max_bid_cap = $maxBidCap;
             $team->display_wallet = $availableWallet;
             $team->retained_players_count = $retainedCount;
+            $team->balance_audit = [
+                'base_wallet' => $baseWallet,
+                'spent_amount' => $spentAmount,
+                'calculated_balance' => $availableWallet,
+                'stored_balance' => $team->wallet_balance ?? 0,
+                'difference' => $availableWallet - ($team->wallet_balance ?? 0),
+            ];
             return $team;
         });
         $auctionStats = [

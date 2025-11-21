@@ -290,6 +290,49 @@
 
         <div id="controller-feedback" class="control-alert hidden"></div>
 
+        @php
+            $mismatchedTeams = collect($teams)->filter(function ($team) {
+                $diff = $team->balance_audit['difference'] ?? 0;
+                return abs($diff) >= 1; // show meaningful rupee differences
+            });
+        @endphp
+        @if($mismatchedTeams->isNotEmpty())
+            <div class="control-card space-y-4 border border-amber-200 bg-amber-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-amber-800">Team balance discrepancy detected</p>
+                        <p class="text-xs text-amber-700">Calculated from wallet limit minus sold/retained spend. Click Fix to sync stored wallet.</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    @foreach($mismatchedTeams as $team)
+                        @php
+                            $audit = $team->balance_audit;
+                            $expected = number_format($audit['calculated_balance'] ?? 0, 2, '.', '');
+                        @endphp
+                        <div class="flex flex-col gap-2 rounded-xl border border-amber-200 bg-white p-3 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900">{{ $team->team?->name ?? 'Team #' . $team->id }}</p>
+                                    <p class="text-[11px] text-slate-500">Stored ₹{{ number_format($audit['stored_balance'] ?? 0) }} • Expected ₹{{ number_format($audit['calculated_balance'] ?? 0) }}</p>
+                                </div>
+                                <span class="text-xs font-semibold text-amber-700">Δ ₹{{ number_format($audit['difference'] ?? 0) }}</span>
+                            </div>
+                            <form method="POST" action="{{ route('league-teams.updateWallet', [$league, $team]) }}" class="flex items-center gap-3">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="wallet_balance" value="{{ $expected }}">
+                                <button type="submit" class="px-3 py-2 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1">
+                                    Fix to ₹{{ number_format($audit['calculated_balance'] ?? 0) }}
+                                </button>
+                                <span class="text-[11px] text-slate-500">Base ₹{{ number_format($audit['base_wallet'] ?? 0) }} · Spent ₹{{ number_format($audit['spent_amount'] ?? 0) }}</span>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div class="control-card player-card">
             <div class="player-thumb">
                 @if($currentPlayer && $currentPlayer->player?->photo)
