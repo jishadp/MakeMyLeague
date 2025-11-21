@@ -118,7 +118,7 @@
                         <div class="text-left sm:text-right">
                             <p class="text-xs uppercase tracking-wide text-gray-500">Last Updated</p>
                             <p class="text-base font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
-                            <p class="text-xs text-gray-400" id="autoRefreshNote">Auto refreshes every 5s</p>
+                            <p class="text-xs text-gray-400" id="autoRefreshNote">Tap the refresh icon under the current bid to update the data.</p>
                         </div>
                         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end w-full sm:w-auto">
                             @if(isset($liveViewers))
@@ -130,16 +130,6 @@
                                     <span>{{ $liveViewers }} watching</span>
                                 </div>
                             @endif
-                            <button
-                                type="button"
-                                id="refreshButton"
-                                aria-label="Refresh auction data"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all w-full sm:w-auto">
-                                <svg id="refreshIcon" class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
-                                </svg>
-                                <span class="text-sm">Refresh</span>
-                            </button>
                             <a href="{{ route('auctions.index') }}" 
                                class="inline-flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center w-full sm:w-auto">
                                 Back to Auctions
@@ -262,6 +252,17 @@
                                                     Awaiting new bids..
                                                 @endif
                                             </p>
+                                            <div class="flex justify-center mt-4">
+                                                <button
+                                                    type="button"
+                                                    id="currentBidRefreshButton"
+                                                    aria-label="Refresh current bid data"
+                                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-blue-200 bg-white text-blue-600 text-xs sm:text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 hover:bg-blue-50 transition w-full sm:w-auto">
+                                                    <svg id="currentBidRefreshIcon" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m0 0a8 8 0 111.387 8.457L4 15m.582-6H9"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                         @if($leadingBudget)
                                             <div class="budget-metrics flex gap-3 sm:gap-4 text-xs sm:text-sm text-gray-700 overflow-x-auto pb-1">
@@ -643,9 +644,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var leagueChannel = pusher.subscribe(`auctions.league.${leagueId}`);
     console.log(`Subscribed to league channel: auctions.league.${leagueId}`);
     
-    const refreshButton = document.getElementById('refreshButton');
-    const refreshIcon = document.getElementById('refreshIcon');
-    const autoRefreshRateMs = 5000;
+    const refreshButton = document.getElementById('currentBidRefreshButton');
+    const refreshIcon = document.getElementById('currentBidRefreshIcon');
     let refreshInFlight = false;
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
     const focusToggleButton = document.getElementById('focusCurrentPlayerButton');
@@ -829,14 +829,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (refreshButton) {
         refreshButton.addEventListener('click', () => performSoftRefresh('manual'));
     }
-    
-    // Use a more efficient approach to update content instead of full page refresh
-    console.log('🔄 Live view: Auto-refreshing page every 5 seconds');
-    setInterval(function() {
-        if (!document.hidden) {
-            window.location.reload();
-        }
-    }, autoRefreshRateMs);
     
     // Listen to sold/unsold events to update data
     channel.bind('player-sold', function(data) {
