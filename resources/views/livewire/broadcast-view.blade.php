@@ -35,14 +35,6 @@
             --display-saturation: 1;
         }
 
-        #broadcastRoot:fullscreen,
-        #broadcastRoot:-webkit-full-screen,
-        #broadcastRoot:-ms-fullscreen {
-            overflow-y: auto;
-            height: 100vh;
-            -webkit-overflow-scrolling: touch;
-        }
-
         #broadcastRoot .broadcast-bg,
         #broadcastRoot .broadcast-panel,
         #broadcastRoot .team-card {
@@ -69,10 +61,51 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
+        .reload-fab .reload-coin {
+            width: 1.6rem;
+            height: 1.6rem;
+            color: #0f172a;
+            filter: drop-shadow(0 2px 6px rgba(15,23,42,0.15));
+            transition: transform 0.35s ease, color 0.2s ease;
+        }
+
+        .reload-fab .reload-coin .shine {
+            opacity: 0.4;
+        }
+
+        .reload-fab .reload-label {
+            display: none;
+            margin-left: 0.45rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            font-size: 0.85rem;
+            color: #0f172a;
+        }
+
         .reload-fab:hover {
             transform: translateY(-2px);
             box-shadow: 0 14px 35px rgba(14, 165, 233, 0.45);
             background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%);
+        }
+
+        .reload-fab:hover .reload-coin {
+            transform: rotate(140deg) scale(1.05);
+        }
+
+        .reload-fab:active .reload-coin {
+            transform: rotate(180deg) scale(0.95);
+        }
+
+        @media (min-width: 640px) {
+            .reload-fab {
+                padding: 0 0.9rem;
+                width: auto;
+                min-width: 3.5rem;
+                gap: 0.4rem;
+            }
+            .reload-fab .reload-label {
+                display: inline;
+            }
         }
 
         @media (max-width: 640px) {
@@ -480,15 +513,9 @@
                     <p class="text-3xl font-semibold leading-tight">{{ $lastUpdated ?? now()->format('H:i:s') }}</p>
                 </div>
                 <div class="flex w-full sm:w-auto flex-col gap-2 sm:flex-row">
-                    <button type="button" wire:click="refreshData"
+                    <button type="button" id="broadcastRefreshDataButton"
                         class="px-4 py-2 rounded-full bg-slate-100 text-slate-900 font-semibold shadow-lg hover:bg-white transition w-full sm:w-auto text-center">
                         Refresh Data
-                    </button>
-                    <button type="button"
-                        id="broadcastFullscreenToggle"
-                        aria-pressed="false"
-                        class="px-4 py-2 rounded-full bg-emerald-400 text-slate-900 font-semibold shadow-lg hover:bg-emerald-300 transition w-full sm:w-auto text-center">
-                        Enter Fullscreen
                     </button>
                 </div>
             </div>
@@ -926,9 +953,20 @@
             id="broadcastReloadFab"
             aria-label="Reload page"
             class="reload-fab group">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-900 group-hover:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 9.75a7.5 7.5 0 0112.69-3.75H18a.75.75 0 000-1.5h-3.75a.75.75 0 00-.75.75V8a.75.75 0 001.5 0V6.84A6 6 0 1112 18a.75.75 0 00-1.5 0 7.5 7.5 0 01-6-12.75" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="reload-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <defs>
+                <linearGradient id="coinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fef08a"/>
+                    <stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="10" fill="url(#coinGradient)" stroke="#f8b400" stroke-width="1.2"/>
+            <circle cx="12" cy="12" r="6.5" fill="none" stroke="#0f172a" stroke-width="1" stroke-opacity="0.6" stroke-dasharray="2 3"/>
+            <path d="M10 8l4 4-4 4" stroke="#0f172a" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="shine" d="M7.5 6.5l2 1" stroke="#fff7d6" stroke-linecap="round"/>
+            <path class="shine" d="M15 16.5l1.5 0.8" stroke="#fff7d6" stroke-linecap="round"/>
         </svg>
+        <span class="reload-label">Reload</span>
     </button>
 
     <div class="display-modal" id="broadcastDisplayModal" role="dialog" aria-modal="true" aria-labelledby="displayModalTitle">
@@ -973,9 +1011,9 @@
     document.addEventListener('livewire:init', () => {
         const componentId = '{{ $this->id() }}';
         const leagueId = {{ $leagueModel->id }};
-        const fullscreenButton = document.getElementById('broadcastFullscreenToggle');
         const broadcastRoot = document.getElementById('broadcastRoot');
         const reloadFab = document.getElementById('broadcastReloadFab');
+        const refreshDataButton = document.getElementById('broadcastRefreshDataButton');
         const themeButtons = document.querySelectorAll('[data-theme-choice]');
         const themeStorageKey = 'broadcast_theme';
         const availableThemes = Array.from(themeButtons).map(btn => btn.dataset.themeChoice);
@@ -988,30 +1026,24 @@
         const sliderBrightness = document.getElementById('displayBrightness');
         const sliderSaturation = document.getElementById('displaySaturation');
         const displayStorageKey = 'broadcast_display_settings';
-        const fullscreenTarget = document.documentElement;
+        const handleReload = (event) => {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            refreshComponent();
+            setTimeout(() => {
+                const component = window.Livewire?.find(componentId);
+                if (!component) {
+                    window.location.reload();
+                }
+            }, 600);
+        };
 
         const displayDefaults = {
             contrast: 1,
             brightness: 1,
             saturation: 1,
-        };
-
-        const getFullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-        const isFullscreenActive = () => Boolean(getFullscreenElement());
-        const requestFullscreen = (target) => {
-            if (!target) {
-                return Promise.reject('No fullscreen target');
-            }
-            if (target.requestFullscreen) return target.requestFullscreen();
-            if (target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
-            if (target.msRequestFullscreen) return target.msRequestFullscreen();
-            return Promise.reject('Fullscreen not supported');
-        };
-        const exitFullscreen = () => {
-            if (document.exitFullscreen) return document.exitFullscreen();
-            if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-            if (document.msExitFullscreen) return document.msExitFullscreen();
-            return Promise.resolve();
         };
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
@@ -1159,50 +1191,12 @@
             });
         }
 
-        const updateFullscreenButton = () => {
-            if (!fullscreenButton) {
-                return;
-            }
-            const isActive = isFullscreenActive();
-            fullscreenButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            fullscreenButton.textContent = isActive ? 'Exit Fullscreen' : 'Enter Fullscreen';
-        };
-
-        if (fullscreenButton) {
-            fullscreenButton.addEventListener('click', () => {
-                const target = fullscreenTarget || broadcastRoot || document.documentElement;
-                if (!isFullscreenActive()) {
-                    requestFullscreen(target).catch(() => {
-                        if (target !== document.documentElement) {
-                            requestFullscreen(document.documentElement).catch(() => {});
-                        }
-                    });
-                } else {
-                    exitFullscreen();
-                }
-            });
-
-            ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(eventName => {
-                document.addEventListener(eventName, updateFullscreenButton);
-            });
-            updateFullscreenButton();
+        if (reloadFab) {
+            reloadFab.addEventListener('click', (event) => handleReload(event));
         }
 
-        if (reloadFab) {
-            reloadFab.addEventListener('click', (event) => {
-                if (isFullscreenActive()) {
-                    event.preventDefault();
-                    refreshComponent();
-                    setTimeout(() => {
-                        const component = window.Livewire?.find(componentId);
-                        if (!component) {
-                            window.location.reload();
-                        }
-                    }, 600);
-                    return;
-                }
-                window.location.reload();
-            });
+        if (refreshDataButton) {
+            refreshDataButton.addEventListener('click', (event) => handleReload(event));
         }
     });
 </script>
