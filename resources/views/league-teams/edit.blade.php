@@ -3,6 +3,9 @@
 @section('title', 'Edit Team - ' . $leagueTeam->team->name)
 
 @section('content')
+@php
+    $isAdmin = auth()->user()?->isAdmin();
+@endphp
 <div class="py-12 bg-gray-50 min-h-screen">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -52,12 +55,18 @@
                                step="0.01"
                                value="{{ old('wallet_balance', $leagueTeam->wallet_balance) }}"
                                placeholder="0.00"
-                               readonly
-                               class="w-full pl-8 border border-gray-300 rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed @error('wallet_balance') border-red-500 @enderror">
+                               @unless($isAdmin) readonly @endunless
+                               class="w-full pl-8 border border-gray-300 rounded-md px-3 py-2 {{ $isAdmin ? 'bg-white' : 'bg-gray-100 cursor-not-allowed' }} @error('wallet_balance') border-red-500 @enderror">
                     </div>
-                    <p class="mt-1 text-sm text-gray-500">
-                        Maximum allowed: ₹{{ number_format($league->team_wallet_limit, 2) }} (Read-only)
-                    </p>
+                    @if($isAdmin)
+                        <p class="mt-1 text-sm text-gray-500">
+                            Admin only: adjust up to ₹{{ number_format($league->team_wallet_limit, 2) }}.
+                        </p>
+                    @else
+                        <p class="mt-1 text-sm text-gray-500">
+                            Maximum allowed: ₹{{ number_format($league->team_wallet_limit, 2) }} (Read-only)
+                        </p>
+                    @endif
                     @error('wallet_balance')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
