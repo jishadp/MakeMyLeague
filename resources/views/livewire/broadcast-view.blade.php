@@ -35,6 +35,14 @@
             --display-saturation: 1;
         }
 
+        #broadcastRoot:fullscreen,
+        #broadcastRoot:-webkit-full-screen,
+        #broadcastRoot:-ms-fullscreen {
+            overflow-y: auto;
+            height: 100vh;
+            -webkit-overflow-scrolling: touch;
+        }
+
         #broadcastRoot .broadcast-bg,
         #broadcastRoot .broadcast-panel,
         #broadcastRoot .team-card {
@@ -980,11 +988,30 @@
         const sliderBrightness = document.getElementById('displayBrightness');
         const sliderSaturation = document.getElementById('displaySaturation');
         const displayStorageKey = 'broadcast_display_settings';
+        const fullscreenTarget = document.documentElement;
 
         const displayDefaults = {
             contrast: 1,
             brightness: 1,
             saturation: 1,
+        };
+
+        const getFullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        const isFullscreenActive = () => Boolean(getFullscreenElement());
+        const requestFullscreen = (target) => {
+            if (!target) {
+                return Promise.reject('No fullscreen target');
+            }
+            if (target.requestFullscreen) return target.requestFullscreen();
+            if (target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+            if (target.msRequestFullscreen) return target.msRequestFullscreen();
+            return Promise.reject('Fullscreen not supported');
+        };
+        const exitFullscreen = () => {
+            if (document.exitFullscreen) return document.exitFullscreen();
+            if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+            if (document.msExitFullscreen) return document.msExitFullscreen();
+            return Promise.resolve();
         };
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
@@ -1136,30 +1163,42 @@
             if (!fullscreenButton) {
                 return;
             }
-            const isActive = Boolean(document.fullscreenElement);
+            const isActive = isFullscreenActive();
             fullscreenButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             fullscreenButton.textContent = isActive ? 'Exit Fullscreen' : 'Enter Fullscreen';
         };
 
         if (fullscreenButton) {
             fullscreenButton.addEventListener('click', () => {
-                const target = broadcastRoot || document.documentElement;
-                if (!document.fullscreenElement && target?.requestFullscreen) {
-                    target.requestFullscreen().catch(() => {});
-                } else if (document.fullscreenElement && document.exitFullscreen) {
-                    document.exitFullscreen();
+                const target = fullscreenTarget || broadcastRoot || document.documentElement;
+                if (!isFullscreenActive()) {
+                    requestFullscreen(target).catch(() => {
+                        if (target !== document.documentElement) {
+                            requestFullscreen(document.documentElement).catch(() => {});
+                        }
+                    });
+                } else {
+                    exitFullscreen();
                 }
             });
 
-            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(eventName => {
+                document.addEventListener(eventName, updateFullscreenButton);
+            });
             updateFullscreenButton();
         }
 
         if (reloadFab) {
             reloadFab.addEventListener('click', (event) => {
-                if (document.fullscreenElement) {
+                if (isFullscreenActive()) {
                     event.preventDefault();
                     refreshComponent();
+                    setTimeout(() => {
+                        const component = window.Livewire?.find(componentId);
+                        if (!component) {
+                            window.location.reload();
+                        }
+                    }, 600);
                     return;
                 }
                 window.location.reload();
