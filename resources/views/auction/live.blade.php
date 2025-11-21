@@ -118,7 +118,7 @@
                         <div class="text-left sm:text-right">
                             <p class="text-xs uppercase tracking-wide text-gray-500">Last Updated</p>
                             <p class="text-base font-semibold text-gray-900" id="lastUpdated">{{ now()->format('H:i:s') }}</p>
-                            <p class="text-xs text-gray-400" id="autoRefreshNote">Tap the refresh icon under the current bid to update the data.</p>
+                            <p class="text-xs text-gray-400" id="autoRefreshNote">Tap the refresh icon under the current bid to reload this page.</p>
                         </div>
                         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end w-full sm:w-auto">
                             @if(isset($liveViewers))
@@ -646,7 +646,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const refreshButton = document.getElementById('currentBidRefreshButton');
     const refreshIcon = document.getElementById('currentBidRefreshIcon');
-    let refreshInFlight = false;
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
     const focusToggleButton = document.getElementById('focusCurrentPlayerButton');
 
@@ -795,39 +794,15 @@ document.addEventListener('DOMContentLoaded', function() {
         setActivePanel(defaultPanel);
     }
 
-    function performSoftRefresh(source = 'auto') {
-        if (refreshInFlight && source === 'auto') {
-            return;
-        }
-
-        refreshInFlight = true;
-
-        if (refreshButton && source === 'manual') {
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
             refreshButton.classList.add('opacity-70', 'cursor-wait');
             refreshButton.setAttribute('aria-disabled', 'true');
-        }
-        if (refreshIcon && source === 'manual') {
-            refreshIcon.classList.add('animate-spin');
-        }
-
-        Promise.allSettled([
-            Promise.resolve(updateLastUpdated()),
-            fetchRecentBids(),
-            refreshTeamBalances()
-        ]).finally(() => {
-            refreshInFlight = false;
-            if (refreshButton) {
-                refreshButton.classList.remove('opacity-70', 'cursor-wait');
-                refreshButton.removeAttribute('aria-disabled');
-            }
             if (refreshIcon) {
-                refreshIcon.classList.remove('animate-spin');
+                refreshIcon.classList.add('animate-spin');
             }
+            window.location.reload();
         });
-    }
-
-    if (refreshButton) {
-        refreshButton.addEventListener('click', () => performSoftRefresh('manual'));
     }
     
     // Listen to sold/unsold events to update data
