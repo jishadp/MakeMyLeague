@@ -28,7 +28,6 @@ class BroadcastView extends Component
     public function refreshData(): void
     {
         $this->lastUpdated = now()->format('H:i:s');
-        $this->forgetComputed('payload');
     }
 
     public function getPayloadProperty(): array

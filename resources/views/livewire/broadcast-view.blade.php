@@ -134,6 +134,7 @@
     $leagueModel = $payload['league'];
     $currentPlayer = $payload['currentPlayer'];
     $currentHighestBid = $payload['currentHighestBid'];
+    $currentBids = $payload['currentBids'];
     $teams = $payload['teams'];
     $liveViewers = $payload['liveViewers'];
     $lastOutcomePlayer = $payload['lastOutcomePlayer'];
@@ -175,6 +176,29 @@
     $playerLocationText = $displayPlayer?->localBody?->name ?? 'Location not shared';
     $leagueLogo = $leagueModel->logo ? asset('storage/' . $leagueModel->logo) : null;
     $leagueInitial = strtoupper(substr($leagueModel->name, 0, 1));
+    $bidCallGroups = $currentBids ?? collect();
+    $bidCallsForDisplay = collect();
+    if ($currentPlayer) {
+        $bidCallsForDisplay = $bidCallGroups->get($currentPlayer->id) ?? collect();
+    } elseif ($lastOutcomePlayer) {
+        $bidCallsForDisplay = $bidCallGroups->get($lastOutcomePlayer->id) ?? collect();
+    }
+    $recentBidCalls = collect($bidCallsForDisplay)->sortByDesc('created_at')->take(3);
+    $latestBidCall = $recentBidCalls->first();
+    $olderBidCalls = $recentBidCalls->skip(1);
+    $bidStatus = $displayLeaguePlayer?->status;
+    $statusLabel = match ($bidStatus) {
+        'auctioning' => 'Ongoing',
+        'sold' => 'Sold',
+        'unsold' => 'Unsold',
+        default => 'Pending',
+    };
+    $statusTone = match ($bidStatus) {
+        'auctioning' => ['bg' => 'bg-emerald-500/10 border-emerald-400/40', 'pill' => 'bg-emerald-500/20 text-emerald-100 border border-emerald-400/50', 'amount' => 'text-emerald-100'],
+        'sold' => ['bg' => 'bg-red-500/10 border-red-400/60', 'pill' => 'bg-red-500/20 text-red-100 border border-red-400/60', 'amount' => 'text-red-100'],
+        'unsold' => ['bg' => 'bg-amber-500/10 border-amber-400/50', 'pill' => 'bg-amber-500/20 text-amber-100 border border-amber-400/50', 'amount' => 'text-amber-100'],
+        default => ['bg' => 'bg-slate-800/60 border-slate-700/60', 'pill' => 'bg-slate-700/60 text-slate-200 border border-slate-600/60', 'amount' => 'text-slate-100'],
+    };
 @endphp
 
 <div wire:poll.30s="refreshData" id="broadcastRoot">
@@ -290,63 +314,214 @@
 
             <div class="space-y-8">
                 <section class="broadcast-panel p-6 sm:p-7">
-                    <div class="flex items-start justify-between gap-6">
-                        <div class="flex items-start gap-3 sm:gap-4">
-                            @php
-                                $winnerTeamLogoPath = $spotlightTeam?->team?->logo ?? null;
-                                $winnerTeamLogo = $winnerTeamLogoPath ? asset('storage/' . $winnerTeamLogoPath) : null;
-                                $winnerTeamInitial = $spotlightTeam && $spotlightTeam->team ? strtoupper(substr($spotlightTeam->team->name ?? '?', 0, 1)) : '?';
-                            @endphp
-                            <span class="team-logo w-12 h-12 rounded-2xl" aria-hidden="true">
-                                @if($winnerTeamLogo)
-                                    <img src="{{ $winnerTeamLogo }}" alt="{{ $spotlightTeam->team->name ?? 'Team' }} logo">
-                                @else
-                                    {{ $winnerTeamInitial }}
-                                @endif
-                            </span>
-                            <div>
-                                <p class="text-slate-400 uppercase text-xs tracking-[0.35em]">
-                                    {{ $spotlightTeam ? ($currentPlayer ? 'Leading Bidder' : 'Last Winner') : 'Winner pending' }}
-                                </p>
-                                <h3 class="text-3xl font-bold mt-2">
-                                    {{ $spotlightTeam->team->name ?? 'Top bid will appear here' }}
-                                </h3>
-                                <p class="text-slate-300">
-                                    @if($spotlightTeam)
-                                        {{ $currentPlayer ? 'Holding the floor with Rs ' . number_format($highestAmount) : 'Secured the last player for Rs ' . number_format($soldAmount ?? 0) }}
+                    @if($isSoldOutcome && $spotlightTeam)
+                        <div class="flex items-start justify-between gap-6">
+                            <div class="flex items-start gap-3 sm:gap-4">
+                                @php
+                                    $winnerTeamLogoPath = $spotlightTeam?->team?->logo ?? null;
+                                    $winnerTeamLogo = $winnerTeamLogoPath ? asset('storage/' . $winnerTeamLogoPath) : null;
+                                    $winnerTeamInitial = $spotlightTeam && $spotlightTeam->team ? strtoupper(substr($spotlightTeam->team->name ?? '?', 0, 1)) : '?';
+                                @endphp
+                                <span class="team-logo w-12 h-12 rounded-2xl" aria-hidden="true">
+                                    @if($winnerTeamLogo)
+                                        <img src="{{ $winnerTeamLogo }}" alt="{{ $spotlightTeam->team->name ?? 'Team' }} logo">
                                     @else
-                                        As soon as a team wins, details will be shown
+                                        {{ $winnerTeamInitial }}
                                     @endif
+                                </span>
+                                <div>
+                                    <p class="text-slate-400 uppercase text-xs tracking-[0.35em]">Sold To</p>
+                                    <h3 class="text-3xl font-bold mt-2">
+                                        {{ $spotlightTeam->team->name ?? 'Team pending' }}
+                                    </h3>
+                                    <p class="text-slate-300">
+                                        Secured the player for Rs {{ number_format($soldAmount ?? 0) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-red-400/60 px-5 py-3 text-center bg-red-500/10">
+                                <p class="text-xs uppercase text-red-100 tracking-wide">Sold Price</p>
+                                <p class="text-2xl font-semibold text-red-100">
+                                    {{ $soldAmount ? 'Rs ' . number_format($soldAmount) : '—' }}
                                 </p>
                             </div>
                         </div>
-                        <div class="rounded-2xl border border-emerald-400/40 px-5 py-3 text-center">
-                            <p class="text-xs uppercase text-emerald-200 tracking-wide">
-                                {{ $currentPlayer ? 'Current Bid' : 'Sold Price' }}
-                            </p>
-                            <p class="text-2xl font-semibold">
-                                {{ $highestAmount ? 'Rs ' . number_format($highestAmount) : '—' }}
-                            </p>
+                        <div class="grid grid-cols-2 gap-4 mt-6 text-sm text-slate-200">
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Wallet</p>
+                                <p class="text-xl font-semibold">Rs {{ number_format($spotlightTeam->display_wallet ?? $spotlightTeam->wallet_balance ?? 0) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Players Signed</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam->leaguePlayers->count() }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Players Needed</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam->players_needed }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Max Bid Cap</p>
+                                <p class="text-xl font-semibold">Rs {{ number_format($spotlightTeam->max_bid_cap ?? 0) }}</p>
+                            </div>
                         </div>
+                    @else
+                        <div class="flex items-start justify-between gap-6">
+                            <div class="flex items-start gap-3 sm:gap-4">
+                                @php
+                                    $winnerTeamLogoPath = $spotlightTeam?->team?->logo ?? null;
+                                    $winnerTeamLogo = $winnerTeamLogoPath ? asset('storage/' . $winnerTeamLogoPath) : null;
+                                    $winnerTeamInitial = $spotlightTeam && $spotlightTeam->team ? strtoupper(substr($spotlightTeam->team->name ?? '?', 0, 1)) : '?';
+                                @endphp
+                                <span class="team-logo w-12 h-12 rounded-2xl" aria-hidden="true">
+                                    @if($winnerTeamLogo)
+                                        <img src="{{ $winnerTeamLogo }}" alt="{{ $spotlightTeam->team->name ?? 'Team' }} logo">
+                                    @else
+                                        {{ $winnerTeamInitial }}
+                                    @endif
+                                </span>
+                                <div>
+                                    <p class="text-slate-400 uppercase text-xs tracking-[0.35em]">
+                                        {{ $spotlightTeam ? ($currentPlayer ? 'Leading Bidder' : 'Last Winner') : 'Winner pending' }}
+                                    </p>
+                                    <h3 class="text-3xl font-bold mt-2">
+                                        {{ $spotlightTeam->team->name ?? 'Top bid will appear here' }}
+                                    </h3>
+                                    <p class="text-slate-300">
+                                        @if($spotlightTeam)
+                                            {{ $currentPlayer ? 'Holding the floor with Rs ' . number_format($highestAmount) : 'Secured the last player for Rs ' . number_format($soldAmount ?? 0) }}
+                                        @else
+                                            As soon as a team wins, details will be shown
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-emerald-400/40 px-5 py-3 text-center">
+                                <p class="text-xs uppercase text-emerald-200 tracking-wide">
+                                    {{ $currentPlayer ? 'Current Bid' : 'Sold Price' }}
+                                </p>
+                                <p class="text-2xl font-semibold">
+                                    {{ $highestAmount ? 'Rs ' . number_format($highestAmount) : '—' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6 text-sm text-slate-200">
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Wallet</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam ? 'Rs ' . number_format($spotlightTeam->display_wallet ?? $spotlightTeam->wallet_balance ?? 0) : '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Players Signed</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam ? $spotlightTeam->leaguePlayers->count() : '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Players Needed</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam ? $spotlightTeam->players_needed : '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 text-xs uppercase">Max Bid Cap</p>
+                                <p class="text-xl font-semibold">{{ $spotlightTeam ? 'Rs ' . number_format($spotlightTeam->max_bid_cap ?? 0) : '—' }}</p>
+                            </div>
+                        </div>
+                    @endif
+                </section>
+
+                <section class="broadcast-panel p-6 sm:p-7">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Bid Activity</p>
+                            <h3 class="text-xl font-semibold mt-1">Last Calls</h3>
+                            <p class="text-sm text-slate-400 mt-1">Latest three bid calls for this player.</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide {{ $statusTone['pill'] }}">
+                            {{ $statusLabel }}
+                        </span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mt-6 text-sm text-slate-200">
-                        <div>
-                            <p class="text-slate-400 text-xs uppercase">Wallet</p>
-                            <p class="text-xl font-semibold">{{ $spotlightTeam ? 'Rs ' . number_format($spotlightTeam->display_wallet ?? $spotlightTeam->wallet_balance ?? 0) : '—' }}</p>
+
+                    @if($isSoldOutcome && $latestBidCall)
+                        @php
+                            $soldTeam = $latestBidCall->leagueTeam?->team;
+                            $soldTime = $latestBidCall->created_at?->timezone(config('app.timezone'))->format('H:i:s');
+                            $soldAmount = $latestBidCall->amount ?? 0;
+                        @endphp
+                        <div class="mt-6 space-y-4">
+                            <div class="rounded-2xl border border-red-400/60 bg-red-500/10 px-4 py-5 sm:px-6 shadow-lg">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="text-xs uppercase text-red-100">Sold</p>
+                                        <p class="text-base font-semibold text-white truncate">{{ $soldTeam->name ?? 'Team TBD' }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide bg-red-500/20 text-red-100 border border-red-400/60">
+                                        Call 1
+                                    </span>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-xs uppercase text-slate-200">Bid Amount</p>
+                                    <p class="text-2xl font-bold text-red-100">Rs {{ number_format($soldAmount) }}</p>
+                                    <p class="text-xs text-slate-200/80 mt-1">at {{ $soldTime ?? '—' }}</p>
+                                </div>
+                            </div>
+
+                            @if($olderBidCalls->isNotEmpty())
+                                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                    @foreach($olderBidCalls as $call)
+                                        @php
+                                            $callTeam = $call->leagueTeam?->team;
+                                            $callTime = $call->created_at?->timezone(config('app.timezone'))->format('H:i:s');
+                                            $callAmount = $call->amount ?? 0;
+                                        @endphp
+                                        <div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-4 flex flex-col gap-2 shadow-md">
+                                            <div class="min-w-0">
+                                                <p class="text-xs uppercase text-slate-400">Call {{ $loop->iteration + 1 }}</p>
+                                                <p class="text-base font-semibold text-white truncate">{{ $callTeam->name ?? 'Team TBD' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs uppercase text-slate-400">Bid Amount</p>
+                                                <p class="text-xl font-bold text-slate-100">Rs {{ number_format($callAmount) }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">at {{ $callTime ?? '—' }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
-                        <div>
-                            <p class="text-slate-400 text-xs uppercase">Players Signed</p>
-                            <p class="text-xl font-semibold">{{ $spotlightTeam ? $spotlightTeam->leaguePlayers->count() : '—' }}</p>
+                    @else
+                        <div class="grid gap-3 mt-6 sm:grid-cols-2 xl:grid-cols-3">
+                            @forelse($recentBidCalls as $call)
+                                @php
+                                    $callTeam = $call->leagueTeam?->team;
+                                    $callTime = $call->created_at?->timezone(config('app.timezone'))->format('H:i:s');
+                                    $callAmount = $call->amount ?? 0;
+                                    $isCurrentCall = $loop->first && $currentPlayer;
+                                    $cardTone = $isCurrentCall
+                                        ? ['wrapper' => 'bg-emerald-500/10 border-emerald-400/60 shadow-emerald-300/20', 'amount' => 'text-emerald-100']
+                                        : ['wrapper' => $statusTone['bg'], 'amount' => $statusTone['amount']];
+                                @endphp
+                                <div class="rounded-2xl border {{ $cardTone['wrapper'] }} px-4 py-4 flex flex-col gap-3 shadow-lg">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="text-xs uppercase text-slate-400">Call {{ $loop->iteration }}</p>
+                                            <p class="text-base font-semibold text-white truncate">{{ $callTeam->name ?? 'Team TBD' }}</p>
+                                        </div>
+                                        @if($isCurrentCall)
+                                            <span class="px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide bg-emerald-500/20 text-emerald-100 border border-emerald-400/50">
+                                                Current
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-xs uppercase text-slate-400">Bid Amount</p>
+                                        <p class="text-2xl font-bold {{ $cardTone['amount'] }}">Rs {{ number_format($callAmount) }}</p>
+                                        <p class="text-xs text-slate-500 mt-1">at {{ $callTime ?? '—' }}</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="rounded-2xl border border-slate-700/60 bg-slate-900/60 px-5 py-4 sm:col-span-2 xl:col-span-3">
+                                    <p class="text-sm text-slate-300 font-semibold">No bids have been placed yet.</p>
+                                    <p class="text-xs text-slate-500 mt-1">Status: {{ $statusLabel }}</p>
+                                </div>
+                            @endforelse
                         </div>
-                        <div>
-                            <p class="text-slate-400 text-xs uppercase">Players Needed</p>
-                            <p class="text-xl font-semibold">{{ $spotlightTeam ? $spotlightTeam->players_needed : '—' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-slate-400 text-xs uppercase">Max Bid Cap</p>
-                            <p class="text-xl font-semibold">{{ $spotlightTeam ? 'Rs ' . number_format($spotlightTeam->max_bid_cap ?? 0) : '—' }}</p>
-                        </div>
-                    </div>
+                    @endif
                 </section>
             </div>
         </div>
@@ -532,7 +707,7 @@
 </section>
 
     <button type="button"
-            onclick="window.location.reload()"
+            id="broadcastReloadFab"
             aria-label="Reload page"
             class="reload-fab group">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-900 group-hover:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -551,6 +726,7 @@
         const leagueId = {{ $leagueModel->id }};
         const fullscreenButton = document.getElementById('broadcastFullscreenToggle');
         const broadcastRoot = document.getElementById('broadcastRoot');
+        const reloadFab = document.getElementById('broadcastReloadFab');
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
 
@@ -561,6 +737,10 @@
                 return;
             }
             setTimeout(() => ensureComponent(callback), 150);
+        };
+
+        const refreshComponent = () => {
+            ensureComponent((component) => component.call('refreshData'));
         };
 
         if (!window.__broadcastPusherSetup[componentId]) {
@@ -580,13 +760,6 @@
                     pusher.subscribe('auctions'),
                     pusher.subscribe(`auctions.league.${leagueId}`),
                 ];
-
-                const refreshComponent = () => {
-                    const component = window.Livewire.find(componentId);
-                    if (component) {
-                        component.call('refreshData');
-                    }
-                };
 
                 ['player-sold', 'player-unsold', 'new-player-started', 'new-player-bid-call'].forEach(eventName => {
                     channels.forEach(channel => {
@@ -617,6 +790,17 @@
 
             document.addEventListener('fullscreenchange', updateFullscreenButton);
             updateFullscreenButton();
+        }
+
+        if (reloadFab) {
+            reloadFab.addEventListener('click', (event) => {
+                if (document.fullscreenElement) {
+                    event.preventDefault();
+                    refreshComponent();
+                    return;
+                }
+                window.location.reload();
+            });
         }
     });
 </script>
