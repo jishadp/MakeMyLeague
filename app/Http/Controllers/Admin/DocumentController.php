@@ -86,7 +86,7 @@ class DocumentController extends Controller
         $layout = $request->input('layout', 'grid');
         $layout = in_array($layout, ['grid', 'wide'], true) ? $layout : 'grid';
         $cardsPerPage = (int) $request->input('cards_per_page', 12);
-        $cardsPerPage = in_array($cardsPerPage, [12, 16], true) ? $cardsPerPage : 12;
+        $cardsPerPage = in_array($cardsPerPage, [12, 16, 25], true) ? $cardsPerPage : 12;
         $payload = $this->prepareLeagueRosterData($request);
         $query = array_filter([
             'search' => $payload['filters']['search'] ?? null,
@@ -99,6 +99,7 @@ class DocumentController extends Controller
             'downloadUrl' => route('admin.documents.leagues.download', $query),
             'hideChrome' => true,
             'layout' => $layout,
+            'cardsPerPage' => $cardsPerPage,
         ]));
     }
 
@@ -321,12 +322,8 @@ class DocumentController extends Controller
     protected function formatPlayerLocation(User $player): string
     {
         $localBody = optional($player->localBody)->name;
-        $district = optional(optional($player->localBody)->district)->name;
-        $state = optional(optional(optional($player->localBody)->district)->state)->name;
 
-        $parts = collect([$localBody, $district, $state])->filter();
-
-        return $parts->isNotEmpty() ? $parts->implode(', ') : 'No location submitted';
+        return $localBody ? $localBody : 'No location submitted';
     }
 
     /**

@@ -22,6 +22,10 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 16px;
     }
+    .print-grid.compact-layout.cards-25 {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+    }
     .print-grid.wide-layout {
         grid-template-columns: repeat(1, minmax(0, 1fr));
     }
@@ -36,6 +40,10 @@
         padding: 14px;
         gap: 1rem;
     }
+    .player-card.is-5x5 {
+        align-items: center;
+        text-align: center;
+    }
     .player-card.is-wide {
         flex-direction: row;
         align-items: stretch;
@@ -48,6 +56,11 @@
     .player-card.is-dense .player-card__header {
         gap: 0.75rem;
     }
+    .player-card.is-5x5 .player-card__header {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
     .player-card.is-wide .player-card__header {
         flex: 1;
     }
@@ -58,6 +71,9 @@
     .player-card.is-dense .player-card__meta {
         grid-template-columns: 1fr;
         gap: 0.5rem;
+    }
+    .player-card.is-5x5 .player-card__meta {
+        grid-template-columns: 1fr;
     }
     .player-card.is-wide .player-card__meta {
         width: 240px;
@@ -84,6 +100,7 @@
         .print-area {
             box-shadow: none !important;
             border: none !important;
+            padding: 12px !important;
         }
         .print-grid.compact-layout.cards-12 {
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -91,7 +108,11 @@
         }
         .print-grid.compact-layout.cards-16 {
             grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            gap: 10px !important;
+            gap: 8px !important;
+        }
+        .print-grid.compact-layout.cards-25 {
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            gap: 8px !important;
         }
         .print-grid.wide-layout {
             grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
@@ -102,13 +123,35 @@
             min-height: 230px;
         }
         .print-grid.compact-layout.cards-16 .player-card {
-            min-height: 190px;
-            padding: 12px !important;
+            min-height: 165px;
+            padding: 10px !important;
+            gap: 10px !important;
+        }
+        .print-grid.compact-layout.cards-25 .player-card {
+            min-height: 170px;
+            padding: 10px !important;
+            gap: 12px !important;
+        }
+        .print-grid.compact-layout.cards-16 .player-card__header {
+            gap: 10px !important;
+        }
+        .print-grid.compact-layout.cards-16 .player-card__meta {
+            gap: 6px !important;
+        }
+        .player-card.is-5x5 {
+            text-align: center;
+        }
+        .player-card.is-5x5 .player-card__header {
+            flex-direction: column;
+            align-items: center;
         }
         .print-grid.compact-layout.cards-12 .player-card:nth-child(12n+1):not(:first-child) {
             page-break-before: always;
         }
         .print-grid.compact-layout.cards-16 .player-card:nth-child(16n+1):not(:first-child) {
+            page-break-before: always;
+        }
+        .print-grid.compact-layout.cards-25 .player-card:nth-child(25n+1):not(:first-child) {
             page-break-before: always;
         }
         .player-card.is-wide {
@@ -122,9 +165,13 @@
 @php
     $layoutVariant = $layout ?? 'grid';
     $isWideLayout = $layoutVariant === 'wide';
-    $cardsPerPage = in_array($cardsPerPage ?? null, [12, 16], true) ? (int) $cardsPerPage : 12;
+    $cardsPerPage = in_array($cardsPerPage ?? null, [12, 16, 25], true) ? (int) $cardsPerPage : 12;
     $gridLayoutClass = $isWideLayout ? 'wide-layout' : 'compact-layout cards-' . $cardsPerPage;
-    $cardModifierClass = (!$isWideLayout && $cardsPerPage === 16) ? 'is-dense' : '';
+    $cardModifierClass = (!$isWideLayout && in_array($cardsPerPage, [16, 25], true)) ? 'is-dense' : '';
+    $isFiveByFive = !$isWideLayout && $cardsPerPage === 25;
+    $cardLayoutClass = $isWideLayout
+        ? 'is-wide'
+        : trim($cardModifierClass . ($isFiveByFive ? ' is-5x5' : ''));
     $filterQuery = collect($filters ?? [])->filter(fn ($value) => filled($value))->all();
 @endphp
 <div class="min-h-screen bg-gray-50 py-10">
@@ -172,7 +219,7 @@
                     @endforeach
                 </div>
                 <div class="inline-flex items-center rounded-xl border border-slate-200 overflow-hidden">
-                    @foreach([12 => '12 cards · 3x4', 16 => '16 cards · 4x4'] as $cardsOption => $label)
+                    @foreach([12 => '12 cards · 3x4', 16 => '16 cards · 4x4', 25 => '25 cards · 5x5'] as $cardsOption => $label)
                         @php
                             $isCardsActive = $cardsPerPage === $cardsOption;
                             $cardsQuery = $cardsOption === 12 ? [] : ['cards_per_page' => $cardsOption];
@@ -200,7 +247,7 @@
             @else
                 <div class="print-grid grid {{ $gridLayoutClass }} print-cards">
                     @foreach($players as $player)
-                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $isWideLayout ? 'is-wide' : $cardModifierClass }}">
+                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $cardLayoutClass }}">
                             <div class="player-card__header flex items-center gap-4 {{ $isWideLayout ? 'lg:gap-6' : '' }}">
                                 <div class="relative">
                                     @if(!empty($player['photo']))
@@ -214,10 +261,10 @@
                                         {{ $player['serial'] }}
                                     </span>
                                 </div>
-                                <div>
+                                <div class="flex flex-col gap-1 {{ $isFiveByFive ? 'items-center text-center' : '' }}">
                                     <p class="text-sm uppercase tracking-[0.3em] text-slate-400 font-semibold mb-1">{{ $player['team'] ?? $player['league_short'] ?? $player['league_name'] ?? 'Free Agent' }}</p>
                                     <h3 class="text-lg font-bold text-slate-900">{{ $player['name'] }}</h3>
-                                    <div class="flex flex-wrap gap-2 items-center text-xs text-slate-500">
+                                    <div class="flex flex-wrap gap-2 items-center text-xs text-slate-500 {{ $isFiveByFive ? 'justify-center' : '' }}">
                                         <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">{{ $player['role'] }}</span>
                                         @if($player['retained'])
                                             <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">Retention</span>
@@ -225,7 +272,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $isWideLayout ? '' : 'sm:grid-cols-2' }}">
+                            <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $isWideLayout ? '' : ($isFiveByFive ? '' : 'sm:grid-cols-2') }} {{ $isFiveByFive ? 'text-center' : '' }}">
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Place</p>
                                     <p class="font-semibold">{{ $player['place'] }}</p>
