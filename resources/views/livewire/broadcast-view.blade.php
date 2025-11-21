@@ -138,7 +138,7 @@
     $liveViewers = $payload['liveViewers'];
     $lastOutcomePlayer = $payload['lastOutcomePlayer'];
     $recentSoldPlayers = $payload['recentSoldPlayers'];
-    $refreshIntervalSeconds = 30;
+    $bidStartTime = $currentPlayer?->updated_at ?? null;
 
     $isShowingLastResult = !$currentPlayer && $lastOutcomePlayer;
     $displayLeaguePlayer = $currentPlayer ?? $lastOutcomePlayer;
@@ -177,7 +177,7 @@
     $leagueInitial = strtoupper(substr($leagueModel->name, 0, 1));
 @endphp
 
-<div wire:poll.30s="refreshData">
+<div wire:poll.30s="refreshData" id="broadcastRoot">
 <section class="broadcast-bg py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -206,23 +206,25 @@
                     <p class="text-3xl font-semibold leading-tight">{{ $liveViewers }}</p>
                 </div>
                 <div>
+                    <p class="text-slate-400 uppercase text-xs tracking-wide">Bid Start</p>
+                    <p class="text-3xl font-semibold leading-tight">
+                        {{ $bidStartTime ? $bidStartTime->timezone(config('app.timezone'))->format('d M, H:i') : 'N/A' }}
+                    </p>
+                </div>
+                <div>
                     <p class="text-slate-400 uppercase text-xs tracking-wide">Last Update</p>
                     <p class="text-3xl font-semibold leading-tight">{{ $lastUpdated ?? now()->format('H:i:s') }}</p>
-                </div>
-                <div class="min-w-[9rem]">
-                    <p class="text-slate-400 uppercase text-xs tracking-wide">Next Auto Refresh</p>
-                    <p class="text-3xl font-semibold leading-tight">
-                        <span id="refresh-countdown-{{ $this->id() }}" aria-live="polite">{{ $refreshIntervalSeconds }}s</span>
-                    </p>
-                    <div class="mt-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                        <span id="refresh-progress-{{ $this->id() }}" class="block h-full bg-emerald-400" style="width: 100%;"></span>
-                    </div>
-                    <p class="text-[11px] text-emerald-200 mt-1">Auto updates every {{ $refreshIntervalSeconds }}s</p>
                 </div>
                 <div class="flex w-full sm:w-auto flex-col gap-2 sm:flex-row">
                     <button type="button" wire:click="refreshData"
                         class="px-4 py-2 rounded-full bg-slate-100 text-slate-900 font-semibold shadow-lg hover:bg-white transition w-full sm:w-auto text-center">
                         Refresh Data
+                    </button>
+                    <button type="button"
+                        id="broadcastFullscreenToggle"
+                        aria-pressed="false"
+                        class="px-4 py-2 rounded-full bg-emerald-400 text-slate-900 font-semibold shadow-lg hover:bg-emerald-300 transition w-full sm:w-auto text-center">
+                        Enter Fullscreen
                     </button>
                 </div>
             </div>
@@ -547,13 +549,10 @@
     document.addEventListener('livewire:init', () => {
         const componentId = '{{ $this->id() }}';
         const leagueId = {{ $leagueModel->id }};
-        const refreshIntervalSeconds = {{ $refreshIntervalSeconds }};
-        const countdownElementId = `refresh-countdown-${componentId}`;
-        const progressElementId = `refresh-progress-${componentId}`;
+        const fullscreenButton = document.getElementById('broadcastFullscreenToggle');
+        const broadcastRoot = document.getElementById('broadcastRoot');
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
-        window.__broadcastCountdownSetup = window.__broadcastCountdownSetup || {};
-        window.__broadcastCountdownTimers = window.__broadcastCountdownTimers || {};
 
         const ensureComponent = (callback) => {
             const component = window.Livewire.find(componentId);
@@ -597,44 +596,27 @@
             });
         }
 
-        if (!window.__broadcastCountdownSetup[componentId]) {
-            window.__broadcastCountdownSetup[componentId] = true;
+        const updateFullscreenButton = () => {
+            if (!fullscreenButton) {
+                return;
+            }
+            const isActive = Boolean(document.fullscreenElement);
+            fullscreenButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            fullscreenButton.textContent = isActive ? 'Exit Fullscreen' : 'Enter Fullscreen';
+        };
 
-            ensureComponent((component) => {
-                let remaining = refreshIntervalSeconds;
-                const countdownEl = document.getElementById(countdownElementId);
-                const progressEl = document.getElementById(progressElementId);
-
-                const updateCountdown = () => {
-                    if (countdownEl) {
-                        countdownEl.textContent = `${remaining}s`;
-                    }
-                    if (progressEl) {
-                        const width = Math.max(0, Math.min(100, (remaining / refreshIntervalSeconds) * 100));
-                        progressEl.style.width = `${width}%`;
-                    }
-                };
-
-                updateCountdown();
-
-                if (window.__broadcastCountdownTimers[componentId]) {
-                    clearInterval(window.__broadcastCountdownTimers[componentId]);
+        if (fullscreenButton) {
+            fullscreenButton.addEventListener('click', () => {
+                const target = broadcastRoot || document.documentElement;
+                if (!document.fullscreenElement && target?.requestFullscreen) {
+                    target.requestFullscreen().catch(() => {});
+                } else if (document.fullscreenElement && document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
-
-                window.__broadcastCountdownTimers[componentId] = setInterval(() => {
-                    remaining = Math.max(0, remaining - 1);
-                    updateCountdown();
-                    // The Livewire poll handles triggering the refresh; we only show the timer here.
-                }, 1000);
-
-                window.Livewire.hook('message.processed', (message, component) => {
-                    if (!component || component.id !== componentId) {
-                        return;
-                    }
-                    remaining = refreshIntervalSeconds;
-                    updateCountdown();
-                });
             });
+
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            updateFullscreenButton();
         }
     });
 </script>
