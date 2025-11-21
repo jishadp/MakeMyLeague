@@ -64,6 +64,162 @@
             transform: scale(0.96);
         }
 
+        .theme-switcher {
+            position: sticky;
+            bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+            z-index: 40;
+        }
+
+        .theme-switcher button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #e2e8f0;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.02em;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .theme-switcher button .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .theme-switcher button.is-active {
+            border-color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.5);
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .broadcast-bg {
+            background: radial-gradient(circle at 20% 20%, rgba(148, 163, 184, 0.2), transparent 40%), #f8fafc;
+            color: #0f172a;
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .broadcast-panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .team-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .text-white,
+        #broadcastRoot[data-broadcast-theme="light"] .text-slate-200,
+        #broadcastRoot[data-broadcast-theme="light"] .text-slate-300,
+        #broadcastRoot[data-broadcast-theme="light"] .text-slate-400,
+        #broadcastRoot[data-broadcast-theme="light"] .text-slate-500 {
+            color: #0f172a !important;
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .bg-slate-800\/70,
+        #broadcastRoot[data-broadcast-theme="light"] .bg-slate-900\/50,
+        #broadcastRoot[data-broadcast-theme="light"] .bg-slate-900\/60,
+        #broadcastRoot[data-broadcast-theme="light"] .bg-slate-900\/40 {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .team-logo,
+        #broadcastRoot[data-broadcast-theme="light"] .player-thumb {
+            background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+
+        #broadcastRoot[data-broadcast-theme="light"] .reload-fab {
+            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+            color: #0f172a;
+            box-shadow: 0 10px 30px rgba(148, 163, 184, 0.35);
+        }
+
+        #broadcastRoot[data-broadcast-theme="ice"] .broadcast-bg {
+            background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.2), transparent 45%), #e0f2fe;
+            color: #0b1b33;
+        }
+
+        #broadcastRoot[data-broadcast-theme="ice"] .broadcast-panel {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            box-shadow: 0 20px 50px rgba(59, 130, 246, 0.15);
+        }
+
+        #broadcastRoot[data-broadcast-theme="ice"] .team-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+        }
+
+        #broadcastRoot[data-broadcast-theme="ice"] .text-white,
+        #broadcastRoot[data-broadcast-theme="ice"] .text-slate-200,
+        #broadcastRoot[data-broadcast-theme="ice"] .text-slate-300,
+        #broadcastRoot[data-broadcast-theme="ice"] .text-slate-400,
+        #broadcastRoot[data-broadcast-theme="ice"] .text-slate-500 {
+            color: #0b1b33 !important;
+        }
+
+        #broadcastRoot[data-broadcast-theme="ice"] .team-logo,
+        #broadcastRoot[data-broadcast-theme="ice"] .player-thumb {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            color: #0b1b33;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .broadcast-bg {
+            background: radial-gradient(circle at 30% 20%, rgba(251, 191, 36, 0.3), transparent 45%), #fff7ed;
+            color: #3b1b0f;
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .broadcast-panel {
+            background: #fff7ed;
+            border: 1px solid rgba(234, 179, 8, 0.35);
+            box-shadow: 0 18px 40px rgba(234, 179, 8, 0.15);
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .team-card {
+            background: #fff7ed;
+            border: 1px solid rgba(234, 179, 8, 0.35);
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .text-white,
+        #broadcastRoot[data-broadcast-theme="sunrise"] .text-slate-200,
+        #broadcastRoot[data-broadcast-theme="sunrise"] .text-slate-300,
+        #broadcastRoot[data-broadcast-theme="sunrise"] .text-slate-400,
+        #broadcastRoot[data-broadcast-theme="sunrise"] .text-slate-500 {
+            color: #3b1b0f !important;
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .team-logo,
+        #broadcastRoot[data-broadcast-theme="sunrise"] .player-thumb {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #3b1b0f;
+            border-color: rgba(234, 179, 8, 0.45);
+        }
+
+        #broadcastRoot[data-broadcast-theme="sunrise"] .reload-fab {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #3b1b0f;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.35);
+        }
+
         .logo-circle {
             width: 3.25rem;
             height: 3.25rem;
@@ -201,7 +357,16 @@
     };
 @endphp
 
-<div wire:poll.30s="refreshData" id="broadcastRoot">
+@php
+    $themeOptions = [
+        ['key' => 'dark', 'label' => 'Dark'],
+        ['key' => 'light', 'label' => 'Light'],
+        ['key' => 'ice', 'label' => 'Ice'],
+        ['key' => 'sunrise', 'label' => 'Sunrise'],
+    ];
+@endphp
+
+<div wire:poll.30s="refreshData" id="broadcastRoot" data-broadcast-theme="dark">
 <section class="broadcast-bg py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -653,6 +818,27 @@
             </div>
         </section>
 
+        <div class="flex justify-center mt-6 pb-6">
+            <div class="theme-switcher" id="broadcastThemeSwitcher" aria-label="Theme switcher">
+                @php
+                    $themeDotColors = [
+                        'dark' => '#0ea5e9',
+                        'light' => '#0f172a',
+                        'ice' => '#38bdf8',
+                        'sunrise' => '#f59e0b',
+                    ];
+                @endphp
+                @foreach($themeOptions as $theme)
+                    <button type="button"
+                            data-theme-choice="{{ $theme['key'] }}"
+                            aria-label="Switch to {{ $theme['label'] }} theme">
+                        <span class="dot" style="background: {{ $themeDotColors[$theme['key']] ?? '#0ea5e9' }};"></span>
+                        <span>{{ $theme['label'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
     </div>
 </section>
 
@@ -677,6 +863,9 @@
         const fullscreenButton = document.getElementById('broadcastFullscreenToggle');
         const broadcastRoot = document.getElementById('broadcastRoot');
         const reloadFab = document.getElementById('broadcastReloadFab');
+        const themeButtons = document.querySelectorAll('[data-theme-choice]');
+        const themeStorageKey = 'broadcast_theme';
+        const availableThemes = Array.from(themeButtons).map(btn => btn.dataset.themeChoice);
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
 
@@ -692,6 +881,36 @@
         const refreshComponent = () => {
             ensureComponent((component) => component.call('refreshData'));
         };
+
+        const setTheme = (theme) => {
+            if (!broadcastRoot || !theme) return;
+            const choice = availableThemes.includes(theme) ? theme : (availableThemes[0] || 'dark');
+            broadcastRoot.setAttribute('data-broadcast-theme', choice);
+            try {
+                localStorage.setItem(themeStorageKey, choice);
+            } catch (e) {}
+            themeButtons.forEach(btn => {
+                const isActive = btn.dataset.themeChoice === choice;
+                btn.classList.toggle('is-active', isActive);
+            });
+        };
+
+        const initTheme = () => {
+            let stored = null;
+            try {
+                stored = localStorage.getItem(themeStorageKey);
+            } catch (e) {}
+            setTheme(stored || 'dark');
+        };
+
+        initTheme();
+
+        themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const choice = btn.dataset.themeChoice;
+                setTheme(choice);
+            });
+        });
 
         if (!window.__broadcastPusherSetup[componentId]) {
             window.__broadcastPusherSetup[componentId] = true;
