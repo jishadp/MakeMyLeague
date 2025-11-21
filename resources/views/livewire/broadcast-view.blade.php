@@ -29,6 +29,21 @@
             transition: transform 0.3s ease, border-color 0.3s ease;
         }
 
+        #broadcastRoot {
+            --display-contrast: 1;
+            --display-brightness: 1;
+            --display-saturation: 1;
+        }
+
+        #broadcastRoot .broadcast-bg,
+        #broadcastRoot .broadcast-panel,
+        #broadcastRoot .team-card {
+            filter:
+                contrast(var(--display-contrast))
+                brightness(var(--display-brightness))
+                saturate(var(--display-saturation));
+        }
+
         .reload-fab {
             position: fixed;
             inset: auto 1.25rem calc(4.5rem + env(safe-area-inset-bottom, 0px)) auto;
@@ -105,6 +120,58 @@
             border-color: rgba(255,255,255,0.45);
             background: rgba(255,255,255,0.08);
             box-shadow: 0 8px 18px rgba(15, 23, 42, 0.5);
+        }
+
+        .display-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 1rem;
+        }
+
+        .display-modal.is-open {
+            display: flex;
+        }
+
+        .display-card {
+            background: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
+            color: #e2e8f0;
+        }
+
+        .display-card h3 {
+            margin: 0;
+        }
+
+        .display-control {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .display-control input[type="range"] {
+            width: 100%;
+        }
+
+        @media (max-width: 640px) {
+            .display-card {
+                max-width: 100%;
+            }
+
+            .display-control {
+                grid-template-columns: 1fr;
+            }
         }
 
         #broadcastRoot[data-broadcast-theme="light"] .broadcast-bg {
@@ -818,7 +885,7 @@
             </div>
         </section>
 
-        <div class="flex justify-center mt-6 pb-6">
+        <div class="flex flex-col items-center gap-3 mt-6 pb-8">
             <div class="theme-switcher" id="broadcastThemeSwitcher" aria-label="Theme switcher">
                 @php
                     $themeDotColors = [
@@ -837,6 +904,11 @@
                     </button>
                 @endforeach
             </div>
+            <button type="button"
+                    id="openDisplayModal"
+                    class="px-4 py-2 rounded-full bg-slate-800 text-white font-semibold border border-slate-600 hover:bg-slate-700 transition">
+                Display adjustments
+            </button>
         </div>
 
     </div>
@@ -850,6 +922,39 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 9.75a7.5 7.5 0 0112.69-3.75H18a.75.75 0 000-1.5h-3.75a.75.75 0 00-.75.75V8a.75.75 0 001.5 0V6.84A6 6 0 1112 18a.75.75 0 00-1.5 0 7.5 7.5 0 01-6-12.75" />
         </svg>
     </button>
+
+    <div class="display-modal" id="broadcastDisplayModal" role="dialog" aria-modal="true" aria-labelledby="displayModalTitle">
+        <div class="display-card">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Display</p>
+                    <h3 class="text-xl font-semibold mt-1" id="displayModalTitle">Adjust visibility</h3>
+                    <p class="text-sm text-slate-400">Tune for projectors or bright rooms. Changes save per browser.</p>
+                </div>
+                <button type="button" id="closeDisplayModal" aria-label="Close display settings" class="text-slate-300 hover:text-white">
+                    ✕
+                </button>
+            </div>
+            <div class="mt-5 space-y-4">
+                <div class="display-control">
+                    <label for="displayContrast" class="text-sm font-semibold text-slate-200">Contrast</label>
+                    <input type="range" id="displayContrast" name="display-contrast" min="80" max="140" value="100">
+                </div>
+                <div class="display-control">
+                    <label for="displayBrightness" class="text-sm font-semibold text-slate-200">Brightness</label>
+                    <input type="range" id="displayBrightness" name="display-brightness" min="80" max="140" value="100">
+                </div>
+                <div class="display-control">
+                    <label for="displaySaturation" class="text-sm font-semibold text-slate-200">Saturation</label>
+                    <input type="range" id="displaySaturation" name="display-saturation" min="70" max="150" value="100">
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between gap-3">
+                <button type="button" id="resetDisplaySettings" class="px-4 py-2 rounded-full border border-slate-500 text-slate-100 hover:bg-slate-800">Reset</button>
+                <button type="button" id="closeDisplayModalFooter" class="px-4 py-2 rounded-full bg-emerald-500 text-slate-900 font-semibold hover:bg-emerald-400">Done</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @once
@@ -866,6 +971,21 @@
         const themeButtons = document.querySelectorAll('[data-theme-choice]');
         const themeStorageKey = 'broadcast_theme';
         const availableThemes = Array.from(themeButtons).map(btn => btn.dataset.themeChoice);
+        const displayModal = document.getElementById('broadcastDisplayModal');
+        const openDisplayModal = document.getElementById('openDisplayModal');
+        const closeDisplayModal = document.getElementById('closeDisplayModal');
+        const closeDisplayModalFooter = document.getElementById('closeDisplayModalFooter');
+        const resetDisplaySettings = document.getElementById('resetDisplaySettings');
+        const sliderContrast = document.getElementById('displayContrast');
+        const sliderBrightness = document.getElementById('displayBrightness');
+        const sliderSaturation = document.getElementById('displaySaturation');
+        const displayStorageKey = 'broadcast_display_settings';
+
+        const displayDefaults = {
+            contrast: 1,
+            brightness: 1,
+            saturation: 1,
+        };
 
         window.__broadcastPusherSetup = window.__broadcastPusherSetup || {};
 
@@ -911,6 +1031,80 @@
                 setTheme(choice);
             });
         });
+
+        const applyDisplaySettings = (settings) => {
+            if (!broadcastRoot) return;
+            const merged = { ...displayDefaults, ...settings };
+            broadcastRoot.style.setProperty('--display-contrast', merged.contrast);
+            broadcastRoot.style.setProperty('--display-brightness', merged.brightness);
+            broadcastRoot.style.setProperty('--display-saturation', merged.saturation);
+            if (sliderContrast) sliderContrast.value = Math.round(merged.contrast * 100);
+            if (sliderBrightness) sliderBrightness.value = Math.round(merged.brightness * 100);
+            if (sliderSaturation) sliderSaturation.value = Math.round(merged.saturation * 100);
+        };
+
+        const loadDisplaySettings = () => {
+            try {
+                const saved = localStorage.getItem(displayStorageKey);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {}
+            return { ...displayDefaults };
+        };
+
+        const persistDisplaySettings = (settings) => {
+            try {
+                localStorage.setItem(displayStorageKey, JSON.stringify(settings));
+            } catch (e) {}
+        };
+
+        let currentDisplaySettings = loadDisplaySettings();
+        applyDisplaySettings(currentDisplaySettings);
+
+        const syncFromSliders = () => {
+            currentDisplaySettings = {
+                contrast: (Number(sliderContrast?.value) || 100) / 100,
+                brightness: (Number(sliderBrightness?.value) || 100) / 100,
+                saturation: (Number(sliderSaturation?.value) || 100) / 100,
+            };
+            applyDisplaySettings(currentDisplaySettings);
+            persistDisplaySettings(currentDisplaySettings);
+        };
+
+        [sliderContrast, sliderBrightness, sliderSaturation].forEach(slider => {
+            if (slider) {
+                slider.addEventListener('input', syncFromSliders);
+                slider.addEventListener('change', syncFromSliders);
+            }
+        });
+
+        const openModal = () => {
+            if (displayModal) displayModal.classList.add('is-open');
+        };
+
+        const closeModal = () => {
+            if (displayModal) displayModal.classList.remove('is-open');
+        };
+
+        if (openDisplayModal) openDisplayModal.addEventListener('click', openModal);
+        if (closeDisplayModal) closeDisplayModal.addEventListener('click', closeModal);
+        if (closeDisplayModalFooter) closeDisplayModalFooter.addEventListener('click', closeModal);
+        if (displayModal) {
+            displayModal.addEventListener('click', (e) => {
+                if (e.target === displayModal) {
+                    closeModal();
+                }
+            });
+        }
+
+        if (resetDisplaySettings) {
+            resetDisplaySettings.addEventListener('click', () => {
+                currentDisplaySettings = { ...displayDefaults };
+                applyDisplaySettings(currentDisplaySettings);
+                persistDisplaySettings(currentDisplaySettings);
+            });
+        }
 
         if (!window.__broadcastPusherSetup[componentId]) {
             window.__broadcastPusherSetup[componentId] = true;
