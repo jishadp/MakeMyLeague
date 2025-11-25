@@ -5,13 +5,19 @@
 @section('styles')
 <style>
     .control-room {
-        background: #f5f5f5;
+        background: radial-gradient(circle at 10% 20%, #eef2ff, #f8fafc 35%, #f1f5f9);
     }
     .control-card {
-        background: #fff;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
         border-radius: 1.5rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .control-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12);
     }
     .control-header {
         text-align: center;
@@ -233,6 +239,220 @@
         gap: 0.75rem;
         margin-top: 1.25rem;
     }
+    .player-finder {
+        position: relative;
+    }
+    .player-finder__input {
+        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 0.85rem 1rem 0.85rem 2.75rem;
+        background: #f8fafc;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .player-finder__input:focus {
+        outline: 2px solid #6366f1;
+        outline-offset: 2px;
+        background: #fff;
+    }
+    .player-finder__icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    .player-finder__results {
+        position: static;
+        transform: none;
+        margin-top: 0.35rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        box-shadow: none;
+        z-index: 1;
+        max-height: 140px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0.5rem;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(190px, 1fr);
+        gap: 0.5rem;
+    }
+    .player-finder__card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid #d9e1f2;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff, #f4f6fb);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    .player-finder__results .player-finder__card {
+        min-width: 180px;
+        padding: 0.6rem 0.65rem;
+    }
+    .player-finder__results .player-finder__action {
+        padding: 0.45rem 0.6rem;
+        font-size: 12px;
+    }
+    .player-finder__avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #e2e8f0;
+        flex-shrink: 0;
+    }
+    .player-finder__meta {
+        flex: 1;
+        min-width: 0;
+    }
+    .player-finder__name {
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .player-finder__details {
+        font-size: 12px;
+        color: #475569;
+        margin-top: 2px;
+    }
+    .player-finder__action {
+        border-radius: 999px;
+        padding: 0.55rem 0.85rem;
+        font-weight: 700;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .player-finder__action:hover {
+        border-color: #6366f1;
+        color: #312e81;
+        background: #eef2ff;
+    }
+    .player-finder__card:hover,
+    .player-queue__item:hover {
+        border-color: #b8c4ec;
+        box-shadow: 0 10px 26px rgba(99, 102, 241, 0.12);
+    }
+    .player-finder__empty {
+        padding: 1rem;
+        text-align: center;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .player-finder__pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.65rem;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #eef2ff;
+        color: #312e81;
+    }
+    .player-finder__random {
+        border-radius: 1rem;
+        padding: 0.85rem 1rem;
+        border: 1px dashed #cbd5e1;
+        background: #fff;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    .player-finder__random:hover {
+        border-color: #6366f1;
+        color: #312e81;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+    }
+    .player-queue {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(200px, 1fr);
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    .player-queue__item {
+        border: 1px solid #d9e1f2;
+        border-radius: 1rem;
+        padding: 0.6rem 0.65rem;
+        background: linear-gradient(135deg, #ffffff, #f4f6fb);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 200px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    .player-queue__meta {
+        flex: 1;
+        min-width: 0;
+    }
+    .player-queue__actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .auto-start-options {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: #475569;
+    }
+    .auto-start-options label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        background: #f8fafc;
+        font-weight: 600;
+    }
+    .control-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        box-shadow: 0 15px 30px rgba(15, 23, 42, 0.25);
+    }
+    .control-bar h1 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        margin: 0;
+        color: #e2e8f0;
+    }
+    .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+    .hide-shell .top-navbar,
+    .hide-shell .sidebar,
+    .hide-shell footer,
+    .hide-shell .bottom-navigation-buttons {
+        display: none !important;
+    }
+    .hide-shell main#top {
+        padding-bottom: 0;
+    }
 </style>
 @endsection
 
@@ -254,7 +474,7 @@
     $firstBidIncrement = $bidIncrementValues->first() ?? 0;
 @endphp
 <div class="control-room min-h-screen py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-6 space-y-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 space-y-6">
         <input type="hidden" id="controller-league-id" value="{{ $league->id }}">
         <input type="hidden" id="controller-league-slug" value="{{ $league->slug }}">
         <input type="hidden" id="controller-player-id" value="{{ $currentPlayer->player->id ?? '' }}">
@@ -265,27 +485,44 @@
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
         <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
         <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
+        <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
+        <script id="controller-available-players" type="application/json">
+            {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
+                'id' => $leaguePlayer->id,
+                'user_id' => $leaguePlayer->user_id,
+                'name' => $leaguePlayer->player->name,
+                'role' => $leaguePlayer->player->primaryGameRole?->gamePosition?->name ?? $leaguePlayer->player->position?->name ?? '',
+                'base_price' => $leaguePlayer->base_price,
+                'photo' => $leaguePlayer->player->photo ? \Illuminate\Support\Facades\Storage::url($leaguePlayer->player->photo) : asset('images/defaultplayer.jpeg'),
+            ])->values(), JSON_UNESCAPED_SLASHES) !!}
+        </script>
 
-        <div class="control-card control-header space-y-3">
-            <div class="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                <span>{{ $league->isAuctionActive() ? 'Live Auction' : 'Standby' }}</span>
-                <span>•</span>
-                <span>Season {{ $league->season }}</span>
+        <script>
+            document.body?.classList.add('hide-shell');
+        </script>
+
+        <div class="control-bar">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-300 flex items-center gap-2">
+                    <span>{{ $league->isAuctionActive() ? 'Live Auction' : 'Standby' }}</span>
+                    <span>•</span>
+                    <span>Season {{ $league->season }}</span>
+                </p>
+                <h1>{{ $league->name }} Control</h1>
+                <p class="text-[12px] text-slate-200">{{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
             </div>
-            <h1>Control Room</h1>
-            <p class="text-sm text-slate-500">{{ $league->name }} • {{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
-            @if(isset($switchableLeagues) && $switchableLeagues->count() > 0)
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center text-sm">
-                    <label for="leagueSwitchSelect" class="font-semibold text-slate-600">Switch League</label>
-                    <select id="leagueSwitchSelect" class="rounded-full border border-slate-200 px-4 py-2 text-center text-sm font-semibold text-slate-700 focus:border-indigo-500 focus:outline-none" onchange="if (this.value) window.location.href = this.value;">
+            <div class="flex items-center gap-2">
+                @if(isset($switchableLeagues) && $switchableLeagues->count() > 0)
+                    <select id="leagueSwitchSelect" class="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs font-semibold text-white focus:border-indigo-400 focus:outline-none" onchange="if (this.value) window.location.href = this.value;">
                         @foreach($switchableLeagues as $switchLeague)
                             <option value="{{ route('auction.control-room', $switchLeague) }}" @selected($switchLeague->id === $league->id)>
                                 {{ $switchLeague->name }}
                             </option>
                         @endforeach
                     </select>
-                </div>
-            @endif
+                @endif
+                <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-sm shadow hover:bg-slate-100">Dashboard</a>
+            </div>
         </div>
 
         <div id="controller-feedback" class="control-alert hidden"></div>
@@ -303,8 +540,9 @@
                         <p class="text-sm font-semibold text-amber-800">Team balance discrepancy detected</p>
                         <p class="text-xs text-amber-700">Calculated from wallet limit minus sold/retained spend. Click Fix to sync stored wallet.</p>
                     </div>
+                    <button type="button" class="text-xs font-semibold text-amber-800 hover:text-amber-900" data-toggle-mismatch>Expand</button>
                 </div>
-                <div class="space-y-3">
+                <div id="mismatch-body" class="space-y-3 hidden">
                     @foreach($mismatchedTeams as $team)
                         @php
                             $audit = $team->balance_audit;
@@ -333,132 +571,186 @@
             </div>
         @endif
 
-        <div class="control-card player-card">
-            <div class="player-thumb">
-                @if($currentPlayer && $currentPlayer->player?->photo)
-                    <img src="{{ Storage::url($currentPlayer->player->photo) }}" alt="{{ $currentPlayer->player->name }}">
-                @else
-                    <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="Player">
-                @endif
-            </div>
-            <div class="player-details">
-                <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Current Player</p>
-                <h2 class="text-2xl font-bold text-slate-900">{{ $currentPlayer?->player?->name ?? 'Awaiting selection' }}</h2>
-                <p class="text-sm text-slate-500">
-                    @if($currentPlayer)
-                        {{ $currentPlayer->player?->primaryGameRole?->gamePosition?->name ?? $currentPlayer->player?->position?->name ?? 'Role TBA' }}
-                        · Base ₹{{ number_format($currentPlayer->base_price ?? 0) }}
-                    @else
-                        Start an auction to see player details here.
-                    @endif
-                </p>
-            </div>
-            <div class="player-bid">
-                <p class="text-xs font-semibold text-slate-500 uppercase">Current Bid</p>
-                <p id="controller-current-bid-label" class="text-3xl font-bold text-emerald-600">{{ $currentPlayer ? '₹' . number_format($currentBidAmount) : '—' }}</p>
-                <p class="text-xs text-slate-400 mt-1">{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'No bids yet' }}</p>
-            </div>
-            <div class="player-actions">
-                <div class="flex items-center justify-between text-xs text-slate-500">
-                    <span>Manage result for current player</span>
-                    <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
-                        Override amount
-                    </button>
+            <div class="control-card space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Next Player Tools</p>
+                        <p class="text-xs text-slate-500">Search and queue an available player or pull a random pick.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="player-finder__pill">{{ $auctionStats['available_players'] ?? $availablePlayers->count() }} available</span>
+                        <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700" data-toggle-player-tools>Collapse</button>
+                    </div>
                 </div>
-                <div class="player-actions__buttons">
-                    <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
-                        Sold
-                    </button>
-                    <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                        Unsold
-                    </button>
-                </div>
-                <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
-            </div>
-        </div>
-
-        <div class="control-card space-y-5">
-            <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-600 mb-1">Quick Bid Amount</p>
-                    <p id="selected-team-label" class="text-xs text-slate-500">
-                        Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
-                    </p>
-                    <p class="text-xs text-slate-500">
-                        Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
-                    </p>
-                </div>
-                <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
-                    Change amount
-                </button>
-            </div>
-            <div class="quick-grid">
-                @if($bidIncrementValues->isNotEmpty())
-                    <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
-                        +₹{{ number_format($bidIncrementValues->first()) }}
-                    </button>
-                @endif
-            </div>
-            <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
-                <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
-            </button>
-            <p class="text-center text-xs text-slate-400">Use the quick bid button to queue the next amount, then press Bid.</p>
-        </div>
-
-        <div class="control-card space-y-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-600">Choose Team</p>
-                    <p class="text-xs text-slate-500">Tap to assign the bid target.</p>
-                </div>
-                <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
-            </div>
-            <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
-            @php
-                $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
-            @endphp
-            <div class="team-grid">
-                @foreach($teams as $team)
-                    @php
-                        $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
-                        $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid <= $currentRequiredBid);
-                    @endphp
-                    <button type="button"
-                        class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
-                        data-team-pill="{{ $team->id }}"
-                        data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
-                        data-team-reserve="{{ $team->reserve_amount }}"
-                        data-team-max="{{ $team->max_bid_cap }}"
-                        data-team-needed="{{ $team->players_needed }}"
-                        data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
-                        data-team-details="{{ json_encode([
-                            'players' => $team->sold_players_count,
-                            'retained' => $team->retained_players_count ?? 0,
-                            'wallet' => number_format($team->display_wallet ?? $team->wallet_balance ?? 0),
-                            'needs' => $team->players_needed,
-                            'reserve' => number_format($team->reserve_amount),
-                            'max' => number_format($team->max_bid_cap)
-                        ]) }}"
-                        {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
-                        <div class="team-pill__header">
-                            <div>
-                                <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
-                                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
-                                </p>
-                                <p class="text-[11px] font-semibold text-slate-700">₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
-                                <p class="text-[10px] text-slate-400">Wallet</p>
-                            </div>
-                            @if($teamDisabled)
-                                <span class="text-[10px] font-semibold text-rose-500">Cap ₹{{ number_format($teamMaxBid) }}</span>
-                            @endif
+                <div id="controller-player-tools" class="space-y-3">
+                    <div class="player-finder">
+                        <span class="player-finder__icon">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.25 5.25a7.5 7.5 0 001.4 11.4z" />
+                            </svg>
+                        </span>
+                        <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
+                        <div id="controller-search-results" class="player-finder__results hidden"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
+                        <button type="button" class="player-finder__random" data-controller-random>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
+                            </svg>
+                            Random available player
+                        </button>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-600">Queued Players</p>
+                            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700" data-clear-queue>Clear</button>
                         </div>
-                        <p class="team-pill__meta">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
-                        <p class="team-pill__meta text-indigo-600 font-semibold">Max ₹{{ number_format($team->max_bid_cap) }}</p>
-                        <div class="team-pill__details" data-team-details-panel></div>
+                        <div class="auto-start-options">
+                            <span class="text-[11px] font-semibold text-slate-600">Auto start next after Sold/Unsold:</span>
+                            <label>
+                                <input type="radio" name="auto-start" value="on" data-auto-start>
+                                <span>On</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="auto-start" value="off" data-auto-start>
+                                <span>Off</span>
+                            </label>
+                        </div>
+                        <div id="controller-player-queue" class="player-queue"></div>
+                        <div id="controller-queue-empty" class="player-finder__empty">No queued players yet. Add from search or random.</div>
+                    </div>
+                </div>
+            </div>
+
+        <div class="control-grid">
+            <div class="control-card space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Choose Team</p>
+                        <p class="text-xs text-slate-500">Tap to assign the bid target.</p>
+                    </div>
+                    <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
+                </div>
+                <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
+                @php
+                    $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
+                @endphp
+                <div class="team-grid">
+                    @foreach($teams as $team)
+                        @php
+                            $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
+                            $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid <= $currentRequiredBid);
+                        @endphp
+                        <button type="button"
+                            class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
+                            data-team-pill="{{ $team->id }}"
+                            data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
+                            data-team-reserve="{{ $team->reserve_amount }}"
+                            data-team-max="{{ $team->max_bid_cap }}"
+                            data-team-needed="{{ $team->players_needed }}"
+                            data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
+                            data-team-details="{{ json_encode([
+                                'players' => $team->sold_players_count,
+                                'retained' => $team->retained_players_count ?? 0,
+                                'wallet' => number_format($team->display_wallet ?? $team->wallet_balance ?? 0),
+                                'needs' => $team->players_needed,
+                                'reserve' => number_format($team->reserve_amount),
+                                'max' => number_format($team->max_bid_cap)
+                            ]) }}"
+                            {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
+                            <div class="team-pill__header">
+                                <div>
+                                    <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
+                                        {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
+                                    </p>
+                                    <p class="text-[11px] font-semibold text-slate-700">₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
+                                    <p class="text-[10px] text-slate-400">Wallet</p>
+                                </div>
+                                @if($teamDisabled)
+                                    <span class="text-[10px] font-semibold text-rose-500">Cap ₹{{ number_format($teamMaxBid) }}</span>
+                                @endif
+                            </div>
+                            <p class="team-pill__meta">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
+                            <p class="team-pill__meta text-indigo-600 font-semibold">Max ₹{{ number_format($team->max_bid_cap) }}</p>
+                            <div class="team-pill__details" data-team-details-panel></div>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="control-card space-y-5">
+                <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600 mb-1">Quick Bid Amount</p>
+                        <p id="selected-team-label" class="text-xs text-slate-500">
+                            Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
+                        </p>
+                        <p class="text-xs text-slate-500">
+                            Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
+                        </p>
+                    </div>
+                    <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
+                        Change amount
                     </button>
-                @endforeach
+                </div>
+                <div class="quick-grid">
+                    @if($bidIncrementValues->isNotEmpty())
+                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
+                            +₹{{ number_format($bidIncrementValues->first()) }}
+                        </button>
+                    @endif
+                </div>
+                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
+                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
+                </button>
+                <p class="text-center text-xs text-slate-400">Use the quick bid button to queue the next amount, then press Bid.</p>
+            </div>
+
+            <div class="control-card player-card">
+                <div class="player-thumb">
+                    @if($currentPlayer && $currentPlayer->player?->photo)
+                        <img src="{{ Storage::url($currentPlayer->player->photo) }}" alt="{{ $currentPlayer->player->name }}">
+                    @else
+                        <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="Player">
+                    @endif
+                </div>
+                <div class="player-details">
+                    <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Current Player</p>
+                    <h2 class="text-2xl font-bold text-slate-900">{{ $currentPlayer?->player?->name ?? 'Awaiting selection' }}</h2>
+                    <p class="text-sm text-slate-500">
+                        @if($currentPlayer)
+                            {{ $currentPlayer->player?->primaryGameRole?->gamePosition?->name ?? $currentPlayer->player?->position?->name ?? 'Role TBA' }}
+                            · Base ₹{{ number_format($currentPlayer->base_price ?? 0) }}
+                        @else
+                            Start an auction to see player details here.
+                        @endif
+                    </p>
+                </div>
+                <div class="player-bid">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Current Bid</p>
+                    <p id="controller-current-bid-label" class="text-3xl font-bold text-emerald-600">{{ $currentPlayer ? '₹' . number_format($currentBidAmount) : '—' }}</p>
+                    <p class="text-xs text-slate-400 mt-1">{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'No bids yet' }}</p>
+                </div>
+                <div class="player-actions">
+                    <div class="flex items-center justify-between text-xs text-slate-500">
+                        <span>Manage result for current player</span>
+                        <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
+                            Override amount
+                        </button>
+                    </div>
+                    <div class="player-actions__buttons">
+                        <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Sold
+                        </button>
+                        <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Unsold
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
+                </div>
             </div>
         </div>
 
@@ -491,6 +783,14 @@
     const controllerPreview = document.getElementById('controller-bid-preview');
     const controllerTeamSelect = document.getElementById('controller-team');
     const controllerDefaultTeam = document.getElementById('controller-default-team');
+    const controllerStartAction = document.getElementById('controller-start-action');
+    const playerSearchInput = document.querySelector('[data-controller-player-search]');
+    const playerSearchResults = document.getElementById('controller-search-results');
+    const randomPlayerButton = document.querySelector('[data-controller-random]');
+    const availablePlayersScript = document.getElementById('controller-available-players');
+    const playerQueueList = document.getElementById('controller-player-queue');
+    const playerQueueEmpty = document.getElementById('controller-queue-empty');
+    const clearQueueButton = document.querySelector('[data-clear-queue]');
     const teamPills = document.querySelectorAll('[data-team-pill]');
     const soldButton = document.querySelector('[data-controller-sold]');
     const quickButton = document.querySelector('[data-quick-trigger]');
@@ -510,6 +810,14 @@
     const modalPresetButtons = modal?.querySelectorAll('[data-modal-value]');
     const defaultSoldLabel = soldButton ? soldButton.textContent.trim() : 'Sold';
     const leagueIdValue = document.getElementById('controller-league-id')?.value;
+    const defaultPlayerPhoto = "{{ asset('images/defaultplayer.jpeg') }}";
+    const queueStorageKey = leagueIdValue ? `league_${leagueIdValue}_queued_players` : null;
+    const autoStartStorageKey = leagueIdValue ? `league_${leagueIdValue}_auto_start` : null;
+    const playerToolsPanel = document.getElementById('controller-player-tools');
+    const playerToolsToggle = document.querySelector('[data-toggle-player-tools]');
+    const mismatchToggle = document.querySelector('[data-toggle-mismatch]');
+    const mismatchBody = document.getElementById('mismatch-body');
+    const autoStartRadios = document.querySelectorAll('[data-auto-start]');
     const quickStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_increment` : null;
     let quickIncrementValue = Number(controllerBidInput?.dataset.defaultIncrement || 0);
     if (quickStorageKey) {
@@ -1009,6 +1317,13 @@
             }
 
             showControllerMessage('Player marked as sold. Refreshing...', 'success');
+            const currentPlayerIdInput = document.getElementById('controller-league-player-id');
+            if (currentPlayerIdInput) {
+                currentPlayerIdInput.value = '';
+            }
+            if (autoStartEnabled && startNextQueued(true)) {
+                return;
+            }
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             showControllerMessage(error.message || 'Unable to mark player as sold.', 'error');
@@ -1056,6 +1371,13 @@
             }
 
             showControllerMessage('Player marked as unsold. Refreshing...', 'success');
+            const currentPlayerIdInput = document.getElementById('controller-league-player-id');
+            if (currentPlayerIdInput) {
+                currentPlayerIdInput.value = '';
+            }
+            if (autoStartEnabled && startNextQueued(true)) {
+                return;
+            }
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             showControllerMessage(error.message || 'Unable to mark player as unsold.', 'error');
@@ -1064,6 +1386,355 @@
             button.innerHTML = originalText;
         }
     }
+
+    const availablePlayerPool = parseAvailablePlayers();
+    let playerQueue = loadQueue();
+    let autoStartEnabled = loadAutoStartSetting();
+    renderQueue();
+    initPlayerToolsToggle();
+    initMismatchToggle();
+    syncAutoStartUI();
+
+    function parseAvailablePlayers() {
+        if (!availablePlayersScript?.textContent) {
+            return [];
+        }
+        try {
+            const parsed = JSON.parse(availablePlayersScript.textContent);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function normalizePlayer(player) {
+        return {
+            id: player.id ? String(player.id) : '',
+            user_id: player.user_id ? String(player.user_id) : '',
+            name: player.name || player.player_name || 'Player',
+            role: player.role || player.position || 'Role TBA',
+            base_price: Number(player.base_price ?? 0),
+            photo: player.photo || defaultPlayerPhoto
+        };
+    }
+
+    function saveQueue() {
+        if (queueStorageKey) {
+            localStorage.setItem(queueStorageKey, JSON.stringify(playerQueue));
+        }
+    }
+
+    function saveAutoStart(value) {
+        autoStartEnabled = value;
+        if (autoStartStorageKey) {
+            localStorage.setItem(autoStartStorageKey, value ? 'on' : 'off');
+        }
+        syncAutoStartUI();
+    }
+
+    function loadAutoStartSetting() {
+        if (!autoStartStorageKey) {
+            return false;
+        }
+        const stored = localStorage.getItem(autoStartStorageKey);
+        return stored === 'on';
+    }
+
+    function syncAutoStartUI() {
+        autoStartRadios?.forEach(radio => {
+            radio.checked = radio.value === (autoStartEnabled ? 'on' : 'off');
+        });
+    }
+
+    function loadQueue() {
+        if (!queueStorageKey) {
+            return [];
+        }
+        try {
+            const raw = localStorage.getItem(queueStorageKey);
+            if (!raw) {
+                return [];
+            }
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function addToQueue(player) {
+        const normalized = normalizePlayer(player);
+        if (!normalized.id || !normalized.user_id) {
+            showControllerMessage('Cannot queue this player right now.', 'error');
+            return;
+        }
+        const exists = playerQueue.some((p) => p.id === normalized.id);
+        if (exists) {
+            showControllerMessage('Player already in queue.');
+            return;
+        }
+        playerQueue.push(normalized);
+        saveQueue();
+        renderQueue();
+        showControllerMessage(`${normalized.name} added to queue.`);
+    }
+
+    function removeFromQueue(playerId) {
+        playerQueue = playerQueue.filter((p) => p.id !== playerId);
+        saveQueue();
+        renderQueue();
+    }
+
+    function renderQueue() {
+        if (!playerQueueList || !playerQueueEmpty) {
+            return;
+        }
+        playerQueueList.innerHTML = '';
+        if (!playerQueue.length) {
+            playerQueueEmpty.classList.remove('hidden');
+            return;
+        }
+        playerQueueEmpty.classList.add('hidden');
+        playerQueue.forEach((player) => {
+            const card = document.createElement('div');
+            card.className = 'player-queue__item';
+            card.innerHTML = `
+                <div class="player-finder__avatar">
+                    <img src="${player.photo}" alt="${player.name}" class="w-full h-full object-cover" onerror="this.src='${defaultPlayerPhoto}'">
+                </div>
+                <div class="player-queue__meta">
+                    <p class="player-finder__name">${player.name}</p>
+                    <p class="player-finder__details">${player.role} • ${formatCurrency(player.base_price)}</p>
+                </div>
+                <div class="player-queue__actions">
+                    <button type="button" class="player-finder__action" data-queue-start>Start</button>
+                    <button type="button" class="text-[11px] font-semibold text-rose-500" data-queue-remove>Remove</button>
+                </div>
+            `;
+            const startBtn = card.querySelector('[data-queue-start]');
+            const removeBtn = card.querySelector('[data-queue-remove]');
+            startBtn?.addEventListener('click', () => startAuctionForPlayer(player, startBtn));
+            removeBtn?.addEventListener('click', () => removeFromQueue(player.id));
+            playerQueueList.appendChild(card);
+        });
+    }
+
+    async function startAuctionForPlayer(player, triggerButton, forceStart = false) {
+        const startAction = controllerStartAction?.value;
+        const token = getControllerToken();
+        const activeLeaguePlayerId = document.getElementById('controller-league-player-id')?.value;
+        if (!forceStart && activeLeaguePlayerId && String(activeLeaguePlayerId) !== String(player.id)) {
+            showControllerMessage('Finish the current player before starting another.', 'error');
+            return;
+        }
+        if (!startAction || !leagueIdValue) {
+            showControllerMessage('Missing start configuration. Refresh and try again.', 'error');
+            return;
+        }
+        if (!player?.id || !player?.user_id) {
+            showControllerMessage('Player details are missing.', 'error');
+            return;
+        }
+        const originalText = triggerButton?.innerHTML;
+        if (triggerButton) {
+            triggerButton.disabled = true;
+            triggerButton.innerHTML = 'Starting...';
+        }
+        try {
+            const response = await fetch(startAction, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    league_id: Number(leagueIdValue),
+                    league_player_id: Number(player.id),
+                    player_id: Number(player.user_id)
+                })
+            });
+            const data = await response.json().catch(() => null);
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.message || 'Unable to start auction for this player.');
+            }
+            showControllerMessage(`${player.name} queued for bidding.`);
+            removeFromQueue(String(player.id));
+            setTimeout(() => window.location.reload(), 800);
+        } catch (error) {
+            showControllerMessage(error.message || 'Unable to start auction.', 'error');
+        } finally {
+            if (triggerButton) {
+                triggerButton.disabled = false;
+                triggerButton.innerHTML = originalText || 'Start';
+            }
+        }
+    }
+
+    async function searchAvailablePlayers(query) {
+        if (!playerSearchResults) {
+            return;
+        }
+        playerSearchResults.innerHTML = '<div class="player-finder__empty">Searching…</div>';
+        playerSearchResults.classList.remove('hidden');
+        try {
+            const response = await fetch(`/auction/search-players?query=${encodeURIComponent(query)}&league_id=${leagueIdValue}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            const data = await response.json().catch(() => null);
+            if (data?.success && Array.isArray(data.players) && data.players.length) {
+                renderSearchResults(data.players);
+            } else {
+                renderSearchResults([]);
+            }
+        } catch (error) {
+            renderSearchResults([]);
+        }
+    }
+
+    function renderSearchResults(players) {
+        if (!playerSearchResults) {
+            return;
+        }
+        playerSearchResults.innerHTML = '';
+        if (!players || players.length === 0) {
+            playerSearchResults.innerHTML = '<div class="player-finder__empty">No players found</div>';
+            playerSearchResults.classList.remove('hidden');
+            return;
+        }
+        players.forEach((raw) => {
+            const player = normalizePlayer(raw);
+            const row = document.createElement('div');
+            row.className = 'player-finder__card w-full';
+            row.innerHTML = `
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="player-finder__avatar">
+                        <img src="${player.photo}" alt="${player.name}" class="w-full h-full object-cover" onerror="this.src='${defaultPlayerPhoto}'">
+                    </div>
+                    <div class="player-finder__meta">
+                        <p class="player-finder__name">${player.name}</p>
+                        <p class="player-finder__details">${player.role} • ${formatCurrency(player.base_price)}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="player-finder__action" data-result-queue>Add to queue</button>
+                    <button type="button" class="player-finder__action" data-result-start>Start now</button>
+                </div>
+            `;
+            const addBtn = row.querySelector('[data-result-queue]');
+            const startBtn = row.querySelector('[data-result-start]');
+            addBtn?.addEventListener('click', (event) => {
+                event.stopPropagation();
+                addToQueue(player);
+                playerSearchResults.classList.add('hidden');
+            });
+            startBtn?.addEventListener('click', (event) => {
+                event.stopPropagation();
+                playerSearchResults.classList.add('hidden');
+                startAuctionForPlayer(player, startBtn);
+            });
+            playerSearchResults.appendChild(row);
+        });
+        playerSearchResults.classList.remove('hidden');
+    }
+
+    if (playerSearchInput) {
+        let searchTimeout;
+        playerSearchInput.addEventListener('input', (event) => {
+            const query = event.target.value.trim();
+            clearTimeout(searchTimeout);
+            if (query.length < 2) {
+                playerSearchResults?.classList.add('hidden');
+                return;
+            }
+            searchTimeout = setTimeout(() => {
+                searchAvailablePlayers(query);
+            }, 250);
+        });
+        document.addEventListener('click', (event) => {
+            if (!playerSearchResults) {
+                return;
+            }
+            if (!playerSearchResults.contains(event.target) && !playerSearchInput.contains(event.target)) {
+                playerSearchResults.classList.add('hidden');
+            }
+        });
+    }
+
+    randomPlayerButton?.addEventListener('click', () => {
+        if (!availablePlayerPool || availablePlayerPool.length === 0) {
+            showControllerMessage('No available players to pick right now.', 'error');
+            return;
+        }
+        const remaining = availablePlayerPool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
+        const pool = remaining.length ? remaining : availablePlayerPool;
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        const player = normalizePlayer(pool[randomIndex]);
+        addToQueue(player);
+    });
+
+    clearQueueButton?.addEventListener('click', () => {
+        playerQueue = [];
+        saveQueue();
+        renderQueue();
+    });
+
+    function initPlayerToolsToggle() {
+        if (!playerToolsToggle || !playerToolsPanel) {
+            return;
+        }
+        const hasActivePlayer = Boolean(document.getElementById('controller-league-player-id')?.value);
+        if (hasActivePlayer) {
+            playerToolsPanel.classList.add('hidden');
+            playerToolsToggle.textContent = 'Expand';
+        }
+        playerToolsToggle.addEventListener('click', () => {
+            const isHidden = playerToolsPanel.classList.toggle('hidden');
+            playerToolsToggle.textContent = isHidden ? 'Expand' : 'Collapse';
+        });
+    }
+
+    function initMismatchToggle() {
+        if (!mismatchToggle || !mismatchBody) {
+            return;
+        }
+        mismatchToggle.textContent = 'Expand';
+        mismatchBody.classList.add('hidden');
+        mismatchToggle.addEventListener('click', () => {
+            const isHidden = mismatchBody.classList.toggle('hidden');
+            mismatchToggle.textContent = isHidden ? 'Expand' : 'Collapse';
+        });
+    }
+
+    function startNextQueued(force = false) {
+        let next = null;
+
+        if (playerQueue.length) {
+            next = playerQueue[0];
+            removeFromQueue(next.id);
+        } else if (availablePlayerPool.length) {
+            const remaining = availablePlayerPool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
+            next = remaining.length ? normalizePlayer(remaining[0]) : normalizePlayer(availablePlayerPool[0]);
+        }
+
+        if (!next) {
+            return false;
+        }
+
+        startAuctionForPlayer(next, null, force);
+        return true;
+    }
+
+    autoStartRadios?.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            const value = event.target.value === 'on';
+            saveAutoStart(value);
+        });
+    });
 })();
 </script>
 @endsection
