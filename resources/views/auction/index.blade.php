@@ -67,6 +67,14 @@
                                 </svg>
                                 Share Link
                             </button>
+                            <button type="button"
+                                    onclick="shareBroadcastToWhatsApp()"
+                                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium inline-flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12.04 2.25h-.08C6.617 2.25 2.25 6.617 2.25 11.96c0 1.856.486 3.664 1.41 5.27L2.3 21.57a.75.75 0 00.95.95l4.34-1.36a10 10 0 004.45 1.05h.08c5.343 0 9.71-4.367 9.71-9.71s-4.367-9.71-9.71-9.71zm0 1.5c4.535 0 8.21 3.675 8.21 8.21s-3.675 8.21-8.21 8.21h-.07a8.5 8.5 0 01-4.03-1.02l-.28-.15-2.58.81.83-2.52-.17-.3a8.5 8.5 0 01-1.05-4.03c0-4.535 3.675-8.21 8.21-8.21h.12zm3.132 6.21c-.165-.082-.97-.48-1.12-.535-.15-.056-.26-.082-.37.082-.11.165-.425.535-.52.645-.095.11-.19.124-.355.041-.165-.082-.7-.258-1.333-.82-.493-.44-.825-.984-.922-1.149-.096-.165-.01-.255.073-.337.075-.075.165-.196.248-.295.083-.098.11-.165.165-.275.055-.11.027-.206-.014-.288-.041-.082-.37-.891-.506-1.223-.133-.32-.269-.276-.37-.281-.096-.004-.206-.005-.316-.005-.11 0-.288.041-.44.206-.15.165-.58.566-.58 1.38 0 .814.594 1.6.677 1.713.082.11 1.17 1.788 2.836 2.505.396.171.704.272.944.349.397.126.76.108 1.047.065.319-.048.97-.396 1.107-.777.137-.38.137-.706.096-.777-.04-.068-.15-.11-.316-.192z"></path>
+                                </svg>
+                                Share Broadcast
+                            </button>
                         @endif
                         <a href="{{ route('auctions.live', $league) }}" 
                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium">
@@ -206,6 +214,10 @@
     const PUSHER_KEY = '{{ config('broadcasting.connections.pusher.key') }}';
     const PUSHER_CLUSTER = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
     const PUSHER_LOG_TO_CONSOLE = {{ config('app.debug') ? 'true' : 'false' }};
+
+    // Broadcast share helpers
+    const broadcastShareUrl = @json(route('auctions.live.public', $league));
+    const broadcastLeagueName = @json($league->name);
 </script>
 <script src="{{ asset('js/pusher-main.js') }}?v={{ time() + 1 }}"></script>
 
@@ -514,6 +526,20 @@ function shareAuctionLink() {
         // Fallback for older browsers
         fallbackCopyTextToClipboard(auctionUrl);
     }
+}
+
+// Share the public broadcast view via WhatsApp
+function shareBroadcastToWhatsApp() {
+    const message = `Watch the live auction broadcast for ${broadcastLeagueName}: ${broadcastShareUrl}`;
+    const shareUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const popup = window.open(shareUrl, '_blank');
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        showMessage('Please allow pop-ups to share on WhatsApp.', 'error');
+        return;
+    }
+
+    showMessage('Opening WhatsApp to share the broadcast link...', 'success');
 }
 
 function fallbackCopyTextToClipboard(text) {

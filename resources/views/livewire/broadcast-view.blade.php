@@ -371,6 +371,45 @@
             object-fit: cover;
         }
 
+        /* Current player hero */
+        .player-hero {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            min-height: 18rem;
+            border-radius: 1.5rem;
+        }
+
+        .player-hero img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .player-hero.pitch::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 18% 100%, 100% 18%;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+
+        .player-hero.pitch::after {
+            content: '';
+            position: absolute;
+            inset: 10%;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 1.25rem;
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08);
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.12), transparent 60%);
+            pointer-events: none;
+        }
+
         .player-thumb {
             width: 2.1rem;
             height: 2.1rem;
@@ -463,6 +502,8 @@
         'unsold' => ['bg' => 'bg-amber-500/10 border-amber-400/50', 'pill' => 'bg-amber-500/20 text-amber-100 border border-amber-400/50', 'amount' => 'text-amber-100'],
         default => ['bg' => 'bg-slate-800/60 border-slate-700/60', 'pill' => 'bg-slate-700/60 text-slate-200 border border-slate-600/60', 'amount' => 'text-slate-100'],
     };
+    $gameName = strtolower($leagueModel->game->name ?? '');
+    $isFootballGame = str_contains($gameName, 'football') || str_contains($gameName, 'soccer');
 @endphp
 
 @php
@@ -525,9 +566,9 @@
             <section class="relative broadcast-panel p-6 sm:p-8">
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <div class="lg:w-1/2">
-                        <div class="relative overflow-hidden rounded-3xl border border-slate-700/70 bg-black/30 shadow-2xl">
+                        <div class="relative overflow-hidden border border-slate-700/70 bg-black/40 shadow-2xl player-hero {{ $isFootballGame ? 'pitch' : '' }}">
                             <img src="{{ $playerPhoto }}" alt="{{ $displayPlayer->name ?? 'Awaiting player' }}"
-                                class="w-full h-[22rem] object-cover {{ $currentPlayer ? '' : 'opacity-100' }}">
+                                class="{{ $currentPlayer ? '' : 'opacity-100' }}">
                             <div class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-white/40"
                                 @if($displayPlayer) style="display:none" @endif>
                                 {{ $playerInitial }}
