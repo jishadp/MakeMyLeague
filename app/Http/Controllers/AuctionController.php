@@ -8,6 +8,7 @@ use App\Events\LeaguePlayerAuctionStarted;
 use App\Events\PlayerSold;
 use App\Events\PlayerUnsold;
 use App\Models\Auction;
+use App\Models\Fixture;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;

@@ -28,6 +28,11 @@ class AuctionPolicy
 
     public function placeBid(User $user, League $league): bool
     {
+        // Allow organizers and admins to place bids from the control panel
+        if ($user->isAdmin() || $this->auctionAccessService->isApprovedOrganizer($user->id, $league->id)) {
+            return true;
+        }
+
         $role = $this->auctionAccessService->getUserAuctionRole($user->id, $league->id);
         return in_array($role, ['auctioneer', 'both']);
     }
