@@ -16,8 +16,8 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            if (!PUSHER_KEY || !PUSHER_CLUSTER) {
-                console.warn('Pusher keys missing');
+            if (!window.Pusher || !PUSHER_KEY || !PUSHER_CLUSTER) {
+                console.warn('Pusher config missing for broadcast');
                 return;
             }
 
@@ -29,45 +29,37 @@
             });
             Pusher.logToConsole = PUSHER_LOG_TO_CONSOLE;
 
-            const channel = pusher.subscribe('auctions');
-            const leagueChannel = leagueId ? pusher.subscribe(`auctions.league.${leagueId}`) : null;
+            const channels = [
+                pusher.subscribe('auctions'),
+                leagueId ? pusher.subscribe(`auctions.league.${leagueId}`) : null,
+            ];
 
             const refreshBroadcast = () => {
-                const root = document.getElementById('broadcastRoot');
-                const wireId = root ? root.getAttribute('wire:id') : null;
-
-                if (root && root.__livewire && typeof root.__livewire.call === 'function') {
-                    root.__livewire.call('refreshData');
-                    return;
-                }
-
-                if (window.Livewire) {
-                    if (typeof Livewire.find === 'function' && wireId) {
-                        const comp = Livewire.find(wireId);
-                        if (comp && typeof comp.call === 'function') {
-                            comp.call('refreshData');
+                try {
+                    // Prefer finding the broadcast Livewire instance directly
+                    if (window.Livewire?.all) {
+                        const comps = Livewire.all();
+                        const broadcastComp = comps.find((c) => (c.name || c.__instance?.name || '').includes('broadcast'));
+                        if (broadcastComp?.call) {
+                            broadcastComp.call('refreshData');
                             return;
                         }
                     }
-                    if (typeof Livewire.all === 'function') {
-                        Livewire.all().forEach(comp => {
-                            if (comp && typeof comp.call === 'function') {
-                                comp.call('refreshData');
-                            }
-                        });
-                    }
+                    // Fallback: iterate over roots with wire:id
+                    document.querySelectorAll('[wire\\:id]').forEach((el) => {
+                        const comp = el.__livewire || (window.Livewire?.find && Livewire.find(el.getAttribute('wire:id')));
+                        if (comp?.call) {
+                            comp.call('refreshData');
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Broadcast refresh failed', e);
                 }
             };
 
-            const bindEvents = targetChannel => {
-                if (!targetChannel) return;
-                ['player-sold', 'player-unsold', 'new-player-started', 'new-player-bid-call'].forEach(event => {
-                    targetChannel.bind(event, refreshBroadcast);
-                });
-            };
-
-            bindEvents(channel);
-            bindEvents(leagueChannel);
+            ['player-sold', 'player-unsold', 'new-player-started', 'new-player-bid-call'].forEach((event) => {
+                channels.forEach((ch) => ch?.bind(event, refreshBroadcast));
+            });
         });
     </script>
 @endsection

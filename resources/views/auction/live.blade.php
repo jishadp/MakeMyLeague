@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="text-gray-500">placed a bid</span>
                 </div>
                 <div class="text-left sm:text-right">
-                    <span class="block text-xl font-bold text-emerald-600">₹${data.new_bid}</span>
+                    <span class="block text-xl font-bold text-emerald-600">₹${Number(data.new_bid).toLocaleString('en-IN')}</span>
                     <p class="text-xs text-gray-500">${new Date().toLocaleTimeString()}</p>
                 </div>
             </div>
@@ -885,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentBidElement = document.getElementById('currentBid');
         const leadingTeamElement = document.getElementById('leadingTeam');
         if (currentBidElement) {
-            currentBidElement.textContent = `₹${data.new_bid}`;
+            currentBidElement.textContent = Number(data.new_bid).toLocaleString('en-IN');
         }
         if (leadingTeamElement) {
             leadingTeamElement.textContent = data.league_team.team.name;
