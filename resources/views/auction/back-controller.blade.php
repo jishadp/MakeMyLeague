@@ -428,16 +428,17 @@
         gap: 1rem;
         padding: 0.75rem 1rem;
         border-radius: 1rem;
-        background: #0f172a;
-        color: #e2e8f0;
-        box-shadow: 0 15px 30px rgba(15, 23, 42, 0.25);
+        background: linear-gradient(135deg, #ffffff, #f8fafc);
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
     }
     .control-bar h1 {
         font-size: 1.25rem;
         font-weight: 800;
         letter-spacing: 0.01em;
         margin: 0;
-        color: #e2e8f0;
+        color: #0f172a;
     }
     .control-grid {
         display: grid;
@@ -502,16 +503,45 @@
         </script>
 
         <div class="control-bar">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-300 flex items-center gap-2">
-                    <span>{{ $league->isAuctionActive() ? 'Live Auction' : 'Standby' }}</span>
-                    <span>•</span>
-                    <span>Season {{ $league->season }}</span>
-                </p>
-                <h1>{{ $league->name }} Control</h1>
-                <p class="text-[12px] text-slate-200">{{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-800 font-bold border border-slate-200">
+                    <i class="fa-solid fa-sliders-h text-lg" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-600 flex items-center gap-2">
+                        <span>{{ $league->isAuctionActive() ? 'Live Auction' : 'Standby' }}</span>
+                        <span>•</span>
+                        <span>Season {{ $league->season }}</span>
+                    </p>
+                    <h1>{{ $league->name }} Control</h1>
+                    <p class="text-[12px] text-slate-500">{{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
+                </div>
             </div>
             <div class="flex items-center gap-2">
+                <button type="button"
+                        onclick="copyTextWithFallback('{{ route('auctions.live', $league) }}', 'Live link copied!')"
+                        class="p-2 rounded-full bg-slate-800/70 text-white hover:bg-slate-700 transition"
+                        title="Copy Live View">
+                    <i class="fa-solid fa-link" aria-hidden="true"></i>
+                </button>
+                <button type="button"
+                        onclick="copyTextWithFallback('{{ route('auctions.live.public', $league) }}', 'Broadcast link copied!')"
+                        class="p-2 rounded-full bg-slate-800/70 text-white hover:bg-slate-700 transition"
+                        title="Copy Broadcast View">
+                    <i class="fa-solid fa-tv" aria-hidden="true"></i>
+                </button>
+                <button type="button"
+                        onclick="openWhatsAppShare('Live link: {{ route('auctions.live', $league) }}')"
+                        class="p-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                        title="WhatsApp Live">
+                    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                </button>
+                <button type="button"
+                        onclick="openWhatsAppShare('Broadcast link: {{ route('auctions.live.public', $league) }}')"
+                        class="p-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                        title="WhatsApp Broadcast">
+                    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                </button>
                 @if(isset($switchableLeagues) && $switchableLeagues->count() > 0)
                     <select id="leagueSwitchSelect" class="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs font-semibold text-white focus:border-indigo-400 focus:outline-none" onchange="if (this.value) window.location.href = this.value;">
                         @foreach($switchableLeagues as $switchLeague)
@@ -521,7 +551,9 @@
                         @endforeach
                     </select>
                 @endif
-                <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-sm shadow hover:bg-slate-100">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition" title="Dashboard">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                </a>
             </div>
         </div>
 
@@ -776,6 +808,54 @@
 @endsection
 
 @section('scripts')
+<script>
+function controllerToast(message, type = 'success') {
+    const feedback = document.getElementById('controller-feedback');
+    if (feedback) {
+        feedback.textContent = message;
+        feedback.classList.remove('hidden', 'success', 'error');
+        feedback.classList.add(type === 'error' ? 'error' : 'success');
+        setTimeout(() => feedback.classList.add('hidden'), 3000);
+    } else {
+        alert(message);
+    }
+}
+
+function copyTextWithFallback(text, successMessage = 'Link copied!') {
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => controllerToast(successMessage, 'success'))
+            .catch(() => fallbackCopy(text, successMessage));
+    } else {
+        fallbackCopy(text, successMessage);
+    }
+}
+
+function fallbackCopy(text, successMessage) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    try {
+        document.execCommand('copy');
+        controllerToast(successMessage, 'success');
+    } catch (e) {
+        controllerToast('Copy failed. Please copy manually.', 'error');
+    }
+    document.body.removeChild(area);
+}
+
+function openWhatsAppShare(message) {
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const popup = window.open(url, '_blank');
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        controllerToast('Please allow pop-ups to share on WhatsApp.', 'error');
+    }
+}
+</script>
 <script>
 (function() {
     const controllerBidInput = document.getElementById('controller-custom-amount');

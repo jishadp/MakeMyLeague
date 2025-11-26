@@ -60,21 +60,38 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         @if($league->isAuctionActive())
-                            <button onclick="shareAuctionLink()" 
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                                </svg>
-                                Share Link
-                            </button>
-                            <button type="button"
-                                    onclick="shareBroadcastToWhatsApp()"
-                                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium inline-flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12.04 2.25h-.08C6.617 2.25 2.25 6.617 2.25 11.96c0 1.856.486 3.664 1.41 5.27L2.3 21.57a.75.75 0 00.95.95l4.34-1.36a10 10 0 004.45 1.05h.08c5.343 0 9.71-4.367 9.71-9.71s-4.367-9.71-9.71-9.71zm0 1.5c4.535 0 8.21 3.675 8.21 8.21s-3.675 8.21-8.21 8.21h-.07a8.5 8.5 0 01-4.03-1.02l-.28-.15-2.58.81.83-2.52-.17-.3a8.5 8.5 0 01-1.05-4.03c0-4.535 3.675-8.21 8.21-8.21h.12zm3.132 6.21c-.165-.082-.97-.48-1.12-.535-.15-.056-.26-.082-.37.082-.11.165-.425.535-.52.645-.095.11-.19.124-.355.041-.165-.082-.7-.258-1.333-.82-.493-.44-.825-.984-.922-1.149-.096-.165-.01-.255.073-.337.075-.075.165-.196.248-.295.083-.098.11-.165.165-.275.055-.11.027-.206-.014-.288-.041-.082-.37-.891-.506-1.223-.133-.32-.269-.276-.37-.281-.096-.004-.206-.005-.316-.005-.11 0-.288.041-.44.206-.15.165-.58.566-.58 1.38 0 .814.594 1.6.677 1.713.082.11 1.17 1.788 2.836 2.505.396.171.704.272.944.349.397.126.76.108 1.047.065.319-.048.97-.396 1.107-.777.137-.38.137-.706.096-.777-.04-.068-.15-.11-.316-.192z"></path>
-                                </svg>
-                                Share Broadcast
-                            </button>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="copyLiveLink()" 
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                    </svg>
+                                    Copy Live Link
+                                </button>
+                                <button onclick="copyBroadcastLink()" 
+                                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17l4 4 4-4m-4-5v9"></path>
+                                    </svg>
+                                    Copy Broadcast
+                                </button>
+                                <button type="button"
+                                        onclick="shareLiveToWhatsApp()"
+                                        class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12.04 2.25h-.08C6.617 2.25 2.25 6.617 2.25 11.96c0 1.856.486 3.664 1.41 5.27L2.3 21.57a.75.75 0 00.95.95l4.34-1.36a10 10 0 004.45 1.05h.08c5.343 0 9.71-4.367 9.71-9.71s-4.367-9.71-9.71-9.71zm0 1.5c4.535 0 8.21 3.675 8.21 8.21s-3.675 8.21-8.21 8.21h-.07a8.5 8.5 0 01-4.03-1.02l-.28-.15-2.58.81.83-2.52-.17-.3a8.5 8.5 0 01-1.05-4.03c0-4.535 3.675-8.21 8.21-8.21h.12zm3.132 6.21c-.165-.082-.97-.48-1.12-.535-.15-.056-.26-.082-.37.082-.11.165-.425.535-.52.645-.095.11-.19.124-.355.041-.165-.082-.7-.258-1.333-.82-.493-.44-.825-.984-.922-1.149-.096-.165-.01-.255.073-.337.075-.075.165-.196.248-.295.083-.098.11-.165.165-.275.055-.11.027-.206-.014-.288-.041-.082-.37-.891-.506-1.223-.133-.32-.269-.276-.37-.281-.096-.004-.206-.005-.316-.005-.11 0-.288.041-.44.206-.15.165-.58.566-.58 1.38 0 .814.594 1.6.677 1.713.082.11 1.17 1.788 2.836 2.505.396.171.704.272.944.349.397.126.76.108 1.047.065.319-.048.97-.396 1.107-.777.137-.38.137-.706.096-.777-.04-.068-.15-.11-.316-.192z"></path>
+                                    </svg>
+                                    WhatsApp Live
+                                </button>
+                                <button type="button"
+                                        onclick="shareBroadcastToWhatsApp()"
+                                        class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12.04 2.25h-.08C6.617 2.25 2.25 6.617 2.25 11.96c0 1.856.486 3.664 1.41 5.27L2.3 21.57a.75.75 0 00.95.95l4.34-1.36a10 10 0 004.45 1.05h.08c5.343 0 9.71-4.367 9.71-9.71s-4.367-9.71-9.71-9.71zm0 1.5c4.535 0 8.21 3.675 8.21 8.21s-3.675 8.21-8.21 8.21h-.07a8.5 8.5 0 01-4.03-1.02l-.28-.15-2.58.81.83-2.52-.17-.3a8.5 8.5 0 01-1.05-4.03c0-4.535 3.675-8.21 8.21-8.21h.12zm3.132 6.21c-.165-.082-.97-.48-1.12-.535-.15-.056-.26-.082-.37.082-.11.165-.425.535-.52.645-.095.11-.19.124-.355.041-.165-.082-.7-.258-1.333-.82-.493-.44-.825-.984-.922-1.149-.096-.165-.01-.255.073-.337.075-.075.165-.196.248-.295.083-.098.11-.165.165-.275.055-.11.027-.206-.014-.288-.041-.082-.37-.891-.506-1.223-.133-.32-.269-.276-.37-.281-.096-.004-.206-.005-.316-.005-.11 0-.288.041-.44.206-.15.165-.58.566-.58 1.38 0 .814.594 1.6.677 1.713.082.11 1.17 1.788 2.836 2.505.396.171.704.272.944.349.397.126.76.108 1.047.065.319-.048.97-.396 1.107-.777.137-.38.137-.706.096-.777-.04-.068-.15-.11-.316-.192z"></path>
+                                    </svg>
+                                    WhatsApp Broadcast
+                                </button>
+                            </div>
                         @endif
                         <a href="{{ route('auctions.live', $league) }}" 
                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium">
@@ -217,6 +234,7 @@
 
     // Broadcast share helpers
     const broadcastShareUrl = @json(route('auctions.live.public', $league));
+    const liveShareUrl = @json(route('auctions.live', $league));
     const broadcastLeagueName = @json($league->name);
 </script>
 <script src="{{ asset('js/pusher-main.js') }}?v={{ time() + 1 }}"></script>
@@ -510,27 +528,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Share auction link function
-function shareAuctionLink() {
-    const auctionUrl = window.location.href;
-    
-    // Try to use the Clipboard API
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(auctionUrl).then(function() {
-            showMessage('Auction link copied to clipboard!', 'success');
-        }, function() {
-            // Fallback if clipboard API fails
-            fallbackCopyTextToClipboard(auctionUrl);
-        });
-    } else {
-        // Fallback for older browsers
-        fallbackCopyTextToClipboard(auctionUrl);
-    }
+// Clipboard helpers
+function copyLiveLink() {
+    copyTextWithFallback(liveShareUrl, 'Live auction link copied to clipboard!');
 }
 
-// Share the public broadcast view via WhatsApp
+function copyBroadcastLink() {
+    copyTextWithFallback(broadcastShareUrl, 'Broadcast link copied to clipboard!');
+}
+
+// Share via WhatsApp
 function shareBroadcastToWhatsApp() {
     const message = `Watch the live auction broadcast for ${broadcastLeagueName}: ${broadcastShareUrl}`;
+    openWhatsAppShare(message);
+}
+
+function shareLiveToWhatsApp() {
+    const message = `Join the live auction room for ${broadcastLeagueName}: ${liveShareUrl}`;
+    openWhatsAppShare(message);
+}
+
+function openWhatsAppShare(message) {
     const shareUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     const popup = window.open(shareUrl, '_blank');
 
@@ -539,7 +557,19 @@ function shareBroadcastToWhatsApp() {
         return;
     }
 
-    showMessage('Opening WhatsApp to share the broadcast link...', 'success');
+    showMessage('Opening WhatsApp to share...', 'success');
+}
+
+function copyTextWithFallback(text, successMessage) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showMessage(successMessage, 'success');
+        }, function() {
+            fallbackCopyTextToClipboard(text);
+        });
+    } else {
+        fallbackCopyTextToClipboard(text);
+    }
 }
 
 function fallbackCopyTextToClipboard(text) {
