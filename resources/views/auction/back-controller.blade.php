@@ -7,6 +7,15 @@
     .control-room {
         background: radial-gradient(circle at 10% 20%, #eef2ff, #f8fafc 35%, #f1f5f9);
     }
+    .control-bar-actions .home-btn {
+        order: 5;
+    }
+    @media (max-width: 640px) {
+        .control-bar-actions .home-btn {
+            order: -1;
+            margin-left: 0;
+        }
+    }
     .control-card {
         background: linear-gradient(145deg, #ffffff, #f8fafc);
         border-radius: 1.5rem;
@@ -432,6 +441,7 @@
         color: #0f172a;
         border: 1px solid #e2e8f0;
         box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+        flex-wrap: wrap;
     }
     .control-bar h1 {
         font-size: 1.25rem;
@@ -439,6 +449,24 @@
         letter-spacing: 0.01em;
         margin: 0;
         color: #0f172a;
+    }
+    .control-bar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 640px) {
+        .control-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .control-bar-actions {
+            justify-content: flex-start;
+        }
+        .control-bar-actions > * {
+            flex-shrink: 0;
+        }
     }
     .control-grid {
         display: grid;
@@ -517,7 +545,7 @@
                     <p class="text-[12px] text-slate-500">{{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="control-bar-actions">
                 <button type="button"
                         onclick="copyTextWithFallback('{{ route('auctions.live', $league) }}', 'Live link copied!')"
                         class="p-2 rounded-full bg-slate-800/70 text-white hover:bg-slate-700 transition"
@@ -551,7 +579,7 @@
                         @endforeach
                     </select>
                 @endif
-                <a href="{{ route('dashboard') }}" class="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition" title="Dashboard">
+                <a href="{{ route('dashboard') }}" class="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition home-btn" title="Dashboard">
                     <i class="fa-solid fa-house" aria-hidden="true"></i>
                 </a>
             </div>
