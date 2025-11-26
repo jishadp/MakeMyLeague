@@ -5,7 +5,7 @@
 @endphp
 
 <!-- Video Hero Section -->
-<section id="hero" class="video-hero relative min-h-[90vh] flex items-center text-white overflow-hidden">
+<section id="hero" class="video-hero relative min-h-[90vh] flex items-center text-white overflow-visible">
     <video class="hero-video" autoplay muted loop playsinline poster="{{ asset('images/hero.jpg') }}">
         <source src="{{ asset('videos/hero-stadium.mp4') }}" type="video/mp4">
         <source src="{{ asset('videos/hero-auction.mp4') }}" type="video/mp4">
@@ -126,6 +126,7 @@
     }
     .video-hero {
         background: #020715;
+        overflow: visible;
     }
     .hero-video {
         position: absolute;

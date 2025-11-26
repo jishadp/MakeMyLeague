@@ -292,11 +292,12 @@ function updatePlayerCard(playerData, newBid) {
         $('.basePrice').text(playerData.base_price);
     }
     
-    // Update current bid display with currency symbol
-    $('.currentBid').html('₹' + parseInt(newBid).toLocaleString());
+    // Update current bid display without duplicating currency (currency handled in markup)
+    const formatted = parseInt(newBid).toLocaleString();
+    $('.currentBid').html(formatted);
     
-    // Update custom bid modal current bid display
-    $('#currentBidDisplay').html('₹' + parseInt(newBid).toLocaleString());
+    // Update custom bid modal current bid display (includes currency here)
+    $('#currentBidDisplay').html('₹' + formatted);
     
     // Update bid status
     $('.bidStatus').text('Current Bid');
