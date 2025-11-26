@@ -543,6 +543,19 @@
                     </p>
                     <h1>{{ $league->name }} Control</h1>
                     <p class="text-[12px] text-slate-500">{{ $league->game->name ?? 'Game TBA' }} • {{ $league->league_teams_count }} teams</p>
+                    <div class="flex flex-wrap items-center gap-1 text-[11px] text-slate-500 mt-1">
+                        <span class="font-semibold text-slate-600">Access:</span>
+                        @forelse($league->approvedOrganizers as $organizer)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-[10px] font-bold text-slate-700">
+                                    {{ strtoupper(substr($organizer->name, 0, 1)) }}
+                                </span>
+                                {{ $organizer->name }}
+                            </span>
+                        @empty
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Organizers & Admins</span>
+                        @endforelse
+                    </div>
                 </div>
             </div>
             <div class="control-bar-actions">

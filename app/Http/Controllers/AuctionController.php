@@ -103,7 +103,7 @@ class AuctionController extends Controller
 
         $this->authorize('viewAuctionPanel', $league);
 
-        $league->load(['game', 'localBody.district']);
+        $league->load(['game', 'localBody.district', 'approvedOrganizers']);
         $league->loadCount('leagueTeams');
 
         $currentPlayer = LeaguePlayer::where('league_id', $league->id)
