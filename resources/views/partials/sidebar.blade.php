@@ -59,6 +59,9 @@
                             <a href="{{ route('leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Leagues</span>
                             </a>
+                            <a href="{{ route('auctions.live-matches') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('auctions.live-matches') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
+                                <span>Live Matches</span>
+                            </a>
                             <a href="{{ route('auctions.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('auctions.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>Auctions</span>
                             </a>

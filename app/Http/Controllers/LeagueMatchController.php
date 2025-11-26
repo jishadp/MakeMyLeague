@@ -226,16 +226,19 @@ class LeagueMatchController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'match_date' => 'nullable|date',
             'match_time' => 'nullable|date_format:H:i',
-            'venue' => 'nullable|string|max:255'
+            'venue' => 'nullable|string|max:255',
+            'status' => 'nullable|in:unscheduled,scheduled,in_progress,completed,cancelled',
+            'home_score' => 'nullable|integer|min:0',
+            'away_score' => 'nullable|integer|min:0',
         ]);
 
-        $fixture->update($request->only(['match_date', 'match_time', 'venue']));
+        $fixture->update($validated);
 
         // Update status to scheduled if date and time are set
-        if ($fixture->match_date && $fixture->match_time && $fixture->status === 'unscheduled') {
+        if ($fixture->match_date && $fixture->match_time && ($fixture->status === 'unscheduled' || !$fixture->status)) {
             $fixture->update(['status' => 'scheduled']);
         }
 

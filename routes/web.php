@@ -81,6 +81,9 @@ Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->na
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
 Route::get('dashboard/auctions/{league}/broadcast', [DashboardController::class, 'liveAuctionPublic'])->name('auctions.live.public');
 
+// Public live matches view
+Route::get('league-live-matches', [AuctionController::class, 'liveMatchesIndex'])->name('auctions.live-matches');
+
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');
     Route::get('dashboard/auctions', [DashboardController::class, 'auctionsIndex'])->name('auctions.index');

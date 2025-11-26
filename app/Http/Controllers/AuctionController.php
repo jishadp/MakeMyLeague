@@ -26,6 +26,30 @@ class AuctionController extends Controller
     {
         $this->auctionAccessService = $auctionAccessService;
     }
+
+    /**
+     * Live matches hub for organizers/admins.
+     */
+    public function liveMatchesIndex(Request $request)
+    {
+        $leagues = League::with('game')
+            ->whereHas('fixtures', function ($query) {
+                $query->whereIn('status', ['in_progress', 'scheduled', 'unscheduled']);
+            })
+            ->orderBy('name')
+            ->get();
+
+        $fixtures = Fixture::with(['homeTeam.team', 'awayTeam.team', 'league'])
+            ->whereIn('league_id', $leagues->pluck('id'))
+            ->whereIn('status', ['in_progress', 'scheduled', 'unscheduled'])
+            ->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'unscheduled')")
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->get()
+            ->groupBy('league_id');
+
+        return view('auction.live-matches', compact('leagues', 'fixtures'));
+    }
     /**
      * Display the auction bidding page.
      */
@@ -207,6 +231,27 @@ class AuctionController extends Controller
             ? League::orderBy('name')->get(['id', 'name', 'slug'])
             : $user->approvedOrganizedLeagues()->orderBy('name')->get();
 
+        // Matches: surface live and upcoming fixtures for this league
+        $baseFixtureQuery = Fixture::with([
+            'homeTeam.team',
+            'awayTeam.team',
+            'leagueGroup',
+        ])->where('league_id', $league->id);
+
+        $liveFixtures = (clone $baseFixtureQuery)
+            ->where('status', 'in_progress')
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->take(2)
+            ->get();
+
+        $upcomingFixtures = (clone $baseFixtureQuery)
+            ->whereIn('status', ['scheduled', 'unscheduled'])
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->take(5)
+            ->get();
+
         return view('auction.back-controller', [
             'league' => $league,
             'currentPlayer' => $currentPlayer,
@@ -218,6 +263,8 @@ class AuctionController extends Controller
             'progressPercentage' => $progressPercentage,
             'bidIncrements' => $bidIncrements,
             'switchableLeagues' => $switchableLeagues,
+            'liveFixtures' => $liveFixtures,
+            'upcomingFixtures' => $upcomingFixtures,
         ]);
     }
 
