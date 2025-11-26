@@ -478,23 +478,16 @@
 @section('scripts')
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
+    const PUSHER_KEY = '{{ config('broadcasting.connections.pusher.key') }}';
+    const PUSHER_CLUSTER = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
+    const PUSHER_LOG_TO_CONSOLE = {{ config('app.debug') ? 'true' : 'false' }};
+</script>
+<script src="{{ asset('js/pusher-main.js') }}?v={{ time() + 1 }}"></script>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Pusher for live updates
-    var pusher = new Pusher('b62b3b015a81d2d28278', { 
-        cluster: 'ap2',
-        forceTLS: true,
-        enabledTransports: ['ws', 'wss']
-    });
-    
-    // Subscribe to the general auctions channel
-    var channel = pusher.subscribe('auctions');
-    
-    // Subscribe to league-specific channel
     const leagueId = document.getElementById('league-id').value;
     const leagueSlug = document.getElementById('league-slug').value;
-    var leagueChannel = pusher.subscribe(`auctions.league.${leagueId}`);
-    console.log(`Subscribed to league channel: auctions.league.${leagueId}`);
-    
+
     const refreshButton = document.getElementById('currentBidRefreshButton');
     const refreshIcon = document.getElementById('currentBidRefreshIcon');
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
