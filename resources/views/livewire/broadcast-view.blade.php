@@ -374,7 +374,7 @@
         .player-thumb {
             width: 2.1rem;
             height: 2.1rem;
-            border-radius: 9999px;
+            border-radius: 0.65rem;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.15);
             background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(59,130,246,0.25));
