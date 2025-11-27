@@ -492,6 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshIcon = document.getElementById('currentBidRefreshIcon');
     const teamToggleButtons = document.querySelectorAll('[data-team-toggle]');
     const focusToggleButton = document.getElementById('focusCurrentPlayerButton');
+    let reloadScheduled = false;
 
     initLiveSpotlightShowcase();
 
@@ -667,6 +668,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             notificationElement.remove();
         }, 3000);
+        schedulePageReload();
     });
     
     channel.bind('player-unsold', function(data) {
@@ -686,6 +688,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             notificationElement.remove();
         }, 3000);
+        schedulePageReload();
     });
     
     leagueChannel.bind('player-sold', function(data) {
@@ -705,6 +708,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             notificationElement.remove();
         }, 3000);
+        schedulePageReload();
     });
     
     leagueChannel.bind('player-unsold', function(data) {
@@ -724,6 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             notificationElement.remove();
         }, 3000);
+        schedulePageReload();
     });
     
     // Listen for new player started on both channels
@@ -949,6 +954,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return '0';
         }
         return new Intl.NumberFormat('en-IN').format(Math.max(0, value));
+    }
+
+    function schedulePageReload() {
+        if (reloadScheduled) {
+            return;
+        }
+        reloadScheduled = true;
+        setTimeout(() => {
+            window.location.reload();
+        }, 1200);
     }
 
     function focusCurrentPlayerCard() {
