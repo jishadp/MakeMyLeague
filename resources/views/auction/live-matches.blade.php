@@ -50,7 +50,7 @@
                         <a href="{{ route('leagues.league-match', $league) }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700">
                             <i class="fa-regular fa-calendar" aria-hidden="true"></i> Fixtures
                         </a>
-                        <a href="{{ route('auctions.control-room', $league) }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">
+                        <a href="{{ route('auction.control-room', $league) }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">
                             <i class="fa-solid fa-sliders-h" aria-hidden="true"></i> Control room
                         </a>
                     </div>
