@@ -95,6 +95,21 @@
             $shareText = trim(implode("\n", array_filter($shareLines, fn ($line) => $line !== null)));
         @endphp
         <textarea id="share-text-{{ $league->id }}" class="hidden">{{ $shareText }}</textarea>
+        @if(session('success'))
+            <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('warnings'))
+            <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 space-y-2">
+                <p class="font-semibold">Skipped items during import:</p>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    @foreach((array) session('warnings') as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">

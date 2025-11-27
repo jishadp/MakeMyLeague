@@ -35,6 +35,95 @@
             </div>
         </div>
 
+        <!-- Quick Import by Location -->
+        <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/40 mb-8">
+            <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                    <p class="text-sm uppercase tracking-wide text-indigo-600 font-semibold">Fast Import</p>
+                    <h2 class="text-xl font-bold text-gray-900 mt-1">Paste players after picking a location</h2>
+                    <p class="text-sm text-gray-600 mt-1">We will check mobile numbers, create missing player accounts, and add only those not already in this league.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">Name</div>
+                    <div class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">Mobile</div>
+                    <div class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">Role</div>
+                </div>
+            </div>
+            <form action="{{ route('league-players.import-location', $league) }}" method="POST" class="p-6 space-y-6">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="local_body_id" class="block text-sm font-medium text-gray-700 mb-2">Location <span class="text-red-500">*</span></label>
+                        <select id="local_body_id" name="local_body_id" required class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('local_body_id') border-red-500 @enderror">
+                            <option value="">Select location</option>
+                            @foreach($localBodies as $localBody)
+                                <option value="{{ $localBody->id }}" {{ old('local_body_id') == $localBody->id ? 'selected' : '' }}>
+                                    {{ $localBody->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('local_body_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="base_price_import" class="block text-sm font-medium text-gray-700 mb-2">Base price for imported players</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span class="text-gray-500 font-medium">₹</span>
+                            </div>
+                            <input type="number" name="import_base_price" id="base_price_import" min="0" step="0.01" value="{{ old('import_base_price', $league->team_wallet_limit * 0.01) }}" class="w-full pl-10 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('import_base_price') border-red-500 @enderror">
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">Defaults to 1% of wallet if left unchanged.</p>
+                        @error('import_base_price')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allowed roles</label>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse($gamePositions as $position)
+                                <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">{{ $position->name }}</span>
+                            @empty
+                                <span class="text-xs text-gray-500">No roles configured</span>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="player_rows" class="block text-sm font-medium text-gray-700 mb-2">Players list <span class="text-red-500">*</span></label>
+                    <textarea id="player_rows" name="player_rows" rows="7" required placeholder='Lines:&#10;John Doe, 9876543210, Batter&#10;Jane Doe, 9876501234, Bowler&#10;&#10;OR JSON:&#10;[{"name":"John Doe","mobile":"9876543210","role":"Batter"}]' class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('player_rows') border-red-500 @enderror">{{ old('player_rows') }}</textarea>
+                    <div class="mt-2 text-xs text-gray-600 space-y-2">
+                        <p>Use either comma-separated lines or JSON array. Mobiles are deduplicated, and players already in this league are skipped automatically.</p>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <p class="font-semibold text-gray-700 mb-1">JSON example:</p>
+                            <pre class="text-[11px] text-gray-800 whitespace-pre-wrap">[
+  {"name":"John Doe","mobile":"9876543210","role":"Batter"},
+  {"name":"Jane Doe","mobile":"9876501234","role":"Bowler"}
+]</pre>
+                        </div>
+                    </div>
+                    @error('player_rows')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="text-sm text-gray-600">
+                        <p>Missing player accounts are auto-created with the selected location and role.</p>
+                        <p>Slots left: {{ $remainingSlots }} / {{ $maxPlayers }}</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" {{ $remainingSlots == 0 ? 'disabled' : '' }}>
+                            Import & Add to League
+                        </button>
+                        <a href="{{ route('league-players.index', $league) }}" class="px-6 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-200 hover:bg-gray-50">Back to Players</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- Main Content Card -->
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden">
             <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 p-6">

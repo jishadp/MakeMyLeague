@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\GamePosition;
+use App\Models\LocalBody;
 use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\LeagueTeam;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -153,6 +156,9 @@ class LeaguePlayerController extends Controller
         $leagueTeams = LeagueTeam::with('team')
             ->where('league_id', $league->id)
             ->get();
+        $league->loadMissing('game.roles');
+        $localBodies = LocalBody::orderBy('name')->get();
+        $gamePositions = $league->game?->roles?->sortBy('name') ?? collect();
 
         // Get current player count and calculate remaining slots
         $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
@@ -168,7 +174,7 @@ class LeaguePlayerController extends Controller
             ->with('position')
             ->get();
 
-        return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers', 'remainingSlots', 'maxPlayers', 'currentPlayerCount'));
+        return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers', 'remainingSlots', 'maxPlayers', 'currentPlayerCount', 'localBodies', 'gamePositions'));
     }
 
     /**
@@ -310,6 +316,194 @@ class LeaguePlayerController extends Controller
         return redirect()
             ->route('league-players.index', $league)
             ->with('success', "{$addedCount} players added to league successfully!");
+    }
+
+    /**
+     * Bulk import players for a league using location + pasted rows.
+     */
+    public function importByLocation(Request $request, League $league)
+    {
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+        $maxPlayers = $league->max_teams * $league->max_team_players;
+        $remainingSlots = max(0, $maxPlayers - $currentPlayerCount);
+
+        if ($remainingSlots === 0) {
+            return back()->withErrors(['player_rows' => 'League is full. Cannot import more players.']);
+        }
+
+        $validated = $request->validate([
+            'local_body_id' => 'required|exists:local_bodies,id',
+            'player_rows' => 'required|string',
+            'import_base_price' => 'nullable|numeric|min:0',
+        ]);
+
+        $basePrice = $validated['import_base_price'] ?? ($league->team_wallet_limit * 0.01);
+        $playerRoleMap = GamePosition::where('game_id', $league->game_id)->get();
+        $playerRoleLookup = $playerRoleMap->keyBy(function ($role) {
+            return Str::lower($role->name);
+        });
+
+        $rawRows = $validated['player_rows'];
+        $parsedRows = [];
+
+        // Try JSON first
+        $decoded = json_decode($rawRows, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !empty($decoded)) {
+            foreach ($decoded as $index => $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                $parsedRows[] = [
+                    'name' => trim($item['name'] ?? $item['Name'] ?? ''),
+                    'mobile' => trim($item['mobile'] ?? $item['phone'] ?? ''),
+                    'role' => trim($item['role'] ?? $item['position'] ?? ''),
+                    'row' => $index + 1,
+                    'source' => 'json',
+                ];
+            }
+        }
+
+        // Fallback: plain text lines "name, mobile, role"
+        if (empty($parsedRows)) {
+            $rows = preg_split("/\\r\\n|\\r|\\n/", $rawRows);
+            foreach ($rows as $index => $row) {
+                $row = trim($row);
+                if ($row === '') {
+                    continue;
+                }
+                [$name, $mobileRaw, $roleInput] = array_pad(array_map('trim', preg_split('/[,\\t]/', $row)), 3, null);
+                $parsedRows[] = [
+                    'name' => $name,
+                    'mobile' => $mobileRaw,
+                    'role' => $roleInput,
+                    'row' => $index + 1,
+                    'source' => 'lines',
+                ];
+            }
+        }
+
+        if (empty($parsedRows)) {
+            return back()->withErrors(['player_rows' => 'No player rows found. Provide JSON array or comma separated lines.']);
+        }
+
+        $seenMobiles = [];
+        $imported = 0;
+        $skipped = [];
+
+        foreach ($parsedRows as $row) {
+            $mobile = $row['mobile'] ? preg_replace('/\\D+/', '', $row['mobile']) : null;
+
+            if (!$row['name'] || !$mobile || !$row['role']) {
+                $skipped[] = "Row {$row['row']}: missing name/mobile/role.";
+                continue;
+            }
+
+            if (strlen($mobile) < 6) {
+                $skipped[] = "Row {$row['row']}: mobile looks invalid.";
+                continue;
+            }
+
+            if (isset($seenMobiles[$mobile])) {
+                $skipped[] = "Row {$row['row']}: duplicate mobile {$mobile} in upload.";
+                continue;
+            }
+            $seenMobiles[$mobile] = true;
+
+            if ($remainingSlots <= 0) {
+                $skipped[] = "Row {$row['row']}: league player limit reached.";
+                break;
+            }
+
+            $normalizedRole = Str::lower($row['role']);
+            $roleSlug = Str::slug($row['role']);
+            $position = $playerRoleLookup->get($normalizedRole)
+                ?? $playerRoleMap->first(function ($role) use ($normalizedRole) {
+                    return Str::contains(Str::lower($role->name), $normalizedRole);
+                })
+                ?? $playerRoleMap->first(function ($role) use ($roleSlug) {
+                    return Str::slug($role->name) === $roleSlug;
+                });
+
+            if (!$position) {
+                $skipped[] = "Row {$row['row']}: unknown role '{$row['role']}'.";
+                continue;
+            }
+
+            $user = User::where('mobile', $mobile)->first();
+            if (!$user) {
+                $user = User::create([
+                    'name' => $row['name'],
+                    'mobile' => $mobile,
+                    'country_code' => '+91',
+                    'pin' => bcrypt((string) random_int(1000, 9999)),
+                    'local_body_id' => $validated['local_body_id'],
+                    'position_id' => $position->id,
+                ]);
+                $this->assignPlayerRole($user);
+            } else {
+                $needsUpdate = false;
+
+                if (!$user->position_id) {
+                    $user->position_id = $position->id;
+                    $needsUpdate = true;
+                }
+
+                if (!$user->local_body_id) {
+                    $user->local_body_id = $validated['local_body_id'];
+                    $needsUpdate = true;
+                }
+
+                if ($needsUpdate) {
+                    $user->save();
+                }
+            }
+
+            $alreadyInLeague = LeaguePlayer::where('league_id', $league->id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if ($alreadyInLeague) {
+                $skipped[] = "Row {$row['row']}: {$mobile} already in league.";
+                continue;
+            }
+
+            LeaguePlayer::create([
+                'user_id' => $user->id,
+                'league_id' => $league->id,
+                'league_team_id' => null,
+                'base_price' => $basePrice,
+                'status' => 'available',
+                'retention' => false
+            ]);
+
+            $imported++;
+            $remainingSlots--;
+        }
+
+        $message = "{$imported} player(s) imported successfully.";
+        if (count($skipped) > 0) {
+            $message .= ' Some rows were skipped.';
+        }
+
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', $message)
+            ->with('warnings', $skipped);
+    }
+
+    /**
+     * Ensure the player role exists for a user.
+     */
+    protected function assignPlayerRole(User $user): void
+    {
+        $playerRole = Role::where('name', User::ROLE_PLAYER)->first();
+
+        if ($playerRole) {
+            UserRole::firstOrCreate([
+                'user_id' => $user->id,
+                'role_id' => $playerRole->id,
+            ]);
+        }
     }
 
     /**
