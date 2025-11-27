@@ -248,6 +248,70 @@
         gap: 0.75rem;
         margin-top: 1.25rem;
     }
+    .quick-rules-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(90px, 1fr));
+        gap: 0.5rem;
+        align-items: end;
+    }
+    .quick-rules-grid input {
+        width: 100%;
+    }
+    .quick-rule-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(90px, 1fr)) auto;
+        gap: 0.5rem;
+        align-items: end;
+    }
+    .quick-rule-row label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 11px;
+        font-weight: 600;
+        color: #475569;
+    }
+    .quick-rule-row input {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.55rem 0.75rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .quick-rule-row button {
+        align-self: center;
+    }
+    .quick-rule-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .quick-rule-note {
+        font-size: 11px;
+        color: #475569;
+    }
+    .quick-jump-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+    }
+    .quick-jump-title span {
+        font-size: 11px;
+        color: #475569;
+    }
+    .quick-jump-input {
+        width: 80px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: right;
+        color: #0f172a;
+        background: #fff;
+    }
     .player-finder {
         position: relative;
     }
@@ -775,6 +839,16 @@
                         </button>
                     @endif
                 </div>
+                <div class="space-y-1">
+                    <div class="quick-jump-title">
+                        <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
+                        <div class="flex items-center gap-2">
+                            <span id="quick-jump-note" class="text-xs text-slate-500">(steps of ₹50)</span>
+                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
+                        </div>
+                    </div>
+                    <div id="quick-jump-grid" class="quick-grid"></div>
+                </div>
                 <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
                     <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
                     <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
@@ -828,6 +902,33 @@
         </div>
 
         <input type="hidden" id="controller-override-amount" value="">
+    </div>
+</div>
+<div id="controller-rules-modal" class="control-modal hidden" role="dialog" aria-modal="true">
+    <div class="control-modal__card space-y-3">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900">Quick Bid Rules</h3>
+                <p class="quick-rule-note">Set increments by bid range. Saved per league in this browser.</p>
+            </div>
+            <button type="button" class="text-slate-400 hover:text-slate-600" data-quick-rules-close aria-label="Close quick bid rules">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="quick-rules-grid text-[11px] font-semibold text-slate-600">
+            <span>From (₹)</span>
+            <span>To (₹)</span>
+            <span>Increment (₹)</span>
+        </div>
+        <div id="quick-rules-rows" class="space-y-2"></div>
+        <p class="quick-rule-note">Ranges are inclusive of “From” and exclusive of “To”. Leave “To” blank to make a range open-ended.</p>
+        <div class="quick-rule-actions">
+            <button type="button" class="px-3 py-2 rounded-lg border border-slate-200 text-indigo-600 font-semibold hover:bg-slate-50" data-add-quick-rule>Add range</button>
+            <div class="flex items-center gap-2">
+                <button type="button" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700" data-save-quick-rules>Save rules</button>
+                <button type="button" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50" data-cancel-quick-rules>Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 <div id="controller-modal" class="control-modal hidden" role="dialog" aria-modal="true">
@@ -920,6 +1021,15 @@ function openWhatsAppShare(message) {
     const overrideButton = document.querySelector('[data-edit-override]');
     const overrideInput = document.getElementById('controller-override-amount');
     const overrideLabel = document.querySelector('[data-override-label]');
+    const quickRulesModal = document.getElementById('controller-rules-modal');
+    const quickRulesRows = document.getElementById('quick-rules-rows');
+    const addQuickRuleBtn = document.querySelector('[data-add-quick-rule]');
+    const saveQuickRulesBtn = document.querySelector('[data-save-quick-rules]');
+    const cancelQuickRulesBtn = document.querySelector('[data-cancel-quick-rules]');
+    const closeQuickRulesBtn = document.querySelector('[data-quick-rules-close]');
+    const quickJumpGrid = document.getElementById('quick-jump-grid');
+    const quickJumpNote = document.getElementById('quick-jump-note');
+    const quickJumpStepInput = document.getElementById('quick-jump-step');
     const selectedNeedLabel = document.querySelector('[data-selected-need]');
     const selectedReserveLabel = document.querySelector('[data-selected-reserve]');
     const selectedMaxLabel = document.querySelector('[data-selected-max]');
@@ -939,22 +1049,23 @@ function openWhatsAppShare(message) {
     const mismatchToggle = document.querySelector('[data-toggle-mismatch]');
     const mismatchBody = document.getElementById('mismatch-body');
     const autoStartRadios = document.querySelectorAll('[data-auto-start]');
-    const quickStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_increment` : null;
-    let quickIncrementValue = Number(controllerBidInput?.dataset.defaultIncrement || 0);
-    if (quickStorageKey) {
-        const storedQuick = Number(localStorage.getItem(quickStorageKey));
-        if (storedQuick && storedQuick > 0) {
-            quickIncrementValue = storedQuick;
-            const base = Number(controllerBaseInput?.value || 0);
-            if (controllerBidInput) {
-                controllerBidInput.dataset.defaultIncrement = storedQuick;
-                controllerBidInput.value = base + storedQuick;
-                updatePreview(base + storedQuick);
-            }
-        } else if (quickIncrementValue > 0) {
-            localStorage.setItem(quickStorageKey, String(quickIncrementValue));
+    const quickRulesStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_rules` : null;
+    const legacyQuickStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_increment` : null;
+    const quickJumpStorageKey = leagueIdValue ? `league_${leagueIdValue}_jump_step` : null;
+    if (quickJumpStepInput && quickJumpStorageKey) {
+        const storedStep = Number(localStorage.getItem(quickJumpStorageKey) || 0);
+        if (storedStep > 0) {
+            quickJumpStepInput.value = storedStep;
         }
     }
+    const defaultQuickRules = [
+        { min: 1, max: 1000, increment: 50 },
+        { min: 1000, max: 3000, increment: 100 },
+        { min: 3000, max: 5000, increment: 200 },
+    ];
+    let quickRules = loadQuickRules();
+    let quickIncrementValue = 0;
+    quickIncrementValue = getQuickIncrement(Number(controllerBaseInput?.value || 0));
     let modalState = null;
     const teamNameMap = {};
     teamPills.forEach(button => {
@@ -964,6 +1075,117 @@ function openWhatsAppShare(message) {
     function formatCurrency(value) {
         const amount = Number(value) || 0;
         return '₹' + amount.toLocaleString('en-IN');
+    }
+
+    function normalizeQuickRules(rules) {
+        return (Array.isArray(rules) ? rules : [])
+            .map(rule => ({
+                min: Math.max(0, Number(rule.min ?? rule.from ?? 0)),
+                max: rule.max === null || rule.max === undefined || rule.max === ''
+                    ? null
+                    : Math.max(0, Number(rule.max ?? rule.to)),
+                increment: Number(rule.increment ?? rule.value ?? 0)
+            }))
+            .filter(rule => rule.increment > 0)
+            .map(rule => {
+                if (rule.max !== null && rule.max <= rule.min) {
+                    rule.max = null;
+                }
+                return rule;
+            })
+            .sort((a, b) => a.min - b.min);
+    }
+
+    function loadQuickRules() {
+        if (quickRulesStorageKey) {
+            try {
+                const stored = JSON.parse(localStorage.getItem(quickRulesStorageKey));
+                const normalized = normalizeQuickRules(stored);
+                if (normalized.length) {
+                    return normalized;
+                }
+            } catch (error) {
+                // ignore parsing errors and fall back to defaults
+            }
+        }
+
+        if (legacyQuickStorageKey) {
+            const legacy = Number(localStorage.getItem(legacyQuickStorageKey));
+            if (legacy && legacy > 0) {
+                return normalizeQuickRules([{ min: 0, max: null, increment: legacy }]);
+            }
+        }
+
+        return normalizeQuickRules(defaultQuickRules);
+    }
+
+    function saveQuickRules(rules) {
+        quickRules = normalizeQuickRules(rules);
+        if (quickRulesStorageKey) {
+            localStorage.setItem(quickRulesStorageKey, JSON.stringify(quickRules));
+        }
+    }
+
+    function getQuickIncrement(amount) {
+        const price = Number(amount) || 0;
+        const match = quickRules.find((rule) => {
+            if (rule.max === null || rule.max === undefined) {
+                return price >= rule.min;
+            }
+            return price >= rule.min && price < rule.max;
+        });
+        let increment = 0;
+        if (match) {
+            increment = match.increment;
+        } else if (quickRules.length) {
+            increment = price < quickRules[0].min
+                ? quickRules[0].increment
+                : quickRules[quickRules.length - 1].increment;
+        }
+        quickIncrementValue = increment;
+        return increment;
+    }
+
+    function buildJumpTargets(base) {
+        const step = getJumpStep();
+        const count = 3;
+        const targets = [];
+        for (let i = 1; i <= count; i++) {
+            targets.push(base + step * i);
+        }
+        return { targets, step };
+    }
+
+    function renderJumpTargets() {
+        if (!quickJumpGrid) {
+            return;
+        }
+        const base = Number(controllerBaseInput?.value || 0);
+        const { targets, step } = buildJumpTargets(base);
+        quickJumpGrid.innerHTML = '';
+        if (quickJumpNote) {
+            quickJumpNote.textContent = `(steps of ₹${(step || 0).toLocaleString('en-IN')})`;
+        }
+        if (quickJumpStepInput && !quickJumpStepInput.value) {
+            quickJumpStepInput.value = step || 50;
+        }
+        targets.forEach((target) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `quick-button ${controllerBaseInput?.value ? '' : 'opacity-50 cursor-not-allowed'}`;
+            btn.textContent = `+₹${(target - base).toLocaleString('en-IN')}`;
+            btn.disabled = !controllerBaseInput?.value;
+            btn.addEventListener('click', () => {
+                if (!controllerBidInput) {
+                    return;
+                }
+                controllerBidInput.value = target;
+                controllerBidInput.dataset.defaultIncrement = target - base;
+                updatePreview(target);
+                updateQuickButtonLabel();
+            });
+            quickJumpGrid.appendChild(btn);
+        });
     }
 
     function updatePreview(value) {
@@ -1078,6 +1300,7 @@ function openWhatsAppShare(message) {
             clearTeamSelection();
         }
     }
+    renderJumpTargets();
     function getTeamButton(teamId) {
         return Array.from(teamPills).find(button => button.dataset.teamPill === teamId);
     }
@@ -1134,59 +1357,155 @@ function openWhatsAppShare(message) {
 
     function updateQuickButtonLabel() {
         if (quickButton) {
-            if (quickIncrementValue > 0) {
-                quickButton.textContent = `+₹${quickIncrementValue.toLocaleString('en-IN')}`;
-            } else {
-                quickButton.textContent = 'Set amount';
-            }
+            const base = Number(controllerBaseInput?.value || 0);
+            const increment = getQuickIncrement(base);
+            quickIncrementValue = increment;
+            quickButton.textContent = increment > 0
+                ? `+₹${increment.toLocaleString('en-IN')}`
+                : 'Set quick rules';
         }
     }
 
-    function applyQuickBid() {
+    function applyQuickBid(showError = false) {
         if (!controllerBidInput || !controllerBaseInput) {
             return;
         }
         const base = Number(controllerBaseInput.value || 0);
-        const target = quickIncrementValue && quickIncrementValue > 0
-            ? base + quickIncrementValue
-            : base;
+        const increment = getQuickIncrement(base);
+        if (!increment || increment <= 0) {
+            if (showError) {
+                showControllerMessage('Add a quick bid rule first.', 'error');
+            }
+            controllerBidInput.value = base;
+            updatePreview(base);
+            updateQuickButtonLabel();
+            return;
+        }
+        const target = base + increment;
+        controllerBidInput.dataset.defaultIncrement = increment;
         controllerBidInput.value = target;
         updatePreview(target);
+        updateQuickButtonLabel();
+        renderJumpTargets();
     }
 
     if (quickButton) {
         quickButton.addEventListener('click', () => {
-            applyQuickBid();
+            applyQuickBid(true);
         });
     }
 
     if (quickEditButton) {
         quickEditButton.addEventListener('click', () => {
-            openValueModal({
-                title: 'Set quick bid increment',
-                placeholder: 'Amount in ₹',
-                defaultValue: quickIncrementValue || '',
-                onConfirm(value) {
-                    const parsed = Number(value);
-                    if (!parsed || parsed <= 0) {
-                        showControllerMessage('Enter a valid amount greater than zero.', 'error');
-                        return false;
-                    }
-                    quickIncrementValue = parsed;
-                    if (controllerBidInput) {
-                        controllerBidInput.dataset.defaultIncrement = parsed;
-                    }
-                    if (quickStorageKey) {
-                        localStorage.setItem(quickStorageKey, String(parsed));
-                    }
-                    updateQuickButtonLabel();
-                    showControllerMessage('Quick amount updated.');
-                    applyQuickBid();
-                    return true;
-                }
-            });
+            openQuickRulesModal();
         });
     }
+
+    function renderQuickRuleRows(rules) {
+        if (!quickRulesRows) {
+            return;
+        }
+        quickRulesRows.innerHTML = '';
+        const rows = (rules && rules.length ? rules : defaultQuickRules);
+        rows.forEach(rule => addQuickRuleRow(rule));
+        if (!quickRulesRows.children.length) {
+            addQuickRuleRow({ min: 0, max: null, increment: 50 });
+        }
+    }
+
+    function addQuickRuleRow(rule = { min: 0, max: null, increment: 0 }) {
+        if (!quickRulesRows) {
+            return;
+        }
+        const row = document.createElement('div');
+        row.className = 'quick-rule-row';
+        row.dataset.ruleRow = 'true';
+        row.innerHTML = `
+            <label>
+                <span>From</span>
+                <input type="number" min="0" inputmode="numeric" value="${rule.min ?? 0}" data-rule-min>
+            </label>
+            <label>
+                <span>To</span>
+                <input type="number" min="0" inputmode="numeric" value="${rule.max ?? ''}" data-rule-max>
+            </label>
+            <label>
+                <span>Increment</span>
+                <input type="number" min="1" inputmode="numeric" value="${rule.increment ?? ''}" data-rule-increment>
+            </label>
+            <button type="button" class="text-rose-500 text-sm font-semibold px-2" data-remove-rule aria-label="Remove rule">&times;</button>
+        `;
+        const removeBtn = row.querySelector('[data-remove-rule]');
+        removeBtn?.addEventListener('click', () => {
+            const totalRows = quickRulesRows?.querySelectorAll('[data-rule-row]')?.length || 0;
+            if (totalRows <= 1) {
+                showControllerMessage('Keep at least one quick bid rule.', 'error');
+                return;
+            }
+            row.remove();
+        });
+        quickRulesRows.appendChild(row);
+    }
+
+    function collectQuickRulesFromUI() {
+        if (!quickRulesRows) {
+            return [];
+        }
+        const rows = quickRulesRows.querySelectorAll('[data-rule-row]');
+        return Array.from(rows).map((row) => {
+            const min = Number(row.querySelector('[data-rule-min]')?.value ?? 0);
+            const rawMax = row.querySelector('[data-rule-max]')?.value ?? '';
+            const increment = Number(row.querySelector('[data-rule-increment]')?.value ?? 0);
+            return {
+                min: isNaN(min) ? 0 : min,
+                max: rawMax === '' ? null : Number(rawMax),
+                increment
+            };
+        });
+    }
+
+    function openQuickRulesModal() {
+        if (!quickRulesModal || !quickRulesRows) {
+            const fallback = window.prompt('Set quick bid increment', quickIncrementValue || defaultQuickRules[0]?.increment || 0);
+            if (fallback !== null) {
+                const parsed = Number(fallback);
+                if (parsed > 0) {
+                    saveQuickRules([{ min: 0, max: null, increment: parsed }]);
+                    applyQuickBid();
+                    showControllerMessage('Quick bid rule updated.');
+                } else {
+                    showControllerMessage('Enter a valid amount.', 'error');
+                }
+            }
+            return;
+        }
+        renderQuickRuleRows(quickRules);
+        quickRulesModal.classList.remove('hidden');
+    }
+
+    function closeQuickRulesModal() {
+        quickRulesModal?.classList.add('hidden');
+    }
+
+    addQuickRuleBtn?.addEventListener('click', () => addQuickRuleRow());
+    saveQuickRulesBtn?.addEventListener('click', () => {
+        const parsedRules = normalizeQuickRules(collectQuickRulesFromUI());
+        if (!parsedRules.length) {
+            showControllerMessage('Add at least one valid quick bid rule.', 'error');
+            return;
+        }
+        saveQuickRules(parsedRules);
+        applyQuickBid();
+        showControllerMessage('Quick bid rules saved.');
+        closeQuickRulesModal();
+    });
+    cancelQuickRulesBtn?.addEventListener('click', closeQuickRulesModal);
+    closeQuickRulesBtn?.addEventListener('click', closeQuickRulesModal);
+    quickRulesModal?.addEventListener('click', (event) => {
+        if (event.target === quickRulesModal) {
+            closeQuickRulesModal();
+        }
+    });
 
     if (overrideButton) {
         overrideButton.addEventListener('click', () => {
@@ -1266,12 +1585,52 @@ function openWhatsAppShare(message) {
         });
     });
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modal?.classList.contains('hidden')) {
-            closeValueModal();
+        if (event.key === 'Escape') {
+            if (!modal?.classList.contains('hidden')) {
+                closeValueModal();
+            }
+            if (!quickRulesModal?.classList.contains('hidden')) {
+                closeQuickRulesModal();
+            }
         }
     });
 
-    updateQuickButtonLabel();
+    function getJumpStep() {
+        const fallback = 50;
+        const value = Number(quickJumpStepInput?.value || 0);
+        if (value > 0) {
+            return value;
+        }
+        if (quickJumpStorageKey) {
+            const stored = Number(localStorage.getItem(quickJumpStorageKey) || 0);
+            if (stored > 0) {
+                return stored;
+            }
+        }
+        return fallback;
+    }
+
+    function saveJumpStep(value) {
+        if (!quickJumpStorageKey) return;
+        localStorage.setItem(quickJumpStorageKey, String(value));
+    }
+
+    quickJumpStepInput?.addEventListener('change', () => {
+        const value = Number(quickJumpStepInput.value || 0);
+        if (!value || value <= 0) {
+            quickJumpStepInput.value = getJumpStep();
+            return;
+        }
+        saveJumpStep(value);
+        renderJumpTargets();
+    });
+    quickJumpStepInput?.addEventListener('blur', () => {
+        const value = Number(quickJumpStepInput.value || 0);
+        if (!value || value <= 0) {
+            quickJumpStepInput.value = getJumpStep();
+        }
+    });
+
     updateOverrideLabel();
 
     function showControllerMessage(message, type = 'success') {
@@ -1353,9 +1712,13 @@ function openWhatsAppShare(message) {
 
             controllerBaseInput.value = targetAmount;
             updateSoldButtonLabel(targetAmount);
-            const nextTarget = quickIncrementValue > 0 ? targetAmount + quickIncrementValue : targetAmount;
+            const nextIncrement = getQuickIncrement(targetAmount);
+            const nextTarget = nextIncrement > 0 ? targetAmount + nextIncrement : targetAmount;
             controllerBidInput.value = nextTarget;
+            controllerBidInput.dataset.defaultIncrement = nextIncrement;
             updatePreview(nextTarget);
+            updateQuickButtonLabel();
+            renderJumpTargets();
             const bidLabel = document.getElementById('controller-current-bid-label');
             if (bidLabel) {
                 bidLabel.textContent = formatCurrency(targetAmount);
@@ -1371,7 +1734,14 @@ function openWhatsAppShare(message) {
         }
     }
 
-    updatePreview(controllerBidInput?.value || controllerBaseInput?.value || 0);
+    const hasActivePlayer = Boolean(document.getElementById('controller-league-player-id')?.value);
+    if (hasActivePlayer) {
+        applyQuickBid();
+    } else {
+        updatePreview(controllerBidInput?.value || controllerBaseInput?.value || 0);
+        updateQuickButtonLabel();
+    }
+    renderJumpTargets();
     updateSoldButtonLabel();
 
     window.placeControllerBid = placeControllerBid;
