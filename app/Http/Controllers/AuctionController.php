@@ -616,6 +616,25 @@ class AuctionController extends Controller
         }
         $bidPrice = max($bidPrice, 0);
 
+        $minimumRosterSize = $this->getMinimumRosterSize($leaguePlayer->league);
+        $currentRosterCount = $this->getSecuredRosterCount($team);
+        $projectedRosterCount = $currentRosterCount + 1;
+        $isFinalSlot = $minimumRosterSize > 0
+            && $currentRosterCount < $minimumRosterSize
+            && $projectedRosterCount >= $minimumRosterSize;
+
+        if ($isFinalSlot) {
+            $remainingWallet = (float) ($team->wallet_balance ?? 0);
+            $finalWalletOverride = $winningBidPreview
+                ? $winningBidPreview->amount + $remainingWallet
+                : $remainingWallet;
+
+            if ($finalWalletOverride > $bidPrice) {
+                $bidPrice = $finalWalletOverride;
+                $hasOverride = true; // Ensure wallet adjustment happens when a bid already exists
+            }
+        }
+
         \App\Models\AuctionLog::logAction(
             $leaguePlayer->league_id,
             auth()->id(),
@@ -625,8 +644,6 @@ class AuctionController extends Controller
             ['team_id' => $teamId, 'amount' => $bidPrice]
         );
         
-        $currentRosterCount = $this->getSecuredRosterCount($team);
-        $projectedRosterCount = $currentRosterCount + 1;
         if ($winningBidPreview) {
             $balanceAdjustmentPreview = $winningBidPreview->amount - $bidPrice;
             $projectedBalance = $team->wallet_balance + $balanceAdjustmentPreview;
