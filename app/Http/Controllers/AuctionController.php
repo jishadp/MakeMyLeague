@@ -587,17 +587,12 @@ class AuctionController extends Controller
         
         $this->authorize('markSoldUnsold', $leaguePlayer->league);
         
-        \App\Models\AuctionLog::logAction(
-            $leaguePlayer->league_id,
-            auth()->id(),
-            'player_sold',
-            'LeaguePlayer',
-            $leaguePlayer->id,
-            ['team_id' => $request->team_id, 'amount' => $request->override_amount]
-        );
         $leaguePlayerId = $request->league_player_id;
         $teamId = $request->team_id;
-        $overrideAmount = $request->override_amount;
+        $overrideInput = $request->override_amount;
+        $hasOverride = $overrideInput !== null && $overrideInput !== '';
+        $overrideAmount = $hasOverride ? floatval($overrideInput) : null;
+        $basePrice = (float) ($leaguePlayer->base_price ?? 0);
         
         $team = LeagueTeam::find($teamId);
         if (!$team || $team->league_id !== $leaguePlayer->league_id) {
@@ -612,13 +607,23 @@ class AuctionController extends Controller
             ->latest('id')
             ->first();
         
-        if ($overrideAmount !== null && $overrideAmount !== '') {
-            $bidPrice = floatval($overrideAmount);
+        if ($hasOverride) {
+            $bidPrice = $overrideAmount;
         } elseif ($winningBidPreview) {
             $bidPrice = $winningBidPreview->amount;
         } else {
-            $bidPrice = 0;
+            $bidPrice = $basePrice;
         }
+        $bidPrice = max($bidPrice, 0);
+
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'player_sold',
+            'LeaguePlayer',
+            $leaguePlayer->id,
+            ['team_id' => $teamId, 'amount' => $bidPrice]
+        );
         
         $currentRosterCount = $this->getSecuredRosterCount($team);
         $projectedRosterCount = $currentRosterCount + 1;
@@ -645,7 +650,7 @@ class AuctionController extends Controller
         }
 
         // Use database transaction for atomic operations
-        DB::transaction(function () use ($leaguePlayerId, $teamId, $overrideAmount, $bidPrice) {
+        DB::transaction(function () use ($leaguePlayerId, $teamId, $bidPrice, $hasOverride) {
             // Mark the winning bid as 'won'
             $winningBid = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('league_team_id', $teamId)
@@ -674,7 +679,7 @@ class AuctionController extends Controller
             }
             // Adjust winning team's balance if override amount is different from bid
             if ($winningBid) {
-                if ($overrideAmount !== null && $overrideAmount !== '') {
+                if ($hasOverride) {
                     $balanceAdjustment = $winningBid->amount - $bidPrice;
                     if ($balanceAdjustment != 0) {
                         // If override is less than bid, refund difference
