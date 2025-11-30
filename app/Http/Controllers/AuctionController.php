@@ -594,6 +594,74 @@ class AuctionController extends Controller
         ]);
     }
 
+    public function undoBid(Request $request)
+    {
+        $validated = $request->validate([
+            'league_player_id' => ['required', 'integer', 'exists:league_players,id'],
+        ]);
+
+        $leaguePlayer = LeaguePlayer::with('league')->find($validated['league_player_id']);
+        if (!$leaguePlayer) {
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
+        }
+
+        if (!auth()->user()?->canManageLeague($leaguePlayer->league_id)) {
+            return response()->json(['success' => false, 'message' => 'Only organizers or admins can undo bids.'], 403);
+        }
+
+        if (in_array($leaguePlayer->status, ['sold', 'unsold'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot undo bids after the player is completed.'
+            ], 422);
+        }
+
+        $lastBid = Auction::where('league_player_id', $leaguePlayer->id)
+            ->latest('id')
+            ->first();
+
+        if (!$lastBid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No bids to undo for this player.'
+            ], 422);
+        }
+
+        if (in_array($lastBid->status, ['won', 'refunded'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Latest bid is already finalized and cannot be undone.'
+            ], 422);
+        }
+
+        $refundedTeam = null;
+
+        DB::transaction(function () use ($lastBid, &$refundedTeam) {
+            $refundedTeam = LeagueTeam::find($lastBid->league_team_id);
+            if ($refundedTeam) {
+                $refundedTeam->increment('wallet_balance', $lastBid->amount);
+            }
+            $lastBid->update(['status' => 'refunded']);
+        });
+
+        $latestActiveBid = Auction::where('league_player_id', $leaguePlayer->id)
+            ->where('status', 'ask')
+            ->latest('id')
+            ->first();
+
+        $currentAmount = $latestActiveBid?->amount ?? (float) ($leaguePlayer->base_price ?? 0);
+        $currentTeamId = $latestActiveBid?->league_team_id;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Last bid undone successfully.',
+            'current_amount' => $currentAmount,
+            'current_team_id' => $currentTeamId,
+            'refunded_team_id' => $refundedTeam?->id,
+            'refunded_team_wallet' => $refundedTeam?->wallet_balance,
+        ]);
+    }
+
     public function sold(Request $request)
     {
         $validated = $request->validate([
@@ -679,8 +747,10 @@ class AuctionController extends Controller
             ], 422);
         }
 
-        $maxBidCap = $this->calculateMaxBidCap($team, $leaguePlayer->league, $playersNeeded);
-        if ($maxBidCap > 0 && $finalAmount > $maxBidCap) {
+        $availableWallet = $this->calculateAvailableWallet($team, $leaguePlayer->league);
+        $maxBidCap = $this->calculateMaxBidCap($team, $leaguePlayer->league, $playersNeeded, $availableWallet);
+        $displayMaxCap = $this->calculateDisplayedMaxBidCap($team, $leaguePlayer->league, $availableWallet);
+        if ($maxBidCap > 0 && $finalAmount > $maxBidCap && $finalAmount > $displayMaxCap) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bid exceeds team cap/balance.'
@@ -689,7 +759,7 @@ class AuctionController extends Controller
 
         $alreadyDeducted = $winningBidPreview->amount ?? 0;
         $extraNeeded = max($finalAmount - $alreadyDeducted, 0);
-        if ($extraNeeded > ($team->wallet_balance ?? 0)) {
+        if ($extraNeeded > $availableWallet) {
             return response()->json([
                 'success' => false,
                 'message' => 'Insufficient team balance for this sale.'
@@ -706,7 +776,7 @@ class AuctionController extends Controller
         );
 
         $balanceAdjustment = $alreadyDeducted - $finalAmount; // positive = refund, negative = extra deduction
-        $projectedBalance = ($team->wallet_balance ?? 0) + $balanceAdjustment;
+        $projectedBalance = $availableWallet + $balanceAdjustment;
 
         $rosterValidation = $this->validateRosterBudget(
             $team,
@@ -1033,7 +1103,17 @@ class AuctionController extends Controller
     /**
      * Calculate max bid cap after reserving cheapest slots for future picks.
      */
-    protected function calculateMaxBidCap(LeagueTeam $team, League $league, int $playersNeeded): float
+    protected function calculateAvailableWallet(LeagueTeam $team, League $league): float
+    {
+        $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
+        $spentAmount = $team->leaguePlayers()
+            ->where('status', 'sold')
+            ->sum('bid_price');
+
+        return max($baseWallet - $spentAmount, $team->wallet_balance ?? 0, 0);
+    }
+
+    protected function calculateMaxBidCap(LeagueTeam $team, League $league, int $playersNeeded, ?float $overrideWallet = null): float
     {
         $futureSlots = max($playersNeeded - 1, 0);
         $availableBasePrices = $league->leaguePlayers()
@@ -1044,7 +1124,9 @@ class AuctionController extends Controller
             ->values();
 
         $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
-        $availableWallet = max((float) ($team->wallet_balance ?? 0), 0);
+        $availableWallet = $overrideWallet !== null
+            ? max((float) $overrideWallet, 0)
+            : max((float) ($team->wallet_balance ?? 0), 0);
 
         return max($availableWallet - $reserveAmount, 0);
     }
@@ -1052,12 +1134,12 @@ class AuctionController extends Controller
     /**
      * Mirror UI max bid cap calculation to keep validations aligned with the control room.
      */
-    protected function calculateDisplayedMaxBidCap(LeagueTeam $team, League $league): float
+    protected function calculateDisplayedMaxBidCap(LeagueTeam $team, League $league, ?float $overrideWallet = null): float
     {
         $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
         $soldCount = $team->leaguePlayers()->where('status', 'sold')->count();
         $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
-        return $this->calculateMaxBidCap($team, $league, $playersNeeded);
+        return $this->calculateMaxBidCap($team, $league, $playersNeeded, $overrideWallet);
     }
 
     /**
