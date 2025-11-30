@@ -573,6 +573,7 @@
         <input type="hidden" id="controller-player-id" value="{{ $currentPlayer->player->id ?? '' }}">
         <input type="hidden" id="controller-league-player-id" value="{{ $currentPlayer->id ?? '' }}">
         <input type="hidden" id="controller-base-price" value="{{ $currentBidAmount }}">
+        <input type="hidden" id="controller-player-base-price" value="{{ $currentPlayer->base_price ?? 0 }}">
         <input type="hidden" id="controller-default-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
         <input type="hidden" id="controller-bid-increments" value='@json($bidIncrements)'>
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
@@ -782,12 +783,12 @@
                 <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
                 @php
                     $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
-                @endphp
+        @endphp
                 <div class="team-grid">
                     @foreach($teams as $team)
                         @php
                             $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
-                            $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid <= $currentRequiredBid);
+                            $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
                         @endphp
                         <button type="button"
                             class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
@@ -795,6 +796,7 @@
                             data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
                             data-team-reserve="{{ $team->reserve_amount }}"
                             data-team-max="{{ $team->max_bid_cap }}"
+                            data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
                             data-team-needed="{{ $team->players_needed }}"
                             data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
                             data-team-details="{{ json_encode([
@@ -941,6 +943,27 @@
         </div>
     </div>
 </div>
+<div id="controller-unsold-modal" class="control-modal hidden" role="dialog" aria-modal="true">
+    <div class="control-modal__card space-y-3">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900">Start Unsold Round?</h3>
+                <p class="text-sm text-slate-600">All available players are finished. Move to unsold players?</p>
+            </div>
+            <button type="button" class="text-slate-400 hover:text-slate-600" data-unsold-cancel aria-label="Close unsold confirmation">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="space-y-2 text-sm text-slate-600">
+            <p>Random picks will use the unsold pool until everyone is completed.</p>
+            <p class="text-[12px] text-slate-500">You can start players manually at any time.</p>
+        </div>
+        <div class="control-modal__actions">
+            <button type="button" class="flex-1 px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700" data-unsold-confirm>Start Unsold Round</button>
+            <button type="button" class="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50" data-unsold-cancel>Not Now</button>
+        </div>
+    </div>
+</div>
 <div id="controller-modal" class="control-modal hidden" role="dialog" aria-modal="true">
     <div class="control-modal__card">
         <h3 class="text-lg font-semibold text-slate-900 mb-4" data-modal-title>Update value</h3>
@@ -1012,6 +1035,7 @@ function openWhatsAppShare(message) {
 (function() {
     const controllerBidInput = document.getElementById('controller-custom-amount');
     const controllerBaseInput = document.getElementById('controller-base-price');
+    const playerBasePriceInput = document.getElementById('controller-player-base-price');
     const controllerPreview = document.getElementById('controller-bid-preview');
     const controllerTeamSelect = document.getElementById('controller-team');
     const controllerDefaultTeam = document.getElementById('controller-default-team');
@@ -1063,6 +1087,14 @@ function openWhatsAppShare(message) {
     const quickRulesStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_rules` : null;
     const legacyQuickStorageKey = leagueIdValue ? `league_${leagueIdValue}_quick_increment` : null;
     const quickJumpStorageKey = leagueIdValue ? `league_${leagueIdValue}_jump_step` : null;
+    const availableCompletedStorageKey = leagueIdValue ? `league_${leagueIdValue}_completed_available` : null;
+    const unsoldCompletedStorageKey = leagueIdValue ? `league_${leagueIdValue}_completed_unsold` : null;
+    const availableServedStorageKey = leagueIdValue ? `league_${leagueIdValue}_served_available` : null;
+    const unsoldServedStorageKey = leagueIdValue ? `league_${leagueIdValue}_served_unsold` : null;
+    const randomPhaseStorageKey = leagueIdValue ? `league_${leagueIdValue}_random_phase` : null;
+    const unsoldModal = document.getElementById('controller-unsold-modal');
+    const unsoldConfirmButtons = unsoldModal?.querySelectorAll('[data-unsold-confirm]');
+    const unsoldCancelButtons = unsoldModal?.querySelectorAll('[data-unsold-cancel]');
     if (quickJumpStepInput && quickJumpStorageKey) {
         const storedStep = Number(localStorage.getItem(quickJumpStorageKey) || 0);
         if (storedStep > 0) {
@@ -1078,6 +1110,14 @@ function openWhatsAppShare(message) {
     let quickIncrementValue = 0;
     quickIncrementValue = getQuickIncrement(Number(controllerBaseInput?.value || 0));
     let modalState = null;
+    let availableCompletedSet = loadIdSet(availableCompletedStorageKey);
+    let unsoldCompletedSet = loadIdSet(unsoldCompletedStorageKey);
+    let availableServedSet = loadIdSet(availableServedStorageKey);
+    let unsoldServedSet = loadIdSet(unsoldServedStorageKey);
+    let currentRandomPhase = normalizeRandomPhase(loadRandomPhase());
+    let pendingAutoStartAfterConfirm = false;
+    let availableRandomPool = [];
+    let unsoldRandomPool = [];
     const teamNameMap = {};
     teamPills.forEach(button => {
         teamNameMap[button.dataset.teamPill] = button.dataset.teamName || button.textContent.trim();
@@ -1086,6 +1126,34 @@ function openWhatsAppShare(message) {
     function formatCurrency(value) {
         const amount = Number(value) || 0;
         return '₹' + amount.toLocaleString('en-IN');
+    }
+
+    function loadIdSet(storageKey) {
+        if (!storageKey) return new Set();
+        try {
+            const raw = localStorage.getItem(storageKey);
+            if (!raw) return new Set();
+            const parsed = JSON.parse(raw);
+            return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+        } catch (error) {
+            return new Set();
+        }
+    }
+
+    function saveIdSet(storageKey, setValue) {
+        if (!storageKey) return;
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(setValue)));
+    }
+
+    function loadRandomPhase() {
+        if (!randomPhaseStorageKey) return 'available';
+        const stored = localStorage.getItem(randomPhaseStorageKey);
+        return stored || 'available';
+    }
+
+    function normalizeRandomPhase(phase) {
+        if (phase === 'unsold' || phase === 'completed') return phase;
+        return 'available';
     }
 
     function normalizeQuickRules(rules) {
@@ -1603,8 +1671,17 @@ function openWhatsAppShare(message) {
             if (!quickRulesModal?.classList.contains('hidden')) {
                 closeQuickRulesModal();
             }
+            if (!unsoldModal?.classList.contains('hidden')) {
+                closeUnsoldModal();
+            }
         }
     });
+
+    unsoldConfirmButtons?.forEach((button) => button.addEventListener('click', () => startUnsoldRound()));
+    unsoldCancelButtons?.forEach((button) => button.addEventListener('click', () => {
+        pendingAutoStartAfterConfirm = false;
+        closeUnsoldModal();
+    }));
 
     function getJumpStep() {
         const fallback = 50;
@@ -1783,6 +1860,17 @@ function openWhatsAppShare(message) {
             return;
         }
 
+        const teamButton = getTeamButton(teamId);
+        if (!teamButton) {
+            showControllerMessage('Select a valid team before marking sold.', 'error');
+            return;
+        }
+        const teamNeeded = Number(teamButton?.dataset.teamNeeded || 0);
+        if (teamNeeded <= 0) {
+            showControllerMessage('Team already completed their required players.', 'error');
+            return;
+        }
+
         const action = document.getElementById('controller-sold-action')?.value;
         const token = getControllerToken();
         if (!action || !token) {
@@ -1792,6 +1880,26 @@ function openWhatsAppShare(message) {
 
         const leaguePlayerId = document.getElementById('controller-league-player-id').value;
         const overrideAmount = document.getElementById('controller-override-amount')?.value;
+        const playerBasePrice = Number(playerBasePriceInput?.value || 0);
+        const currentBidAmount = Number(controllerBaseInput?.value || 0);
+        const finalAmount = Number(overrideAmount || currentBidAmount);
+        const teamMaxCap = Number(teamButton?.dataset.teamMax || 0);
+        const teamWalletBalance = Number(teamButton?.dataset.teamWallet || 0);
+
+        if (!finalAmount || finalAmount < playerBasePrice) {
+            showControllerMessage('Bid amount is below base price.', 'error');
+            return;
+        }
+
+        if (teamMaxCap && finalAmount > teamMaxCap) {
+            showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
+            return;
+        }
+
+        if (!Number.isNaN(teamWalletBalance) && finalAmount > teamWalletBalance) {
+            showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
+            return;
+        }
 
         const originalText = button.innerHTML;
         button.disabled = true;
@@ -1808,7 +1916,10 @@ function openWhatsAppShare(message) {
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId,
                     team_id: teamId,
-                    override_amount: overrideAmount || null
+                    override_amount: overrideAmount || null,
+                    final_amount: finalAmount,
+                    player_base_price: playerBasePrice,
+                    current_bid_amount: currentBidAmount
                 })
             });
 
@@ -1823,7 +1934,17 @@ function openWhatsAppShare(message) {
             if (currentPlayerIdInput) {
                 currentPlayerIdInput.value = '';
             }
-            if (autoStartEnabled && startNextQueued(true)) {
+            const updatedNeeded = Math.max(0, teamNeeded - 1);
+            const updatedWallet = Math.max(0, teamWalletBalance - finalAmount);
+            teamButton.dataset.teamNeeded = String(updatedNeeded);
+            teamButton.dataset.teamWallet = String(updatedWallet);
+            updateTeamBudgetLabels(teamId);
+            markPlayerCompleted(leaguePlayerId);
+            const transition = handlePhaseTransitions({ autoStart: autoStartEnabled });
+            if (autoStartEnabled && !transition.pending && startNextQueued(true)) {
+                return;
+            }
+            if (transition.pending) {
                 return;
             }
             setTimeout(() => window.location.reload(), 1000);
@@ -1877,7 +1998,12 @@ function openWhatsAppShare(message) {
             if (currentPlayerIdInput) {
                 currentPlayerIdInput.value = '';
             }
-            if (autoStartEnabled && startNextQueued(true)) {
+            markPlayerCompleted(leaguePlayerId);
+            const transition = handlePhaseTransitions({ autoStart: autoStartEnabled });
+            if (autoStartEnabled && !transition.pending && startNextQueued(true)) {
+                return;
+            }
+            if (transition.pending) {
                 return;
             }
             setTimeout(() => window.location.reload(), 1000);
@@ -1893,6 +2019,9 @@ function openWhatsAppShare(message) {
     const unsoldPlayerPool = parsePlayers(unsoldPlayersScript);
     let playerQueue = loadQueue();
     let autoStartEnabled = loadAutoStartSetting();
+    rebuildRandomPools();
+    enforcePhaseConsistency();
+    handlePhaseTransitions({ showToast: false });
     renderQueue();
     initPlayerToolsToggle();
     initMismatchToggle();
@@ -1919,6 +2048,177 @@ function openWhatsAppShare(message) {
             base_price: Number(player.base_price ?? 0),
             photo: player.photo || defaultPlayerPhoto
         };
+    }
+
+    function saveRandomPhase(phase) {
+        currentRandomPhase = normalizeRandomPhase(phase);
+        if (randomPhaseStorageKey) {
+            localStorage.setItem(randomPhaseStorageKey, currentRandomPhase);
+        }
+    }
+
+    function uniqueCount(pool) {
+        return new Set((pool || []).map(p => String(p.id))).size;
+    }
+
+    function buildRandomPool(pool, completedSet, servedSet) {
+        return (pool || []).filter((p) => {
+            const id = String(p.id);
+            return !completedSet.has(id) && !servedSet.has(id);
+        });
+    }
+
+    function rebuildRandomPools() {
+        availableRandomPool = buildRandomPool(availablePlayerPool, availableCompletedSet, availableServedSet);
+        unsoldRandomPool = buildRandomPool(unsoldPlayerPool, unsoldCompletedSet, unsoldServedSet);
+    }
+
+    function isAvailablePlayer(id) {
+        const target = String(id || '');
+        return availablePlayerPool.some((p) => String(p.id) === target);
+    }
+
+    function isUnsoldPlayer(id) {
+        const target = String(id || '');
+        return unsoldPlayerPool.some((p) => String(p.id) === target);
+    }
+
+    function markServed(playerId, phase) {
+        const id = String(playerId || '');
+        if (!id) return;
+        if (phase === 'unsold') {
+            unsoldServedSet.add(id);
+            saveIdSet(unsoldServedStorageKey, unsoldServedSet);
+        } else {
+            availableServedSet.add(id);
+            saveIdSet(availableServedStorageKey, availableServedSet);
+        }
+        rebuildRandomPools();
+    }
+
+    function markPlayerCompleted(playerId) {
+        const id = String(playerId || '');
+        if (!id) return;
+        if (isAvailablePlayer(id)) {
+            availableCompletedSet.add(id);
+            saveIdSet(availableCompletedStorageKey, availableCompletedSet);
+        }
+        if (isUnsoldPlayer(id)) {
+            unsoldCompletedSet.add(id);
+            saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
+        }
+        rebuildRandomPools();
+    }
+
+    function isAllAvailableCompleted() {
+        return availableCompletedSet.size >= uniqueCount(availablePlayerPool);
+    }
+
+    function isAllUnsoldCompleted() {
+        return unsoldCompletedSet.size >= uniqueCount(unsoldPlayerPool);
+    }
+
+    function enforcePhaseConsistency() {
+        const availableDone = isAllAvailableCompleted();
+        const unsoldDone = isAllUnsoldCompleted();
+
+        if (currentRandomPhase === 'unsold' && !availableDone) {
+            saveRandomPhase('available');
+        }
+
+        if (currentRandomPhase === 'unsold' && !unsoldPlayerPool.length) {
+            saveRandomPhase('completed');
+        }
+
+        if (currentRandomPhase === 'completed') {
+            if (!availableDone) {
+                saveRandomPhase('available');
+            } else if (!unsoldDone && unsoldPlayerPool.length) {
+                saveRandomPhase('unsold');
+            }
+        }
+
+        if (currentRandomPhase === 'available' && availableDone && !unsoldPlayerPool.length) {
+            saveRandomPhase('completed');
+        }
+    }
+
+    function takeRandomPlayerFromPool(phase) {
+        const pool = phase === 'unsold' ? unsoldRandomPool : availableRandomPool;
+        if (!pool.length) return null;
+        const index = Math.floor(Math.random() * pool.length);
+        const [player] = pool.splice(index, 1);
+        markServed(player.id, phase);
+        return player ? normalizePlayer(player) : null;
+    }
+
+    function takeRandomPlayerForCurrentPhase() {
+        if (currentRandomPhase === 'completed') {
+            return null;
+        }
+        if (currentRandomPhase === 'unsold') {
+            const candidate = takeRandomPlayerFromPool('unsold');
+            if (candidate) return candidate;
+            return null;
+        }
+        const candidate = takeRandomPlayerFromPool('available');
+        return candidate || null;
+    }
+
+    function openUnsoldModal(autoStart = false) {
+        pendingAutoStartAfterConfirm = autoStart;
+        if (!unsoldModal) {
+            const proceed = window.confirm('All available players are finished. Start Unsold players round?');
+            if (proceed) {
+                startUnsoldRound();
+            }
+            return;
+        }
+        unsoldModal.classList.remove('hidden');
+    }
+
+    function closeUnsoldModal() {
+        unsoldModal?.classList.add('hidden');
+    }
+
+    function startUnsoldRound() {
+        saveRandomPhase('unsold');
+        rebuildRandomPools();
+        closeUnsoldModal();
+        showControllerMessage('Unsold round started. Random picks will use unsold players.');
+        handlePhaseTransitions();
+        if (pendingAutoStartAfterConfirm) {
+            pendingAutoStartAfterConfirm = false;
+            setTimeout(() => startNextQueued(true), 50);
+        }
+    }
+
+    function handlePhaseTransitions({ autoStart = false, showToast = true } = {}) {
+        const availableDone = isAllAvailableCompleted();
+        const unsoldDone = isAllUnsoldCompleted();
+        const hasUnsold = uniqueCount(unsoldPlayerPool) > 0;
+
+        if (currentRandomPhase === 'available' && availableDone) {
+            if (hasUnsold) {
+                openUnsoldModal(autoStart);
+                return { pending: true };
+            }
+            saveRandomPhase('completed');
+            if (showToast) {
+                showControllerMessage('All players are completed. No unsold players remaining.');
+            }
+            return { pending: false };
+        }
+
+        if (currentRandomPhase === 'unsold' && unsoldDone) {
+            saveRandomPhase('completed');
+            if (showToast) {
+                showControllerMessage('All unsold players finished. Auction fully completed.');
+            }
+            return { pending: false };
+        }
+
+        return { pending: false };
     }
 
     function saveQueue() {
@@ -2169,27 +2469,37 @@ function openWhatsAppShare(message) {
     }
 
     function getActivePool() {
-        if (availablePlayerPool && availablePlayerPool.length) {
-            return { pool: availablePlayerPool, label: 'available' };
+        if (currentRandomPhase === 'unsold') {
+            return { pool: unsoldRandomPool, label: 'unsold' };
         }
-        if (unsoldPlayerPool && unsoldPlayerPool.length) {
-            return { pool: unsoldPlayerPool, label: 'unsold' };
+        if (currentRandomPhase === 'completed') {
+            return { pool: [], label: 'completed' };
         }
-        return { pool: [], label: 'none' };
+        return { pool: availableRandomPool, label: 'available' };
     }
 
     randomPlayerButton?.addEventListener('click', () => {
-        const { pool, label } = getActivePool();
+        if (currentRandomPhase === 'completed') {
+            showControllerMessage('All unsold players finished. Auction fully completed.');
+            return;
+        }
+        const { pool } = getActivePool();
         if (!pool.length) {
+            const transition = handlePhaseTransitions();
+            if (transition.pending) return;
             showControllerMessage('No players to pick right now.', 'error');
             return;
         }
-        const remaining = pool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
-        const effectivePool = remaining.length ? remaining : pool;
-        const randomIndex = Math.floor(Math.random() * effectivePool.length);
-        const player = normalizePlayer(effectivePool[randomIndex]);
+        const player = takeRandomPlayerForCurrentPhase();
+        if (!player) {
+            const transition = handlePhaseTransitions();
+            if (!transition.pending && currentRandomPhase !== 'completed') {
+                showControllerMessage('No players to pick right now.', 'error');
+            }
+            return;
+        }
         addToQueue(player);
-        if (label === 'unsold') {
+        if (currentRandomPhase === 'unsold') {
             showControllerMessage('Added an unsold player to the queue.');
         }
     });
@@ -2227,15 +2537,6 @@ function openWhatsAppShare(message) {
         });
     }
 
-    function pickNextFromPool(pool) {
-        if (!pool || !pool.length) {
-            return null;
-        }
-        const remaining = pool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
-        const candidate = remaining.length ? remaining[0] : pool[0];
-        return candidate ? normalizePlayer(candidate) : null;
-    }
-
     function startNextQueued(force = false) {
         let next = null;
 
@@ -2243,9 +2544,13 @@ function openWhatsAppShare(message) {
             next = playerQueue[0];
             removeFromQueue(next.id);
         } else {
-            next = pickNextFromPool(availablePlayerPool);
+            next = takeRandomPlayerForCurrentPhase();
             if (!next) {
-                next = pickNextFromPool(unsoldPlayerPool);
+                const transition = handlePhaseTransitions({ autoStart: force });
+                if (transition.pending) {
+                    return false;
+                }
+                return false;
             }
         }
 

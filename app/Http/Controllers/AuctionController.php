@@ -291,7 +291,7 @@ class AuctionController extends Controller
         LeaguePlayer::where('league_id', $request->league_id)
             ->where('status', 'auctioning')
             ->update(['status' => 'available']);
-        
+
         // Set the player status to 'auctioning' to prevent other players from being selected
         $leaguePlayer = LeaguePlayer::find($request->league_player_id);
         
@@ -310,8 +310,8 @@ class AuctionController extends Controller
             ], 400);
         }
         
-        // Verify player is available for auction
-        if (!in_array($leaguePlayer->status, ['available', 'auctioning'])) {
+        // Verify player is available for auction (supports unsold round)
+        if (!in_array($leaguePlayer->status, ['available', 'auctioning', 'unsold'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Player is not available for auction. Current status: ' . $leaguePlayer->status
@@ -479,7 +479,12 @@ class AuctionController extends Controller
             $securedPlayers + 1,
             [$leaguePlayer->id]
         );
+        $displayMaxCap = $this->calculateDisplayedMaxBidCap($bidTeam, $league);
         
+        if (!$rosterValidation['ok'] && $newBid <= $displayMaxCap) {
+            $rosterValidation['ok'] = true;
+        }
+
         if (!$rosterValidation['ok']) {
             return response()->json([
                 'success' => false,
@@ -591,22 +596,35 @@ class AuctionController extends Controller
 
     public function sold(Request $request)
     {
-        $leaguePlayer = LeaguePlayer::find($request->league_player_id);
+        $validated = $request->validate([
+            'league_player_id' => ['required', 'integer', 'exists:league_players,id'],
+            'team_id' => ['required', 'integer', 'exists:league_teams,id'],
+            'override_amount' => ['nullable', 'numeric', 'min:0'],
+            'final_amount' => ['nullable', 'numeric', 'min:0'],
+            'player_base_price' => ['nullable', 'numeric', 'min:0'],
+            'current_bid_amount' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $leaguePlayer = LeaguePlayer::find($validated['league_player_id']);
         if (!$leaguePlayer) {
             return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
         }
-        
+
+        if ($leaguePlayer->status === 'sold') {
+            return response()->json(['success' => false, 'message' => 'Player already sold.'], 422);
+        }
+
         $leaguePlayer->loadMissing('league');
-        
+
         $this->authorize('markSoldUnsold', $leaguePlayer->league);
-        
-        $leaguePlayerId = $request->league_player_id;
-        $teamId = $request->team_id;
-        $overrideInput = $request->override_amount;
+
+        $leaguePlayerId = $validated['league_player_id'];
+        $teamId = $validated['team_id'];
+        $overrideInput = $validated['override_amount'];
         $hasOverride = $overrideInput !== null && $overrideInput !== '';
-        $overrideAmount = $hasOverride ? floatval($overrideInput) : null;
-        $basePrice = (float) ($leaguePlayer->base_price ?? 0);
-        
+        $overrideAmount = $hasOverride ? (float) $overrideInput : null;
+        $basePrice = (float) ($validated['player_base_price'] ?? $leaguePlayer->base_price ?? 0);
+
         $team = LeagueTeam::find($teamId);
         if (!$team || $team->league_id !== $leaguePlayer->league_id) {
             return response()->json([
@@ -614,20 +632,26 @@ class AuctionController extends Controller
                 'message' => 'Invalid team selection for this league.'
             ], 422);
         }
-        
+
+        $playersNeeded = $this->getTeamPlayersNeeded($team, $leaguePlayer->league);
+        if ($playersNeeded <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Team already completed their required players.'
+            ], 422);
+        }
+
         $winningBidPreview = Auction::where('league_player_id', $leaguePlayerId)
             ->where('league_team_id', $teamId)
             ->latest('id')
             ->first();
-        
-        if ($hasOverride) {
-            $bidPrice = $overrideAmount;
-        } elseif ($winningBidPreview) {
-            $bidPrice = $winningBidPreview->amount;
-        } else {
-            $bidPrice = $basePrice;
-        }
-        $bidPrice = max($bidPrice, 0);
+
+        $finalAmount = $validated['final_amount']
+            ?? ($hasOverride ? $overrideAmount : null)
+            ?? ($winningBidPreview->amount ?? null)
+            ?? ($validated['current_bid_amount'] ?? null)
+            ?? $basePrice;
+        $finalAmount = max((float) $finalAmount, 0);
 
         $minimumRosterSize = $this->getMinimumRosterSize($leaguePlayer->league);
         $currentRosterCount = $this->getSecuredRosterCount($team);
@@ -642,10 +666,34 @@ class AuctionController extends Controller
                 ? $winningBidPreview->amount + $remainingWallet
                 : $remainingWallet;
 
-            if ($finalWalletOverride > $bidPrice) {
-                $bidPrice = $finalWalletOverride;
-                $hasOverride = true; // Ensure wallet adjustment happens when a bid already exists
+            if ($finalWalletOverride > $finalAmount) {
+                $finalAmount = $finalWalletOverride;
+                $hasOverride = true;
             }
+        }
+
+        if ($finalAmount < $basePrice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bid amount is below base price.'
+            ], 422);
+        }
+
+        $maxBidCap = $this->calculateMaxBidCap($team, $leaguePlayer->league, $playersNeeded);
+        if ($maxBidCap > 0 && $finalAmount > $maxBidCap) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bid exceeds team cap/balance.'
+            ], 422);
+        }
+
+        $alreadyDeducted = $winningBidPreview->amount ?? 0;
+        $extraNeeded = max($finalAmount - $alreadyDeducted, 0);
+        if ($extraNeeded > ($team->wallet_balance ?? 0)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient team balance for this sale.'
+            ], 422);
         }
 
         \App\Models\AuctionLog::logAction(
@@ -654,17 +702,12 @@ class AuctionController extends Controller
             'player_sold',
             'LeaguePlayer',
             $leaguePlayer->id,
-            ['team_id' => $teamId, 'amount' => $bidPrice]
+            ['team_id' => $teamId, 'amount' => $finalAmount]
         );
-        
-        if ($winningBidPreview) {
-            $balanceAdjustmentPreview = $winningBidPreview->amount - $bidPrice;
-            $projectedBalance = $team->wallet_balance + $balanceAdjustmentPreview;
-        } else {
-            $balanceAdjustmentPreview = -$bidPrice;
-            $projectedBalance = $team->wallet_balance - $bidPrice;
-        }
-        
+
+        $balanceAdjustment = $alreadyDeducted - $finalAmount; // positive = refund, negative = extra deduction
+        $projectedBalance = ($team->wallet_balance ?? 0) + $balanceAdjustment;
+
         $rosterValidation = $this->validateRosterBudget(
             $team,
             $leaguePlayer->league,
@@ -672,7 +715,7 @@ class AuctionController extends Controller
             $projectedRosterCount,
             [$leaguePlayerId]
         );
-        
+
         if (!$rosterValidation['ok']) {
             return response()->json([
                 'success' => false,
@@ -681,23 +724,23 @@ class AuctionController extends Controller
         }
 
         // Use database transaction for atomic operations
-        DB::transaction(function () use ($leaguePlayerId, $teamId, $bidPrice, $hasOverride) {
+        DB::transaction(function () use ($leaguePlayerId, $teamId, $finalAmount) {
             // Mark the winning bid as 'won'
             $winningBid = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('league_team_id', $teamId)
                 ->latest('id')
                 ->first();
-                
+
             if ($winningBid) {
                 $winningBid->update(['status' => 'won']);
             }
-            
+
             // Mark all other bids for this player as 'lost'
             // Refund losing teams
             $otherBids = Auction::where('league_player_id', $leaguePlayerId)
                 ->where('id', '!=', $winningBid ? $winningBid->id : 0)
                 ->get();
-            
+
             foreach ($otherBids as $bid) {
                 // Refund the bid amount to losing teams only if not already refunded
                 if ($bid->status !== 'refunded') {
@@ -708,26 +751,23 @@ class AuctionController extends Controller
                     $bid->update(['status' => 'lost']);
                 }
             }
-            // Adjust winning team's balance if override amount is different from bid
+
+            // Adjust winning team's balance relative to final amount
             if ($winningBid) {
-                if ($hasOverride) {
-                    $balanceAdjustment = $winningBid->amount - $bidPrice;
-                    if ($balanceAdjustment != 0) {
-                        // If override is less than bid, refund difference
-                        // If override is more than bid, deduct extra
-                        LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
-                    }
+                $balanceAdjustment = $winningBid->amount - $finalAmount;
+                if ($balanceAdjustment != 0) {
+                    LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
                 }
-            } elseif ($bidPrice > 0) {
+            } elseif ($finalAmount > 0) {
                 // No bid existed – deduct the manual sale amount directly
-                LeagueTeam::find($teamId)->decrement('wallet_balance', $bidPrice);
+                LeagueTeam::find($teamId)->decrement('wallet_balance', $finalAmount);
             }
-            
+
             // Update the league player status to 'sold' and assign to team
             LeaguePlayer::where('id', $leaguePlayerId)->update([
                 'league_team_id' => $teamId,
                 'status' => 'sold',
-                'bid_price' => $bidPrice
+                'bid_price' => $finalAmount
             ]);
         });
 
@@ -752,7 +792,15 @@ class AuctionController extends Controller
         if (!$leaguePlayer) {
             return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
         }
-        
+
+        if ($leaguePlayer->status === 'sold') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Player already sold and cannot be marked unsold.'
+            ], 422);
+        }
+
+        $leaguePlayer->loadMissing('league');
         $this->authorize('markSoldUnsold', $leaguePlayer->league);
         
         \App\Models\AuctionLog::logAction(
@@ -969,6 +1017,47 @@ class AuctionController extends Controller
                     ->orWhere('retention', true);
             })
             ->count();
+    }
+
+    /**
+     * Remaining players needed before this sale is applied.
+     */
+    protected function getTeamPlayersNeeded(LeagueTeam $team, League $league): int
+    {
+        $minimumRosterSize = $this->getMinimumRosterSize($league);
+        $secured = $this->getSecuredRosterCount($team);
+
+        return max($minimumRosterSize - $secured, 0);
+    }
+
+    /**
+     * Calculate max bid cap after reserving cheapest slots for future picks.
+     */
+    protected function calculateMaxBidCap(LeagueTeam $team, League $league, int $playersNeeded): float
+    {
+        $futureSlots = max($playersNeeded - 1, 0);
+        $availableBasePrices = $league->leaguePlayers()
+            ->where('status', 'available')
+            ->orderBy('base_price')
+            ->pluck('base_price')
+            ->map(fn ($price) => max((float) $price, 0))
+            ->values();
+
+        $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
+        $availableWallet = max((float) ($team->wallet_balance ?? 0), 0);
+
+        return max($availableWallet - $reserveAmount, 0);
+    }
+
+    /**
+     * Mirror UI max bid cap calculation to keep validations aligned with the control room.
+     */
+    protected function calculateDisplayedMaxBidCap(LeagueTeam $team, League $league): float
+    {
+        $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
+        $soldCount = $team->leaguePlayers()->where('status', 'sold')->count();
+        $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
+        return $this->calculateMaxBidCap($team, $league, $playersNeeded);
     }
 
     /**
