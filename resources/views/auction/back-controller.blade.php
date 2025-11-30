@@ -589,6 +589,16 @@
                 'photo' => $leaguePlayer->player->photo ? \Illuminate\Support\Facades\Storage::url($leaguePlayer->player->photo) : asset('images/defaultplayer.jpeg'),
             ])->values(), JSON_UNESCAPED_SLASHES) !!}
         </script>
+        <script id="controller-unsold-players" type="application/json">
+            {!! json_encode($unsoldPlayers->map(fn ($leaguePlayer) => [
+                'id' => $leaguePlayer->id,
+                'user_id' => $leaguePlayer->user_id,
+                'name' => $leaguePlayer->player->name,
+                'role' => $leaguePlayer->player->primaryGameRole?->gamePosition?->name ?? $leaguePlayer->player->position?->name ?? '',
+                'base_price' => $leaguePlayer->base_price,
+                'photo' => $leaguePlayer->player->photo ? \Illuminate\Support\Facades\Storage::url($leaguePlayer->player->photo) : asset('images/defaultplayer.jpeg'),
+            ])->values(), JSON_UNESCAPED_SLASHES) !!}
+        </script>
 
         <script>
             document.body?.classList.add('hide-shell');
@@ -1010,6 +1020,7 @@ function openWhatsAppShare(message) {
     const playerSearchResults = document.getElementById('controller-search-results');
     const randomPlayerButton = document.querySelector('[data-controller-random]');
     const availablePlayersScript = document.getElementById('controller-available-players');
+    const unsoldPlayersScript = document.getElementById('controller-unsold-players');
     const playerQueueList = document.getElementById('controller-player-queue');
     const playerQueueEmpty = document.getElementById('controller-queue-empty');
     const clearQueueButton = document.querySelector('[data-clear-queue]');
@@ -1878,7 +1889,8 @@ function openWhatsAppShare(message) {
         }
     }
 
-    const availablePlayerPool = parseAvailablePlayers();
+    const availablePlayerPool = parsePlayers(availablePlayersScript);
+    const unsoldPlayerPool = parsePlayers(unsoldPlayersScript);
     let playerQueue = loadQueue();
     let autoStartEnabled = loadAutoStartSetting();
     renderQueue();
@@ -1886,12 +1898,12 @@ function openWhatsAppShare(message) {
     initMismatchToggle();
     syncAutoStartUI();
 
-    function parseAvailablePlayers() {
-        if (!availablePlayersScript?.textContent) {
+    function parsePlayers(scriptEl) {
+        if (!scriptEl?.textContent) {
             return [];
         }
         try {
-            const parsed = JSON.parse(availablePlayersScript.textContent);
+            const parsed = JSON.parse(scriptEl.textContent);
             return Array.isArray(parsed) ? parsed : [];
         } catch (error) {
             return [];
@@ -2156,16 +2168,30 @@ function openWhatsAppShare(message) {
         });
     }
 
+    function getActivePool() {
+        if (availablePlayerPool && availablePlayerPool.length) {
+            return { pool: availablePlayerPool, label: 'available' };
+        }
+        if (unsoldPlayerPool && unsoldPlayerPool.length) {
+            return { pool: unsoldPlayerPool, label: 'unsold' };
+        }
+        return { pool: [], label: 'none' };
+    }
+
     randomPlayerButton?.addEventListener('click', () => {
-        if (!availablePlayerPool || availablePlayerPool.length === 0) {
-            showControllerMessage('No available players to pick right now.', 'error');
+        const { pool, label } = getActivePool();
+        if (!pool.length) {
+            showControllerMessage('No players to pick right now.', 'error');
             return;
         }
-        const remaining = availablePlayerPool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
-        const pool = remaining.length ? remaining : availablePlayerPool;
-        const randomIndex = Math.floor(Math.random() * pool.length);
-        const player = normalizePlayer(pool[randomIndex]);
+        const remaining = pool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
+        const effectivePool = remaining.length ? remaining : pool;
+        const randomIndex = Math.floor(Math.random() * effectivePool.length);
+        const player = normalizePlayer(effectivePool[randomIndex]);
         addToQueue(player);
+        if (label === 'unsold') {
+            showControllerMessage('Added an unsold player to the queue.');
+        }
     });
 
     clearQueueButton?.addEventListener('click', () => {
@@ -2201,15 +2227,26 @@ function openWhatsAppShare(message) {
         });
     }
 
+    function pickNextFromPool(pool) {
+        if (!pool || !pool.length) {
+            return null;
+        }
+        const remaining = pool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
+        const candidate = remaining.length ? remaining[0] : pool[0];
+        return candidate ? normalizePlayer(candidate) : null;
+    }
+
     function startNextQueued(force = false) {
         let next = null;
 
         if (playerQueue.length) {
             next = playerQueue[0];
             removeFromQueue(next.id);
-        } else if (availablePlayerPool.length) {
-            const remaining = availablePlayerPool.filter(p => !playerQueue.some(q => q.id === String(p.id)));
-            next = remaining.length ? normalizePlayer(remaining[0]) : normalizePlayer(availablePlayerPool[0]);
+        } else {
+            next = pickNextFromPool(availablePlayerPool);
+            if (!next) {
+                next = pickNextFromPool(unsoldPlayerPool);
+            }
         }
 
         if (!next) {

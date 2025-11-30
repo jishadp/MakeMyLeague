@@ -159,6 +159,12 @@ class AuctionController extends Controller
             ->orderBy('updated_at', 'asc')
             ->take(8)
             ->get();
+        $unsoldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'unsold')
+            ->with(['player.position'])
+            ->orderBy('updated_at', 'asc')
+            ->take(8)
+            ->get();
 
         $teams = LeagueTeam::where('league_id', $league->id)
             ->with(['team', 'teamAuctioneer.auctioneer'])
@@ -257,6 +263,7 @@ class AuctionController extends Controller
             'currentPlayer' => $currentPlayer,
             'currentHighestBid' => $currentHighestBid,
             'availablePlayers' => $availablePlayers,
+            'unsoldPlayers' => $unsoldPlayers,
             'teams' => $teams,
             'recentBids' => $recentBids,
             'auctionStats' => $auctionStats,
@@ -345,10 +352,15 @@ class AuctionController extends Controller
         $query = $request->input('query');
         $leagueId = $request->input('league_id');
         
-        // Only search available players (exclude sold, unsold, retained, auctioning)
+        $hasAvailable = LeaguePlayer::where('league_id', $leagueId)
+            ->where('status', 'available')
+            ->exists();
+        $searchStatuses = $hasAvailable ? ['available'] : ['unsold'];
+
+        // Search available players; if none remain, fall back to unsold players
         $players = LeaguePlayer::with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->where('league_id', $leagueId)
-            ->where('status', 'available') // Only show available players
+            ->whereIn('status', $searchStatuses)
             ->where('retention', false) // Exclude retained players
             ->where(function ($q) use ($query) {
                 $q->whereHas('player', function ($subQ) use ($query) {
@@ -464,7 +476,8 @@ class AuctionController extends Controller
             $bidTeam,
             $league,
             $projectedBalance,
-            $securedPlayers + 1
+            $securedPlayers + 1,
+            [$leaguePlayer->id]
         );
         
         if (!$rosterValidation['ok']) {
@@ -656,7 +669,8 @@ class AuctionController extends Controller
             $team,
             $leaguePlayer->league,
             $projectedBalance,
-            $projectedRosterCount
+            $projectedRosterCount,
+            [$leaguePlayerId]
         );
         
         if (!$rosterValidation['ok']) {
@@ -960,7 +974,7 @@ class AuctionController extends Controller
     /**
      * Ensure a team keeps enough balance to finish its roster with available players.
      */
-    protected function validateRosterBudget(LeagueTeam $team, League $league, float $projectedBalance, int $projectedRosterCount): array
+    protected function validateRosterBudget(LeagueTeam $team, League $league, float $projectedBalance, int $projectedRosterCount, array $excludeLeaguePlayerIds = []): array
     {
         $minimumRosterSize = $this->getMinimumRosterSize($league);
         $remainingSlots = max($minimumRosterSize - $projectedRosterCount, 0);
@@ -976,16 +990,31 @@ class AuctionController extends Controller
             return ['ok' => true];
         }
 
-        $availablePrices = LeaguePlayer::where('league_id', $league->id)
-            ->where('status', 'available')
-            ->orderBy('base_price')
+        $availableQuery = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['available', 'unsold'])
+            ->orderBy('base_price');
+
+        if (!empty($excludeLeaguePlayerIds)) {
+            $availableQuery->whereNotIn('id', $excludeLeaguePlayerIds);
+        }
+
+        $availablePrices = $availableQuery
             ->limit($remainingSlots)
             ->pluck('base_price');
+
+        if ($availablePrices->count() < $remainingSlots && !empty($excludeLeaguePlayerIds)) {
+            // Fall back to include excluded ids (e.g., current auction player) to prevent a false block
+            $availablePrices = LeaguePlayer::where('league_id', $league->id)
+                ->whereIn('status', ['available', 'unsold'])
+                ->orderBy('base_price')
+                ->limit($remainingSlots)
+                ->pluck('base_price');
+        }
 
         if ($availablePrices->count() < $remainingSlots) {
             return [
                 'ok' => false,
-                'message' => 'Only ' . $availablePrices->count() . ' available players remain, but '
+                'message' => 'Only ' . $availablePrices->count() . ' remaining players are available, but '
                     . $remainingSlots . ' roster slots are still required to hit the minimum of '
                     . $minimumRosterSize . '.'
             ];

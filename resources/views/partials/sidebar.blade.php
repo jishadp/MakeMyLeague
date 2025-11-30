@@ -139,6 +139,19 @@
 
                     <!-- Admin Section -->
                     @if(auth()->user()->isAdmin())
+                    @php
+                        // Pick the league in context, fallback to default or latest for admin quick access.
+                        $sidebarLeague = request()->route('league');
+                        if (is_string($sidebarLeague)) {
+                            $sidebarLeague = \App\Models\League::where('slug', $sidebarLeague)->first();
+                        }
+                        if (!$sidebarLeague) {
+                            $sidebarLeague = \App\Models\League::where('is_default', true)->first();
+                        }
+                        if (!$sidebarLeague) {
+                            $sidebarLeague = \App\Models\League::latest()->first();
+                        }
+                    @endphp
                     <div class="space-y-1">
                         <button onclick="toggleGroup('admin-group')" class="w-full flex items-center justify-between p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-colors">
                             <div class="flex items-center space-x-3">
@@ -161,9 +174,15 @@
                             <a href="{{ route('admin.leagues.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->routeIs('admin.leagues.*') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
                                 <span>League Management</span>
                             </a>
-                            <a href="{{ url('/leagues/kavumannam-premier-league/auction/control-room') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->is('leagues/*/auction/control-room') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
-                                <span>Live Auction Control</span>
-                            </a>
+                            @if($sidebarLeague)
+                                <a href="{{ route('auction.control-room', $sidebarLeague) }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm {{ request()->is('leagues/*/auction/control-room') ? 'bg-white text-[#4a90e2]' : 'text-white/80 hover:bg-white/20 hover:text-white' }}">
+                                    <span>Live Auction Control</span>
+                                </a>
+                            @else
+                                <a href="{{ route('auctions.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-full transition-colors text-sm text-white/80 hover:bg-white/20 hover:text-white">
+                                    <span>Live Auction Control</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                     @endif

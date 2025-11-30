@@ -77,22 +77,27 @@ class LeaguePlayerController extends Controller
             ->get()
             ->pluck('team');
 
-        // Get status counts for all players in the league
-        $statusQuery = LeaguePlayer::where(function($query) use ($league) {
-            $query->whereHas('leagueTeam', function($q) use ($league) {
-                $q->where('league_id', $league->id);
-            })
-            ->orWhereNull('league_team_id');
-        });
-        
-        $statusCounts = $statusQuery->selectRaw('status, count(*) as count')
+        // Get status counts for all players in the current league (auctioning counts as available)
+        $statusCountsRaw = LeaguePlayer::where('league_id', $league->id)
+            ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
-        // Count players without a team
-        $unassignedCount = LeaguePlayer::whereNull('league_team_id')
+        $statusCounts = [
+            'pending' => $statusCountsRaw['pending'] ?? 0,
+            'available' => ($statusCountsRaw['available'] ?? 0) + ($statusCountsRaw['auctioning'] ?? 0),
+            'sold' => $statusCountsRaw['sold'] ?? 0,
+            'unsold' => $statusCountsRaw['unsold'] ?? 0,
+            'skip' => $statusCountsRaw['skip'] ?? 0,
+        ];
+
+        // Count players without a team within this league
+        $unassignedCount = LeaguePlayer::where('league_id', $league->id)
+            ->whereNull('league_team_id')
             ->count();
+
+        $totalPlayersCount = LeaguePlayer::where('league_id', $league->id)->count();
 
         $league->loadMissing([
             'leaguePlayers.user.localBody',
@@ -116,6 +121,7 @@ class LeaguePlayerController extends Controller
             'teams',
             'statusCounts',
             'unassignedCount',
+            'totalPlayersCount',
             'gamePositions',
             'statusFilter',
             'playersWithoutRoleCount'

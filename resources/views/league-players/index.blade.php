@@ -116,7 +116,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">League Players</h1>
-                    <p class="text-gray-600 mt-2">{{ $league->name }} - Managing {{ $leaguePlayers->total() }} players</p>
+                    <p class="text-gray-600 mt-2">{{ $league->name }} - Managing {{ $totalPlayersCount }} players</p>
                 </div>
                 <div class="w-full sm:w-auto flex justify-stretch sm:justify-end">
                     <button type="button"
@@ -410,7 +410,7 @@
         <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mb-8">
             <div class="bg-white p-4 rounded-lg shadow-sm">
                 <div class="text-center">
-                    <p class="text-2xl font-semibold text-gray-900">{{ $leaguePlayers->total() }}</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $totalPlayersCount }}</p>
                     <p class="text-xs text-gray-500">Total Players</p>
                 </div>
             </div>

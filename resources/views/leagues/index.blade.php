@@ -545,23 +545,28 @@
         </div>
     </div>
 
-    <div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="dashboardBroadcastModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="dashboardBroadcastModalLabel">📢 Broadcast Alert</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="dashboardBroadcastMessage">
-                    @include('auction.partials.player-bidding')
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    @php
+        $broadcastLeague = $leagues->first();
+    @endphp
+    @if($broadcastLeague)
+        <div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="dashboardBroadcastModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content rounded-4 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dashboardBroadcastModalLabel">📢 Broadcast Alert</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="dashboardBroadcastMessage">
+                        @include('auction.partials.player-bidding', ['league' => $broadcastLeague])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <!-- Animations -->
     <style>
