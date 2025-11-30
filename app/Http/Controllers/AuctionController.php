@@ -617,20 +617,14 @@ class AuctionController extends Controller
         }
 
         $lastBid = Auction::where('league_player_id', $leaguePlayer->id)
+            ->where('status', 'ask')
             ->latest('id')
             ->first();
 
         if (!$lastBid) {
             return response()->json([
                 'success' => false,
-                'message' => 'No bids to undo for this player.'
-            ], 422);
-        }
-
-        if (in_array($lastBid->status, ['won', 'refunded'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Latest bid is already finalized and cannot be undone.'
+                'message' => 'No active bids to undo for this player.'
             ], 422);
         }
 

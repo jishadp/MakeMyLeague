@@ -57,10 +57,14 @@
                                                      class="w-full h-full object-cover rounded-3xl"
                                                      onerror="handleImageError(this);">
                                             @else
-                                                <img src="{{ asset('images/defaultplayer.jpeg') }}"
-                                                     alt="Player"
-                                                     class="w-full h-full object-cover rounded-3xl"
-                                                     onerror="handleImageError(this);">
+                                            @php
+                                                $playerPhoto = $currentPlayer->player->photo ?? null;
+                                                $playerPhotoUrl = $playerPhoto ? \\Illuminate\\Support\\Facades\\Storage::url($playerPhoto) : asset('images/defaultplayer.jpeg');
+                                            @endphp
+                                            <img src="{{ $playerPhotoUrl }}"
+                                                 alt="Player"
+                                                 class="w-full h-full object-cover rounded-3xl"
+                                                 onerror="handleImageError(this);">
                                             @endif
                                             <div class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl hidden rounded-3xl">
                                                 {{ strtoupper(substr($currentPlayer->player->name, 0, 1)) }}

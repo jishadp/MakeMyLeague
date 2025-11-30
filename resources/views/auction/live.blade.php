@@ -160,13 +160,21 @@
                     </div>
                     <div class="space-y-4" id="teamsContainer">
                         @foreach($teams as $team)
+                        @php
+                            $teamLogoPath = $team->team->logo ?? null;
+                            $teamLogo = $teamLogoPath ? asset('storage/' . $teamLogoPath) : null;
+                        @endphp
                         <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white/80 hover:shadow-xl transition-shadow duration-300" data-team-card="{{ $team->id }}">
                             <!-- Team Header -->
                             <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
                                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold backdrop-blur-sm">
-                                            {{ strtoupper(substr($team->team->name, 0, 2)) }}
+                                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center font-bold backdrop-blur-sm overflow-hidden">
+                                            @if($teamLogo)
+                                                <img src="{{ $teamLogo }}" alt="{{ $team->team->name }} logo" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'">
+                                            @else
+                                                {{ strtoupper(substr($team->team->name, 0, 2)) }}
+                                            @endif
                                         </div>
                                         <div>
                                             <h3 class="font-bold">{{ $team->team->name }}</h3>
@@ -757,6 +765,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCurrentBid(data);
     });
     
+    function buildPhotoUrl(path) {
+        if (!path) return '/images/defaultplayer.jpeg';
+        if (path.startsWith('http')) return path;
+        if (path.startsWith('/storage/')) return path;
+        return `/storage/${path.replace(/^\\?\//, '')}`;
+    }
+
     function updateCurrentPlayer(data) {
         const playerCard = document.getElementById('currentPlayerCard');
         
@@ -808,7 +823,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8 mb-8">
                         <div class="relative flex-shrink-0 mx-auto sm:mx-0">
                             <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl overflow-hidden bg-white bg-opacity-20 flex items-center justify-center ring-4 ring-blue-200 ring-opacity-50 shadow-2xl">
-                                <img src="${data.player.photo || '/images/defaultplayer.jpeg'}"
+                                <img src="${buildPhotoUrl(data.player.photo)}"
                                      alt="${data.player.name}"
                                      class="w-full h-full object-cover rounded-3xl"
                                      onerror="handleImageError(this);">
