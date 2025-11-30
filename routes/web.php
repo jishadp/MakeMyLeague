@@ -317,7 +317,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('auction')->name('auction.')->group(function () {
         // Global auction management routes (no league parameter needed)
         Route::post('call', [AuctionController::class, 'call'])->name('call');
-        Route::post('undo-bid', [AuctionController::class, 'undoBid'])->name('undo-bid');
         Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
         Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');

@@ -577,7 +577,6 @@
         <input type="hidden" id="controller-default-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
         <input type="hidden" id="controller-bid-increments" value='@json($bidIncrements)'>
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
-        <input type="hidden" id="controller-undo-action" value="{{ route('auction.undo-bid') }}">
         <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
         <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
         <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
@@ -845,11 +844,6 @@
                         Change amount
                     </button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" class="text-xs font-semibold text-rose-500 hover:text-rose-600 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-undo-bid {{ $currentPlayer ? '' : 'disabled' }}>
-                        Undo last bid
-                    </button>
-                </div>
                 <div class="quick-grid">
                     @if($bidIncrementValues->isNotEmpty())
                         <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
@@ -1046,7 +1040,6 @@ function openWhatsAppShare(message) {
     const controllerTeamSelect = document.getElementById('controller-team');
     const controllerDefaultTeam = document.getElementById('controller-default-team');
     const controllerStartAction = document.getElementById('controller-start-action');
-    const controllerUndoAction = document.getElementById('controller-undo-action');
     const playerSearchInput = document.querySelector('[data-controller-player-search]');
     const playerSearchResults = document.getElementById('controller-search-results');
     const randomPlayerButton = document.querySelector('[data-controller-random]');
@@ -1102,7 +1095,6 @@ function openWhatsAppShare(message) {
     const unsoldModal = document.getElementById('controller-unsold-modal');
     const unsoldConfirmButtons = unsoldModal?.querySelectorAll('[data-unsold-confirm]');
     const unsoldCancelButtons = unsoldModal?.querySelectorAll('[data-unsold-cancel]');
-    const undoBidButton = document.querySelector('[data-undo-bid]');
     if (quickJumpStepInput && quickJumpStorageKey) {
         const storedStep = Number(localStorage.getItem(quickJumpStorageKey) || 0);
         if (storedStep > 0) {
@@ -1482,10 +1474,6 @@ function openWhatsAppShare(message) {
         });
     }
 
-    undoBidButton?.addEventListener('click', () => {
-        undoLastBid(undoBidButton);
-    });
-
     if (quickEditButton) {
         quickEditButton.addEventListener('click', () => {
             openQuickRulesModal();
@@ -1747,78 +1735,6 @@ function openWhatsAppShare(message) {
         setTimeout(() => {
             feedback.classList.add('hidden');
         }, 3500);
-    }
-
-    async function undoLastBid(button) {
-        if (!ensurePlayerActive()) {
-            return;
-        }
-        const action = controllerUndoAction?.value;
-        const token = getControllerToken();
-        if (!action || !token) {
-            showControllerMessage('Missing configuration for undo action.', 'error');
-            return;
-        }
-
-        const leaguePlayerId = document.getElementById('controller-league-player-id').value;
-        const originalText = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Undoing...</span>';
-
-        try {
-            const response = await fetch(action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    league_player_id: leaguePlayerId
-                })
-            });
-
-            const data = await response.json().catch(() => ({ success: false }));
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'Unable to undo last bid.');
-            }
-
-            const base = Number(data.current_amount ?? controllerBaseInput?.value ?? 0);
-            if (controllerBaseInput) {
-                controllerBaseInput.value = base;
-            }
-
-            const increment = getQuickIncrement(base);
-            const nextAmount = increment > 0 ? base + increment : base;
-            if (controllerBidInput) {
-                controllerBidInput.value = nextAmount;
-                controllerBidInput.dataset.defaultIncrement = increment;
-            }
-
-            updatePreview(nextAmount);
-            updateQuickButtonLabel();
-            renderJumpTargets();
-            updateSoldButtonLabel(base);
-
-            const bidLabel = document.getElementById('controller-current-bid-label');
-            if (bidLabel) {
-                bidLabel.textContent = formatCurrency(base);
-            }
-
-            if (data.current_team_id) {
-                setTeamSelection(String(data.current_team_id));
-            } else {
-                clearTeamSelection();
-            }
-
-            showControllerMessage('Last bid undone.');
-        } catch (error) {
-            showControllerMessage(error.message || 'Unable to undo last bid.', 'error');
-        } finally {
-            button.disabled = false;
-            button.innerHTML = originalText;
-        }
     }
 
     async function placeControllerBid(button) {

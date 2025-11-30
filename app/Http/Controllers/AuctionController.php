@@ -594,68 +594,6 @@ class AuctionController extends Controller
         ]);
     }
 
-    public function undoBid(Request $request)
-    {
-        $validated = $request->validate([
-            'league_player_id' => ['required', 'integer', 'exists:league_players,id'],
-        ]);
-
-        $leaguePlayer = LeaguePlayer::with('league')->find($validated['league_player_id']);
-        if (!$leaguePlayer) {
-            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
-        }
-
-        if (!auth()->user()?->canManageLeague($leaguePlayer->league_id)) {
-            return response()->json(['success' => false, 'message' => 'Only organizers or admins can undo bids.'], 403);
-        }
-
-        if (in_array($leaguePlayer->status, ['sold', 'unsold'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot undo bids after the player is completed.'
-            ], 422);
-        }
-
-        $lastBid = Auction::where('league_player_id', $leaguePlayer->id)
-            ->where('status', 'ask')
-            ->latest('id')
-            ->first();
-
-        if (!$lastBid) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No active bids to undo for this player.'
-            ], 422);
-        }
-
-        $refundedTeam = null;
-
-        DB::transaction(function () use ($lastBid, &$refundedTeam) {
-            $refundedTeam = LeagueTeam::find($lastBid->league_team_id);
-            if ($refundedTeam) {
-                $refundedTeam->increment('wallet_balance', $lastBid->amount);
-            }
-            $lastBid->update(['status' => 'refunded']);
-        });
-
-        $latestActiveBid = Auction::where('league_player_id', $leaguePlayer->id)
-            ->where('status', 'ask')
-            ->latest('id')
-            ->first();
-
-        $currentAmount = $latestActiveBid?->amount ?? (float) ($leaguePlayer->base_price ?? 0);
-        $currentTeamId = $latestActiveBid?->league_team_id;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Last bid undone successfully.',
-            'current_amount' => $currentAmount,
-            'current_team_id' => $currentTeamId,
-            'refunded_team_id' => $refundedTeam?->id,
-            'refunded_team_wallet' => $refundedTeam?->wallet_balance,
-        ]);
-    }
-
     public function sold(Request $request)
     {
         $validated = $request->validate([
