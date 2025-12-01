@@ -418,6 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function updateFixture(fixtureId, field, value, element = null) {
+    const payloadValue = value === '' ? null : value;
     fetch(`/leagues/{{ $league->slug }}/fixtures/${fixtureId}/update`, {
         method: 'PATCH',
         headers: {
@@ -425,7 +426,7 @@ function updateFixture(fixtureId, field, value, element = null) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({
-            [field]: value
+            [field]: payloadValue
         })
     })
     .then(response => response.json())
