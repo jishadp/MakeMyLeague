@@ -84,19 +84,19 @@
                                 $awayTopBuy = optional($topBoughtByTeam->get($fixture->away_team_id))->first();
                             @endphp
                             <div class="rounded-2xl bg-white text-slate-900 shadow-xl ring-1 ring-slate-100 overflow-hidden">
-                                <div class="bg-gradient-to-r from-emerald-50 via-white to-indigo-50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
+                                <div class="bg-slate-900 text-white px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800">
                                     <div class="flex items-center gap-2">
                                         <span class="h-2 w-2 rounded-full {{ $fixture->status === 'completed' ? 'bg-emerald-400' : ($fixture->status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-slate-300') }}"></span>
-                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-100">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
                                     </div>
-                                    <div class="text-xs text-slate-500 flex items-center gap-2 sm:justify-end">
+                                    <div class="text-xs text-slate-200 flex items-center gap-2 sm:justify-end">
                                         @if($fixture->match_date)
                                             <span>{{ $fixture->match_date->format('M d, H:i') }}</span>
                                         @else
                                             <span>TBD</span>
                                         @endif
                                         @if($fixture->venue)
-                                            <span class="text-slate-400">•</span>
+                                            <span class="text-slate-500">•</span>
                                             <span>{{ $fixture->venue }}</span>
                                         @endif
                                     </div>
@@ -209,52 +209,55 @@
                                         </div>
                                     </div>
 
-                                    <div class="pt-2 sm:pt-0 grid sm:grid-cols-2 gap-3">
-                                        <div class="rounded-xl border border-slate-200 p-3">
-                                            <div class="flex items-center justify-between mb-2">
-                                                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention core</p>
-                                                <span class="text-[11px] text-slate-400">{{ $homeRetention->count() }} players</span>
-                                            </div>
-                                            <div class="flex flex-wrap gap-2">
-                                                @forelse($homeRetention as $player)
-                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
-                                                        <span class="h-6 w-6 rounded-full bg-emerald-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
-                                                            @if($player->player?->photo)
-                                                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
-                                                            @else
-                                                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
-                                                            @endif
-                                                        </span>
-                                                        {{ $player->player?->name ?? 'Player' }}
-                                                    </span>
-                                                @empty
-                                                    <p class="text-xs text-slate-400">No retention players listed.</p>
-                                                @endforelse
-                                            </div>
+                                    @if($homeRetention->count() > 0 || $awayRetention->count() > 0)
+                                        <div class="pt-2 sm:pt-0 grid sm:grid-cols-2 gap-3">
+                                            @if($homeRetention->count() > 0)
+                                                <div class="rounded-xl border border-slate-200 p-3">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention core</p>
+                                                        <span class="text-[11px] text-slate-400">{{ $homeRetention->count() }} players</span>
+                                                    </div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach($homeRetention as $player)
+                                                            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
+                                                                <span class="h-6 w-6 rounded-full bg-emerald-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
+                                                                    @if($player->player?->photo)
+                                                                        <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                                                                    @else
+                                                                        {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
+                                                                    @endif
+                                                                </span>
+                                                                {{ $player->player?->name ?? 'Player' }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if($awayRetention->count() > 0)
+                                                <div class="rounded-xl border border-slate-200 p-3">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention core</p>
+                                                        <span class="text-[11px] text-slate-400">{{ $awayRetention->count() }} players</span>
+                                                    </div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach($awayRetention as $player)
+                                                            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100">
+                                                                <span class="h-6 w-6 rounded-full bg-indigo-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
+                                                                    @if($player->player?->photo)
+                                                                        <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                                                                    @else
+                                                                        {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
+                                                                    @endif
+                                                                </span>
+                                                                {{ $player->player?->name ?? 'Player' }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
-                                        <div class="rounded-xl border border-slate-200 p-3">
-                                            <div class="flex items-center justify-between mb-2">
-                                                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention core</p>
-                                                <span class="text-[11px] text-slate-400">{{ $awayRetention->count() }} players</span>
-                                            </div>
-                                            <div class="flex flex-wrap gap-2">
-                                                @forelse($awayRetention as $player)
-                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-100">
-                                                        <span class="h-6 w-6 rounded-full bg-indigo-200 overflow-hidden flex items-center justify-center text-[10px] font-bold">
-                                                            @if($player->player?->photo)
-                                                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
-                                                            @else
-                                                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 1)) }}
-                                                            @endif
-                                                        </span>
-                                                        {{ $player->player?->name ?? 'Player' }}
-                                                    </span>
-                                                @empty
-                                                    <p class="text-xs text-slate-400">No retention players listed.</p>
-                                                @endforelse
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
