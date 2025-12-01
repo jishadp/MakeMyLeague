@@ -466,29 +466,31 @@ function updateFixture(fixtureId, field, value, element = null) {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
             [field]: payloadValue
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            if (element) {
-                const originalBorder = element.className;
-                element.className = element.className.replace('border-gray-300', 'border-green-500');
-                setTimeout(() => {
-                    element.className = originalBorder;
-                }, 1000);
-            }
-        } else {
-            alert('Error updating fixture: ' + data.message);
+    .then(async response => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.success) {
+            const message = data?.message || 'Unable to update fixture.';
+            throw new Error(message);
+        }
+        if (element) {
+            const originalBorder = element.className;
+            element.className = element.className.replace('border-gray-300', 'border-green-500');
+            setTimeout(() => {
+                element.className = originalBorder;
+            }, 1000);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating the fixture.');
+        alert(error.message || 'An error occurred while updating the fixture.');
     });
 }
 
@@ -562,28 +564,30 @@ function saveFixtureRow(fixtureSlug) {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
+        credentials: 'same-origin',
         body: JSON.stringify({
             match_date,
             match_time,
             venue
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            row.classList.add('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
-            setTimeout(() => {
-                row.classList.remove('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
-            }, 1200);
-        } else {
-            alert('Error updating fixture: ' + data.message);
+    .then(async response => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || !data.success) {
+            const message = data?.message || 'Unable to update fixture.';
+            throw new Error(message);
         }
+        row.classList.add('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
+        setTimeout(() => {
+            row.classList.remove('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
+        }, 1200);
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating the fixture.');
+        alert(error.message || 'An error occurred while updating the fixture.');
     });
 }
 </script>
