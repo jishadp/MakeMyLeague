@@ -84,12 +84,12 @@
                                 $awayTopBuy = optional($topBoughtByTeam->get($fixture->away_team_id))->first();
                             @endphp
                             <div class="rounded-2xl bg-white text-slate-900 shadow-xl ring-1 ring-slate-100 overflow-hidden">
-                                <div class="bg-gradient-to-r from-emerald-50 via-white to-indigo-50 px-4 py-3 flex items-center justify-between border-b border-slate-100">
+                                <div class="bg-gradient-to-r from-emerald-50 via-white to-indigo-50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
                                     <div class="flex items-center gap-2">
                                         <span class="h-2 w-2 rounded-full {{ $fixture->status === 'completed' ? 'bg-emerald-400' : ($fixture->status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-slate-300') }}"></span>
                                         <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
                                     </div>
-                                    <div class="text-xs text-slate-500 flex items-center gap-2">
+                                    <div class="text-xs text-slate-500 flex items-center gap-2 sm:justify-end">
                                         @if($fixture->match_date)
                                             <span>{{ $fixture->match_date->format('M d, H:i') }}</span>
                                         @else
@@ -102,8 +102,55 @@
                                     </div>
                                 </div>
 
-                                <div class="p-4 sm:p-6">
-                                    <div class="grid sm:grid-cols-5 gap-4 sm:gap-6 items-center">
+                                <div class="p-4 sm:p-6 space-y-4">
+                                    @php $hasScore = $fixture->home_score !== null || $fixture->away_score !== null; @endphp
+
+                                    <div class="sm:hidden flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
+                                                @if($fixture->homeTeam->team->logo)
+                                                    <img src="{{ Storage::url($fixture->homeTeam->team->logo) }}" alt="{{ $fixture->homeTeam->team->name }} Logo" class="w-full h-full object-cover">
+                                                @else
+                                                    {{ strtoupper(substr($fixture->homeTeam->team->name, 0, 2)) }}
+                                                @endif
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $fixture->homeTeam->team->name }}</p>
+                                                <p class="text-[11px] text-slate-500">Home</p>
+                                                @if($homeTopBuy)
+                                                    <p class="text-[11px] text-emerald-700 font-semibold truncate mt-1">Top buy: {{ $homeTopBuy->player->name ?? 'Player' }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-col items-center flex-shrink-0 text-center">
+                                            @if($hasScore)
+                                                <div class="text-xl font-black text-slate-900">{{ $fixture->home_score ?? 0 }} - {{ $fixture->away_score ?? 0 }}</div>
+                                            @else
+                                                <div class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">VS</div>
+                                            @endif
+                                            <p class="text-[10px] text-slate-500 mt-1">Head-to-head</p>
+                                        </div>
+
+                                        <div class="flex items-center gap-2 min-w-0 justify-end text-right">
+                                            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
+                                                @if($fixture->awayTeam->team->logo)
+                                                    <img src="{{ Storage::url($fixture->awayTeam->team->logo) }}" alt="{{ $fixture->awayTeam->team->name }} Logo" class="w-full h-full object-cover">
+                                                @else
+                                                    {{ strtoupper(substr($fixture->awayTeam->team->name, 0, 2)) }}
+                                                @endif
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $fixture->awayTeam->team->name }}</p>
+                                                <p class="text-[11px] text-slate-500">Away</p>
+                                                @if($awayTopBuy)
+                                                    <p class="text-[11px] text-indigo-700 font-semibold truncate mt-1">Top buy: {{ $awayTopBuy->player->name ?? 'Player' }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="hidden sm:grid sm:grid-cols-5 gap-4 sm:gap-6 items-center">
                                         <div class="sm:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3">
                                             <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-lg overflow-hidden">
                                                 @if($fixture->homeTeam->team->logo)
@@ -129,7 +176,7 @@
                                         </div>
 
                                         <div class="text-center">
-                                            @if($fixture->home_score !== null || $fixture->away_score !== null)
+                                            @if($hasScore)
                                                 <div class="text-3xl font-black text-slate-900">{{ $fixture->home_score ?? 0 }} - {{ $fixture->away_score ?? 0 }}</div>
                                             @else
                                                 <div class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">VS</div>
@@ -162,7 +209,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="mt-4 grid sm:grid-cols-2 gap-3">
+                                    <div class="pt-2 sm:pt-0 grid sm:grid-cols-2 gap-3">
                                         <div class="rounded-xl border border-slate-200 p-3">
                                             <div class="flex items-center justify-between mb-2">
                                                 <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention core</p>
