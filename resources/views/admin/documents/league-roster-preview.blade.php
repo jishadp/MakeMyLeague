@@ -272,15 +272,28 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $isWideLayout ? '' : ($isFiveByFive ? '' : 'sm:grid-cols-2') }} {{ $isFiveByFive ? 'text-center' : '' }}">
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Place</p>
-                                    <p class="font-semibold">{{ $player['place'] }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Phone</p>
-                                    <p class="font-semibold">{{ $player['phone'] }}</p>
-                                </div>
+                            @php
+                                $metaGridClass = (!$isWideLayout && !$isFiveByFive && $showLocation && $showMobile) ? 'sm:grid-cols-2' : '';
+                            @endphp
+                            <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $metaGridClass }} {{ $isFiveByFive ? 'text-center' : '' }}">
+                                @if($showLocation)
+                                    <div>
+                                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Place</p>
+                                        <p class="font-semibold">{{ $player['place'] }}</p>
+                                    </div>
+                                @endif
+                                @if($showMobile)
+                                    <div>
+                                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Phone</p>
+                                        <p class="font-semibold">{{ $player['phone'] }}</p>
+                                    </div>
+                                @endif
+                                @if(!$showLocation && !$showMobile)
+                                    <div>
+                                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Contacts</p>
+                                        <p class="font-semibold text-slate-500">Hidden for this export</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endforeach

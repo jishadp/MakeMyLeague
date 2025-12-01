@@ -89,6 +89,32 @@
                     >
                     <p class="text-xs text-slate-500 mt-2">Use a compact title for the roster preview and PDF if the full name is too long.</p>
                 </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Show Mobile</label>
+                    <div class="flex items-center gap-2 text-sm text-slate-700">
+                        <label class="inline-flex items-center gap-1">
+                            <input type="radio" name="show_mobile" value="1" @checked(($rosterFilters['show_mobile'] ?? '1') === '1') class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Show</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1">
+                            <input type="radio" name="show_mobile" value="0" @checked(($rosterFilters['show_mobile'] ?? '1') === '0') class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hide</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Show Location</label>
+                    <div class="flex items-center gap-2 text-sm text-slate-700">
+                        <label class="inline-flex items-center gap-1">
+                            <input type="radio" name="show_location" value="1" @checked(($rosterFilters['show_location'] ?? '1') === '1') class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Show</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1">
+                            <input type="radio" name="show_location" value="0" @checked(($rosterFilters['show_location'] ?? '1') === '0') class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hide</span>
+                        </label>
+                    </div>
+                </div>
                 <div class="md:col-span-2 flex flex-col gap-3 md:flex-row md:justify-end">
                     <button type="submit"
                         formaction="{{ route('admin.documents.leagues.preview') }}"

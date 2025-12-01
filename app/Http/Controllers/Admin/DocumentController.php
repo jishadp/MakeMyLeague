@@ -39,6 +39,8 @@ class DocumentController extends Controller
                 'retention_filter' => $request->input('retention_filter', 'all'),
                 'league_id' => $request->input('league_id'),
                 'league_short_name' => $request->input('league_short_name', ''),
+                'show_mobile' => $request->input('show_mobile', '1'),
+                'show_location' => $request->input('show_location', '1'),
             ],
         ]);
     }
@@ -94,6 +96,8 @@ class DocumentController extends Controller
             'league_id' => $payload['filters']['league_id'] ?? null,
             'retention_filter' => $payload['filters']['retention_filter'] ?? null,
             'league_short_name' => $payload['filters']['league_short_name'] ?? null,
+            'show_mobile' => $payload['filters']['show_mobile'] ?? null,
+            'show_location' => $payload['filters']['show_location'] ?? null,
         ], fn ($value) => filled($value));
 
         return view('admin.documents.league-roster-preview', array_merge($payload, [
@@ -138,6 +142,8 @@ class DocumentController extends Controller
             'search' => ['nullable', 'string', 'max:255'],
             'retention_filter' => ['nullable', Rule::in(array_keys($this->retentionFilterOptions()))],
             'league_short_name' => ['nullable', 'string', 'max:80'],
+            'show_mobile' => ['nullable', 'boolean'],
+            'show_location' => ['nullable', 'boolean'],
         ]);
 
         $leagueId = $validated['league_id'] ?? null;
@@ -147,6 +153,12 @@ class DocumentController extends Controller
             ? trim((string) $validated['league_short_name'])
             : null;
         $leagueShortName = $leagueShortName === '' ? null : $leagueShortName;
+        $showMobile = array_key_exists('show_mobile', $validated)
+            ? (bool) $validated['show_mobile']
+            : true;
+        $showLocation = array_key_exists('show_location', $validated)
+            ? (bool) $validated['show_location']
+            : true;
 
         $playerQuery = LeaguePlayer::query()
             ->with([
@@ -194,11 +206,15 @@ class DocumentController extends Controller
             'searchTerm' => $search,
             'playerCount' => $rosterEntries->count(),
             'leagueBadge' => $leagueBadge,
+            'showMobile' => $showMobile,
+            'showLocation' => $showLocation,
             'filters' => [
                 'league_id' => $leagueId,
                 'search' => $search,
                 'retention_filter' => $retentionFilter,
                 'league_short_name' => $leagueShortName,
+                'show_mobile' => $showMobile ? '1' : '0',
+                'show_location' => $showLocation ? '1' : '0',
             ],
         ];
     }

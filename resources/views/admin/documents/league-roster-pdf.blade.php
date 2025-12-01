@@ -209,14 +209,24 @@
                 </div>
             </div>
             <div class="card-body">
-                <div>
-                    <p class="label">Place</p>
-                    <p class="value">{{ $player['place'] }}</p>
-                </div>
-                <div>
-                    <p class="label">Phone</p>
-                    <p class="value">{{ $player['phone'] }}</p>
-                </div>
+                @if($showLocation)
+                    <div>
+                        <p class="label">Place</p>
+                        <p class="value">{{ $player['place'] }}</p>
+                    </div>
+                @endif
+                @if($showMobile)
+                    <div>
+                        <p class="label">Phone</p>
+                        <p class="value">{{ $player['phone'] }}</p>
+                    </div>
+                @endif
+                @if(!$showLocation && !$showMobile)
+                    <div>
+                        <p class="label">Contacts</p>
+                        <p class="value">Hidden for this export</p>
+                    </div>
+                @endif
             </div>
         </div>
     @empty
