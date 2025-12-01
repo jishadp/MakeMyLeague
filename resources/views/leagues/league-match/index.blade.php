@@ -563,8 +563,8 @@ function saveGroups() {
         }
     });
     
-    if (groups.length < 2) {
-        alert('Please create at least 2 groups with teams assigned.');
+    if (groups.length < 1) {
+        alert('Please create at least 1 group with teams assigned.');
         return;
     }
     
@@ -767,7 +767,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Only add default groups if no existing groups
     const existingGroups = {{ $existingGroups->count() }};
     if (existingGroups === 0) {
-        addGroup();
         addGroup();
     } else {
         // Show existing groups display by default
