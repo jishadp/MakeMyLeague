@@ -38,24 +38,33 @@
             </div>
 
             @if(isset($topBoughtOverall) && $topBoughtOverall->count() > 0)
-            <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach($topBoughtOverall as $player)
-                    <div class="rounded-2xl bg-white border border-slate-100 p-4 flex items-center gap-4 shadow-sm">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-indigo-400 flex items-center justify-center text-lg font-bold text-white overflow-hidden shadow-sm">
-                            @if($player->player?->photo)
-                                <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
-                            @else
-                                {{ strtoupper(substr($player->player->name ?? 'P', 0, 2)) }}
-                            @endif
+            <div class="mt-8">
+                <button id="toggle-top-buys" type="button" class="w-full inline-flex items-center justify-between px-4 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-semibold text-slate-800">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M12 5l7 7-7 7"></path></svg>
+                        Top buys
+                    </span>
+                    <span id="top-buys-toggle-icon" class="text-slate-500 text-xs">Show</span>
+                </button>
+                <div id="top-buys-panel" class="hidden pt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($topBoughtOverall as $player)
+                        <div class="rounded-2xl bg-white border border-slate-100 p-4 flex items-center gap-4 shadow-sm">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-indigo-400 flex items-center justify-center text-lg font-bold text-white overflow-hidden shadow-sm">
+                                @if($player->player?->photo)
+                                    <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
+                                @else
+                                    {{ strtoupper(substr($player->player->name ?? 'P', 0, 2)) }}
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-slate-900 break-words">{{ $player->player->name ?? 'Player' }}</p>
+                                <p class="text-xs text-slate-600 break-words">{{ $player->player?->position?->name ?? 'Role' }} • ₹{{ number_format($player->bid_price ?? 0) }}</p>
+                                <p class="text-[11px] text-emerald-700 break-words">{{ $player->leagueTeam?->team?->name }}</p>
+                            </div>
+                            <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Top Buy</span>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-slate-900">{{ $player->player->name ?? 'Player' }}</p>
-                            <p class="text-xs text-slate-600">{{ $player->player?->position?->name ?? 'Role' }} • ₹{{ number_format($player->bid_price ?? 0) }}</p>
-                            <p class="text-[11px] text-emerald-700">{{ $player->leagueTeam?->team?->name }}</p>
-                        </div>
-                        <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Top Buy</span>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
             @endif
         </div>
@@ -115,10 +124,10 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $fixture->homeTeam->team->name }}</p>
+                                                <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->homeTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Home</p>
                                                 @if($homeTopBuy)
-                                                    <p class="text-[11px] text-emerald-700 font-semibold truncate mt-1">Top buy: {{ $homeTopBuy->player->name ?? 'Player' }}</p>
+                                                    <p class="text-[11px] text-emerald-700 font-semibold mt-1 leading-snug break-words">Top buy: {{ $homeTopBuy->player->name ?? 'Player' }}</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -141,10 +150,10 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $fixture->awayTeam->team->name }}</p>
+                                                <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->awayTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Away</p>
                                                 @if($awayTopBuy)
-                                                    <p class="text-[11px] text-indigo-700 font-semibold truncate mt-1">Top buy: {{ $awayTopBuy->player->name ?? 'Player' }}</p>
+                                                    <p class="text-[11px] text-indigo-700 font-semibold mt-1 leading-snug break-words">Top buy: {{ $awayTopBuy->player->name ?? 'Player' }}</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -282,3 +291,21 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('toggle-top-buys');
+    const panel = document.getElementById('top-buys-panel');
+    const icon = document.getElementById('top-buys-toggle-icon');
+
+    if (toggleBtn && panel && icon) {
+        toggleBtn.addEventListener('click', () => {
+            const isHidden = panel.classList.contains('hidden');
+            panel.classList.toggle('hidden');
+            icon.textContent = isHidden ? 'Hide' : 'Show';
+        });
+    }
+});
+</script>
+@endpush

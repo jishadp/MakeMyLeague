@@ -355,9 +355,11 @@ Route::middleware('auth')->group(function () {
         Route::post('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'createFixture'])->name('fixtures.create');
         Route::patch('fixtures/{fixture}/update', [\App\Http\Controllers\LeagueMatchController::class, 'updateFixture'])->name('fixtures.update');
         Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
-        Route::get('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('fixtures');
     });
 });
+
+// Public fixtures viewing
+Route::get('leagues/{league}/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('leagues.fixtures');
 
 // API route for local bodies by district
 Route::get('api/local-bodies', [RegisterController::class, 'getLocalBodiesByDistrict'])->name('api.local-bodies');
