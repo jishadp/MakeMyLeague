@@ -131,15 +131,30 @@
     }
     .team-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 0.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
     }
     .control-card--wide {
         grid-column: 1 / -1;
     }
     @media (max-width: 640px) {
         .team-grid {
-            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+    }
+    @media (min-width: 720px) {
+        .team-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (min-width: 960px) {
+        .team-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+    @media (min-width: 1240px) {
+        .team-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
     }
     .round-table {
