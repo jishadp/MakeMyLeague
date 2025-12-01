@@ -125,6 +125,80 @@
             grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         }
     }
+    .round-table {
+        position: relative;
+        border-radius: 1.5rem;
+        border: 1px solid #e2e8f0;
+        background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f8fafc 55%, #e2e8f0 100%);
+        padding: 1rem;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06) inset, 0 18px 36px rgba(15, 23, 42, 0.06);
+    }
+    .round-table__orbit {
+        --seat-radius: clamp(150px, 38vw, 280px);
+        position: relative;
+        margin: 0 auto;
+        max-width: 860px;
+        aspect-ratio: 1 / 1;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        isolation: isolate;
+    }
+    .round-table__halo {
+        position: absolute;
+        inset: 12%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.02));
+        box-shadow:
+            0 0 0 1px rgba(99, 102, 241, 0.08),
+            0 12px 26px rgba(15, 23, 42, 0.08),
+            0 28px 60px rgba(15, 23, 42, 0.05);
+        z-index: 0;
+    }
+    .round-table__center {
+        position: relative;
+        z-index: 2;
+        padding: 1rem 1.25rem;
+        width: 48%;
+        max-width: 280px;
+        text-align: center;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #e2e8f0;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.22);
+    }
+    .round-table__legend {
+        margin-top: 0.6rem;
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        font-size: 11px;
+    }
+    .round-table__legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f8fafc;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .round-table__seat {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: rotate(var(--seat-angle)) translate(var(--seat-radius)) rotate(var(--seat-angle-rev));
+        transform-origin: center;
+        width: 160px;
+        z-index: 1;
+        transition: transform 0.2s ease;
+    }
+    .round-table__seat:hover {
+        transform: rotate(var(--seat-angle)) translate(calc(var(--seat-radius) + 6px)) rotate(var(--seat-angle-rev));
+    }
     .team-pill {
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
@@ -137,6 +211,13 @@
         display: flex;
         flex-direction: column;
         gap: 0.3rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .team-pill--round {
+        text-align: center;
+        align-items: center;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #ffffff, #f8fafc);
     }
     .team-pill.active {
         border-color: #10b981;
@@ -158,6 +239,11 @@
         justify-content: space-between;
         gap: 0.4rem;
     }
+    .team-pill--round .team-pill__header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
     .team-pill__name {
         font-size: 12px;
         font-weight: 700;
@@ -165,6 +251,19 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         line-height: 1.1;
+    }
+    .team-pill__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 11px;
+        font-weight: 700;
+        color: #0f172a;
+        padding: 0.3rem 0.65rem;
+        background: #e0e7ff;
+        border-radius: 999px;
+        border: 1px solid #c7d2fe;
+        box-shadow: 0 6px 12px rgba(99, 102, 241, 0.12);
     }
     .team-pill__wallet {
         text-align: right;
@@ -176,6 +275,42 @@
         font-size: 11px;
         line-height: 1.2;
         color: #475569;
+    }
+    .team-pill--round .team-pill__wallet,
+    .team-pill--round .team-pill__meta {
+        text-align: center;
+    }
+    .round-table__subtitle {
+        margin-top: 0.75rem;
+        text-align: center;
+        font-size: 12px;
+        color: #475569;
+    }
+    @media (max-width: 1024px) {
+        .round-table__orbit {
+            aspect-ratio: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.65rem;
+            padding: 0.35rem;
+        }
+        .round-table__halo {
+            display: none;
+        }
+        .round-table__center {
+            width: 100%;
+            max-width: none;
+            border-radius: 1rem;
+            margin-bottom: 0.35rem;
+        }
+        .round-table__seat {
+            position: static;
+            transform: none;
+            width: 100%;
+        }
+        .round-table__seat:hover {
+            transform: none;
+        }
     }
     .hidden {
         display: none !important;
@@ -776,55 +911,71 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-slate-600">Choose Team</p>
-                        <p class="text-xs text-slate-500">Tap to assign the bid target.</p>
+                        <p class="text-xs text-slate-500">Seat them around the table and tap to assign the bid target.</p>
                     </div>
                     <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
                 </div>
                 <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
                 @php
                     $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
+                    $teamCount = max($teams->count(), 1);
         @endphp
-                <div class="team-grid">
-                    @foreach($teams as $team)
-                        @php
-                            $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
-                            $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
-                        @endphp
-                        <button type="button"
-                            class="team-pill {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
-                            data-team-pill="{{ $team->id }}"
-                            data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
-                            data-team-reserve="{{ $team->reserve_amount }}"
-                            data-team-max="{{ $team->max_bid_cap }}"
-                            data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
-                            data-team-needed="{{ $team->players_needed }}"
-                            data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
-                            data-team-details="{{ json_encode([
-                                'players' => $team->sold_players_count,
-                                'retained' => $team->retained_players_count ?? 0,
-                                'wallet' => number_format($team->display_wallet ?? $team->wallet_balance ?? 0),
-                                'needs' => $team->players_needed,
-                                'reserve' => number_format($team->reserve_amount),
-                                'max' => number_format($team->max_bid_cap)
-                            ]) }}"
-                            {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
-                            <div class="team-pill__header">
-                                <div>
-                                    <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
-                                        {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
-                                    </p>
-                                    <p class="text-[11px] font-semibold text-slate-700">₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
-                                    <p class="text-[10px] text-slate-400">Wallet</p>
-                                </div>
-                                @if($teamDisabled)
-                                    <span class="text-[10px] font-semibold text-rose-500">Cap ₹{{ number_format($teamMaxBid) }}</span>
-                                @endif
+                <div class="round-table">
+                    <div class="round-table__orbit">
+                        <div class="round-table__halo"></div>
+                        <div class="round-table__center">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100/80 mb-1">Seat Map</p>
+                            <p class="text-sm font-semibold text-white">{{ $league->name }}</p>
+                            <p class="text-[11px] text-indigo-100/90">Clockwise order mirrors your table layout.</p>
+                            <div class="round-table__legend">
+                                <span><span class="w-2 h-2 rounded-full bg-emerald-400 block"></span>Active seat</span>
+                                <span><span class="w-2 h-2 rounded-full bg-slate-200 block"></span>Available</span>
+                                <span><span class="w-2 h-2 rounded-full bg-rose-300 block"></span>Wallet capped</span>
                             </div>
-                            <p class="team-pill__meta">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
-                            <p class="team-pill__meta text-indigo-600 font-semibold">Max ₹{{ number_format($team->max_bid_cap) }}</p>
-                            <div class="team-pill__details" data-team-details-panel></div>
-                        </button>
-                    @endforeach
+                        </div>
+                        @foreach($teams as $team)
+                            @php
+                                $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
+                                $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
+                                $seatAngle = (($loop->index / $teamCount) * 360) - 90;
+                            @endphp
+                            <div class="round-table__seat" style="--seat-angle: {{ $seatAngle }}deg; --seat-angle-rev: -{{ $seatAngle }}deg;">
+                                <button type="button"
+                                    class="team-pill team-pill--round {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
+                                    data-team-pill="{{ $team->id }}"
+                                    data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
+                                    data-team-reserve="{{ $team->reserve_amount }}"
+                                    data-team-max="{{ $team->max_bid_cap }}"
+                                    data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
+                                    data-team-needed="{{ $team->players_needed }}"
+                                    data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
+                                    data-team-details="{{ json_encode([
+                                        'players' => $team->sold_players_count,
+                                        'retained' => $team->retained_players_count ?? 0,
+                                        'wallet' => number_format($team->display_wallet ?? $team->wallet_balance ?? 0),
+                                        'needs' => $team->players_needed,
+                                        'reserve' => number_format($team->reserve_amount),
+                                        'max' => number_format($team->max_bid_cap)
+                                    ]) }}"
+                                    {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
+                                    <span class="team-pill__badge">Seat {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <div class="team-pill__header">
+                                        <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
+                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
+                                        </p>
+                                        <p class="text-[11px] font-semibold text-slate-700">Wallet ₹{{ number_format($team->display_wallet ?? $team->wallet_balance ?? 0) }}</p>
+                                        @if($teamDisabled)
+                                            <span class="text-[10px] font-semibold text-rose-500">Cap ₹{{ number_format($teamMaxBid) }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="team-pill__meta">Needs {{ $team->players_needed }} • Reserve ₹{{ number_format($team->reserve_amount) }}</p>
+                                    <p class="team-pill__meta text-indigo-600 font-semibold">Max ₹{{ number_format($team->max_bid_cap) }}</p>
+                                    <div class="team-pill__details" data-team-details-panel></div>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="round-table__subtitle">Order runs clockwise from the top seat. Tap any team to lock in the bidder.</p>
                 </div>
             </div>
 

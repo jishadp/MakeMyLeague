@@ -191,7 +191,18 @@ class DocumentController extends Controller
         $leaguePlayers = $playerQuery
             ->orderBy('created_at')
             ->orderBy('id')
-            ->get();
+            ->get()
+            ->sortBy(function (LeaguePlayer $leaguePlayer) {
+                $teamName = optional(optional($leaguePlayer->leagueTeam)->team)->name;
+                $playerName = $leaguePlayer->player->name ?? '';
+
+                return [
+                    $teamName ? 0 : 1, // Team-assigned players first
+                    Str::lower($teamName ?? ''), // Sort by team name
+                    Str::lower($playerName), // Then by player name
+                ];
+            })
+            ->values();
 
         $rosterEntries = $this->buildLeagueRosterEntries($leaguePlayers, $leagueShortName, $leagueId);
         $league = $leagueId ? League::find($leagueId) : null;

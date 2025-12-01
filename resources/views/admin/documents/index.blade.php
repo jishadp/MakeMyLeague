@@ -67,7 +67,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-slate-500">Exports players that match the active search &amp; league filters, ordered by league join date.</p>
+                    <p class="text-xs text-slate-500">Exports players that match the active search &amp; league filters, sorted by team (then player name).</p>
                 </div>
                 <div class="lg:col-span-4 space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Retention Filter</label>
@@ -78,7 +78,7 @@
                     </select>
                     <div class="flex flex-wrap gap-2 text-xs text-slate-500">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">Applied to preview &amp; PDF</span>
-                        <span>Serial numbers follow join date.</span>
+                        <span>Serial numbers follow team/name order.</span>
                     </div>
                 </div>
                 <div class="lg:col-span-3 space-y-2">
