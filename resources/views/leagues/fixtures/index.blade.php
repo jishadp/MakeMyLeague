@@ -3,34 +3,34 @@
 @section('title', 'Fixtures - ' . $league->name)
 
 @section('content')
-<div class="bg-slate-950 text-white">
+<div class="bg-slate-50 text-slate-900">
     <div class="relative overflow-hidden">
-        <div class="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_20%,#22c55e,transparent_25%),radial-gradient(circle_at_80%_0%,#6366f1,transparent_25%),radial-gradient(circle_at_30%_80%,#14b8a6,transparent_20%)]"></div>
+        <div class="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_20%_20%,#d8eaff,transparent_32%),radial-gradient(circle_at_80%_0%,#e7ecff,transparent_30%),radial-gradient(circle_at_30%_80%,#e4f5ff,transparent_28%)]"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-12 relative z-10">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div>
                     <div class="flex items-center gap-3">
                         @if($league->logo)
-                            <div class="w-12 h-12 rounded-2xl bg-white/20 border border-white/40 overflow-hidden">
+                            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
                                 <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }} Logo" class="w-full h-full object-cover">
                             </div>
                         @endif
                         <div>
-                            <p class="uppercase tracking-[0.18em] text-xs font-semibold text-green-200/80">Season {{ $league->season }}</p>
-                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">{{ $league->name }} Fixtures</h1>
+                            <p class="uppercase tracking-[0.18em] text-xs font-semibold text-sky-700/80">Season {{ $league->season }}</p>
+                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-slate-900">{{ $league->name }} Fixtures</h1>
                         </div>
                     </div>
-                    <p class="text-green-100/80 mt-2 text-sm sm:text-base">Group breakdown, head-to-head cards with retention cores, and marquee buys.</p>
-                    <div class="flex items-center gap-3 mt-4 text-xs text-green-100/70">
-                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Live squads locked in
+                    <p class="text-slate-600 mt-2 text-sm sm:text-base">Clean, mobile-first fixtures list with quick context and marquee buys.</p>
+                    <div class="flex items-center gap-3 mt-4 text-xs text-slate-600">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-slate-200 shadow-sm text-slate-700">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Squads locked in
                         </span>
-                        <a href="{{ route('leagues.show', $league) }}" class="underline decoration-dotted underline-offset-4 hover:text-white">Back to league</a>
+                        <a href="{{ route('leagues.show', $league) }}" class="underline decoration-dotted underline-offset-4 text-slate-700 hover:text-slate-900">Back to league</a>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('leagues.fixtures.pdf', $league) }}" class="inline-flex items-center px-4 py-2.5 bg-white/10 backdrop-blur border border-white/20 rounded-xl text-sm font-semibold hover:bg-white/15">
+                    <a href="{{ route('leagues.fixtures.pdf', $league) }}" class="inline-flex items-center px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 hover:border-slate-300 shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Download PDF
                     </a>
@@ -40,8 +40,8 @@
             @if(isset($topBoughtOverall) && $topBoughtOverall->count() > 0)
             <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach($topBoughtOverall as $player)
-                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-indigo-500 flex items-center justify-center text-lg font-bold text-slate-900 overflow-hidden">
+                    <div class="rounded-2xl bg-white border border-slate-100 p-4 flex items-center gap-4 shadow-sm">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-indigo-400 flex items-center justify-center text-lg font-bold text-white overflow-hidden shadow-sm">
                             @if($player->player?->photo)
                                 <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
                             @else
@@ -49,11 +49,11 @@
                             @endif
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-white">{{ $player->player->name ?? 'Player' }}</p>
-                            <p class="text-xs text-white/70">{{ $player->player?->position?->name ?? 'Role' }} • ₹{{ number_format($player->bid_price ?? 0) }}</p>
-                            <p class="text-[11px] text-emerald-200/90">{{ $player->leagueTeam?->team?->name }}</p>
+                            <p class="text-sm font-semibold text-slate-900">{{ $player->player->name ?? 'Player' }}</p>
+                            <p class="text-xs text-slate-600">{{ $player->player?->position?->name ?? 'Role' }} • ₹{{ number_format($player->bid_price ?? 0) }}</p>
+                            <p class="text-[11px] text-emerald-700">{{ $player->leagueTeam?->team?->name }}</p>
                         </div>
-                        <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/30">Top Buy</span>
+                        <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Top Buy</span>
                     </div>
                 @endforeach
             </div>
@@ -67,10 +67,10 @@
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <p class="text-xs uppercase tracking-[0.2em] text-white/60">Group</p>
-                            <h2 class="text-2xl font-bold">{{ $groupName }}</h2>
+                            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Group</p>
+                            <h2 class="text-2xl font-bold text-slate-900">{{ $groupName }}</h2>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-white/80">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 shadow-sm">
                             {{ $groupFixtures->count() }} {{ Str::plural('Match', $groupFixtures->count()) }}
                         </span>
                     </div>
@@ -84,19 +84,19 @@
                                 $awayTopBuy = optional($topBoughtByTeam->get($fixture->away_team_id))->first();
                             @endphp
                             <div class="rounded-2xl bg-white text-slate-900 shadow-xl ring-1 ring-slate-100 overflow-hidden">
-                                <div class="bg-slate-900 text-white px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800">
+                                <div class="bg-gradient-to-r from-white to-sky-50 text-slate-700 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100">
                                     <div class="flex items-center gap-2">
-                                        <span class="h-2 w-2 rounded-full {{ $fixture->status === 'completed' ? 'bg-emerald-400' : ($fixture->status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-slate-300') }}"></span>
-                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-100">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
+                                        <span class="h-2 w-2 rounded-full {{ $fixture->status === 'completed' ? 'bg-emerald-500' : ($fixture->status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-slate-300') }}"></span>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
                                     </div>
-                                    <div class="text-xs text-slate-200 flex items-center gap-2 sm:justify-end">
+                                    <div class="text-xs text-slate-600 flex items-center gap-2 sm:justify-end">
                                         @if($fixture->match_date)
                                             <span>{{ $fixture->match_date->format('M d, H:i') }}</span>
                                         @else
                                             <span>TBD</span>
                                         @endif
                                         @if($fixture->venue)
-                                            <span class="text-slate-500">•</span>
+                                            <span class="text-slate-400">•</span>
                                             <span>{{ $fixture->venue }}</span>
                                         @endif
                                     </div>
@@ -265,14 +265,14 @@
                 </div>
             @endforeach
         @else
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-10 text-center">
-                <div class="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div class="bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-sm">
+                <div class="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-white text-2xl font-bold mb-2">No Fixtures Yet</h3>
-                <p class="text-white/70 text-sm mb-4">Generate fixtures to showcase groups, retention cores, and marquee signings.</p>
+                <h3 class="text-slate-900 text-2xl font-bold mb-2">No Fixtures Yet</h3>
+                <p class="text-slate-600 text-sm mb-4">Generate fixtures to showcase groups, retention cores, and marquee signings.</p>
                 @if(auth()->user()->isOrganizer() && $league->user_id === auth()->id())
-                    <a href="{{ route('leagues.tournament-setup', $league) }}" class="inline-flex items-center px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl transition">
+                    <a href="{{ route('leagues.tournament-setup', $league) }}" class="inline-flex items-center px-5 py-3 rounded-xl bg-sky-500 text-white font-semibold shadow-md hover:shadow-lg transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         Setup Tournament
                     </a>
