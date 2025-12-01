@@ -817,13 +817,13 @@
     }
     .control-board {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1rem;
         align-items: start;
     }
     @media (max-width: 1200px) {
         .control-board {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         }
     }
     @media (max-width: 900px) {
@@ -1104,9 +1104,11 @@
                         <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
                             Sold
                         </button>
-                        <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                            Unsold
-                        </button>
+                        @unless($currentHighestBid)
+                            <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                                Unsold
+                            </button>
+                        @endunless
                     </div>
                     <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
                 </div>
@@ -2396,6 +2398,7 @@ function openWhatsAppShare(message) {
         const finalAmount = Number(overrideAmount || currentBidAmount);
         const teamMaxCap = Number(teamButton?.dataset.teamMax || 0);
         const teamWalletBalance = Number(teamButton?.dataset.teamWallet || 0);
+        const teamName = teamButton?.dataset.teamName || 'Selected team';
 
         if (!finalAmount || finalAmount < playerBasePrice) {
             showControllerMessage('Bid amount is below base price.', 'error');
@@ -2409,6 +2412,11 @@ function openWhatsAppShare(message) {
 
         if (!Number.isNaN(teamWalletBalance) && finalAmount > teamWalletBalance) {
             showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
+            return;
+        }
+
+        const confirmMessage = `Confirm sale?\n\nTeam: ${teamName}\nAmount: ${formatCurrency(finalAmount)}`;
+        if (!window.confirm(confirmMessage)) {
             return;
         }
 
