@@ -74,6 +74,19 @@ class WelcomeController extends Controller
             ->take(6)
             ->get();
 
+        $upcomingFixtures = Fixture::with([
+                'league',
+                'homeTeam.team',
+                'awayTeam.team',
+                'leagueGroup',
+            ])
+            ->where('status', 'scheduled')
+            ->whereDate('match_date', '>=', now()->toDateString())
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->take(6)
+            ->get();
+
         $opsMetrics = [
             'leaguesThisMonth' => League::where('created_at', '>=', now()->subDays(30))->count(),
             'fixturesScheduled' => Fixture::whereDate('match_date', '>=', now())->count(),
@@ -89,6 +102,7 @@ class WelcomeController extends Controller
             'upcomingLeague',
             'nextFixture',
             'recentLeagues',
+            'upcomingFixtures',
             'opsMetrics'
         ));
     }
