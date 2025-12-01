@@ -173,7 +173,7 @@
         width: 100%;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 0.6rem;
+        gap: 0.75rem;
         padding: 0.6rem;
         isolation: isolate;
     }
@@ -276,7 +276,7 @@
     .team-pill {
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
-        padding: 0.55rem;
+        padding: 0.8rem 0.9rem;
         text-align: left;
         background: #fff;
         transition: all 0.2s ease;
@@ -293,7 +293,7 @@
     .team-pill--round {
         text-align: center;
         align-items: center;
-        padding: 0.9rem;
+        padding: 1rem 0.9rem;
         background: #fff;
     }
     .team-pill--round.team-pill--bg {
@@ -335,12 +335,16 @@
         width: 100%;
     }
     .team-pill__name {
+        max-width: 100%;
         font-size: 12px;
         font-weight: 800;
         color: #0f172a;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         text-align: center;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
     .team-pill__logo {
         width: 32px;
@@ -364,6 +368,12 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+    .team-pill__meta {
+        font-size: 11px;
+        font-weight: 700;
+        color: #0f172a;
+        text-align: center;
     }
     .team-pill__bid {
         border-radius: 0.65rem;
@@ -397,6 +407,8 @@
     .round-table--compact .round-table__orbit {
         --seat-radius: clamp(110px, 26vw, 200px);
         max-width: 720px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.85rem;
     }
     .round-table--compact .round-table__seat {
         width: 135px;
@@ -1171,6 +1183,8 @@
                                 $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
                                 $seatAngle = (($loop->index / $teamCount) * 360);
                                 $seatIndex = $loop->iteration;
+                                $balanceAudit = $team->balance_audit ?? [];
+                                $teamRemaining = $balanceAudit['calculated_balance'] ?? ($team->display_wallet ?? $team->wallet_balance ?? 0);
                             @endphp
                             <div class="round-table__seat" data-seat-default="{{ $seatIndex }}">
                                 @php
@@ -1182,7 +1196,7 @@
                                     data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
                                     data-team-reserve="{{ $team->reserve_amount }}"
                                     data-team-max="{{ $team->max_bid_cap }}"
-                                    data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
+                                    data-team-wallet="{{ $teamRemaining }}"
                                     data-team-needed="{{ $team->players_needed }}"
                                     data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}">
                                     <div class="team-pill__header">
@@ -1197,6 +1211,7 @@
                                             {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}
                                         </p>
                                     </div>
+                                    <p class="team-pill__meta">₹{{ number_format($teamRemaining) }} remaining</p>
                                     <div class="team-pill__cta">
                                         <button type="button"
                                             class="team-pill__bid {{ $currentPlayer && !$teamDisabled ? '' : 'opacity-50 cursor-not-allowed' }}"
