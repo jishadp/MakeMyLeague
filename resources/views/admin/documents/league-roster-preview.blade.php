@@ -79,6 +79,18 @@
         width: 240px;
         flex-shrink: 0;
     }
+    @media (max-width: 640px) {
+        .player-card.is-wide {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .player-card.is-wide .player-card__header {
+            width: 100%;
+        }
+        .player-card.is-wide .player-card__meta {
+            width: 100%;
+        }
+    }
     @media print {
         @page {
             size: A4 portrait;
@@ -247,8 +259,8 @@
             @else
                 <div class="print-grid grid {{ $gridLayoutClass }} print-cards">
                     @foreach($players as $player)
-                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 bg-gradient-to-b from-white to-slate-50/40 {{ $cardLayoutClass }}">
-                            <div class="player-card__header flex items-center gap-4 {{ $isWideLayout ? 'lg:gap-6' : '' }}">
+                        <div class="player-card border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 sm:gap-5 bg-gradient-to-b from-white to-slate-50/40 {{ $cardLayoutClass }}">
+                            <div class="player-card__header flex flex-col sm:flex-row items-center sm:items-start gap-4 {{ $isWideLayout ? 'lg:gap-6' : '' }} w-full">
                                 <div class="relative">
                                     @if(!empty($player['photo']))
                                         <img src="{{ $player['photo'] }}" alt="{{ $player['name'] }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200">
@@ -261,9 +273,9 @@
                                         {{ $player['serial'] }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col gap-1 {{ $isFiveByFive ? 'items-center text-center' : '' }}">
-                                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400 font-semibold mb-1">{{ $player['team'] ?? $player['league_short'] ?? $player['league_name'] ?? 'Free Agent' }}</p>
-                                    <h3 class="text-lg font-bold text-slate-900">{{ $player['name'] }}</h3>
+                                <div class="flex flex-col gap-1 min-w-0 text-center sm:text-left {{ $isFiveByFive ? 'items-center text-center' : '' }} w-full">
+                                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400 font-semibold mb-1 break-words">{{ $player['team'] ?? $player['league_short'] ?? $player['league_name'] ?? 'Free Agent' }}</p>
+                                    <h3 class="text-lg font-bold text-slate-900 break-words">{{ $player['name'] }}</h3>
                                     <div class="flex flex-wrap gap-2 items-center text-xs text-slate-500 {{ $isFiveByFive ? 'justify-center' : '' }}">
                                         <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">{{ $player['role'] }}</span>
                                         @if($player['retained'])
@@ -272,9 +284,9 @@
                                     </div>
                                 </div>
                             </div>
-                            @php
-                                $metaGridClass = (!$isWideLayout && !$isFiveByFive && $showLocation && $showMobile) ? 'sm:grid-cols-2' : '';
-                            @endphp
+            @php
+                $metaGridClass = (!$isWideLayout && !$isFiveByFive && $showLocation && $showMobile) ? 'sm:grid-cols-2' : '';
+            @endphp
                             <div class="player-card__meta grid grid-cols-1 gap-3 text-sm text-slate-600 {{ $metaGridClass }} {{ $isFiveByFive ? 'text-center' : '' }}">
                                 @if($showLocation)
                                     <div>
@@ -286,12 +298,6 @@
                                     <div>
                                         <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Phone</p>
                                         <p class="font-semibold">{{ $player['phone'] }}</p>
-                                    </div>
-                                @endif
-                                @if(!$showLocation && !$showMobile)
-                                    <div>
-                                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Contacts</p>
-                                        <p class="font-semibold text-slate-500">Hidden for this export</p>
                                     </div>
                                 @endif
                             </div>

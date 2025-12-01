@@ -221,12 +221,6 @@
                         <p class="value">{{ $player['phone'] }}</p>
                     </div>
                 @endif
-                @if(!$showLocation && !$showMobile)
-                    <div>
-                        <p class="label">Contacts</p>
-                        <p class="value">Hidden for this export</p>
-                    </div>
-                @endif
             </div>
         </div>
     @empty
