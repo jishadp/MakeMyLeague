@@ -54,11 +54,11 @@
             </form>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md p-6 border border-indigo-50 space-y-4">
-            <form method="GET" action="{{ route('admin.documents.leagues.download') }}" target="_blank" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-indigo-50 space-y-5">
+            <form method="GET" action="{{ route('admin.documents.leagues.download') }}" target="_blank" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 <input type="hidden" name="search" value="{{ $filters['search'] ?? '' }}">
-                <div class="md:col-span-4">
-                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Roster League</label>
+                <div class="lg:col-span-5 space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Roster League</label>
                     <select name="league_id" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
                         <option value="">All leagues</option>
                         @foreach($leagues as $league)
@@ -67,18 +67,22 @@
                             </option>
                         @endforeach
                     </select>
+                    <p class="text-xs text-slate-500">Exports players that match the active search &amp; league filters, ordered by league join date.</p>
                 </div>
-                <div class="md:col-span-3">
-                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Retention Filter</label>
+                <div class="lg:col-span-4 space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Retention Filter</label>
                     <select name="retention_filter" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
                         @foreach($retentionFilters as $value => $label)
                             <option value="{{ $value }}" @selected(($rosterFilters['retention_filter'] ?? 'all') === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-slate-500 mt-2">Exports all players that match the active search &amp; league filters with serial numbers ordered by league join date.</p>
+                    <div class="flex flex-wrap gap-2 text-xs text-slate-500">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">Applied to preview &amp; PDF</span>
+                        <span>Serial numbers follow join date.</span>
+                    </div>
                 </div>
-                <div class="md:col-span-3">
-                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Short League Name (optional)</label>
+                <div class="lg:col-span-3 space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Short League Name (optional)</label>
                     <input
                         type="text"
                         name="league_short_name"
@@ -87,39 +91,45 @@
                         placeholder="e.g., BWCSL"
                         maxlength="80"
                     >
-                    <p class="text-xs text-slate-500 mt-2">Use a compact title for the roster preview and PDF if the full name is too long.</p>
+                    <p class="text-xs text-slate-500">Use a compact title if the full name is too long.</p>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Show Mobile</label>
-                    <div class="flex items-center gap-2 text-sm text-slate-700">
-                        <label class="inline-flex items-center gap-1">
-                            <input type="radio" name="show_mobile" value="1" @checked(($rosterFilters['show_mobile'] ?? '1') === '1') class="text-indigo-600 focus:ring-indigo-500">
+                <div class="lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Show Mobile</label>
+                    <div class="inline-flex rounded-full border border-slate-200 bg-slate-50 overflow-hidden text-sm text-slate-700">
+                        @php
+                            $mobileOn = ($rosterFilters['show_mobile'] ?? '1') === '1';
+                        @endphp
+                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ $mobileOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
+                            <input type="radio" name="show_mobile" value="1" @checked($mobileOn) class="sr-only">
                             <span>Show</span>
                         </label>
-                        <label class="inline-flex items-center gap-1">
-                            <input type="radio" name="show_mobile" value="0" @checked(($rosterFilters['show_mobile'] ?? '1') === '0') class="text-indigo-600 focus:ring-indigo-500">
+                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ !$mobileOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
+                            <input type="radio" name="show_mobile" value="0" @checked(!$mobileOn) class="sr-only">
                             <span>Hide</span>
                         </label>
                     </div>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Show Location</label>
-                    <div class="flex items-center gap-2 text-sm text-slate-700">
-                        <label class="inline-flex items-center gap-1">
-                            <input type="radio" name="show_location" value="1" @checked(($rosterFilters['show_location'] ?? '1') === '1') class="text-indigo-600 focus:ring-indigo-500">
+                <div class="lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Show Location</label>
+                    <div class="inline-flex rounded-full border border-slate-200 bg-slate-50 overflow-hidden text-sm text-slate-700">
+                        @php
+                            $locationOn = ($rosterFilters['show_location'] ?? '1') === '1';
+                        @endphp
+                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ $locationOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
+                            <input type="radio" name="show_location" value="1" @checked($locationOn) class="sr-only">
                             <span>Show</span>
                         </label>
-                        <label class="inline-flex items-center gap-1">
-                            <input type="radio" name="show_location" value="0" @checked(($rosterFilters['show_location'] ?? '1') === '0') class="text-indigo-600 focus:ring-indigo-500">
+                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ !$locationOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
+                            <input type="radio" name="show_location" value="0" @checked(!$locationOn) class="sr-only">
                             <span>Hide</span>
                         </label>
                     </div>
                 </div>
-                <div class="md:col-span-2 flex flex-col gap-3 md:flex-row md:justify-end">
+                <div class="lg:col-span-12 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="submit"
                         formaction="{{ route('admin.documents.leagues.preview') }}"
                         formtarget="_blank"
-                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-700 text-slate-100 font-semibold shadow hover:bg-slate-900 transition-colors">
+                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-800 text-slate-100 font-semibold shadow hover:bg-slate-900 transition-colors">
                         View Roster Preview
                     </button>
                     <button type="submit" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
@@ -127,7 +137,9 @@
                     </button>
                 </div>
             </form>
-            <p class="text-xs text-slate-500">Retention filter applies to both preview and downloads.</p>
+            <div class="text-xs text-slate-600 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                Retention filter applies to both preview and downloads.
+            </div>
         </div>
 
         @php
