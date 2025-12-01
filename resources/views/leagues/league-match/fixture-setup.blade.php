@@ -157,16 +157,16 @@
                                                     <input type="date" 
                                                            value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value)">
+                                                           onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
                                                     <input type="time" 
                                                            value="{{ $fixture->match_time ? $fixture->match_time->format('H:i') : '' }}"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value)">
+                                                           onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value, this)">
                                                     <input type="text" 
                                                            placeholder="Venue"
                                                            value="{{ $fixture->venue ?? '' }}"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs col-span-2"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'venue', this.value)">
+                                                           onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
                                                 </div>
                                             </div>
 
@@ -187,7 +187,7 @@
                                                         <input type="date" 
                                                                value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                               onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value)">
+                                                               onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Time -->
@@ -195,7 +195,7 @@
                                                         <input type="time" 
                                                                value="{{ $fixture->match_time ? $fixture->match_time->format('H:i') : '' }}"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                               onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value)">
+                                                               onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Venue -->
@@ -204,7 +204,7 @@
                                                                placeholder="Venue"
                                                                value="{{ $fixture->venue ?? '' }}"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                               onchange="updateFixture({{ $fixture->id }}, 'venue', this.value)">
+                                                           onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Status -->
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function updateFixture(fixtureId, field, value) {
+function updateFixture(fixtureId, field, value, element = null) {
     fetch(`/leagues/{{ $league->slug }}/fixtures/${fixtureId}/update`, {
         method: 'PATCH',
         headers: {
@@ -431,12 +431,13 @@ function updateFixture(fixtureId, field, value) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const element = event.target;
-            const originalBorder = element.className;
-            element.className = element.className.replace('border-gray-300', 'border-green-500');
-            setTimeout(() => {
-                element.className = originalBorder;
-            }, 1000);
+            if (element) {
+                const originalBorder = element.className;
+                element.className = element.className.replace('border-gray-300', 'border-green-500');
+                setTimeout(() => {
+                    element.className = originalBorder;
+                }, 1000);
+            }
         } else {
             alert('Error updating fixture: ' + data.message);
         }
