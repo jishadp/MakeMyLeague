@@ -318,8 +318,22 @@
                                                         </div>
                                                         
                                                         <!-- Player Avatar -->
-                                                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                                            {{ substr($player->name, 0, 1) }}
+                                                        <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow">
+                                                            @if($player->photo)
+                                                                <img 
+                                                                    src="{{ Storage::url($player->photo) }}" 
+                                                                    alt="{{ $player->name }}" 
+                                                                    class="w-full h-full object-cover"
+                                                                    loading="lazy"
+                                                                >
+                                                            @else
+                                                                <img 
+                                                                    src="{{ asset('images/defaultplayer.jpeg') }}" 
+                                                                    alt="{{ $player->name }}" 
+                                                                    class="w-full h-full object-cover"
+                                                                    loading="lazy"
+                                                                >
+                                                            @endif
                                                         </div>
                                                         
                                                         <!-- Player Info -->
