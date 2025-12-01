@@ -61,7 +61,7 @@
                             <!-- Date -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Match Date</label>
-                                <input type="date" id="match_date" min="{{ date('Y-m-d') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <input type="text" id="match_date" autocomplete="off" placeholder="Select date" class="flatpickr w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                             </div>
                         </div>
                         
@@ -131,10 +131,35 @@
                                         {{ $fixtures->where('league_group_id', $group->id)->count() }} Matches
                                     </span>
                                 </div>
+                                <div class="bg-white border border-dashed border-gray-200 rounded-lg p-3 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Start date</label>
+                                        <input id="start-date-{{ $group->id }}" type="text" autocomplete="off" placeholder="Select date" class="flatpickr w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Start time</label>
+                                        <input id="start-time-{{ $group->id }}" type="time" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Match duration (mins)</label>
+                                        <input id="duration-{{ $group->id }}" type="number" min="10" value="90" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Gap between games (mins)</label>
+                                        <input id="gap-{{ $group->id }}" type="number" min="0" value="15" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Matches per day</label>
+                                        <div class="flex gap-2">
+                                            <input id="matches-per-day-{{ $group->id }}" type="number" min="1" value="3" class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm">
+                                            <button type="button" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-sm font-semibold" onclick="autoScheduleGroup({{ $group->id }})">Auto schedule</button>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="space-y-3">
                                     @foreach($fixtures->where('league_group_id', $group->id) as $fixture)
-                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4" data-fixture-id="{{ $fixture->id }}" data-group-id="{{ $group->id }}">
                                             <!-- Mobile Layout -->
                                             <div class="sm:hidden">
                                                 <div class="flex items-center justify-between mb-3">
@@ -159,9 +184,9 @@
                                                 
                                                 <!-- Mobile Schedule Form -->
                                                 <div class="grid grid-cols-2 gap-2">
-                                                    <input type="date" 
+                                                    <input type="text" autocomplete="off" placeholder="Date"
                                                            value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
-                                                           class="border border-gray-300 rounded px-2 py-1 text-xs"
+                                                           class="flatpickr border border-gray-300 rounded px-2 py-1 text-xs"
                                                            onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
                                                     <input type="time" 
                                                            value="{{ $fixture->match_time ? $fixture->match_time->format('H:i') : '' }}"
@@ -190,9 +215,9 @@
                                                     
                                                     <!-- Date -->
                                                     <div class="col-span-2">
-                                                        <input type="date" 
+                                                        <input type="text" autocomplete="off" placeholder="Date"
                                                                value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
-                                                               class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                                               class="flatpickr w-full border border-gray-300 rounded px-3 py-2 text-sm"
                                                                onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
                                                     </div>
                                                     
@@ -453,6 +478,60 @@ function updateFixture(fixtureId, field, value, element = null) {
     .catch(error => {
         console.error('Error:', error);
         alert('An error occurred while updating the fixture.');
+    });
+}
+
+function autoScheduleGroup(groupId) {
+    const startDate = document.getElementById(`start-date-${groupId}`).value;
+    const startTime = document.getElementById(`start-time-${groupId}`).value;
+    const duration = parseInt(document.getElementById(`duration-${groupId}`).value || '0', 10);
+    const gap = parseInt(document.getElementById(`gap-${groupId}`).value || '0', 10);
+    const matchesPerDay = parseInt(document.getElementById(`matches-per-day-${groupId}`).value || '1', 10);
+
+    if (!startDate || !startTime) {
+        alert('Please set a start date and time.');
+        return;
+    }
+    if (duration <= 0 || gap < 0 || matchesPerDay <= 0) {
+        alert('Please enter valid duration, gap, and matches per day values.');
+        return;
+    }
+
+    const fixtures = document.querySelectorAll(`[data-group-id="${groupId}"]`);
+    if (fixtures.length === 0) return;
+
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    let current = new Date(startDate);
+    current.setHours(startHours);
+    current.setMinutes(startMinutes);
+    current.setSeconds(0);
+    current.setMilliseconds(0);
+
+    fixtures.forEach((fixture, index) => {
+        const dayOffset = Math.floor(index / matchesPerDay);
+        const slotInDay = index % matchesPerDay;
+
+        const scheduled = new Date(current);
+        scheduled.setDate(current.getDate() + dayOffset);
+        const minutesToAdd = slotInDay * (duration + gap);
+        scheduled.setMinutes(scheduled.getMinutes() + minutesToAdd);
+
+        const dateInputs = Array.from(fixture.querySelectorAll('input[type="date"]'));
+        const timeInputs = Array.from(fixture.querySelectorAll('input[type="time"]'));
+
+        const isoDate = scheduled.toISOString().slice(0, 10);
+        const hh = String(scheduled.getHours()).padStart(2, '0');
+        const mm = String(scheduled.getMinutes()).padStart(2, '0');
+        const timeVal = `${hh}:${mm}`;
+
+        if (dateInputs.length) {
+            dateInputs.forEach(input => input.value = isoDate);
+            updateFixture(fixture.dataset.fixtureId, 'match_date', isoDate, dateInputs[0]);
+        }
+        if (timeInputs.length) {
+            timeInputs.forEach(input => input.value = timeVal);
+            updateFixture(fixture.dataset.fixtureId, 'match_time', timeVal, timeInputs[0]);
+        }
     });
 }
 </script>

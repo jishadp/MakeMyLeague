@@ -47,7 +47,7 @@ class LeagueMatchController extends Controller
 
         $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
         $fixtures = $league->fixtures()->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])->get();
-        $grounds = Ground::orderBy('name')->get(['id', 'name', 'local_body_id']);
+        $grounds = Ground::orderBy('name')->get(['id', 'name']);
 
         return view('leagues.league-match.fixture-setup', compact('league', 'groups', 'fixtures', 'grounds'));
     }
