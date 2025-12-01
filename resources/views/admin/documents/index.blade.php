@@ -55,9 +55,9 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-md p-6 border border-indigo-50 space-y-4">
-            <form method="GET" action="{{ route('admin.documents.leagues.download') }}" target="_blank" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+            <form method="GET" action="{{ route('admin.documents.leagues.download') }}" target="_blank" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <input type="hidden" name="search" value="{{ $filters['search'] ?? '' }}">
-                <div class="md:col-span-2">
+                <div class="md:col-span-4">
                     <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Roster League</label>
                     <select name="league_id" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
                         <option value="">All leagues</option>
@@ -68,7 +68,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="md:col-span-2">
+                <div class="md:col-span-3">
                     <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Retention Filter</label>
                     <select name="retention_filter" class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100">
                         @foreach($retentionFilters as $value => $label)
@@ -76,6 +76,18 @@
                         @endforeach
                     </select>
                     <p class="text-xs text-slate-500 mt-2">Exports all players that match the active search &amp; league filters with serial numbers ordered by league join date.</p>
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-semibold text-slate-600 tracking-wide uppercase mb-2">Short League Name (optional)</label>
+                    <input
+                        type="text"
+                        name="league_short_name"
+                        value="{{ $rosterFilters['league_short_name'] ?? '' }}"
+                        class="w-full rounded-xl border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"
+                        placeholder="e.g., BWCSL"
+                        maxlength="80"
+                    >
+                    <p class="text-xs text-slate-500 mt-2">Use a compact title for the roster preview and PDF if the full name is too long.</p>
                 </div>
                 <div class="md:col-span-2 flex flex-col gap-3 md:flex-row md:justify-end">
                     <button type="submit"

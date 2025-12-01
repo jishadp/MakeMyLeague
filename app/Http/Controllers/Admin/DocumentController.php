@@ -38,6 +38,7 @@ class DocumentController extends Controller
             'rosterFilters' => [
                 'retention_filter' => $request->input('retention_filter', 'all'),
                 'league_id' => $request->input('league_id'),
+                'league_short_name' => $request->input('league_short_name', ''),
             ],
         ]);
     }
@@ -92,6 +93,7 @@ class DocumentController extends Controller
             'search' => $payload['filters']['search'] ?? null,
             'league_id' => $payload['filters']['league_id'] ?? null,
             'retention_filter' => $payload['filters']['retention_filter'] ?? null,
+            'league_short_name' => $payload['filters']['league_short_name'] ?? null,
         ], fn ($value) => filled($value));
 
         return view('admin.documents.league-roster-preview', array_merge($payload, [
@@ -135,11 +137,16 @@ class DocumentController extends Controller
             'league_id' => ['nullable', 'integer', 'exists:leagues,id'],
             'search' => ['nullable', 'string', 'max:255'],
             'retention_filter' => ['nullable', Rule::in(array_keys($this->retentionFilterOptions()))],
+            'league_short_name' => ['nullable', 'string', 'max:80'],
         ]);
 
         $leagueId = $validated['league_id'] ?? null;
         $search = isset($validated['search']) ? trim($validated['search']) : null;
         $retentionFilter = $validated['retention_filter'] ?? 'all';
+        $leagueShortName = isset($validated['league_short_name'])
+            ? trim((string) $validated['league_short_name'])
+            : null;
+        $leagueShortName = $leagueShortName === '' ? null : $leagueShortName;
 
         $playerQuery = LeaguePlayer::query()
             ->with([
@@ -174,8 +181,9 @@ class DocumentController extends Controller
             ->orderBy('id')
             ->get();
 
-        $rosterEntries = $this->buildLeagueRosterEntries($leaguePlayers);
+        $rosterEntries = $this->buildLeagueRosterEntries($leaguePlayers, $leagueShortName, $leagueId);
         $league = $leagueId ? League::find($leagueId) : null;
+        $leagueBadge = $leagueShortName ?: $this->formatLeagueBadge($league);
 
         return [
             'players' => $rosterEntries,
@@ -185,11 +193,12 @@ class DocumentController extends Controller
             'retentionFilterKey' => $retentionFilter,
             'searchTerm' => $search,
             'playerCount' => $rosterEntries->count(),
-            'leagueBadge' => $this->formatLeagueBadge($league),
+            'leagueBadge' => $leagueBadge,
             'filters' => [
                 'league_id' => $leagueId,
                 'search' => $search,
                 'retention_filter' => $retentionFilter,
+                'league_short_name' => $leagueShortName,
             ],
         ];
     }
@@ -251,14 +260,26 @@ class DocumentController extends Controller
     /**
      * Prepare roster entries for the consolidated PDF.
      */
-    protected function buildLeagueRosterEntries(Collection $leaguePlayers): Collection
+    protected function buildLeagueRosterEntries(
+        Collection $leaguePlayers,
+        ?string $overrideLeagueShortName = null,
+        ?int $overrideLeagueId = null
+    ): Collection
     {
         return $leaguePlayers
             ->filter(fn (LeaguePlayer $leaguePlayer) => $leaguePlayer->player instanceof User)
             ->values()
-            ->map(function (LeaguePlayer $leaguePlayer, int $index) {
+            ->map(function (LeaguePlayer $leaguePlayer, int $index) use (
+                $overrideLeagueShortName,
+                $overrideLeagueId
+            ) {
                 $player = $leaguePlayer->player;
                 $photoSources = $this->resolvePhotoSources($player);
+                $shouldUseOverride = $overrideLeagueShortName
+                    && ($overrideLeagueId === null || $leaguePlayer->league_id === $overrideLeagueId);
+                $leagueShortName = $shouldUseOverride
+                    ? $overrideLeagueShortName
+                    : $this->formatLeagueBadge($leaguePlayer->league);
 
                 return [
                     'serial' => $index + 1,
@@ -269,7 +290,7 @@ class DocumentController extends Controller
                     'photo' => $photoSources['data_uri'] ?? $photoSources['web'],
                     'team' => optional(optional($leaguePlayer->leagueTeam)->team)->name,
                     'league_name' => optional($leaguePlayer->league)->name,
-                    'league_short' => $this->formatLeagueBadge($leaguePlayer->league) ?? optional($leaguePlayer->league)->name,
+                    'league_short' => $leagueShortName ?? optional($leaguePlayer->league)->name,
                     'season' => optional($leaguePlayer->league)->season,
                     'retained' => (bool) $leaguePlayer->retention,
                     'joined_at' => $leaguePlayer->created_at,
