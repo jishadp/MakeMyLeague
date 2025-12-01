@@ -159,7 +159,7 @@
 
                                 <div class="space-y-3">
                                     @foreach($fixtures->where('league_group_id', $group->id) as $fixture)
-                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4" data-fixture-id="{{ $fixture->id }}" data-group-id="{{ $group->id }}">
+                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4" data-fixture-id="{{ $fixture->slug }}" data-group-id="{{ $group->id }}">
                                             <!-- Mobile Layout -->
                                             <div class="sm:hidden">
                                                 <div class="flex items-center justify-between mb-3">
@@ -187,17 +187,17 @@
                                                     <input type="text" autocomplete="off" placeholder="Date"
                                                            value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
                                                            class="flatpickr border border-gray-300 rounded px-2 py-1 text-xs"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
+                                                           onchange="updateFixture('{{ $fixture->slug }}', 'match_date', this.value, this)">
                                                     <input type="time" 
                                                            value="{{ $fixture->match_time ? $fixture->match_time->format('H:i') : '' }}"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value, this)">
+                                                           onchange="updateFixture('{{ $fixture->slug }}', 'match_time', this.value, this)">
                                                     <input type="text" 
                                                            placeholder="Venue"
                                                            value="{{ $fixture->venue ?? '' }}"
                                                            list="venue-options"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs col-span-2"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
+                                                           onchange="updateFixture('{{ $fixture->slug }}', 'venue', this.value, this)">
                                                 </div>
                                             </div>
 
@@ -218,7 +218,7 @@
                                                         <input type="text" autocomplete="off" placeholder="Date"
                                                                value="{{ $fixture->match_date ? $fixture->match_date->format('Y-m-d') : '' }}"
                                                                class="flatpickr w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                               onchange="updateFixture({{ $fixture->id }}, 'match_date', this.value, this)">
+                                                               onchange="updateFixture('{{ $fixture->slug }}', 'match_date', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Time -->
@@ -226,7 +226,7 @@
                                                         <input type="time" 
                                                                value="{{ $fixture->match_time ? $fixture->match_time->format('H:i') : '' }}"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                               onchange="updateFixture({{ $fixture->id }}, 'match_time', this.value, this)">
+                                                               onchange="updateFixture('{{ $fixture->slug }}', 'match_time', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Venue -->
@@ -236,7 +236,7 @@
                                                                value="{{ $fixture->venue ?? '' }}"
                                                                list="venue-options"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                                                           onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
+                                                           onchange="updateFixture('{{ $fixture->slug }}', 'venue', this.value, this)">
                                                     </div>
                                                     
                                                     <!-- Status -->
@@ -247,6 +247,17 @@
                                                         </span>
                                                     </div>
                                                 </div>
+                                            </div>
+
+                                            <div class="flex justify-end mt-3">
+                                                <button type="button"
+                                                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm hover:bg-indigo-700 transition"
+                                                        onclick="saveFixtureRow('{{ $fixture->slug }}')">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Update
+                                                </button>
                                             </div>
                                         </div>
                                     @endforeach
@@ -532,6 +543,47 @@ function autoScheduleGroup(groupId) {
             timeInputs.forEach(input => input.value = timeVal);
             updateFixture(fixture.dataset.fixtureId, 'match_time', timeVal, timeInputs[0]);
         }
+    });
+}
+
+function saveFixtureRow(fixtureSlug) {
+    const row = document.querySelector(`[data-fixture-id="${fixtureSlug}"]`);
+    if (!row) return;
+
+    const dateInputs = Array.from(row.querySelectorAll('input.flatpickr'));
+    const timeInputs = Array.from(row.querySelectorAll('input[type="time"]'));
+    const venueInputs = Array.from(row.querySelectorAll('input[list="venue-options"]'));
+
+    const match_date = (dateInputs.find(input => input.value)?.value) || null;
+    const match_time = (timeInputs.find(input => input.value)?.value) || null;
+    const venue = (venueInputs.find(input => input.value)?.value) || null;
+
+    fetch(`/leagues/{{ $league->slug }}/fixtures/${fixtureSlug}/update`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            match_date,
+            match_time,
+            venue
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            row.classList.add('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
+            setTimeout(() => {
+                row.classList.remove('ring', 'ring-emerald-300', 'ring-offset-2', 'ring-offset-white');
+            }, 1200);
+        } else {
+            alert('Error updating fixture: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the fixture.');
     });
 }
 </script>
