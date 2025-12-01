@@ -121,7 +121,7 @@
         gap: 0.5rem;
     }
     .control-card--wide {
-        grid-column: 1 / -1;
+        grid-column: auto;
     }
     @media (max-width: 640px) {
         .team-grid {
@@ -130,81 +130,38 @@
     }
     .round-table {
         position: relative;
-        border-radius: 1.5rem;
+        border-radius: 1rem;
         border: 1px solid #e2e8f0;
-        background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f8fafc 55%, #e2e8f0 100%);
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
         padding: 1rem;
         overflow: hidden;
         box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06) inset, 0 18px 36px rgba(15, 23, 42, 0.06);
     }
     .round-table__orbit {
-        --seat-radius: clamp(140px, 34vw, 260px);
         position: relative;
         margin: 0 auto;
-        max-width: 860px;
-        aspect-ratio: 1 / 1;
-        border-radius: 50%;
+        max-width: 960px;
+        width: 100%;
         display: grid;
-        place-items: center;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
         isolation: isolate;
     }
     .round-table__halo {
-        position: absolute;
-        inset: 12%;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.02));
-        box-shadow:
-            0 0 0 1px rgba(99, 102, 241, 0.08),
-            0 12px 26px rgba(15, 23, 42, 0.08),
-            0 28px 60px rgba(15, 23, 42, 0.05);
-        z-index: 0;
+        display: none;
     }
     .round-table__center {
-        position: relative;
-        z-index: 2;
-        padding: 1.1rem 1.25rem;
-        width: min(420px, 60%);
-        max-width: 460px;
-        text-align: center;
-        border-radius: 1.25rem;
-        background: linear-gradient(135deg, #0f172a, #111827);
-        color: #e2e8f0;
-        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.28);
-        display: grid;
-        gap: 0.65rem;
-        align-items: start;
+        display: none;
     }
     .round-table__legend {
-        margin-top: 0.6rem;
-        display: flex;
-        justify-content: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        font-size: 11px;
-    }
-    .round-table__legend span {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #0f172a;
-        border: 1px solid #e2e8f0;
-        background: #fff;
+        display: none;
     }
     .round-table__seat {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: rotate(var(--seat-angle)) translate(var(--seat-radius)) rotate(var(--seat-angle-rev));
-        transform-origin: center;
-        width: 160px;
+        position: static;
+        transform: none;
+        width: 100%;
         z-index: 1;
-        transition: transform 0.2s ease;
-    }
-    .round-table__seat:hover {
-        transform: rotate(var(--seat-angle)) translate(calc(var(--seat-radius) + 6px)) rotate(var(--seat-angle-rev));
     }
     .round-table__eyebrow {
         font-size: 10px;
@@ -385,9 +342,82 @@
         width: 135px;
     }
     .round-table--compact .round-table__center {
-        width: min(360px, 55%);
-        max-width: 420px;
-        padding: 0.9rem 1rem;
+        width: min(240px, 42%);
+        max-width: 300px;
+        padding: 0.75rem 0.9rem;
+    }
+    .round-table__center--placeholder {
+        background: linear-gradient(135deg, #0b1223, #0f172a);
+        box-shadow: 0 14px 24px rgba(15, 23, 42, 0.2);
+    }
+    .seat-sorter {
+        border: 1px dashed #e2e8f0;
+        border-radius: 1rem;
+        padding: 0.75rem;
+        background: #fff;
+    }
+    .seat-sorter__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .seat-sorter__title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .seat-sorter__hint {
+        font-size: 11px;
+        color: #475569;
+    }
+    .seat-sorter__list {
+        margin-top: 0.65rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.5rem;
+    }
+    .seat-sorter__item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        background: #f8fafc;
+        cursor: grab;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+    }
+    .seat-sorter__item:active {
+        cursor: grabbing;
+    }
+    .seat-sorter__handle {
+        width: 28px;
+        height: 28px;
+        border-radius: 0.65rem;
+        background: #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #475569;
+        flex-shrink: 0;
+    }
+    .seat-sorter__name {
+        flex: 1;
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 12px;
+    }
+    .seat-sorter__badge {
+        font-size: 11px;
+        font-weight: 800;
+        color: #0f172a;
+        background: #e0e7ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        padding: 0.25rem 0.55rem;
     }
     @media (max-width: 1024px) {
         .round-table__orbit {
@@ -787,7 +817,7 @@
     }
     .control-board {
         display: grid;
-        grid-template-columns: minmax(280px, 340px) minmax(420px, 1fr) minmax(300px, 360px);
+        grid-template-columns: minmax(260px, 1fr) minmax(520px, 2fr) minmax(260px, 1fr);
         gap: 1rem;
         align-items: start;
     }
@@ -804,6 +834,9 @@
             grid-template-columns: 1fr;
         }
         .control-board > .control-card {
+            grid-column: 1 / -1;
+        }
+        .control-card--wide {
             grid-column: 1 / -1;
         }
     }
@@ -990,6 +1023,54 @@
         @endif
 
         <div class="control-board">
+            <div class="control-card space-y-4" style="grid-column: 1 / -1;">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Next Player Tools</p>
+                        <p class="text-xs text-slate-500">Search and queue an available player or pull a random pick.</p>
+                    </div>
+                    <span class="player-finder__pill">{{ $auctionStats['available_players'] ?? $availablePlayers->count() }} available</span>
+                </div>
+                <div id="controller-player-tools" class="space-y-3">
+                    <div class="player-finder">
+                        <span class="player-finder__icon">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.25 5.25a7.5 7.5 0 001.4 11.4z" />
+                            </svg>
+                        </span>
+                        <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
+                        <div id="controller-search-results" class="player-finder__results hidden"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
+                        <button type="button" class="player-finder__random" data-controller-random>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
+                            </svg>
+                            Random available player
+                        </button>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-600">Queued Players</p>
+                            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700" data-clear-queue>Clear</button>
+                        </div>
+                        <div class="auto-start-options">
+                            <span class="text-[11px] font-semibold text-slate-600">Auto start next after Sold/Unsold:</span>
+                            <label>
+                                <input type="radio" name="auto-start" value="on" data-auto-start>
+                                <span>On</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="auto-start" value="off" data-auto-start>
+                                <span>Off</span>
+                            </label>
+                        </div>
+                        <div id="controller-player-queue" class="player-queue"></div>
+                        <div id="controller-queue-empty" class="player-finder__empty">No queued players yet. Add from search or random.</div>
+                    </div>
+                </div>
+            </div>
             <div class="control-card player-card">
                 <div class="player-thumb">
                     @if($currentPlayer && $currentPlayer->player?->photo)
@@ -1051,56 +1132,15 @@
                     $teamCount = max($teams->count(), 1);
         @endphp
                 <div class="round-table">
-                    <div class="round-table__orbit">
-                        <div class="round-table__halo"></div>
-                        <div class="round-table__center">
-                            <p class="round-table__eyebrow">Bid Desk</p>
-                            <p class="round-table__title">Round Table Control</p>
-                            <p id="selected-team-label" class="round-table__chip">
-                                Selected: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
-                            </p>
-                            <p class="round-table__meta">
-                                Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
-                            </p>
-                            <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
-                            <div class="round-table__hub">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-xs font-semibold text-indigo-100">Quick amount</p>
-                                    <button type="button" class="text-[11px] font-semibold text-indigo-200 hover:text-white" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
-                                        Change amount
-                                    </button>
-                                </div>
-                                <div class="quick-grid">
-                                    @if($bidIncrementValues->isNotEmpty())
-                                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
-                                            +₹{{ number_format($bidIncrementValues->first()) }}
-                                        </button>
-                                    @endif
-                                </div>
-                                <div class="space-y-1">
-                                    <div class="quick-jump-title">
-                                        <p class="text-xs font-semibold text-indigo-100">Jump to amount</p>
-                                        <div class="flex items-center gap-2">
-                                            <span id="quick-jump-note" class="text-xs text-indigo-100/80">(steps of ₹50)</span>
-                                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
-                                        </div>
-                                    </div>
-                                    <div id="quick-jump-grid" class="quick-grid"></div>
-                                </div>
-                                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
-                                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
-                                </button>
-                            </div>
-                            <p class="round-table__tip">Queue quick increments then lock in with Bid from the auction desk.</p>
-                        </div>
+                    <div class="round-table__orbit" data-team-count="{{ $teamCount }}">
                         @foreach($teams as $team)
                             @php
                                 $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
                                 $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
-                                $seatAngle = (($loop->index / $teamCount) * 360) - 90;
+                                $seatAngle = (($loop->index / $teamCount) * 360);
+                                $seatIndex = $loop->iteration;
                             @endphp
-                            <div class="round-table__seat" style="--seat-angle: {{ $seatAngle }}deg; --seat-angle-rev: -{{ $seatAngle }}deg;">
+                            <div class="round-table__seat" data-seat-default="{{ $seatIndex }}">
                                 <button type="button"
                                     class="team-pill team-pill--round {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
                                     data-team-pill="{{ $team->id }}"
@@ -1119,7 +1159,7 @@
                                         'max' => number_format($team->max_bid_cap)
                                     ]) }}"
                                     {{ $teamDisabled ? 'disabled aria-disabled=true' : '' }}>
-                                    <span class="team-pill__badge">Seat {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="team-pill__badge" data-seat-label>Seat {{ str_pad($seatIndex, 2, '0', STR_PAD_LEFT) }}</span>
                                     <div class="team-pill__header">
                                         <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
                                             {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 14, '')) }}
@@ -1136,61 +1176,69 @@
                             </div>
                         @endforeach
                     </div>
-                    <div class="round-table__legend">
-                        <span><span class="w-2 h-2 rounded-full bg-emerald-400 block"></span>Active seat</span>
-                        <span><span class="w-2 h-2 rounded-full bg-slate-200 block"></span>Available</span>
-                        <span><span class="w-2 h-2 rounded-full bg-rose-300 block"></span>Wallet capped</span>
-                    </div>
                     <p class="round-table__subtitle">Order runs clockwise from the top seat. Tap any team to lock in the bidder.</p>
+                </div>
+                <div class="seat-sorter" id="seat-sorter">
+                    <div class="seat-sorter__header">
+                        <p class="seat-sorter__title">Seat order</p>
+                        <div class="flex items-center gap-2">
+                            <span class="seat-sorter__hint">Drag to match your table layout</span>
+                            <button type="button" class="round-table__link" data-seat-sort-toggle>Hide</button>
+                        </div>
+                    </div>
+                    <div id="seat-sort-list" class="seat-sorter__list">
+                        @foreach($teams as $team)
+                            @php
+                                $seatIndex = $loop->iteration;
+                            @endphp
+                            <div class="seat-sorter__item" draggable="true" data-seat-sort-item data-team-id="{{ $team->id }}" data-seat-default="{{ $seatIndex }}">
+                                <span class="seat-sorter__handle">≡</span>
+                                <span class="seat-sorter__name">{{ $team->team?->name ?? 'Team #' . $team->id }}</span>
+                                <span class="seat-sorter__badge" data-seat-sort-badge>{{ $seatIndex }}</span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             <div class="control-card space-y-4">
-                <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-slate-600">Next Player Tools</p>
-                        <p class="text-xs text-slate-500">Search and queue an available player or pull a random pick.</p>
+                        <p class="text-sm font-semibold text-slate-600">Bid Desk</p>
+                        <p class="text-xs text-slate-500">Choose quick amounts and place bids.</p>
                     </div>
-                    <span class="player-finder__pill">{{ $auctionStats['available_players'] ?? $availablePlayers->count() }} available</span>
+                    <button type="button" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
+                        Change amount
+                    </button>
                 </div>
-                <div id="controller-player-tools" class="space-y-3">
-                    <div class="player-finder">
-                        <span class="player-finder__icon">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.25 5.25a7.5 7.5 0 001.4 11.4z" />
-                            </svg>
-                        </span>
-                        <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
-                        <div id="controller-search-results" class="player-finder__results hidden"></div>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
-                        <button type="button" class="player-finder__random" data-controller-random>
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
-                            </svg>
-                            Random available player
+                <p id="selected-team-label" class="text-xs text-slate-600">
+                    Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
+                </p>
+                <p class="text-xs text-slate-500">
+                    Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
+                </p>
+                <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
+                <div class="quick-grid">
+                    @if($bidIncrementValues->isNotEmpty())
+                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
+                            +₹{{ number_format($bidIncrementValues->first()) }}
                         </button>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-slate-600">Queued Players</p>
-                            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700" data-clear-queue>Clear</button>
-                        </div>
-                        <div class="auto-start-options">
-                            <span class="text-[11px] font-semibold text-slate-600">Auto start next after Sold/Unsold:</span>
-                            <label>
-                                <input type="radio" name="auto-start" value="on" data-auto-start>
-                                <span>On</span>
-                            </label>
-                            <label>
-                                <input type="radio" name="auto-start" value="off" data-auto-start>
-                                <span>Off</span>
-                            </label>
-                        </div>
-                        <div id="controller-player-queue" class="player-queue"></div>
-                        <div id="controller-queue-empty" class="player-finder__empty">No queued players yet. Add from search or random.</div>
-                    </div>
+                    @endif
                 </div>
+                <div class="space-y-1">
+                    <div class="quick-jump-title">
+                        <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
+                        <div class="flex items-center gap-2">
+                            <span id="quick-jump-note" class="text-xs text-slate-500">(steps of ₹50)</span>
+                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
+                        </div>
+                    </div>
+                    <div id="quick-jump-grid" class="quick-grid"></div>
+                </div>
+                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
+                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
+                </button>
+                <p class="text-center text-xs text-slate-400">Queue quick bid amounts, then press Bid to push to the live room.</p>
             </div>
         </div>
 
@@ -1376,6 +1424,12 @@ function openWhatsAppShare(message) {
     const roundTableToggle = document.querySelector('[data-round-table-toggle]');
     const roundTable = document.querySelector('.round-table');
     const roundTableStorageKey = leagueIdValue ? `league_${leagueIdValue}_round_table_compact` : null;
+    const roundTableOrbit = document.querySelector('.round-table__orbit');
+    const seatSortList = document.getElementById('seat-sort-list');
+    const seatOrderStorageKey = leagueIdValue ? `league_${leagueIdValue}_seat_order` : null;
+    const seatSorter = document.getElementById('seat-sorter');
+    const seatSortToggle = document.querySelector('[data-seat-sort-toggle]');
+    const seatSortToggleStorageKey = leagueIdValue ? `league_${leagueIdValue}_seat_sort_hidden` : null;
     const unsoldModal = document.getElementById('controller-unsold-modal');
     const unsoldConfirmButtons = unsoldModal?.querySelectorAll('[data-unsold-confirm]');
     const unsoldCancelButtons = unsoldModal?.querySelectorAll('[data-unsold-cancel]');
@@ -1403,6 +1457,8 @@ function openWhatsAppShare(message) {
     let availableRandomPool = [];
     let unsoldRandomPool = [];
     initRoundTableSizing();
+    initSeatOrdering();
+    initSeatSortToggle();
     const teamNameMap = {};
     teamPills.forEach(button => {
         teamNameMap[button.dataset.teamPill] = button.dataset.teamName || button.textContent.trim();
@@ -1455,6 +1511,138 @@ function openWhatsAppShare(message) {
         if (roundTableToggle) {
             roundTableToggle.textContent = enabled ? 'Expand view' : 'Compact view';
         }
+    }
+
+    function initSeatOrdering() {
+        if (!roundTableOrbit || !seatSortList) return;
+        const storedOrder = loadSeatOrder();
+        hydrateSeatSortList(storedOrder);
+        applySeatOrder(storedOrder);
+        enableSeatDrag();
+    }
+
+    function initSeatSortToggle() {
+        if (!seatSorter || !seatSortToggle) return;
+        const hidden = seatSortToggleStorageKey ? localStorage.getItem(seatSortToggleStorageKey) === '1' : false;
+        setSeatSorterHidden(hidden);
+        seatSortToggle.addEventListener('click', () => {
+            const nextHidden = !seatSorter.classList.contains('hidden');
+            setSeatSorterHidden(nextHidden);
+            if (seatSortToggleStorageKey) {
+                localStorage.setItem(seatSortToggleStorageKey, nextHidden ? '1' : '0');
+            }
+        });
+    }
+
+    function setSeatSorterHidden(hidden) {
+        if (!seatSorter || !seatSortToggle) return;
+        seatSorter.classList.toggle('hidden', hidden);
+        seatSortToggle.textContent = hidden ? 'Show' : 'Hide';
+    }
+
+    function hydrateSeatSortList(orderMap = {}) {
+        if (!seatSortList) return;
+        const items = Array.from(seatSortList.querySelectorAll('[data-seat-sort-item]'));
+        items.sort((a, b) => {
+            const aOrder = Number(orderMap[a.dataset.teamId] || a.dataset.seatDefault || 0);
+            const bOrder = Number(orderMap[b.dataset.teamId] || b.dataset.seatDefault || 0);
+            return aOrder - bOrder;
+        });
+        items.forEach(item => seatSortList.appendChild(item));
+        refreshSeatSortBadges();
+    }
+
+    function enableSeatDrag() {
+        let dragItem = null;
+        seatSortList.addEventListener('dragstart', (event) => {
+            const target = event.target.closest('[data-seat-sort-item]');
+            if (!target) return;
+            dragItem = target;
+            event.dataTransfer.effectAllowed = 'move';
+        });
+        seatSortList.addEventListener('dragover', (event) => {
+            if (!dragItem) return;
+            event.preventDefault();
+            const target = event.target.closest('[data-seat-sort-item]');
+            if (!target || target === dragItem) return;
+            const items = Array.from(seatSortList.children);
+            const dragIndex = items.indexOf(dragItem);
+            const targetIndex = items.indexOf(target);
+            if (dragIndex < targetIndex) {
+                seatSortList.insertBefore(dragItem, target.nextSibling);
+            } else {
+                seatSortList.insertBefore(dragItem, target);
+            }
+        });
+        const commit = () => {
+            if (!dragItem) return;
+            dragItem = null;
+            const map = collectSeatOrder();
+            saveSeatOrder(map);
+            refreshSeatSortBadges();
+            applySeatOrder(map);
+        };
+        seatSortList.addEventListener('drop', (event) => {
+            event.preventDefault();
+            commit();
+        });
+        seatSortList.addEventListener('dragend', commit);
+    }
+
+    function collectSeatOrder() {
+        const map = {};
+        if (!seatSortList) return map;
+        const items = Array.from(seatSortList.querySelectorAll('[data-seat-sort-item]'));
+        items.forEach((item, index) => {
+            map[item.dataset.teamId] = index + 1;
+        });
+        return map;
+    }
+
+    function refreshSeatSortBadges() {
+        if (!seatSortList) return;
+        const items = Array.from(seatSortList.querySelectorAll('[data-seat-sort-item]'));
+        items.forEach((item, index) => {
+            const badge = item.querySelector('[data-seat-sort-badge]');
+            if (badge) {
+                badge.textContent = index + 1;
+            }
+        });
+    }
+
+    function loadSeatOrder() {
+        if (!seatOrderStorageKey) return {};
+        try {
+            const parsed = JSON.parse(localStorage.getItem(seatOrderStorageKey) || '{}');
+            return typeof parsed === 'object' && parsed !== null ? parsed : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveSeatOrder(map) {
+        if (!seatOrderStorageKey) return;
+        localStorage.setItem(seatOrderStorageKey, JSON.stringify(map || {}));
+    }
+
+    function applySeatOrder(orderMap = {}) {
+        if (!roundTableOrbit) return;
+        const seats = Array.from(roundTableOrbit.querySelectorAll('.round-table__seat'));
+        seats.sort((a, b) => {
+            const aTeam = a.querySelector('[data-team-pill]')?.dataset.teamPill;
+            const bTeam = b.querySelector('[data-team-pill]')?.dataset.teamPill;
+            const aOrder = Number(orderMap[aTeam] || a.dataset.seatDefault || 0);
+            const bOrder = Number(orderMap[bTeam] || b.dataset.seatDefault || 0);
+            return aOrder - bOrder;
+        });
+        seats.forEach((seat, index) => {
+            const label = seat.querySelector('[data-seat-label]');
+            const orderNumber = index + 1;
+            if (label) {
+                label.textContent = `Seat ${String(orderNumber).padStart(2, '0')}`;
+            }
+            roundTableOrbit.appendChild(seat);
+        });
     }
 
     function normalizeRandomPhase(phase) {
@@ -1533,7 +1721,7 @@ function openWhatsAppShare(message) {
 
     function buildJumpTargets(base) {
         const step = getJumpStep();
-        const count = 3;
+        const count = 2;
         const targets = [];
         for (let i = 1; i <= count; i++) {
             targets.push(base + step * i);
