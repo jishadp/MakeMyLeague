@@ -8,6 +8,7 @@ use App\Models\League;
 use App\Models\LeagueGroup;
 use App\Models\Fixture;
 use App\Models\LeaguePlayer;
+use App\Models\Ground;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -46,8 +47,9 @@ class LeagueMatchController extends Controller
 
         $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
         $fixtures = $league->fixtures()->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])->get();
+        $grounds = Ground::orderBy('name')->get(['id', 'name', 'local_body_id']);
 
-        return view('leagues.league-match.fixture-setup', compact('league', 'groups', 'fixtures'));
+        return view('leagues.league-match.fixture-setup', compact('league', 'groups', 'fixtures', 'grounds'));
     }
 
     public function createGroups(CreateGroupsRequest $request, League $league)

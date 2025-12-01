@@ -91,7 +91,12 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-                            <input type="text" id="venue" placeholder="Enter venue name" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <input type="text" id="venue" placeholder="Search or enter venue" list="venue-options" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <datalist id="venue-options">
+                                @foreach($grounds as $ground)
+                                    <option value="{{ $ground->name }}"></option>
+                                @endforeach
+                            </datalist>
                         </div>
                         
                         <div class="flex justify-end">
@@ -165,6 +170,7 @@
                                                     <input type="text" 
                                                            placeholder="Venue"
                                                            value="{{ $fixture->venue ?? '' }}"
+                                                           list="venue-options"
                                                            class="border border-gray-300 rounded px-2 py-1 text-xs col-span-2"
                                                            onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
                                                 </div>
@@ -203,6 +209,7 @@
                                                         <input type="text" 
                                                                placeholder="Venue"
                                                                value="{{ $fixture->venue ?? '' }}"
+                                                               list="venue-options"
                                                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                                                            onchange="updateFixture({{ $fixture->id }}, 'venue', this.value, this)">
                                                     </div>
