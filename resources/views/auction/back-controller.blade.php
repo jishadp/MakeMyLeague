@@ -85,6 +85,10 @@
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
         gap: 0.75rem;
     }
+    .static-jump-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+    }
     .quick-button {
         border-radius: 999px;
         padding: 0.85rem 1rem;
@@ -115,6 +119,16 @@
         border: none;
         box-shadow: 0 12px 20px rgba(5, 150, 105, 0.35);
     }
+    .next-amount-btn--compact {
+        width: auto;
+        min-width: 170px;
+        padding: 0.65rem 0.85rem;
+        align-items: flex-start;
+        box-shadow: 0 10px 18px rgba(5, 150, 105, 0.3);
+    }
+    .next-amount-btn__amount {
+        font-size: 1.05rem;
+    }
     .team-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -143,9 +157,9 @@
         max-width: 960px;
         width: 100%;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 0.75rem;
-        padding: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+        padding: 0.6rem;
         isolation: isolate;
     }
     .round-table__halo {
@@ -247,7 +261,7 @@
     .team-pill {
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
-        padding: 0.85rem;
+        padding: 0.55rem;
         text-align: left;
         background: #fff;
         transition: all 0.2s ease;
@@ -256,10 +270,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-        aspect-ratio: 1 / 1;
-        min-height: 140px;
         overflow: hidden;
         position: relative;
     }
@@ -301,21 +313,24 @@
     }
     .team-pill__header {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
     }
     .team-pill__name {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 800;
         color: #0f172a;
         text-transform: uppercase;
         letter-spacing: 0.04em;
+        text-align: center;
     }
     .team-pill__logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
         background: #e2e8f0;
         display: inline-flex;
         align-items: center;
@@ -324,6 +339,11 @@
         color: #475569;
         overflow: hidden;
         flex-shrink: 0;
+    }
+    .team-pill__logo--small {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
     }
     .team-pill__logo img {
         width: 100%;
@@ -444,12 +464,30 @@
         border-radius: 999px;
         padding: 0.25rem 0.55rem;
     }
+    .seat-sorter__logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #475569;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .seat-sorter__logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
     @media (max-width: 1024px) {
         .round-table__orbit {
             aspect-ratio: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.65rem;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 0.45rem;
             padding: 0.35rem;
         }
         .round-table__halo {
@@ -1093,6 +1131,102 @@
                     </div>
                 </div>
             </div>
+            <div class="control-card control-card--wide space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Choose Team</p>
+                        <p class="text-xs text-slate-500">Seat them around the table and tap to assign the bid target.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="round-table__link" data-seat-sort-toggle>Show sort</button>
+                        <button type="button" class="round-table__link" data-round-table-toggle>Compact view</button>
+                        <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
+                    </div>
+                </div>
+                <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
+                @php
+                    $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
+                    $teamCount = max($teams->count(), 1);
+        @endphp
+                <div class="round-table">
+                    <div class="round-table__orbit" data-team-count="{{ $teamCount }}">
+                        @foreach($teams as $team)
+                            @php
+                                $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
+                                $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
+                                $seatAngle = (($loop->index / $teamCount) * 360);
+                                $seatIndex = $loop->iteration;
+                            @endphp
+                            <div class="round-table__seat" data-seat-default="{{ $seatIndex }}">
+                                @php
+                                    $logoUrl = $team->team?->logo ? \Illuminate\Support\Facades\Storage::url($team->team->logo) : null;
+                                @endphp
+                                <div
+                                    class="team-pill team-pill--round {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
+                                    data-team-pill="{{ $team->id }}"
+                                    data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
+                                    data-team-reserve="{{ $team->reserve_amount }}"
+                                    data-team-max="{{ $team->max_bid_cap }}"
+                                    data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
+                                    data-team-needed="{{ $team->players_needed }}"
+                                    data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}">
+                                    <div class="team-pill__header">
+                                        <span class="team-pill__logo team-pill__logo--small">
+                                            @if($logoUrl)
+                                                <img src="{{ $logoUrl }}" alt="{{ $team->team?->name ?? 'Team #' . $team->id }} logo">
+                                            @else
+                                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 2, '')) }}
+                                            @endif
+                                        </span>
+                                        <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
+                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}
+                                        </p>
+                                    </div>
+                                    <div class="team-pill__cta">
+                                        <button type="button"
+                                            class="team-pill__bid {{ $currentPlayer && !$teamDisabled ? '' : 'opacity-50 cursor-not-allowed' }}"
+                                            data-team-bid-label
+                                            onclick="bidFromTeam('{{ $team->id }}')"
+                                            {{ $currentPlayer && !$teamDisabled ? '' : 'disabled' }}>
+                                            Bid
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="round-table__subtitle hidden">Tap any team to lock in the bidder.</p>
+                </div>
+                <div class="seat-sorter hidden" id="seat-sorter">
+                    <div class="seat-sorter__header">
+                        <div>
+                            <p class="seat-sorter__title">Sort teams</p>
+                            <p class="seat-sorter__hint">Drag to reorder the seating list.</p>
+                        </div>
+                    </div>
+                    <div id="seat-sort-list" class="seat-sorter__list">
+                        @foreach($teams as $team)
+                            @php
+                                $logoUrl = $team->team?->logo ? \Illuminate\Support\Facades\Storage::url($team->team->logo) : null;
+                            @endphp
+                            <div class="seat-sorter__item" draggable="true" data-seat-sort-item data-team-id="{{ $team->id }}" data-seat-default="{{ $loop->iteration }}">
+                                <span class="seat-sorter__handle" aria-hidden="true">::</span>
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <span class="seat-sorter__logo">
+                                        @if($logoUrl)
+                                            <img src="{{ $logoUrl }}" alt="{{ $team->team?->name ?? 'Team #' . $team->id }} logo">
+                                        @else
+                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 2, '')) }}
+                                        @endif
+                                    </span>
+                                    <span class="seat-sorter__name truncate">{{ $team->team?->name ?? 'Team #' . $team->id }}</span>
+                                </div>
+                                <span class="seat-sorter__badge" data-seat-sort-badge>{{ $loop->iteration }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
             <div class="control-card player-card">
                 <div class="player-thumb">
                     @if($currentPlayer && $currentPlayer->player?->photo)
@@ -1140,21 +1274,29 @@
             </div>
 
             <div class="control-card space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-start justify-between gap-3">
                     <div>
                         <p class="text-sm font-semibold text-slate-600">Bid Desk</p>
                         <p class="text-xs text-slate-500">Choose quick amounts and place bids.</p>
                     </div>
-                    <button type="button" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
-                        Change amount
-                    </button>
+                    <div class="flex flex-col items-end gap-2">
+                        <button type="button" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
+                            Change amount
+                        </button>
+                        <button type="button" onclick="placeControllerBid(this)" data-main-bid-button class="next-amount-btn next-amount-btn--compact {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                            <span class="uppercase text-[11px] tracking-wide text-white/80">Bid</span>
+                            <span id="controller-bid-preview" class="next-amount-btn__amount">₹{{ number_format($currentBidAmount) }}</span>
+                        </button>
+                    </div>
                 </div>
-                <p id="selected-team-label" class="text-xs text-slate-600">
-                    Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
-                </p>
-                <p class="text-xs text-slate-500">
-                    Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
-                </p>
+                <div class="space-y-1">
+                    <p id="selected-team-label" class="text-xs text-slate-600">
+                        Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
+                    </p>
+                    <p class="text-xs text-slate-500">
+                        Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
+                    </p>
+                </div>
                 <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount ?? 0 }}">
                 <div class="quick-grid">
                     @if($bidIncrementValues->isNotEmpty())
@@ -1163,7 +1305,7 @@
                         </button>
                     @endif
                 </div>
-                <div class="space-y-1">
+                <div class="space-y-2">
                     <div class="quick-jump-title">
                         <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
                         <div class="flex items-center gap-2">
@@ -1171,74 +1313,15 @@
                             <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
                         </div>
                     </div>
-                    <div id="quick-jump-grid" class="quick-grid"></div>
-                </div>
-                <button type="button" onclick="placeControllerBid(this)" data-main-bid-button class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                    <span class="uppercase text-[11px] tracking-wide text-white/80">Bid</span>
-                    <span id="controller-bid-preview" class="text-lg">₹{{ number_format($currentBidAmount) }}</span>
-                </button>
-            </div>
-
-            <div class="control-card control-card--wide space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-600">Choose Team</p>
-                        <p class="text-xs text-slate-500">Seat them around the table and tap to assign the bid target.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="round-table__link" data-round-table-toggle>Compact view</button>
-                        <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
-                    </div>
-                </div>
-                <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
-                @php
-                    $currentRequiredBid = $currentPlayer ? ($currentBidAmount ?? 0) : 0;
-                    $teamCount = max($teams->count(), 1);
-        @endphp
-                <div class="round-table">
-                    <div class="round-table__orbit" data-team-count="{{ $teamCount }}">
-                        @foreach($teams as $team)
-                            @php
-                                $teamMaxBid = max($team->max_bid_cap ?? 0, 0);
-                                $teamDisabled = ($team->players_needed ?? 0) === 0 || ($currentPlayer && $teamMaxBid < $currentRequiredBid);
-                                $seatAngle = (($loop->index / $teamCount) * 360);
-                                $seatIndex = $loop->iteration;
-                            @endphp
-                            <div class="round-table__seat" data-seat-default="{{ $seatIndex }}">
-                                @php
-                                    $logoUrl = $team->team?->logo ? \Illuminate\Support\Facades\Storage::url($team->team->logo) : null;
-                                @endphp
-                                <div
-                                    class="team-pill team-pill--round {{ $logoUrl ? 'team-pill--bg' : '' }} {{ $currentHighestBid?->league_team_id === $team->id ? 'active' : '' }} {{ $teamDisabled ? 'team-pill--disabled' : '' }}"
-                                    data-team-pill="{{ $team->id }}"
-                                    data-team-name="{{ $team->team?->name ?? 'Team #' . $team->id }}"
-                                    data-team-reserve="{{ $team->reserve_amount }}"
-                                    data-team-max="{{ $team->max_bid_cap }}"
-                                    data-team-wallet="{{ $team->display_wallet ?? $team->wallet_balance ?? 0 }}"
-                                    data-team-needed="{{ $team->players_needed }}"
-                                    data-team-disabled="{{ $teamDisabled ? 'true' : 'false' }}"
-                                    @if($logoUrl) style="background-image: url('{{ $logoUrl }}');" @endif>
-                                    <div class="team-pill__header">
-                                        <p class="team-pill__name" title="{{ $team->team?->name ?? 'Team #' . $team->id }}">
-                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::limit($team->team?->name ?? 'Team #' . $team->id, 16, '')) }}
-                                        </p>
-                                    </div>
-                                    <div class="team-pill__cta">
-                                        <button type="button"
-                                            class="team-pill__bid {{ $currentPlayer && !$teamDisabled ? '' : 'opacity-50 cursor-not-allowed' }}"
-                                            data-team-bid-label
-                                            onclick="bidFromTeam('{{ $team->id }}')"
-                                            {{ $currentPlayer && !$teamDisabled ? '' : 'disabled' }}>
-                                            Bid
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="quick-grid static-jump-grid">
+                        @foreach(range(500, 2000, 100) as $jumpAmount)
+                            <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-static-jump="{{ $jumpAmount }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                                ₹{{ number_format($jumpAmount) }}
+                            </button>
                         @endforeach
                     </div>
-                    <p class="round-table__subtitle hidden">Tap any team to lock in the bidder.</p>
+                    <div id="quick-jump-grid" class="quick-grid"></div>
                 </div>
-                <div class="seat-sorter hidden" id="seat-sorter"></div>
             </div>
         </div>
 
@@ -1394,6 +1477,7 @@ function openWhatsAppShare(message) {
     const quickJumpGrid = document.getElementById('quick-jump-grid');
     const quickJumpNote = document.getElementById('quick-jump-note');
     const quickJumpStepInput = document.getElementById('quick-jump-step');
+    const staticJumpButtons = document.querySelectorAll('[data-static-jump]');
     const mainBidButton = document.querySelector('[data-main-bid-button]');
     const teamBidLabels = document.querySelectorAll('[data-team-bid-label]');
     const selectedNeedLabel = document.querySelector('[data-selected-need]');
@@ -1525,7 +1609,9 @@ function openWhatsAppShare(message) {
 
     function initSeatSortToggle() {
         if (!seatSorter || !seatSortToggle) return;
-        const hidden = seatSortToggleStorageKey ? localStorage.getItem(seatSortToggleStorageKey) === '1' : false;
+        const hidden = seatSortToggleStorageKey
+            ? localStorage.getItem(seatSortToggleStorageKey) === '1'
+            : seatSorter.classList.contains('hidden');
         setSeatSorterHidden(hidden);
         seatSortToggle.addEventListener('click', () => {
             const nextHidden = !seatSorter.classList.contains('hidden');
@@ -1539,7 +1625,8 @@ function openWhatsAppShare(message) {
     function setSeatSorterHidden(hidden) {
         if (!seatSorter || !seatSortToggle) return;
         seatSorter.classList.toggle('hidden', hidden);
-        seatSortToggle.textContent = hidden ? 'Show' : 'Hide';
+        seatSortToggle.textContent = hidden ? 'Show sort' : 'Hide sort';
+        seatSortToggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
     }
 
     function hydrateSeatSortList(orderMap = {}) {
@@ -1762,6 +1849,31 @@ function openWhatsAppShare(message) {
             quickJumpGrid.appendChild(btn);
         });
     }
+
+    function applyStaticJump(target) {
+        if (!controllerBidInput || !controllerBaseInput) {
+            return;
+        }
+        const base = Number(controllerBaseInput.value || 0);
+        if (base && target <= base) {
+            showControllerMessage('Choose an amount above the current bid.', 'error');
+            return;
+        }
+        controllerBidInput.value = target;
+        controllerBidInput.dataset.defaultIncrement = Math.max(target - base, 0);
+        updatePreview(target);
+        updateQuickButtonLabel();
+    }
+
+    staticJumpButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const target = Number(button.dataset.staticJump || 0);
+            if (!target) {
+                return;
+            }
+            applyStaticJump(target);
+        });
+    });
 
     function updatePreview(value) {
         if (controllerPreview) {
