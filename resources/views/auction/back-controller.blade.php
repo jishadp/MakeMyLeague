@@ -120,6 +120,9 @@
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         gap: 0.5rem;
     }
+    .control-card--wide {
+        grid-column: 1 / -1;
+    }
     @media (max-width: 640px) {
         .team-grid {
             grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -135,7 +138,7 @@
         box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06) inset, 0 18px 36px rgba(15, 23, 42, 0.06);
     }
     .round-table__orbit {
-        --seat-radius: clamp(150px, 38vw, 280px);
+        --seat-radius: clamp(140px, 34vw, 260px);
         position: relative;
         margin: 0 auto;
         max-width: 860px;
@@ -159,14 +162,17 @@
     .round-table__center {
         position: relative;
         z-index: 2;
-        padding: 1rem 1.25rem;
-        width: 48%;
-        max-width: 280px;
+        padding: 1.1rem 1.25rem;
+        width: min(420px, 60%);
+        max-width: 460px;
         text-align: center;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, #0f172a, #111827);
         color: #e2e8f0;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.22);
+        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.28);
+        display: grid;
+        gap: 0.65rem;
+        align-items: start;
     }
     .round-table__legend {
         margin-top: 0.6rem;
@@ -183,8 +189,9 @@
         padding: 0.25rem 0.5rem;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.08);
-        color: #f8fafc;
-        border: 1px solid rgba(148, 163, 184, 0.25);
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+        background: #fff;
     }
     .round-table__seat {
         position: absolute;
@@ -198,6 +205,87 @@
     }
     .round-table__seat:hover {
         transform: rotate(var(--seat-angle)) translate(calc(var(--seat-radius) + 6px)) rotate(var(--seat-angle-rev));
+    }
+    .round-table__eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #a5b4fc;
+        font-weight: 800;
+    }
+    .round-table__title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #f8fafc;
+        margin: 0;
+    }
+    .round-table__chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.85rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #e2e8f0;
+    }
+    .round-table__meta {
+        font-size: 12px;
+        color: #cbd5f5;
+    }
+    .round-table__hub {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 1rem;
+        padding: 0.85rem;
+        display: grid;
+        gap: 0.6rem;
+        text-align: left;
+    }
+    .round-table__hub .quick-grid {
+        gap: 0.5rem;
+    }
+    .round-table__hub .quick-button {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+    }
+    .round-table__hub .quick-button:hover,
+    .round-table__hub .quick-button:focus {
+        border-color: #c7d2fe;
+    }
+    .round-table__hub .quick-jump-title {
+        color: #cbd5f5;
+    }
+    .round-table__hub .quick-jump-input {
+        background: rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .round-table__hub .quick-jump-input:focus {
+        border-color: #c7d2fe;
+        outline: none;
+    }
+    .round-table__hub .quick-rule-note {
+        color: #cbd5f5;
+    }
+    .round-table__tip {
+        font-size: 11px;
+        color: #cbd5f5;
+        margin: 0;
+    }
+    .round-table__link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        font-size: 12px;
+        font-weight: 700;
+        color: #c7d2fe;
+        text-decoration: underline;
     }
     .team-pill {
         border-radius: 1rem;
@@ -285,6 +373,21 @@
         text-align: center;
         font-size: 12px;
         color: #475569;
+    }
+    .round-table--compact {
+        padding: 0.75rem;
+    }
+    .round-table--compact .round-table__orbit {
+        --seat-radius: clamp(110px, 26vw, 200px);
+        max-width: 720px;
+    }
+    .round-table--compact .round-table__seat {
+        width: 135px;
+    }
+    .round-table--compact .round-table__center {
+        width: min(360px, 55%);
+        max-width: 420px;
+        padding: 0.9rem 1rem;
     }
     @media (max-width: 1024px) {
         .round-table__orbit {
@@ -642,6 +745,16 @@
         box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
         flex-wrap: wrap;
     }
+    @media (min-width: 768px) {
+        .control-bar {
+            flex-wrap: nowrap;
+        }
+        .control-bar-actions {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+    }
     .control-bar h1 {
         font-size: 1.25rem;
         font-weight: 800;
@@ -671,6 +784,28 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1rem;
+    }
+    .control-board {
+        display: grid;
+        grid-template-columns: minmax(280px, 340px) minmax(420px, 1fr) minmax(300px, 360px);
+        gap: 1rem;
+        align-items: start;
+    }
+    @media (max-width: 1200px) {
+        .control-board {
+            grid-template-columns: minmax(280px, 340px) 1fr;
+        }
+        .control-board > .control-card:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+    }
+    @media (max-width: 900px) {
+        .control-board {
+            grid-template-columns: 1fr;
+        }
+        .control-board > .control-card {
+            grid-column: 1 / -1;
+        }
     }
     .hide-shell .top-navbar,
     .hide-shell .sidebar,
@@ -854,66 +989,61 @@
             </div>
         @endif
 
-            <div class="control-card space-y-4">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-600">Next Player Tools</p>
-                        <p class="text-xs text-slate-500">Search and queue an available player or pull a random pick.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="player-finder__pill">{{ $auctionStats['available_players'] ?? $availablePlayers->count() }} available</span>
-                        <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700" data-toggle-player-tools>Collapse</button>
-                    </div>
+        <div class="control-board">
+            <div class="control-card player-card">
+                <div class="player-thumb">
+                    @if($currentPlayer && $currentPlayer->player?->photo)
+                        <img src="{{ Storage::url($currentPlayer->player->photo) }}" alt="{{ $currentPlayer->player->name }}">
+                    @else
+                        <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="Player">
+                    @endif
                 </div>
-                <div id="controller-player-tools" class="space-y-3">
-                    <div class="player-finder">
-                        <span class="player-finder__icon">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.25 5.25a7.5 7.5 0 001.4 11.4z" />
-                            </svg>
-                        </span>
-                        <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
-                        <div id="controller-search-results" class="player-finder__results hidden"></div>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
-                        <button type="button" class="player-finder__random" data-controller-random>
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
-                            </svg>
-                            Random available player
+                <div class="player-details">
+                    <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Current Player</p>
+                    <h2 class="text-2xl font-bold text-slate-900">{{ $currentPlayer?->player?->name ?? 'Awaiting selection' }}</h2>
+                    <p class="text-sm text-slate-500">
+                        @if($currentPlayer)
+                            {{ $currentPlayer->player?->primaryGameRole?->gamePosition?->name ?? $currentPlayer->player?->position?->name ?? 'Role TBA' }}
+                            · Base ₹{{ number_format($currentPlayer->base_price ?? 0) }}
+                        @else
+                            Start an auction to see player details here.
+                        @endif
+                    </p>
+                </div>
+                <div class="player-bid">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Current Bid</p>
+                    <p id="controller-current-bid-label" class="text-3xl font-bold text-emerald-600">{{ $currentPlayer ? '₹' . number_format($currentBidAmount) : '—' }}</p>
+                    <p class="text-xs text-slate-400 mt-1">{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'No bids yet' }}</p>
+                </div>
+                <div class="player-actions">
+                    <div class="flex items-center justify-between text-xs text-slate-500">
+                        <span>Manage result for current player</span>
+                        <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
+                            Override amount
                         </button>
                     </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-slate-600">Queued Players</p>
-                            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700" data-clear-queue>Clear</button>
-                        </div>
-                        <div class="auto-start-options">
-                            <span class="text-[11px] font-semibold text-slate-600">Auto start next after Sold/Unsold:</span>
-                            <label>
-                                <input type="radio" name="auto-start" value="on" data-auto-start>
-                                <span>On</span>
-                            </label>
-                            <label>
-                                <input type="radio" name="auto-start" value="off" data-auto-start>
-                                <span>Off</span>
-                            </label>
-                        </div>
-                        <div id="controller-player-queue" class="player-queue"></div>
-                        <div id="controller-queue-empty" class="player-finder__empty">No queued players yet. Add from search or random.</div>
+                    <div class="player-actions__buttons">
+                        <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Sold
+                        </button>
+                        <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Unsold
+                        </button>
                     </div>
+                    <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
                 </div>
             </div>
 
-        <div class="control-grid">
-            <div class="control-card space-y-4">
+            <div class="control-card control-card--wide space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-slate-600">Choose Team</p>
                         <p class="text-xs text-slate-500">Seat them around the table and tap to assign the bid target.</p>
                     </div>
-                    <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="round-table__link" data-round-table-toggle>Compact view</button>
+                        <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
+                    </div>
                 </div>
                 <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
                 @php
@@ -924,14 +1054,45 @@
                     <div class="round-table__orbit">
                         <div class="round-table__halo"></div>
                         <div class="round-table__center">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100/80 mb-1">Seat Map</p>
-                            <p class="text-sm font-semibold text-white">{{ $league->name }}</p>
-                            <p class="text-[11px] text-indigo-100/90">Clockwise order mirrors your table layout.</p>
-                            <div class="round-table__legend">
-                                <span><span class="w-2 h-2 rounded-full bg-emerald-400 block"></span>Active seat</span>
-                                <span><span class="w-2 h-2 rounded-full bg-slate-200 block"></span>Available</span>
-                                <span><span class="w-2 h-2 rounded-full bg-rose-300 block"></span>Wallet capped</span>
+                            <p class="round-table__eyebrow">Bid Desk</p>
+                            <p class="round-table__title">Round Table Control</p>
+                            <p id="selected-team-label" class="round-table__chip">
+                                Selected: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
+                            </p>
+                            <p class="round-table__meta">
+                                Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
+                            </p>
+                            <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
+                            <div class="round-table__hub">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-xs font-semibold text-indigo-100">Quick amount</p>
+                                    <button type="button" class="text-[11px] font-semibold text-indigo-200 hover:text-white" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
+                                        Change amount
+                                    </button>
+                                </div>
+                                <div class="quick-grid">
+                                    @if($bidIncrementValues->isNotEmpty())
+                                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
+                                            +₹{{ number_format($bidIncrementValues->first()) }}
+                                        </button>
+                                    @endif
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="quick-jump-title">
+                                        <p class="text-xs font-semibold text-indigo-100">Jump to amount</p>
+                                        <div class="flex items-center gap-2">
+                                            <span id="quick-jump-note" class="text-xs text-indigo-100/80">(steps of ₹50)</span>
+                                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
+                                        </div>
+                                    </div>
+                                    <div id="quick-jump-grid" class="quick-grid"></div>
+                                </div>
+                                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
+                                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
+                                </button>
                             </div>
+                            <p class="round-table__tip">Queue quick increments then lock in with Bid from the auction desk.</p>
                         </div>
                         @foreach($teams as $team)
                             @php
@@ -975,91 +1136,60 @@
                             </div>
                         @endforeach
                     </div>
+                    <div class="round-table__legend">
+                        <span><span class="w-2 h-2 rounded-full bg-emerald-400 block"></span>Active seat</span>
+                        <span><span class="w-2 h-2 rounded-full bg-slate-200 block"></span>Available</span>
+                        <span><span class="w-2 h-2 rounded-full bg-rose-300 block"></span>Wallet capped</span>
+                    </div>
                     <p class="round-table__subtitle">Order runs clockwise from the top seat. Tap any team to lock in the bidder.</p>
                 </div>
             </div>
-
-            <div class="control-card space-y-5">
-                <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
-                <div class="flex items-center justify-between">
+            <div class="control-card space-y-4">
+                <div class="flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-sm font-semibold text-slate-600 mb-1">Quick Bid Amount</p>
-                        <p id="selected-team-label" class="text-xs text-slate-500">
-                            Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
-                        </p>
-                        <p class="text-xs text-slate-500">
-                            Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
-                        </p>
+                        <p class="text-sm font-semibold text-slate-600">Next Player Tools</p>
+                        <p class="text-xs text-slate-500">Search and queue an available player or pull a random pick.</p>
                     </div>
-                    <button type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
-                        Change amount
-                    </button>
+                    <span class="player-finder__pill">{{ $auctionStats['available_players'] ?? $availablePlayers->count() }} available</span>
                 </div>
-                <div class="quick-grid">
-                    @if($bidIncrementValues->isNotEmpty())
-                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
-                            +₹{{ number_format($bidIncrementValues->first()) }}
+                <div id="controller-player-tools" class="space-y-3">
+                    <div class="player-finder">
+                        <span class="player-finder__icon">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.25 5.25a7.5 7.5 0 001.4 11.4z" />
+                            </svg>
+                        </span>
+                        <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
+                        <div id="controller-search-results" class="player-finder__results hidden"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
+                        <button type="button" class="player-finder__random" data-controller-random>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
+                            </svg>
+                            Random available player
                         </button>
-                    @endif
-                </div>
-                <div class="space-y-1">
-                    <div class="quick-jump-title">
-                        <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
-                        <div class="flex items-center gap-2">
-                            <span id="quick-jump-note" class="text-xs text-slate-500">(steps of ₹50)</span>
-                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-600">Queued Players</p>
+                            <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-700" data-clear-queue>Clear</button>
                         </div>
+                        <div class="auto-start-options">
+                            <span class="text-[11px] font-semibold text-slate-600">Auto start next after Sold/Unsold:</span>
+                            <label>
+                                <input type="radio" name="auto-start" value="on" data-auto-start>
+                                <span>On</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="auto-start" value="off" data-auto-start>
+                                <span>Off</span>
+                            </label>
+                        </div>
+                        <div id="controller-player-queue" class="player-queue"></div>
+                        <div id="controller-queue-empty" class="player-finder__empty">No queued players yet. Add from search or random.</div>
                     </div>
-                    <div id="quick-jump-grid" class="quick-grid"></div>
-                </div>
-                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
-                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
-                </button>
-                <p class="text-center text-xs text-slate-400">Use the quick bid button to queue the next amount, then press Bid.</p>
-            </div>
-
-            <div class="control-card player-card">
-                <div class="player-thumb">
-                    @if($currentPlayer && $currentPlayer->player?->photo)
-                        <img src="{{ Storage::url($currentPlayer->player->photo) }}" alt="{{ $currentPlayer->player->name }}">
-                    @else
-                        <img src="{{ asset('images/defaultplayer.jpeg') }}" alt="Player">
-                    @endif
-                </div>
-                <div class="player-details">
-                    <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Current Player</p>
-                    <h2 class="text-2xl font-bold text-slate-900">{{ $currentPlayer?->player?->name ?? 'Awaiting selection' }}</h2>
-                    <p class="text-sm text-slate-500">
-                        @if($currentPlayer)
-                            {{ $currentPlayer->player?->primaryGameRole?->gamePosition?->name ?? $currentPlayer->player?->position?->name ?? 'Role TBA' }}
-                            · Base ₹{{ number_format($currentPlayer->base_price ?? 0) }}
-                        @else
-                            Start an auction to see player details here.
-                        @endif
-                    </p>
-                </div>
-                <div class="player-bid">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Current Bid</p>
-                    <p id="controller-current-bid-label" class="text-3xl font-bold text-emerald-600">{{ $currentPlayer ? '₹' . number_format($currentBidAmount) : '—' }}</p>
-                    <p class="text-xs text-slate-400 mt-1">{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'No bids yet' }}</p>
-                </div>
-                <div class="player-actions">
-                    <div class="flex items-center justify-between text-xs text-slate-500">
-                        <span>Manage result for current player</span>
-                        <button type="button" class="font-semibold text-indigo-600 hover:text-indigo-700 {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-edit-override {{ $currentPlayer ? '' : 'disabled' }}>
-                            Override amount
-                        </button>
-                    </div>
-                    <div class="player-actions__buttons">
-                        <button type="button" data-controller-sold class="px-6 py-3 rounded-2xl bg-emerald-500 text-white font-semibold shadow-lg hover:bg-emerald-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" onclick="markControllerSold(this)" {{ $currentPlayer ? '' : 'disabled' }}>
-                            Sold
-                        </button>
-                        <button type="button" onclick="markControllerUnsold(this)" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg hover:bg-rose-600 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                            Unsold
-                        </button>
-                    </div>
-                    <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
                 </div>
             </div>
         </div>
@@ -1243,6 +1373,9 @@ function openWhatsAppShare(message) {
     const availableServedStorageKey = leagueIdValue ? `league_${leagueIdValue}_served_available` : null;
     const unsoldServedStorageKey = leagueIdValue ? `league_${leagueIdValue}_served_unsold` : null;
     const randomPhaseStorageKey = leagueIdValue ? `league_${leagueIdValue}_random_phase` : null;
+    const roundTableToggle = document.querySelector('[data-round-table-toggle]');
+    const roundTable = document.querySelector('.round-table');
+    const roundTableStorageKey = leagueIdValue ? `league_${leagueIdValue}_round_table_compact` : null;
     const unsoldModal = document.getElementById('controller-unsold-modal');
     const unsoldConfirmButtons = unsoldModal?.querySelectorAll('[data-unsold-confirm]');
     const unsoldCancelButtons = unsoldModal?.querySelectorAll('[data-unsold-cancel]');
@@ -1269,6 +1402,7 @@ function openWhatsAppShare(message) {
     let pendingAutoStartAfterConfirm = false;
     let availableRandomPool = [];
     let unsoldRandomPool = [];
+    initRoundTableSizing();
     const teamNameMap = {};
     teamPills.forEach(button => {
         teamNameMap[button.dataset.teamPill] = button.dataset.teamName || button.textContent.trim();
@@ -1300,6 +1434,27 @@ function openWhatsAppShare(message) {
         if (!randomPhaseStorageKey) return 'available';
         const stored = localStorage.getItem(randomPhaseStorageKey);
         return stored || 'available';
+    }
+
+    function initRoundTableSizing() {
+        if (!roundTable || !roundTableToggle) return;
+        const storedCompact = roundTableStorageKey ? localStorage.getItem(roundTableStorageKey) === '1' : false;
+        setRoundTableCompact(storedCompact);
+        roundTableToggle.addEventListener('click', () => {
+            const next = !roundTable.classList.contains('round-table--compact');
+            setRoundTableCompact(next);
+            if (roundTableStorageKey) {
+                localStorage.setItem(roundTableStorageKey, next ? '1' : '0');
+            }
+        });
+    }
+
+    function setRoundTableCompact(enabled) {
+        if (!roundTable) return;
+        roundTable.classList.toggle('round-table--compact', !!enabled);
+        if (roundTableToggle) {
+            roundTableToggle.textContent = enabled ? 'Expand view' : 'Compact view';
+        }
     }
 
     function normalizeRandomPhase(phase) {
@@ -1403,7 +1558,7 @@ function openWhatsAppShare(message) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `quick-button ${controllerBaseInput?.value ? '' : 'opacity-50 cursor-not-allowed'}`;
-            btn.textContent = `+₹${(target - base).toLocaleString('en-IN')}`;
+            btn.textContent = `₹${target.toLocaleString('en-IN')}`;
             btn.disabled = !controllerBaseInput?.value;
             btn.addEventListener('click', () => {
                 if (!controllerBidInput) {
