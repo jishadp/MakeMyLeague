@@ -287,7 +287,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('toggle-top-buys');
@@ -303,4 +303,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
-@endpush
+@endsection
