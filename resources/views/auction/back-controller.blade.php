@@ -121,7 +121,7 @@
         gap: 0.5rem;
     }
     .control-card--wide {
-        grid-column: auto;
+        grid-column: 1 / -1;
     }
     @media (max-width: 640px) {
         .team-grid {
@@ -817,16 +817,13 @@
     }
     .control-board {
         display: grid;
-        grid-template-columns: minmax(260px, 1fr) minmax(520px, 2fr) minmax(260px, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 1rem;
         align-items: start;
     }
     @media (max-width: 1200px) {
         .control-board {
-            grid-template-columns: minmax(280px, 340px) 1fr;
-        }
-        .control-board > .control-card:nth-child(3) {
-            grid-column: 1 / -1;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
     }
     @media (max-width: 900px) {
@@ -1115,6 +1112,47 @@
                 </div>
             </div>
 
+            <div class="control-card space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Bid Desk</p>
+                        <p class="text-xs text-slate-500">Choose quick amounts and place bids.</p>
+                    </div>
+                    <button type="button" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
+                        Change amount
+                    </button>
+                </div>
+                <p id="selected-team-label" class="text-xs text-slate-600">
+                    Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
+                </p>
+                <p class="text-xs text-slate-500">
+                    Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
+                </p>
+                <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount ?? 0 }}">
+                <div class="quick-grid">
+                    @if($bidIncrementValues->isNotEmpty())
+                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
+                            +₹{{ number_format($bidIncrementValues->first()) }}
+                        </button>
+                    @endif
+                </div>
+                <div class="space-y-1">
+                    <div class="quick-jump-title">
+                        <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
+                        <div class="flex items-center gap-2">
+                            <span id="quick-jump-note" class="text-xs text-slate-500">(steps of ₹50)</span>
+                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
+                        </div>
+                    </div>
+                    <div id="quick-jump-grid" class="quick-grid"></div>
+                </div>
+                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
+                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
+                </button>
+                <p class="text-center text-xs text-slate-400">Queue quick bid amounts, then press Bid to push to the live room.</p>
+            </div>
+
             <div class="control-card control-card--wide space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
@@ -1176,7 +1214,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <p class="round-table__subtitle">Order runs clockwise from the top seat. Tap any team to lock in the bidder.</p>
+                    <p class="round-table__subtitle hidden">Tap any team to lock in the bidder.</p>
                 </div>
                 <div class="seat-sorter" id="seat-sorter">
                     <div class="seat-sorter__header">
@@ -1199,46 +1237,6 @@
                         @endforeach
                     </div>
                 </div>
-            </div>
-            <div class="control-card space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-600">Bid Desk</p>
-                        <p class="text-xs text-slate-500">Choose quick amounts and place bids.</p>
-                    </div>
-                    <button type="button" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700" data-edit-quick {{ $currentPlayer ? '' : 'disabled' }}>
-                        Change amount
-                    </button>
-                </div>
-                <p id="selected-team-label" class="text-xs text-slate-600">
-                    Selected team: <span data-selected-team>{{ $currentHighestBid?->leagueTeam?->team?->name ?? 'None' }}</span>
-                </p>
-                <p class="text-xs text-slate-500">
-                    Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
-                </p>
-                <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount > 0 ? $currentBidAmount + $firstBidIncrement : '' }}">
-                <div class="quick-grid">
-                    @if($bidIncrementValues->isNotEmpty())
-                        <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-quick-trigger {{ $currentPlayer ? '' : 'disabled' }}>
-                            +₹{{ number_format($bidIncrementValues->first()) }}
-                        </button>
-                    @endif
-                </div>
-                <div class="space-y-1">
-                    <div class="quick-jump-title">
-                        <p class="text-xs font-semibold text-slate-600">Jump to amount</p>
-                        <div class="flex items-center gap-2">
-                            <span id="quick-jump-note" class="text-xs text-slate-500">(steps of ₹50)</span>
-                            <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
-                        </div>
-                    </div>
-                    <div id="quick-jump-grid" class="quick-grid"></div>
-                </div>
-                <button type="button" onclick="placeControllerBid(this)" class="next-amount-btn {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                    <span class="uppercase text-xs tracking-wide text-white/80">Bid</span>
-                    <span id="controller-bid-preview" class="text-2xl">₹{{ number_format($currentBidAmount) }}</span>
-                </button>
-                <p class="text-center text-xs text-slate-400">Queue quick bid amounts, then press Bid to push to the live room.</p>
             </div>
         </div>
 
@@ -1962,6 +1960,25 @@ function openWhatsAppShare(message) {
         renderJumpTargets();
     }
 
+    function setInitialBidValue() {
+        if (!controllerBidInput || !controllerBaseInput) return;
+        const base = Number(controllerBaseInput.value || 0);
+        const hasExistingBid = Boolean(controllerDefaultTeam?.value);
+        const increment = getQuickIncrement(base);
+        if (hasExistingBid && increment > 0) {
+            const target = base + increment;
+            controllerBidInput.dataset.defaultIncrement = increment;
+            controllerBidInput.value = target;
+            updatePreview(target);
+        } else {
+            controllerBidInput.dataset.defaultIncrement = increment;
+            controllerBidInput.value = base;
+            updatePreview(base);
+        }
+        updateQuickButtonLabel();
+        renderJumpTargets();
+    }
+
     if (quickButton) {
         quickButton.addEventListener('click', () => {
             applyQuickBid(true);
@@ -2318,7 +2335,7 @@ function openWhatsAppShare(message) {
 
     const hasActivePlayer = Boolean(document.getElementById('controller-league-player-id')?.value);
     if (hasActivePlayer) {
-        applyQuickBid();
+        setInitialBidValue();
     } else {
         updatePreview(controllerBidInput?.value || controllerBaseInput?.value || 0);
         updateQuickButtonLabel();
