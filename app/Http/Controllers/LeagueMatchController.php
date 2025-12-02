@@ -167,22 +167,39 @@ class LeagueMatchController extends Controller
 
     public function fixtures(League $league)
     {
-        $fixtures = $league->fixtures()
+        $sortMode = request('sort') === 'time' ? 'time' : 'group';
+
+        $baseQuery = $league->fixtures()
             ->with([
                 'homeTeam.team',
                 'awayTeam.team',
                 'leagueGroup'
-            ])
-            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'qualifier' THEN 1 WHEN 'eliminator' THEN 2 WHEN 'quarter_final' THEN 3 WHEN 'semi_final' THEN 4 WHEN 'final' THEN 5 ELSE 6 END")
-            ->orderBy('league_group_id')
-            ->orderBy('sort_order')
-            ->orderBy('match_date')
-            ->orderBy('match_time')
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy(function ($fixture) {
-                return $fixture->leagueGroup?->name ?? 'Knockout / Unassigned';
-            });
+            ]);
+
+        if ($sortMode === 'time') {
+            $fixtures = $baseQuery
+                ->orderByRaw("CASE WHEN match_date IS NULL THEN 1 ELSE 0 END")
+                ->orderBy('match_date')
+                ->orderByRaw("CASE WHEN match_time IS NULL THEN 1 ELSE 0 END")
+                ->orderBy('match_time')
+                ->orderBy('sort_order')
+                ->get()
+                ->groupBy(function ($fixture) {
+                    return $fixture->match_date?->format('M d, Y') ?? 'Date TBD';
+                });
+        } else {
+            $fixtures = $baseQuery
+                ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'qualifier' THEN 1 WHEN 'eliminator' THEN 2 WHEN 'quarter_final' THEN 3 WHEN 'semi_final' THEN 4 WHEN 'final' THEN 5 ELSE 6 END")
+                ->orderBy('league_group_id')
+                ->orderBy('sort_order')
+                ->orderBy('match_date')
+                ->orderBy('match_time')
+                ->orderBy('created_at')
+                ->get()
+                ->groupBy(function ($fixture) {
+                    return $fixture->leagueGroup?->name ?? 'Knockout / Unassigned';
+                });
+        }
 
         $retentionByTeam = LeaguePlayer::where('league_id', $league->id)
             ->where(function ($q) {
@@ -204,7 +221,7 @@ class LeagueMatchController extends Controller
             return $players->take(2);
         });
 
-        return view('leagues.fixtures.index', compact('league', 'fixtures', 'retentionByTeam', 'topBoughtByTeam', 'topBoughtOverall'));
+        return view('leagues.fixtures.index', compact('league', 'fixtures', 'retentionByTeam', 'topBoughtByTeam', 'topBoughtOverall', 'sortMode'));
     }
 
     public function createFixture(Request $request, League $league)

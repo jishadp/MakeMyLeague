@@ -39,6 +39,10 @@
                             Edit fixtures
                         </a>
                     @endif
+                    <div class="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden text-sm">
+                        <a href="{{ route('leagues.fixtures', [$league, 'sort' => 'group']) }}" class="px-3 py-1.5 font-semibold {{ $sortMode === 'group' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50' }}">Group order</a>
+                        <a href="{{ route('leagues.fixtures', [$league, 'sort' => 'time']) }}" class="px-3 py-1.5 font-semibold {{ $sortMode === 'time' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50' }}">Time</a>
+                    </div>
                 </div>
             </div>
 
@@ -51,7 +55,7 @@
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Group</p>
+                            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">{{ $sortMode === 'time' ? 'Date' : 'Group' }}</p>
                             <h2 class="text-2xl font-bold text-slate-900">{{ $groupName }}</h2>
                         </div>
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 shadow-sm">
