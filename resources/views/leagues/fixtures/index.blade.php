@@ -42,36 +42,6 @@
                 </div>
             </div>
 
-            @if(isset($topBoughtOverall) && $topBoughtOverall->count() > 0)
-            <div class="mt-8">
-                <button id="toggle-top-buys" type="button" class="w-full inline-flex items-center justify-between px-4 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-semibold text-slate-800">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M12 5l7 7-7 7"></path></svg>
-                        Top buys
-                    </span>
-                    <span id="top-buys-toggle-icon" class="text-slate-500 text-xs">Show</span>
-                </button>
-                <div id="top-buys-panel" class="hidden pt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach($topBoughtOverall as $player)
-                        <div class="rounded-2xl bg-white border border-slate-100 p-4 flex items-center gap-4 shadow-sm">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-indigo-400 flex items-center justify-center text-lg font-bold text-white overflow-hidden shadow-sm">
-                                @if($player->player?->photo)
-                                    <img src="{{ asset('storage/' . $player->player->photo) }}" alt="{{ $player->player->name }}" class="w-full h-full object-cover">
-                                @else
-                                    {{ strtoupper(substr($player->player->name ?? 'P', 0, 2)) }}
-                                @endif
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-slate-900 break-words">{{ $player->player->name ?? 'Player' }}</p>
-                                <p class="text-xs text-slate-600 break-words">{{ $player->player?->position?->name ?? 'Role' }} • ₹{{ number_format($player->bid_price ?? 0) }}</p>
-                                <p class="text-[11px] text-emerald-700 break-words">{{ $player->leagueTeam?->team?->name }}</p>
-                            </div>
-                            <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Top Buy</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
         </div>
     </div>
 
@@ -102,13 +72,21 @@
                                     <div class="flex items-center gap-2">
                                         <span class="h-2 w-2 rounded-full {{ $fixture->status === 'completed' ? 'bg-emerald-500' : ($fixture->status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-slate-300') }}"></span>
                                         <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">{{ ucfirst(str_replace('_',' ', $fixture->status)) }}</p>
-                                    </div>
-                                    <div class="text-xs text-slate-600 flex items-center gap-2 sm:justify-end">
-                                        @if($fixture->match_date)
-                                            <span>{{ $fixture->match_date->format('M d, H:i') }}</span>
-                                        @else
-                                            <span>TBD</span>
+                                        @if($fixture->match_type !== 'group_stage')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white/80 border border-slate-200 text-[11px] font-semibold text-slate-700">
+                                                {{ Str::headline(str_replace('_',' ', $fixture->match_type)) }}
+                                            </span>
                                         @endif
+                                    </div>
+                                    @php
+                                        $kickoff = $fixture->match_date
+                                            ? ($fixture->match_time
+                                                ? $fixture->match_date->format('M d') . ', ' . $fixture->match_time->format('H:i')
+                                                : $fixture->match_date->format('M d'))
+                                            : 'TBD';
+                                    @endphp
+                                    <div class="text-xs text-slate-600 flex items-center gap-2 sm:justify-end">
+                                        <span>{{ $kickoff }}</span>
                                         @if($fixture->venue)
                                             <span class="text-slate-400">•</span>
                                             <span>{{ $fixture->venue }}</span>
@@ -131,9 +109,6 @@
                                             <div class="min-w-0">
                                                 <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->homeTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Home</p>
-                                                @if($homeTopBuy)
-                                                    <p class="text-[11px] text-emerald-700 font-semibold mt-1 leading-snug break-words">Top buy: {{ $homeTopBuy->player->name ?? 'Player' }}</p>
-                                                @endif
                                             </div>
                                         </div>
 
@@ -157,9 +132,6 @@
                                             <div class="min-w-0">
                                                 <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->awayTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Away</p>
-                                                @if($awayTopBuy)
-                                                    <p class="text-[11px] text-indigo-700 font-semibold mt-1 leading-snug break-words">Top buy: {{ $awayTopBuy->player->name ?? 'Player' }}</p>
-                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -176,16 +148,6 @@
                                             <div>
                                                 <p class="text-lg font-bold text-slate-900">{{ $fixture->homeTeam->team->name }}</p>
                                                 <p class="text-xs text-slate-500">Home</p>
-                                                @if($homeTopBuy)
-                                                    <p class="text-xs text-emerald-700 font-semibold mt-1 flex items-center gap-2">
-                                                        @if($homeTopBuy->player?->photo)
-                                                            <span class="inline-flex w-6 h-6 rounded-full overflow-hidden ring-2 ring-emerald-200">
-                                                                <img src="{{ asset('storage/' . $homeTopBuy->player->photo) }}" alt="{{ $homeTopBuy->player->name }}" class="w-full h-full object-cover">
-                                                            </span>
-                                                        @endif
-                                                        <span>Top buy: {{ $homeTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($homeTopBuy->bid_price ?? 0) }}</span>
-                                                    </p>
-                                                @endif
                                             </div>
                                         </div>
 
@@ -209,16 +171,6 @@
                                             <div class="sm:order-1 text-left sm:text-right">
                                                 <p class="text-lg font-bold text-slate-900">{{ $fixture->awayTeam->team->name }}</p>
                                                 <p class="text-xs text-slate-500">Away</p>
-                                                @if($awayTopBuy)
-                                                    <p class="text-xs text-indigo-700 font-semibold mt-1 flex items-center gap-2 sm:justify-end">
-                                                        @if($awayTopBuy->player?->photo)
-                                                            <span class="inline-flex w-6 h-6 rounded-full overflow-hidden ring-2 ring-indigo-200">
-                                                                <img src="{{ asset('storage/' . $awayTopBuy->player->photo) }}" alt="{{ $awayTopBuy->player->name }}" class="w-full h-full object-cover">
-                                                            </span>
-                                                        @endif
-                                                        <span>Top buy: {{ $awayTopBuy->player->name ?? 'Player' }} • ₹{{ number_format($awayTopBuy->bid_price ?? 0) }}</span>
-                                                    </p>
-                                                @endif
                                             </div>
                                         </div>
                                     </div>

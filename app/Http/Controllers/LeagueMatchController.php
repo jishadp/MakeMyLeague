@@ -9,6 +9,7 @@ use App\Models\LeagueGroup;
 use App\Models\Fixture;
 use App\Models\LeaguePlayer;
 use App\Models\Ground;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -48,7 +49,7 @@ class LeagueMatchController extends Controller
         $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
         $fixtures = $league->fixtures()
             ->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])
-            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'quarter_final' THEN 1 WHEN 'semi_final' THEN 2 WHEN 'final' THEN 3 ELSE 4 END")
+            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'qualifier' THEN 1 WHEN 'eliminator' THEN 2 WHEN 'quarter_final' THEN 3 WHEN 'semi_final' THEN 4 WHEN 'final' THEN 5 ELSE 6 END")
             ->orderBy('league_group_id')
             ->orderBy('sort_order')
             ->orderBy('match_date')
@@ -93,10 +94,11 @@ class LeagueMatchController extends Controller
         DB::transaction(function () use ($request, $league) {
             $league->fixtures()->delete();
 
-            $groups = $league->leagueGroups()->with('leagueTeams')->get();
+            $groups = $league->leagueGroups()->with('leagueTeams')->orderBy('sort_order')->orderBy('id')->get();
+            $nextOrder = 1;
 
             foreach ($groups as $group) {
-                $this->generateGroupFixtures($group, $request->format);
+                $nextOrder = $this->generateGroupFixtures($group, $request->format, $nextOrder);
             }
         });
 
@@ -106,14 +108,14 @@ class LeagueMatchController extends Controller
         ]);
     }
 
-    private function generateGroupFixtures(LeagueGroup $group, string $format)
+    private function generateGroupFixtures(LeagueGroup $group, string $format, int $startingOrder = 1): int
     {
         $teams = $group->leagueTeams->pluck('id')->toArray();
         $teamCount = count($teams);
         $fixtures = [];
 
         if ($teamCount < 2) {
-            return; // Need at least 2 teams
+            return $startingOrder; // Need at least 2 teams
         }
 
         $order = 1;
@@ -128,7 +130,7 @@ class LeagueMatchController extends Controller
                     'away_team_id' => $teams[$j],
                     'match_type' => 'group_stage',
                     'status' => 'unscheduled',
-                    'sort_order' => $order++,
+                    'sort_order' => $startingOrder + ($order - 1),
                 ];
 
                 // Double round-robin: add return fixture
@@ -140,9 +142,11 @@ class LeagueMatchController extends Controller
                         'away_team_id' => $teams[$i],
                         'match_type' => 'group_stage',
                         'status' => 'unscheduled',
-                        'sort_order' => $order++,
+                        'sort_order' => $startingOrder + ($order - 1),
                     ];
                 }
+
+                $order++;
             }
         }
 
@@ -156,6 +160,8 @@ class LeagueMatchController extends Controller
         if (!empty($fixtures)) {
             Fixture::insert($fixtures);
         }
+
+        return $startingOrder + count($fixtures);
     }
 
     public function fixtures(League $league)
@@ -166,7 +172,7 @@ class LeagueMatchController extends Controller
                 'awayTeam.team',
                 'leagueGroup'
             ])
-            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'quarter_final' THEN 1 WHEN 'semi_final' THEN 2 WHEN 'final' THEN 3 ELSE 4 END")
+            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'qualifier' THEN 1 WHEN 'eliminator' THEN 2 WHEN 'quarter_final' THEN 3 WHEN 'semi_final' THEN 4 WHEN 'final' THEN 5 ELSE 6 END")
             ->orderBy('league_group_id')
             ->orderBy('sort_order')
             ->orderBy('match_date')
@@ -207,7 +213,7 @@ class LeagueMatchController extends Controller
         }
 
         $request->validate([
-            'match_type' => 'required|in:group_stage,quarter_final,semi_final,final',
+            'match_type' => 'required|in:group_stage,qualifier,eliminator,quarter_final,semi_final,final',
             'league_group_id' => 'nullable|exists:league_groups,id',
             'home_team_id' => 'required|exists:league_teams,id',
             'away_team_id' => 'required|exists:league_teams,id|different:home_team_id',
@@ -300,6 +306,106 @@ class LeagueMatchController extends Controller
             'success' => true,
             'message' => 'Fixture order updated',
         ]);
+    }
+
+    public function regenerateWithSchedule(Request $request, League $league)
+    {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'format' => 'required|in:single_round,double_round',
+            'start_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'matches_per_day' => 'required|integer|min:1',
+            'match_duration' => 'required|integer|min:10',
+            'gap_minutes' => 'required|integer|min:0',
+            'days' => 'required|integer|min:1',
+        ]);
+
+        $startDateTime = Carbon::parse($validated['start_date'] . ' ' . $validated['start_time']);
+        $format = $validated['format'] === 'double_round' ? 'double_round_robin' : 'single_round_robin';
+        $matchesPerDay = (int) $validated['matches_per_day'];
+        $matchDuration = (int) $validated['match_duration'];
+        $gapMinutes = (int) $validated['gap_minutes'];
+
+        DB::transaction(function () use ($league, $format, $startDateTime, $matchesPerDay, $matchDuration, $gapMinutes) {
+            $league->fixtures()->where('match_type', 'group_stage')->delete();
+
+            $groups = $league->leagueGroups()->with('leagueTeams')->orderBy('sort_order')->orderBy('id')->get();
+            $nextOrder = 1;
+
+            foreach ($groups as $group) {
+                $nextOrder = $this->generateGroupFixtures($group, $format, $nextOrder);
+            }
+
+            $this->applySchedule($league, $startDateTime, $matchesPerDay, $matchDuration, $gapMinutes);
+        });
+
+        $totalFixtures = $league->fixtures()->where('match_type', 'group_stage')->count();
+        $capacity = $validated['matches_per_day'] * $validated['days'];
+
+        $message = $capacity < $totalFixtures
+            ? 'Fixtures scheduled across more days than requested based on total matches.'
+            : 'Fixtures generated and scheduled.';
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'scheduled' => $totalFixtures,
+        ]);
+    }
+
+    public function shuffleFixtures(Request $request, League $league)
+    {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        DB::transaction(function () use ($league) {
+            $fixturesByGroup = $league->fixtures()
+                ->where('match_type', 'group_stage')
+                ->get()
+                ->groupBy('league_group_id');
+
+            $order = 1;
+
+            foreach ($fixturesByGroup as $fixtures) {
+                $shuffled = $fixtures->shuffle()->values();
+                $shuffled->each(function ($fixture) use (&$order) {
+                    $fixture->update(['sort_order' => $order++]);
+                });
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Group fixtures shuffled',
+        ]);
+    }
+
+    private function applySchedule(League $league, Carbon $startDateTime, int $matchesPerDay, int $matchDurationMinutes, int $gapMinutes): void
+    {
+        $fixtures = $league->fixtures()
+            ->where('match_type', 'group_stage')
+            ->orderBy('sort_order')
+            ->get();
+
+        $fixtures->each(function (Fixture $fixture, int $index) use ($startDateTime, $matchesPerDay, $matchDurationMinutes, $gapMinutes) {
+            $dayOffset = intdiv($index, $matchesPerDay);
+            $slotInDay = $index % $matchesPerDay;
+
+            $kickoff = (clone $startDateTime)
+                ->addDays($dayOffset)
+                ->addMinutes(($matchDurationMinutes + $gapMinutes) * $slotInDay);
+
+            $fixture->update([
+                'match_date' => $kickoff->toDateString(),
+                'match_time' => $kickoff->format('H:i'),
+                'status' => 'scheduled',
+            ]);
+        });
     }
 
     public function exportPdf(League $league)

@@ -31,6 +31,12 @@
                     </div>
                 </div>
 
+                @php
+                    $firstGroupFixture = $fixtures->where('match_type', 'group_stage')->sortBy('match_date')->first();
+                    $presetDate = $firstGroupFixture?->match_date?->format('Y-m-d') ?? now()->toDateString();
+                    $presetTime = $firstGroupFixture?->match_time?->format('H:i') ?? '09:00';
+                @endphp
+
                 <div class="bg-indigo-50 border border-indigo-100 text-indigo-900 rounded-lg p-4 mb-6 flex gap-3">
                     <div class="mt-0.5">
                         <svg class="w-5 h-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -40,6 +46,72 @@
                     <div>
                         <p class="font-semibold">Fixture editor for organizers</p>
                         <p class="text-sm">Drag group matches to reorder, auto-schedule uses that order, and add knockout games later once group stage is done.</p>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mb-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide font-semibold text-gray-500">Control panel</p>
+                            <h2 class="text-xl font-bold text-gray-900">Generate or update group fixtures</h2>
+                            <p class="text-sm text-gray-600">Pick round-robin type, scheduling window, and auto-build fixtures. Shuffle only randomizes order.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" id="shuffle-fixtures-btn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-800 hover:bg-gray-50">
+                                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+                                    <path d="M4 4h3l2 3 2-3h5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M4 16h3l2-3 2 3h5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M15 4l2 2-2 2M15 12l2 2-2 2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Shuffle order
+                            </button>
+                            <button type="button" id="regenerate-fixtures-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 shadow">
+                                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+                                    <path d="M4 4h9a3 3 0 013 3v2" stroke-linecap="round" />
+                                    <path d="M16 16H7a3 3 0 01-3-3v-2" stroke-linecap="round" />
+                                    <path d="M7 7L4 4 1 7m12 6l3 3 3-3" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Generate & schedule
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Round robin</label>
+                            <select id="fixture-format" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="single_round">Single</option>
+                                <option value="double_round">Double</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Start date</label>
+                            <input id="schedule-start-date" type="text" autocomplete="off" placeholder="Select date" value="{{ $presetDate }}" class="flatpickr w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">First match time</label>
+                            <input id="schedule-start-time" type="time" value="{{ $presetTime }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Days of play</label>
+                            <input id="schedule-days" type="number" min="1" value="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Matches per day</label>
+                            <input id="schedule-matches-per-day" type="number" min="1" value="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Match duration (mins)</label>
+                            <input id="schedule-duration" type="number" min="10" value="90" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Gap after match (mins)</label>
+                            <input id="schedule-gap" type="number" min="0" value="15" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <p id="fixture-control-feedback" class="text-sm text-gray-600"></p>
+                        </div>
                     </div>
                 </div>
 
@@ -53,6 +125,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Match Type</label>
                                 <select id="match_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                                     <option value="group_stage">League Match</option>
+                                    <option value="qualifier">Qualifier</option>
+                                    <option value="eliminator">Eliminator</option>
                                     <option value="quarter_final">Quarter Final</option>
                                     <option value="semi_final">Semi Final</option>
                                     <option value="final">Final</option>
@@ -291,6 +365,38 @@
                             $knockoutFixtures = $fixtures->whereNotNull('match_type')->where('match_type', '!=', 'group_stage')->groupBy('match_type');
                         @endphp
                         
+                        @if($knockoutFixtures->has('qualifier'))
+                            <div class="bg-sky-50 rounded-lg p-4 sm:p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Qualifiers</h2>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                                        {{ $knockoutFixtures['qualifier']->count() }} Matches
+                                    </span>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($knockoutFixtures['qualifier'] as $fixture)
+                                        @include('leagues.league-match.partials.fixture-row', ['fixture' => $fixture])
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($knockoutFixtures->has('eliminator'))
+                            <div class="bg-rose-50 rounded-lg p-4 sm:p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Eliminators</h2>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                                        {{ $knockoutFixtures['eliminator']->count() }} Matches
+                                    </span>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach($knockoutFixtures['eliminator'] as $fixture)
+                                        @include('leagues.league-match.partials.fixture-row', ['fixture' => $fixture])
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         @if($knockoutFixtures->has('quarter_final'))
                             <div class="bg-yellow-50 rounded-lg p-4 sm:p-6">
                                 <div class="flex items-center justify-between mb-4">
@@ -339,7 +445,13 @@
                             </div>
                         @endif
 
-                        @if(!$knockoutFixtures->has('quarter_final') && !$knockoutFixtures->has('semi_final') && !$knockoutFixtures->has('final'))
+                        @if(
+                            !$knockoutFixtures->has('qualifier') &&
+                            !$knockoutFixtures->has('eliminator') &&
+                            !$knockoutFixtures->has('quarter_final') &&
+                            !$knockoutFixtures->has('semi_final') &&
+                            !$knockoutFixtures->has('final')
+                        )
                             <div class="bg-white border border-dashed border-gray-200 rounded-lg p-4 sm:p-6">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
@@ -395,6 +507,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const homeTeamSelect = document.getElementById('home_team_id');
     const awayTeamSelect = document.getElementById('away_team_id');
     const fixtureForm = document.getElementById('fixture-form');
+    const regenerateButton = document.getElementById('regenerate-fixtures-btn');
+    const shuffleButton = document.getElementById('shuffle-fixtures-btn');
+    const formatSelect = document.getElementById('fixture-format');
+    const startDateInput = document.getElementById('schedule-start-date');
+    const startTimeInput = document.getElementById('schedule-start-time');
+    const daysInput = document.getElementById('schedule-days');
+    const matchesPerDayInput = document.getElementById('schedule-matches-per-day');
+    const durationInput = document.getElementById('schedule-duration');
+    const gapInput = document.getElementById('schedule-gap');
+    const controlFeedback = document.getElementById('fixture-control-feedback');
     
     // Handle match type change
     matchTypeSelect.addEventListener('change', function() {
@@ -422,6 +544,24 @@ document.addEventListener('DOMContentLoaded', function() {
     fixtureForm.addEventListener('submit', function(e) {
         e.preventDefault();
         createFixture();
+    });
+
+    regenerateButton?.addEventListener('click', function() {
+        regenerateFixtures(
+            formatSelect?.value,
+            startDateInput?.value,
+            startTimeInput?.value,
+            daysInput?.value,
+            matchesPerDayInput?.value,
+            durationInput?.value,
+            gapInput?.value,
+            controlFeedback,
+            regenerateButton
+        );
+    });
+
+    shuffleButton?.addEventListener('click', function() {
+        shuffleFixtures(controlFeedback, shuffleButton);
     });
     
     function updateTeamOptions(teams) {
@@ -633,6 +773,94 @@ function saveFixtureRow(fixtureSlug) {
         console.error('Error:', error);
         alert(error.message || 'An error occurred while updating the fixture.');
     });
+}
+
+function regenerateFixtures(format, startDate, startTime, days, matchesPerDay, duration, gap, feedbackEl, buttonEl) {
+    if (!format || !startDate || !startTime) {
+        showControlFeedback(feedbackEl, 'Please set format, start date, and start time.', true);
+        return;
+    }
+
+    const payload = {
+        format,
+        start_date: startDate,
+        start_time: startTime,
+        days: Number(days || 1),
+        matches_per_day: Number(matchesPerDay || 1),
+        match_duration: Number(duration || 0),
+        gap_minutes: Number(gap || 0),
+    };
+
+    toggleBusy(buttonEl, true);
+    showControlFeedback(feedbackEl, 'Building fixtures...', false);
+
+    fetch(`{{ route('leagues.fixtures.regenerate', $league) }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload)
+    })
+    .then(async response => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+            const message = data?.message || 'Unable to regenerate fixtures.';
+            throw new Error(message);
+        }
+        showControlFeedback(feedbackEl, data.message || 'Fixtures generated.', false);
+        setTimeout(() => window.location.reload(), 600);
+    })
+    .catch(error => {
+        console.error('Regenerate failed:', error);
+        showControlFeedback(feedbackEl, error.message || 'Failed to regenerate fixtures.', true);
+    })
+    .finally(() => toggleBusy(buttonEl, false));
+}
+
+function shuffleFixtures(feedbackEl, buttonEl) {
+    toggleBusy(buttonEl, true);
+    showControlFeedback(feedbackEl, 'Shuffling matches...', false);
+
+    fetch(`{{ route('leagues.fixtures.shuffle', $league) }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({})
+    })
+    .then(async response => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+            const message = data?.message || 'Unable to shuffle fixtures.';
+            throw new Error(message);
+        }
+        showControlFeedback(feedbackEl, data.message || 'Fixtures shuffled.', false);
+        setTimeout(() => window.location.reload(), 500);
+    })
+    .catch(error => {
+        console.error('Shuffle failed:', error);
+        showControlFeedback(feedbackEl, error.message || 'Failed to shuffle fixtures.', true);
+    })
+    .finally(() => toggleBusy(buttonEl, false));
+}
+
+function showControlFeedback(el, message, isError = false) {
+    if (!el) return;
+    el.textContent = message;
+    el.classList.remove('text-emerald-600', 'text-gray-600', 'text-rose-600');
+    el.classList.add(isError ? 'text-rose-600' : 'text-emerald-600');
+}
+
+function toggleBusy(button, state) {
+    if (!button) return;
+    button.disabled = !!state;
+    button.classList.toggle('opacity-70', !!state);
 }
 
 function initDragSorting() {
