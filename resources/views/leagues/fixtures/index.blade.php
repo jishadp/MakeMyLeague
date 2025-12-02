@@ -29,7 +29,17 @@
                         <a href="{{ route('leagues.show', $league) }}" class="underline decoration-dotted underline-offset-4 text-slate-700 hover:text-slate-900">Back to league</a>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-3"></div>
+                <div class="flex flex-wrap gap-3">
+                    @if(auth()->check() && (auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin()))
+                        <a href="{{ route('leagues.fixtures.edit', $league) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-full shadow-md hover:bg-slate-800 transition">
+                            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path d="M4 13.5V16h2.5l7.06-7.06-2.5-2.5L4 13.5z" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M11.5 5l2.5 2.5M9 16h7" stroke-linecap="round" />
+                            </svg>
+                            Edit fixtures
+                        </a>
+                    @endif
+                </div>
             </div>
 
             @if(isset($topBoughtOverall) && $topBoughtOverall->count() > 0)

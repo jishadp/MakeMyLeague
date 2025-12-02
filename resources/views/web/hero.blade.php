@@ -6,10 +6,7 @@
 
 <!-- Video Hero Section -->
 <section id="hero" class="video-hero relative min-h-[90vh] flex items-center text-white overflow-visible">
-    <video class="hero-video" autoplay muted loop playsinline poster="{{ asset('images/hero.jpg') }}">
-        <source src="{{ asset('videos/hero-stadium.mp4') }}" type="video/mp4">
-        <source src="{{ asset('videos/hero-auction.mp4') }}" type="video/mp4">
-    </video>
+    <div class="hero-visual" aria-hidden="true"></div>
     <div class="hero-overlay"></div>
 
     <div class="relative z-10 w-full py-24 px-4 sm:px-6 lg:px-8">
@@ -33,6 +30,12 @@
                             Sign In
                         </a>
                     @endauth
+                    <a href="https://wa.me/919400960223" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-600 font-semibold text-lg shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-5 h-5 fill-current">
+                            <path d="M16 2.667c-7.355 0-13.333 5.86-13.333 13.093 0 2.307.63 4.56 1.824 6.536l-1.938 7.037 7.248-1.89A13.286 13.286 0 0 0 16 28.76c7.355 0 13.333-5.86 13.333-13.093C29.333 8.526 23.355 2.667 16 2.667Zm0 23.894c-2.032 0-4.02-.555-5.747-1.603l-.41-.248-4.3 1.121 1.146-4.162-.266-.427a10.34 10.34 0 0 1-1.56-5.12c0-5.67 4.652-10.288 10.333-10.288s10.333 4.617 10.333 10.288S21.68 26.561 16 26.561Zm6.111-7.722c-.334-.167-1.98-.978-2.287-1.091-.307-.115-.531-.167-.755.166-.223.333-.866 1.091-1.062 1.313-.195.223-.389.247-.723.082-.334-.166-1.41-.516-2.685-1.646-.992-.885-1.663-1.977-1.857-2.31-.195-.333-.021-.513.146-.676.151-.15.334-.388.5-.582.167-.194.222-.333.333-.555.111-.223.056-.416-.028-.582-.083-.166-.755-1.812-1.035-2.478-.273-.657-.552-.569-.755-.58-.195-.01-.417-.012-.64-.012-.223 0-.584.084-.889.416-.305.333-1.167 1.14-1.167 2.778 0 1.638 1.194 3.22 1.361 3.444.167.223 2.35 3.58 5.69 4.86.795.306 1.414.489 1.897.626.797.227 1.524.195 2.099.119.64-.095 1.98-.81 2.26-1.592.28-.78.28-1.448.195-1.592-.083-.144-.307-.222-.64-.389Z"/>
+                        </svg>
+                        WhatsApp +91 9400960223
+                    </a>
                 </div>
 
                 <div class="hero-stats">
@@ -49,10 +52,7 @@
                 <p class="text-white/90 text-lg"></p>
 
                 <div class="relative rounded-3xl overflow-hidden border border-white/10 mt-6">
-                    <video class="w-full h-56 object-cover" autoplay muted loop playsinline>
-                        <source src="{{ asset('videos/hero-auction.mp4') }}" type="video/mp4">
-                        <source src="{{ asset('videos/hero-stories.mp4') }}" type="video/mp4">
-                    </video>
+                    <img src="{{ asset('images/hero.jpg') }}" alt="Live auction highlight" class="w-full h-56 object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-6 flex flex-col justify-end">
                             <div class="flex items-center justify-between text-sm text-white/80">
                                 <span>Live auction • {{ $liveAuctionLeague->name }}</span>
@@ -128,13 +128,14 @@
         background: #020715;
         overflow: visible;
     }
-    .hero-video {
+    .hero-visual {
         position: absolute;
         inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.75;
+        background: linear-gradient(115deg, rgba(7, 16, 46, 0.92) 0%, rgba(8, 18, 52, 0.85) 40%, rgba(5, 13, 36, 0.75) 100%), url('{{ asset('images/hero.jpg') }}');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.9;
+        filter: saturate(1.05);
     }
     .hero-overlay {
         position: absolute;

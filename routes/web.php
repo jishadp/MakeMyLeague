@@ -352,8 +352,10 @@ Route::middleware('auth')->group(function () {
         Route::post('league-match/groups', [\App\Http\Controllers\LeagueMatchController::class, 'createGroups'])->name('league-match.groups');
         Route::post('league-match/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'generateFixtures'])->name('league-match.fixtures');
         Route::get('league-match/fixture-setup', [\App\Http\Controllers\LeagueMatchController::class, 'fixtureSetup'])->name('league-match.fixture-setup');
+        Route::get('fixtures/edit', [\App\Http\Controllers\LeagueMatchController::class, 'fixtureSetup'])->name('fixtures.edit');
         Route::post('fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'createFixture'])->name('fixtures.create');
         Route::patch('fixtures/{fixture}/update', [\App\Http\Controllers\LeagueMatchController::class, 'updateFixture'])->name('fixtures.update');
+        Route::patch('fixtures/reorder', [\App\Http\Controllers\LeagueMatchController::class, 'reorderFixtures'])->name('fixtures.reorder');
         Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
     });
 });

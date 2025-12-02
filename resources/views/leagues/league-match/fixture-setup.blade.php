@@ -31,6 +31,18 @@
                     </div>
                 </div>
 
+                <div class="bg-indigo-50 border border-indigo-100 text-indigo-900 rounded-lg p-4 mb-6 flex gap-3">
+                    <div class="mt-0.5">
+                        <svg class="w-5 h-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11a.75.75 0 011.5 0v3.5a.75.75 0 01-.36.64l-2 1.2a.75.75 0 11-.78-1.28l1.92-1.15V7z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Fixture editor for organizers</p>
+                        <p class="text-sm">Drag group matches to reorder, auto-schedule uses that order, and add knockout games later once group stage is done.</p>
+                    </div>
+                </div>
+
                 <!-- Manual Fixture Creation -->
                 <div class="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New Fixture</h2>
@@ -125,8 +137,11 @@
                         <!-- Group Stage Fixtures -->
                         @foreach($groups as $group)
                             <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">{{ $group->name }}</h2>
+                                <div class="flex items-center justify-between mb-2 sm:mb-4">
+                                    <div>
+                                        <h2 class="text-lg sm:text-xl font-semibold text-gray-900">{{ $group->name }}</h2>
+                                        <p class="text-xs text-gray-500 mt-0.5">Drag to reorder. Auto-schedule follows this order.</p>
+                                    </div>
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         {{ $fixtures->where('league_group_id', $group->id)->count() }} Matches
                                     </span>
@@ -157,19 +172,25 @@
                                     </div>
                                 </div>
 
-                                <div class="space-y-3">
+                                <div class="space-y-3" data-fixture-group-list data-group-id="{{ $group->id }}">
                                     @foreach($fixtures->where('league_group_id', $group->id) as $fixture)
-                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4" data-fixture-id="{{ $fixture->slug }}" data-group-id="{{ $group->id }}">
+                                        <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 shadow-sm" data-fixture-id="{{ $fixture->slug }}" data-group-id="{{ $group->id }}" data-draggable-fixture draggable="true">
+                                            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                                                <div class="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 text-gray-600 border border-gray-200 cursor-move" aria-label="Drag to reorder" title="Drag to reorder">
+                                                        <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                            <path d="M2 3h8M2 6h8M2 9h8" stroke-linecap="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <span>Match {{ $loop->iteration }}</span>
+                                                </div>
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                    {{ $fixture->status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $fixture->status)) }}
+                                                </span>
+                                            </div>
                                             <!-- Mobile Layout -->
                                             <div class="sm:hidden">
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <span class="text-xs font-medium text-gray-500">Match {{ $loop->iteration }}</span>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                                        {{ $fixture->status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-                                                        {{ ucfirst(str_replace('_', ' ', $fixture->status)) }}
-                                                    </span>
-                                                </div>
-                                                
                                                 <div class="space-y-2 mb-4">
                                                     <div class="flex items-center justify-between">
                                                         <span class="font-medium text-gray-900">{{ $fixture->homeTeam->team->name }}</span>
@@ -317,6 +338,27 @@
                                 </div>
                             </div>
                         @endif
+
+                        @if(!$knockoutFixtures->has('quarter_final') && !$knockoutFixtures->has('semi_final') && !$knockoutFixtures->has('final'))
+                            <div class="bg-white border border-dashed border-gray-200 rounded-lg p-4 sm:p-6">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Knockout placeholder</h3>
+                                        <p class="text-sm text-gray-600 mt-1">No knockout fixtures yet. Use the form above with match type set to Quarter / Semi / Final after group standings are locked.</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">Plan ahead</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+                                    @foreach(['Quarter Final 1','Quarter Final 2','Quarter Final 3','Quarter Final 4','Semi Final 1','Semi Final 2','Final'] as $slot)
+                                        <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ $slot }}</p>
+                                            <p class="text-sm font-semibold text-gray-800">TBD vs TBD</p>
+                                            <p class="text-xs text-gray-500 mt-1">Pick qualified teams later</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @else
                     <!-- No Fixtures -->
@@ -458,6 +500,8 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('An error occurred while creating the fixture.');
         });
     }
+
+    initDragSorting();
 });
 
 function updateFixture(fixtureId, field, value, element = null) {
@@ -588,6 +632,83 @@ function saveFixtureRow(fixtureSlug) {
     .catch(error => {
         console.error('Error:', error);
         alert(error.message || 'An error occurred while updating the fixture.');
+    });
+}
+
+function initDragSorting() {
+    const lists = document.querySelectorAll('[data-fixture-group-list]');
+    lists.forEach(list => setupDragList(list));
+}
+
+function setupDragList(list) {
+    const items = list.querySelectorAll('[data-draggable-fixture]');
+    items.forEach(item => {
+        item.addEventListener('dragstart', () => {
+            item.classList.add('dragging-fixture', 'opacity-70', 'ring', 'ring-indigo-200');
+        });
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging-fixture', 'opacity-70', 'ring', 'ring-indigo-200');
+            persistFixtureOrder(list);
+        });
+    });
+
+    list.addEventListener('dragover', event => {
+        event.preventDefault();
+        const dragging = document.querySelector('.dragging-fixture');
+        if (!dragging) return;
+        const afterElement = getDragAfterElement(list, event.clientY);
+        if (afterElement == null) {
+            list.appendChild(dragging);
+        } else {
+            list.insertBefore(dragging, afterElement);
+        }
+    });
+}
+
+function getDragAfterElement(list, yPosition) {
+    const elements = [...list.querySelectorAll('[data-draggable-fixture]:not(.dragging-fixture)')];
+    return elements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = yPosition - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset, element: child };
+        }
+        return closest;
+    }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+}
+
+function persistFixtureOrder(list) {
+    const orders = Array.from(list.querySelectorAll('[data-draggable-fixture]')).map((item, index) => ({
+        fixture: item.dataset.fixtureId,
+        sort_order: index + 1
+    }));
+
+    if (orders.length === 0) {
+        return;
+    }
+
+    fetch(`{{ route('leagues.fixtures.reorder', $league) }}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ orders })
+    })
+    .then(async response => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+            const message = data?.message || 'Unable to reorder fixtures.';
+            throw new Error(message);
+        }
+        list.classList.add('ring', 'ring-emerald-200', 'ring-offset-2', 'ring-offset-gray-50');
+        setTimeout(() => list.classList.remove('ring', 'ring-emerald-200', 'ring-offset-2', 'ring-offset-gray-50'), 800);
+    })
+    .catch(error => {
+        console.error('Order update failed:', error);
+        alert(error.message || 'An error occurred while reordering fixtures.');
     });
 }
 </script>

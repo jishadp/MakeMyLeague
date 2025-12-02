@@ -46,7 +46,14 @@ class LeagueMatchController extends Controller
         }
 
         $groups = $league->leagueGroups()->with('leagueTeams.team')->get();
-        $fixtures = $league->fixtures()->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])->get();
+        $fixtures = $league->fixtures()
+            ->with(['homeTeam.team', 'awayTeam.team', 'leagueGroup'])
+            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'quarter_final' THEN 1 WHEN 'semi_final' THEN 2 WHEN 'final' THEN 3 ELSE 4 END")
+            ->orderBy('league_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->get();
         $grounds = Ground::orderBy('name')->get(['id', 'name']);
 
         return view('leagues.league-match.fixture-setup', compact('league', 'groups', 'fixtures', 'grounds'));
@@ -109,6 +116,8 @@ class LeagueMatchController extends Controller
             return; // Need at least 2 teams
         }
 
+        $order = 1;
+
         // Single round-robin: each team plays every other team once
         for ($i = 0; $i < $teamCount; $i++) {
             for ($j = $i + 1; $j < $teamCount; $j++) {
@@ -118,7 +127,8 @@ class LeagueMatchController extends Controller
                     'home_team_id' => $teams[$i],
                     'away_team_id' => $teams[$j],
                     'match_type' => 'group_stage',
-                    'status' => 'unscheduled'
+                    'status' => 'unscheduled',
+                    'sort_order' => $order++,
                 ];
 
                 // Double round-robin: add return fixture
@@ -129,7 +139,8 @@ class LeagueMatchController extends Controller
                         'home_team_id' => $teams[$j],
                         'away_team_id' => $teams[$i],
                         'match_type' => 'group_stage',
-                        'status' => 'unscheduled'
+                        'status' => 'unscheduled',
+                        'sort_order' => $order++,
                     ];
                 }
             }
@@ -155,7 +166,11 @@ class LeagueMatchController extends Controller
                 'awayTeam.team',
                 'leagueGroup'
             ])
+            ->orderByRaw("CASE match_type WHEN 'group_stage' THEN 0 WHEN 'quarter_final' THEN 1 WHEN 'semi_final' THEN 2 WHEN 'final' THEN 3 ELSE 4 END")
             ->orderBy('league_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('match_date')
+            ->orderBy('match_time')
             ->orderBy('created_at')
             ->get()
             ->groupBy(function ($fixture) {
@@ -202,6 +217,7 @@ class LeagueMatchController extends Controller
         ]);
 
         $status = ($request->match_date && $request->match_time) ? 'scheduled' : 'unscheduled';
+        $nextOrder = ($league->fixtures()->max('sort_order') ?? 0) + 1;
 
         $fixture = $league->fixtures()->create([
             'slug' => Str::slug($league->slug . '-fixture-' . uniqid()),
@@ -212,7 +228,8 @@ class LeagueMatchController extends Controller
             'match_date' => $request->match_date,
             'match_time' => $request->match_time,
             'venue' => $request->venue,
-            'status' => $status
+            'status' => $status,
+            'sort_order' => $nextOrder,
         ]);
 
         return response()->json([
@@ -235,6 +252,7 @@ class LeagueMatchController extends Controller
             'status' => 'nullable|in:unscheduled,scheduled,in_progress,completed,cancelled',
             'home_score' => 'nullable|integer|min:0',
             'away_score' => 'nullable|integer|min:0',
+            'sort_order' => 'nullable|integer|min:0',
         ]);
 
         $fixture->update($validated);
@@ -247,6 +265,40 @@ class LeagueMatchController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Fixture updated successfully!'
+        ]);
+    }
+
+    public function reorderFixtures(Request $request, League $league)
+    {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'orders' => 'required|array',
+            'orders.*.fixture' => 'required|string',
+            'orders.*.sort_order' => 'required|integer|min:1',
+        ]);
+
+        $orders = collect($validated['orders']);
+        $fixtures = $league->fixtures()
+            ->whereIn('slug', $orders->pluck('fixture'))
+            ->get()
+            ->keyBy('slug');
+
+        DB::transaction(function () use ($orders, $fixtures) {
+            $orders->each(function ($item) use ($fixtures) {
+                if (isset($fixtures[$item['fixture']])) {
+                    $fixtures[$item['fixture']]->update([
+                        'sort_order' => $item['sort_order'],
+                    ]);
+                }
+            });
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Fixture order updated',
         ]);
     }
 
