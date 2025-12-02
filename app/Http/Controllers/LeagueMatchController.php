@@ -10,6 +10,7 @@ use App\Models\Fixture;
 use App\Models\LeaguePlayer;
 use App\Models\Ground;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -300,6 +301,39 @@ class LeagueMatchController extends Controller
                     ]);
                 }
             });
+
+            // Re-sequence kickoff slots to follow the new order while preserving the original set of times
+            $slots = $fixtures->values()->sortBy(function (Fixture $fixture) {
+                $date = $fixture->match_date ? $fixture->match_date->toDateString() : '9999-12-31';
+                $time = $fixture->match_time ? $fixture->match_time->format('H:i') : '23:59';
+                return $date . ' ' . $time;
+            })->map(function (Fixture $fixture) {
+                return [
+                    'match_date' => $fixture->match_date ? $fixture->match_date->toDateString() : null,
+                    'match_time' => $fixture->match_time ? $fixture->match_time->format('H:i') : null,
+                ];
+            })->values();
+
+            $orderedBySort = $orders->sortBy('sort_order')->values();
+
+            $orderedBySort->each(function ($item, $index) use ($fixtures, $slots) {
+                $fixture = $fixtures[$item['fixture']] ?? null;
+                $slot = $slots[$index] ?? ['match_date' => null, 'match_time' => null];
+                if (!$fixture) {
+                    return;
+                }
+
+                $payload = [
+                    'match_date' => $slot['match_date'],
+                    'match_time' => $slot['match_time'],
+                ];
+
+                if ($slot['match_date'] && $slot['match_time']) {
+                    $payload['status'] = 'scheduled';
+                }
+
+                $fixture->update($payload);
+            });
         });
 
         return response()->json([
@@ -372,9 +406,19 @@ class LeagueMatchController extends Controller
             $order = 1;
 
             foreach ($fixturesByGroup as $fixtures) {
-                $shuffled = $fixtures->shuffle()->values();
-                $shuffled->each(function ($fixture) use (&$order) {
-                    $fixture->update(['sort_order' => $order++]);
+                $slots = $this->collectSlots($fixtures);
+                $shuffled = $this->buildNonRepeatingOrder($fixtures);
+                $shuffled->each(function (Fixture $fixture, $index) use (&$order, $slots) {
+                    $slot = $slots[$index] ?? ['match_date' => null, 'match_time' => null];
+                    $payload = [
+                        'sort_order' => $order++,
+                        'match_date' => $slot['match_date'],
+                        'match_time' => $slot['match_time'],
+                    ];
+                    if ($slot['match_date'] && $slot['match_time']) {
+                        $payload['status'] = 'scheduled';
+                    }
+                    $fixture->update($payload);
                 });
             }
         });
@@ -406,6 +450,53 @@ class LeagueMatchController extends Controller
                 'status' => 'scheduled',
             ]);
         });
+    }
+
+    private function collectSlots(Collection $fixtures): Collection
+    {
+        return $fixtures
+            ->sortBy('sort_order')
+            ->values()
+            ->map(function (Fixture $fixture) {
+                return [
+                    'match_date' => $fixture->match_date ? $fixture->match_date->toDateString() : null,
+                    'match_time' => $fixture->match_time ? $fixture->match_time->format('H:i') : null,
+                ];
+            });
+    }
+
+    private function buildNonRepeatingOrder(Collection $fixtures, int $attempts = 50): Collection
+    {
+        $fixtures = $fixtures->values();
+
+        for ($i = 0; $i < $attempts; $i++) {
+            $shuffled = $fixtures->shuffle()->values();
+            if ($this->isNonRepeating($shuffled)) {
+                return $shuffled;
+            }
+        }
+
+        return $fixtures->shuffle()->values();
+    }
+
+    private function isNonRepeating(Collection $ordered): bool
+    {
+        $prevTeams = null;
+        foreach ($ordered as $fixture) {
+            /** @var Fixture $fixture */
+            $currentTeams = [
+                $fixture->home_team_id,
+                $fixture->away_team_id,
+            ];
+
+            if ($prevTeams && (in_array($currentTeams[0], $prevTeams, true) || in_array($currentTeams[1], $prevTeams, true))) {
+                return false;
+            }
+
+            $prevTeams = $currentTeams;
+        }
+
+        return true;
     }
 
     public function exportPdf(League $league)
