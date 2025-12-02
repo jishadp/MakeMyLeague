@@ -97,9 +97,9 @@
                                 <div class="p-4 sm:p-6 space-y-4">
                                     @php $hasScore = $fixture->home_score !== null || $fixture->away_score !== null; @endphp
 
-                                    <div class="sm:hidden flex items-center justify-between gap-3">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
+                                    <div class="sm:hidden space-y-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
                                                 @if($fixture->homeTeam->team->logo)
                                                     <img src="{{ Storage::url($fixture->homeTeam->team->logo) }}" alt="{{ $fixture->homeTeam->team->name }} Logo" class="w-full h-full object-cover">
                                                 @else
@@ -107,22 +107,22 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->homeTeam->team->name }}</p>
+                                                <p class="text-base font-semibold text-slate-900 leading-snug break-words">{{ $fixture->homeTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Home</p>
                                             </div>
                                         </div>
 
-                                        <div class="flex flex-col items-center flex-shrink-0 text-center">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-semibold text-slate-500 uppercase">Head-to-head</span>
                                             @if($hasScore)
-                                                <div class="text-xl font-black text-slate-900">{{ $fixture->home_score ?? 0 }} - {{ $fixture->away_score ?? 0 }}</div>
+                                                <span class="text-xl font-black text-slate-900">{{ $fixture->home_score ?? 0 }} - {{ $fixture->away_score ?? 0 }}</span>
                                             @else
-                                                <div class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">VS</div>
+                                                <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">VS</span>
                                             @endif
-                                            <p class="text-[10px] text-slate-500 mt-1">Head-to-head</p>
                                         </div>
 
-                                        <div class="flex items-center gap-2 min-w-0 justify-end text-right">
-                                            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
                                                 @if($fixture->awayTeam->team->logo)
                                                     <img src="{{ Storage::url($fixture->awayTeam->team->logo) }}" alt="{{ $fixture->awayTeam->team->name }} Logo" class="w-full h-full object-cover">
                                                 @else
@@ -130,7 +130,7 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-sm font-semibold text-slate-900 break-words leading-snug">{{ $fixture->awayTeam->team->name }}</p>
+                                                <p class="text-base font-semibold text-slate-900 leading-snug break-words">{{ $fixture->awayTeam->team->name }}</p>
                                                 <p class="text-[11px] text-slate-500">Away</p>
                                             </div>
                                         </div>
