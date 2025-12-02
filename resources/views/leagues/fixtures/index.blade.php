@@ -199,7 +199,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <span class="text-[11px] font-bold text-slate-500">RET</span>
+                                                    <i class="fa-solid fa-xmark text-slate-500"></i>
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-sm font-bold text-slate-700 ring-2 ring-indigo-200">
                                                             @if($awayRetained?->player?->photo)
