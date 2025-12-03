@@ -225,6 +225,49 @@
                     </form>
                 </div>
 
+                <!-- Retention to Sold Card -->
+                @if($retainedTotal > 0)
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                        <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
+                            <div class="space-y-1">
+                                <h2 class="text-lg font-semibold text-gray-900">Retained → Sold</h2>
+                                <p class="text-sm text-gray-600">Only retained players with status <span class="font-semibold text-blue-700">Available</span> and an assigned team will convert. Retention flag stays.</p>
+                                <p class="text-xs text-gray-500">
+                                    Retained: <span class="font-semibold text-gray-800">{{ $retainedTotal }}</span>
+                                    • Already sold: <span class="font-semibold text-emerald-700">{{ $retainedSold }}</span>
+                                    • Unassigned: <span class="font-semibold text-rose-700">{{ $retainedUnassigned }}</span>
+                                    • Ready to convert: <span class="font-semibold text-blue-700">{{ $retainedConvertible }}</span>
+                                </p>
+                                @if($retainedUnassigned > 0)
+                                    <p class="text-xs text-rose-600">Assign teams to all retained players before converting.</p>
+                                @endif
+                            </div>
+                            <form method="POST" action="{{ route('league-players.retained-to-sold', $league) }}" class="flex items-end gap-3">
+                                @csrf
+                                <div class="flex flex-col">
+                                    <label for="retention_sale_amount" class="text-xs font-semibold text-gray-600">Optional sale value</label>
+                                    <input id="retention_sale_amount"
+                                           name="retention_sale_amount"
+                                           type="number"
+                                           min="0"
+                                           step="1"
+                                           class="w-40 border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                           placeholder="Leave blank to keep existing">
+                                </div>
+                                <button type="submit"
+                                        @if($retainedConvertible === 0 || $retainedUnassigned > 0) disabled @endif
+                                        onclick="return confirm('Mark all retained players with Available status as Sold?');"
+                                        class="inline-flex items-center px-4 py-2 text-white font-medium rounded-lg transition-colors text-sm {{ ($retainedConvertible === 0 || $retainedUnassigned > 0) ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700' }}">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Convert Retained to Sold
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Bulk Role Replacement Card -->
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
                     <div class="flex items-start justify-between gap-4 flex-col md:flex-row">

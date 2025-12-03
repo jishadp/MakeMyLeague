@@ -969,6 +969,7 @@
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
         <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
         <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
+        <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
         <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
         <script id="controller-available-players" type="application/json">
             {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
@@ -1298,6 +1299,9 @@
                                 Unsold
                             </button>
                         @endunless
+                        <button type="button" data-reset-bids onclick="resetControllerBids(this)" class="px-3 py-2 text-xs rounded-xl border border-amber-300 text-amber-700 bg-white hover:bg-amber-50 shadow-sm {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Reset bids
+                        </button>
                     </div>
                     <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
                 </div>
@@ -1505,6 +1509,7 @@ function openWhatsAppShare(message) {
     const overrideButton = document.querySelector('[data-edit-override]');
     const overrideInput = document.getElementById('controller-override-amount');
     const overrideLabel = document.querySelector('[data-override-label]');
+    const resetBidsAction = document.getElementById('controller-reset-action');
     const quickRulesModal = document.getElementById('controller-rules-modal');
     const quickRulesRows = document.getElementById('quick-rules-rows');
     const addQuickRuleBtn = document.querySelector('[data-add-quick-rule]');
@@ -2538,6 +2543,7 @@ function openWhatsAppShare(message) {
     window.placeControllerBid = placeControllerBid;
     window.markControllerSold = markControllerSold;
     window.markControllerUnsold = markControllerUnsold;
+    window.resetControllerBids = resetControllerBids;
     window.bidFromTeam = bidFromTeam;
 
     function applyMaxCallAmount(teamId, { showError = true } = {}) {
@@ -2755,6 +2761,62 @@ function openWhatsAppShare(message) {
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             showControllerMessage(error.message || 'Unable to mark player as unsold.', 'error');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }
+
+    async function resetControllerBids(button) {
+        if (!ensurePlayerActive()) {
+            return;
+        }
+
+        const action = resetBidsAction?.value;
+        const token = getControllerToken();
+        if (!action || !token) {
+            showControllerMessage('Missing configuration for reset action.', 'error');
+            return;
+        }
+
+        const leaguePlayerId = document.getElementById('controller-league-player-id').value;
+        const confirmMessage = 'Reset bids for this player? This refunds all teams and returns to base price.';
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Resetting...</span>';
+
+        try {
+            const response = await fetch(action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    league_player_id: leaguePlayerId
+                })
+            });
+
+            const data = await response.json().catch(() => ({ success: false }));
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to reset bids.');
+            }
+
+            if (overrideInput) {
+                overrideInput.value = '';
+                updateOverrideLabel();
+            }
+
+            showControllerMessage('Bids reset to base price. Refreshing...', 'success');
+            setTimeout(() => window.location.reload(), 800);
+        } catch (error) {
+            showControllerMessage(error.message || 'Unable to reset bids.', 'error');
         } finally {
             button.disabled = false;
             button.innerHTML = originalText;

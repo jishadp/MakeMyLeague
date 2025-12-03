@@ -846,6 +846,73 @@ class AuctionController extends Controller
             'message' => 'Player marked as unsold successfully!'
         ]);
     }
+
+    /**
+     * Reset all bids for the current auctioning player back to base.
+     */
+    public function resetBids(Request $request)
+    {
+        $validated = $request->validate([
+            'league_player_id' => ['required', 'integer', 'exists:league_players,id'],
+        ]);
+
+        $leaguePlayer = LeaguePlayer::with('league')->find($validated['league_player_id']);
+        if (!$leaguePlayer) {
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
+        }
+
+        if ($leaguePlayer->status !== 'auctioning') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active auction to reset for this player.'
+            ], 422);
+        }
+
+        $this->authorize('markSoldUnsold', $leaguePlayer->league);
+
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'bids_reset',
+            'LeaguePlayer',
+            $leaguePlayer->id
+        );
+
+        DB::transaction(function () use ($leaguePlayer) {
+            $bids = Auction::where('league_player_id', $leaguePlayer->id)->get();
+
+            $refunds = [];
+            foreach ($bids as $bid) {
+                if ($bid->status === 'refunded') {
+                    continue;
+                }
+                $teamId = $bid->league_team_id;
+                $refunds[$teamId] = ($refunds[$teamId] ?? 0) + (float) $bid->amount;
+            }
+
+            foreach ($refunds as $teamId => $amount) {
+                if ($teamId && $amount > 0) {
+                    LeagueTeam::where('id', $teamId)->increment('wallet_balance', $amount);
+                }
+            }
+
+            Auction::where('league_player_id', $leaguePlayer->id)->delete();
+
+            $leaguePlayer->update([
+                'status' => 'auctioning',
+                'league_team_id' => null,
+                'bid_price' => null
+            ]);
+        });
+
+        \Cache::forget("auction_current_bid_{$leaguePlayer->id}");
+        \Cache::forget("auction_latest_bid_{$leaguePlayer->league_id}");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bids reset to base price for the current player.'
+        ]);
+    }
     
     /**
      * API endpoint to get recent bids for a league

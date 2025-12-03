@@ -114,6 +114,22 @@ class LeaguePlayerController extends Controller
                 $query->whereNull('position_id');
             })
             ->count();
+        $retainedTotal = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->count();
+        $retainedSold = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->where('status', 'sold')
+            ->count();
+        $retainedUnassigned = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->whereNull('league_team_id')
+            ->count();
+        $retainedConvertible = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->where('status', 'available')
+            ->whereNotNull('league_team_id')
+            ->count();
 
         return view('league-players.index', compact(
             'league',
@@ -124,7 +140,11 @@ class LeaguePlayerController extends Controller
             'totalPlayersCount',
             'gamePositions',
             'statusFilter',
-            'playersWithoutRoleCount'
+            'playersWithoutRoleCount',
+            'retainedTotal',
+            'retainedSold',
+            'retainedConvertible',
+            'retainedUnassigned'
         ));
     }
 
@@ -181,6 +201,54 @@ class LeaguePlayerController extends Controller
             ->get();
 
         return view('league-players.bulk-create', compact('league', 'leagueTeams', 'availablePlayers', 'remainingSlots', 'maxPlayers', 'currentPlayerCount', 'localBodies', 'gamePositions'));
+    }
+
+    /**
+     * Mark all retained players as sold (keeps retention flag).
+     */
+    public function retainedToSold(Request $request, League $league)
+    {
+        $user = auth()->user();
+        if (!$user || !$user->canManageLeague($league->id)) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $data = $request->validate([
+            'retention_sale_amount' => ['nullable', 'numeric', 'min:0'],
+        ]);
+        $saleAmount = $data['retention_sale_amount'] ?? null;
+
+        $unassignedRetained = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->whereNull('league_team_id')
+            ->count();
+
+        if ($unassignedRetained > 0) {
+            return back()->withErrors(['retention' => "{$unassignedRetained} retained player(s) need a team assigned before converting to sold."]);
+        }
+
+        $convertibleQuery = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->where('status', 'available')
+            ->whereNotNull('league_team_id');
+
+        $count = $convertibleQuery->count();
+
+        if ($count === 0) {
+            return back()->with('success', 'No retained players are pending conversion.');
+        }
+
+        $updatePayload = [
+            'status' => 'sold',
+        ];
+        if ($saleAmount !== null && $saleAmount !== '') {
+            $updatePayload['bid_price'] = (float) $saleAmount;
+            $updatePayload['base_price'] = (float) $saleAmount;
+        }
+
+        $convertibleQuery->update($updatePayload);
+
+        return back()->with('success', "{$count} retained player(s) marked as sold.");
     }
 
     /**
