@@ -31,6 +31,11 @@
 <section class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div class="max-w-7xl mx-auto">
 
+        @if(!$retentionEnabled)
+            <div class="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-xl">
+                Retention is disabled for this league or no retention slots are configured. Update league settings to enable retention players.
+            </div>
+        @endif
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
@@ -172,8 +177,8 @@
                                         Squad Players
                                     </h4>
                                     @php
-                                        // Always show button if there are any available players
-                                        $hasAvailableRetentionPlayers = $availableRetentionPlayers->count() > 0;
+                                        // Show button only when retention is enabled and there are available players
+                                        $hasAvailableRetentionPlayers = $retentionEnabled && $availableRetentionPlayers->count() > 0;
                                         $firstLeagueTeamId = $leagueTeamsForTeam->first()->id;
                                         
                                     @endphp
@@ -341,8 +346,8 @@
                                         Squad Players
                                     </h4>
                                     @php
-                                        // Always show button if there are any available players
-                                        $showAddButton = $availableRetentionPlayers->count() > 0;
+                                        // Show button only when retention is enabled and there are available players
+                                        $showAddButton = $retentionEnabled && $availableRetentionPlayers->count() > 0;
                                     @endphp
                                     @if($showAddButton)
                                         <button onclick="openAddRetentionModal({{ $leagueTeam->id }}, '{{ $leagueTeam->team->name }}')" 
@@ -543,11 +548,18 @@ function toggleRetention(playerId, currentRetention) {
 }
 
 // Add Retention Player Modal Functions
+const retentionEnabled = @json($retentionEnabled);
+const retentionLimit = {{ $retentionLimit }};
 let currentLeagueTeamId = null;
 let selectedRetentionPlayerId = null;
 let selectedRetentionPlayerData = null;
 
 function openAddRetentionModal(leagueTeamId, teamName) {
+    if (!retentionEnabled || retentionLimit <= 0) {
+        showNotification('Retention is disabled for this league. Please enable retention and set a slot limit to add players.', 'error');
+        return;
+    }
+    
     currentLeagueTeamId = leagueTeamId;
     
     document.getElementById('addRetentionModalTitle').textContent = 'Add Retention Player';
@@ -603,29 +615,30 @@ function confirmAddRetention() {
             league_team_id: currentLeagueTeamId
         })
     })
-    .then(response => {
-        // Debug logging removed for production
+    .then(async response => {
+        const data = await response.json().catch(() => null);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const message = data?.message || `Failed to add retention player (status ${response.status})`;
+            throw new Error(message);
         }
-        return response.json();
+        return data;
     })
     .then(data => {
-        if (data.success) {
+        if (data?.success) {
             showNotification(data.message, 'success');
             closeAddRetentionModal();
             setTimeout(() => {
                 location.reload();
             }, 1000);
         } else {
-            showNotification(data.message || 'Failed to add retention player', 'error');
+            showNotification(data?.message || 'Failed to add retention player', 'error');
             addButton.disabled = false;
             addButton.innerHTML = originalText;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('An error occurred while adding retention player', 'error');
+        showNotification(error.message || 'An error occurred while adding retention player', 'error');
         addButton.disabled = false;
         addButton.innerHTML = originalText;
     });

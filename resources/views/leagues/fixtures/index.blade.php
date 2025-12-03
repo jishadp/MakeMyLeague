@@ -184,41 +184,33 @@
                                         </div>
                                     </div>
 
-                                    @if($homeRetained || $awayRetained || $fixture->venue)
+                                    @if($homeRetained || $awayRetained)
                                         <div class="pt-2 sm:pt-0 flex flex-col items-center gap-2 text-[11px] text-slate-600">
-                                            @if($homeRetained || $awayRetained)
-                                                <div class="flex items-center justify-center gap-3 sm:gap-4">
-                                                    <div class="flex items-center gap-2">
-                                                        <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-sm font-bold text-slate-700 ring-2 ring-emerald-200">
-                                                            @if($homeRetained?->player?->photo)
-                                                                <img src="{{ Storage::url($homeRetained->player->photo) }}" alt="{{ $homeRetained->player->name }}" class="w-full h-full object-cover">
-                                                            @elseif($homeRetained)
-                                                                {{ strtoupper(substr($homeRetained->player->name ?? 'P', 0, 2)) }}
-                                                            @else
-                                                                —
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    <i class="fa-solid fa-xmark text-slate-500"></i>
-                                                    <div class="flex items-center gap-2">
-                                                        <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-sm font-bold text-slate-700 ring-2 ring-indigo-200">
-                                                            @if($awayRetained?->player?->photo)
-                                                                <img src="{{ Storage::url($awayRetained->player->photo) }}" alt="{{ $awayRetained->player->name }}" class="w-full h-full object-cover">
-                                                            @elseif($awayRetained)
-                                                                {{ strtoupper(substr($awayRetained->player->name ?? 'P', 0, 2)) }}
-                                                            @else
-                                                                —
-                                                            @endif
-                                                        </div>
+                                            <div class="flex items-center justify-center gap-3 sm:gap-4">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-sm font-bold text-slate-700 ring-2 ring-emerald-200">
+                                                        @if($homeRetained?->player?->photo)
+                                                            <img src="{{ Storage::url($homeRetained->player->photo) }}" alt="{{ $homeRetained->player->name }}" class="w-full h-full object-cover">
+                                                        @elseif($homeRetained)
+                                                            {{ strtoupper(substr($homeRetained->player->name ?? 'P', 0, 2)) }}
+                                                        @else
+                                                            —
+                                                        @endif
                                                     </div>
                                                 </div>
-                                            @endif
-                                            @if($fixture->venue)
-                                                <div class="flex items-center gap-1 text-slate-600">
-                                                    <i class="fa-solid fa-location-dot text-slate-500"></i>
-                                                    <span class="break-words text-center">{{ $fixture->venue }}</span>
+                                                <i class="fa-solid fa-xmark text-slate-500"></i>
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center text-sm font-bold text-slate-700 ring-2 ring-indigo-200">
+                                                        @if($awayRetained?->player?->photo)
+                                                            <img src="{{ Storage::url($awayRetained->player->photo) }}" alt="{{ $awayRetained->player->name }}" class="w-full h-full object-cover">
+                                                        @elseif($awayRetained)
+                                                            {{ strtoupper(substr($awayRetained->player->name ?? 'P', 0, 2)) }}
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endif
                                 </div>

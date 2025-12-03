@@ -288,27 +288,29 @@ class LeagueTeamController extends Controller
             $teamsByTeam = $leagueTeams->groupBy('team.id');
         }
 
-        // Get league retention player limit
-        $retentionLimit = $league->retention_players ?? 3; // Default to 3 if not set
+        // Get league retention settings
+        $retentionLimit = max($league->retention_players ?? 3, 0); // Default to 3 if not set, never below zero
+        $retentionEnabled = $league->retention && $retentionLimit > 0;
 
         // Get available players for adding as retention (all players registered in league except sold players, who are not retention yet)
-        $availableRetentionPlayers = \App\Models\LeaguePlayer::where('league_id', $league->id)
-            ->where('status', '!=', 'sold')
-            ->where('retention', false)
-            ->with(['player.position', 'leagueTeam.team'])
-            ->get();
+        $availableRetentionPlayers = collect();
+        if ($retentionEnabled) {
+            $availableRetentionPlayers = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                ->where('status', '!=', 'sold')
+                ->where('retention', false)
+                ->with(['player.position', 'leagueTeam.team'])
+                ->get();
 
-
-
-        // Filter available players based on user permissions
-        if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
-            // Team owners can only add retention players to their own teams
-            // Note: Available players might not have a league_team_id yet, so we allow them to be added to any team the user owns
-            $userTeamIds = $leagueTeams->pluck('id'); // Use league_team IDs instead of team IDs
-            $availableRetentionPlayers = $availableRetentionPlayers->filter(function($player) use ($userTeamIds) {
-                // Allow players without a team (league_team_id is null) or players from user's teams
-                return $player->league_team_id === null || $userTeamIds->contains($player->league_team_id);
-            });
+            // Filter available players based on user permissions
+            if (!$user->isOrganizerForLeague($league->id) && !$user->isAdmin()) {
+                // Team owners can only add retention players to their own teams
+                // Note: Available players might not have a league_team_id yet, so we allow them to be added to any team the user owns
+                $userTeamIds = $leagueTeams->pluck('id'); // Use league_team IDs instead of team IDs
+                $availableRetentionPlayers = $availableRetentionPlayers->filter(function($player) use ($userTeamIds) {
+                    // Allow players without a team (league_team_id is null) or players from user's teams
+                    return $player->league_team_id === null || $userTeamIds->contains($player->league_team_id);
+                });
+            }
         }
 
         // Calculate statistics
@@ -321,6 +323,16 @@ class LeagueTeamController extends Controller
         });
 
 
-        return view('league-teams.manage', compact('league', 'leagueTeams', 'teamsByTeam', 'retentionLimit', 'totalTeams', 'totalSoldPlayers', 'totalRetentionPlayers', 'availableRetentionPlayers'));
+        return view('league-teams.manage', compact(
+            'league',
+            'leagueTeams',
+            'teamsByTeam',
+            'retentionLimit',
+            'totalTeams',
+            'totalSoldPlayers',
+            'totalRetentionPlayers',
+            'availableRetentionPlayers',
+            'retentionEnabled'
+        ));
     }
 }

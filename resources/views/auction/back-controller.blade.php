@@ -1327,6 +1327,13 @@
                         Needs <span data-selected-need>0</span> • Reserve <span data-selected-reserve>₹0</span> • Max bid <span data-selected-max>₹0</span>
                     </p>
                 </div>
+                <div class="flex items-start justify-between gap-2 text-xs text-slate-600">
+                    <label class="inline-flex items-center gap-2">
+                        <input id="controller-max-call-toggle" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" aria-label="Toggle max call mode">
+                        <span class="font-semibold">Max call to team</span>
+                    </label>
+                    <span class="text-[11px] text-slate-500 text-right leading-4">Bid buttons jump to each team's max cap.</span>
+                </div>
                 <input id="controller-custom-amount" type="hidden" data-default-increment="{{ $firstBidIncrement }}" value="{{ $currentBidAmount ?? 0 }}">
                 <div class="quick-grid">
                     @if($bidIncrementValues->isNotEmpty())
@@ -1513,6 +1520,7 @@ function openWhatsAppShare(message) {
     const selectedNeedLabel = document.querySelector('[data-selected-need]');
     const selectedReserveLabel = document.querySelector('[data-selected-reserve]');
     const selectedMaxLabel = document.querySelector('[data-selected-max]');
+    const maxCallToggle = document.getElementById('controller-max-call-toggle');
     const modal = document.getElementById('controller-modal');
     const modalTitle = modal?.querySelector('[data-modal-title]');
     const modalInput = modal?.querySelector('[data-modal-input]');
@@ -1583,6 +1591,10 @@ function openWhatsAppShare(message) {
     function formatCurrency(value) {
         const amount = Number(value) || 0;
         return '₹' + amount.toLocaleString('en-IN');
+    }
+
+    function isMaxCallEnabled() {
+        return Boolean(maxCallToggle?.checked);
     }
 
     function loadIdSet(storageKey) {
@@ -1965,14 +1977,17 @@ function openWhatsAppShare(message) {
         const base = Number(controllerBaseInput?.value || 0);
         if (controllerBidInput) {
             controllerBidInput.value = base;
-            updatePreview(base);
         }
         updateSoldButtonLabel();
         if (selectedTeamLabel) {
             selectedTeamLabel.textContent = getSelectedTeamName() || 'None';
         }
         updateTeamBudgetLabels(teamId);
-        applyQuickBid();
+        if (isMaxCallEnabled() && teamId) {
+            applyMaxCallAmount(teamId, { showError: false });
+        } else {
+            applyQuickBid();
+        }
     }
 
     function clearTeamSelection() {
@@ -2021,6 +2036,11 @@ function openWhatsAppShare(message) {
     renderJumpTargets();
     function getTeamButton(teamId) {
         return Array.from(teamPills).find(button => button.dataset.teamPill === teamId);
+    }
+
+    function getTeamMaxBid(teamId) {
+        const button = teamId ? getTeamButton(teamId) : null;
+        return button ? Number(button.dataset.teamMax || 0) : 0;
     }
 
     function updateTeamBudgetLabels(teamId) {
@@ -2128,9 +2148,13 @@ function openWhatsAppShare(message) {
     }
 
     function updateTeamBidLabels(amount) {
-        const label = formatCurrency(amount || 0);
         teamBidLabels.forEach((button) => {
-            button.textContent = label;
+            const teamPill = button.closest('[data-team-pill]');
+            const teamMax = teamPill ? Number(teamPill.dataset.teamMax || 0) : 0;
+            const useMax = isMaxCallEnabled();
+            const value = useMax ? (teamMax || 0) : (amount || 0);
+            const prefix = useMax ? 'Max ' : '';
+            button.textContent = prefix + formatCurrency(value);
         });
     }
 
@@ -2143,6 +2167,19 @@ function openWhatsAppShare(message) {
     if (quickEditButton) {
         quickEditButton.addEventListener('click', () => {
             openQuickRulesModal();
+        });
+    }
+
+    if (maxCallToggle) {
+        maxCallToggle.addEventListener('change', () => {
+            const activeTeamId = controllerTeamSelect?.value;
+            if (isMaxCallEnabled() && activeTeamId) {
+                applyMaxCallAmount(activeTeamId, { showError: false });
+            } else if (!isMaxCallEnabled()) {
+                applyQuickBid();
+            }
+            const previewAmount = Number(controllerBidInput?.value || controllerBaseInput?.value || 0);
+            updateTeamBidLabels(previewAmount);
         });
     }
 
@@ -2503,6 +2540,24 @@ function openWhatsAppShare(message) {
     window.markControllerUnsold = markControllerUnsold;
     window.bidFromTeam = bidFromTeam;
 
+    function applyMaxCallAmount(teamId, { showError = true } = {}) {
+        if (!teamId || !controllerBidInput || !controllerBaseInput) {
+            return false;
+        }
+        const base = Number(controllerBaseInput.value || 0);
+        const maxBid = getTeamMaxBid(teamId);
+        if (!maxBid || maxBid <= base) {
+            if (showError) {
+                showControllerMessage('Team cannot top the current bid with their max cap.', 'error');
+            }
+            return false;
+        }
+        controllerBidInput.dataset.defaultIncrement = Math.max(maxBid - base, 0);
+        controllerBidInput.value = maxBid;
+        updatePreview(maxBid);
+        return true;
+    }
+
     function getControllerToken() {
         return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     }
@@ -2515,8 +2570,11 @@ function openWhatsAppShare(message) {
             return;
         }
         setTeamSelection(teamId);
-        updateTeamBudgetLabels(teamId);
-        updateSoldButtonLabel();
+        if (isMaxCallEnabled()) {
+            if (!applyMaxCallAmount(teamId)) {
+                return;
+            }
+        }
         const target = Number(controllerBidInput.value || controllerBaseInput?.value || 0);
         updatePreview(target);
         mainBidButton.click();
