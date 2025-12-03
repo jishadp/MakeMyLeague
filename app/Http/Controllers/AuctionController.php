@@ -133,6 +133,7 @@ class AuctionController extends Controller
 
         $currentPlayer = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'auctioning')
+            ->where('retention', false)
             ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->first();
 
@@ -155,12 +156,14 @@ class AuctionController extends Controller
 
         $availablePlayers = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'available')
+            ->where('retention', false)
             ->with(['player.position'])
             ->orderBy('updated_at', 'asc')
             ->take(8)
             ->get();
         $unsoldPlayers = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'unsold')
+            ->where('retention', false)
             ->with(['player.position'])
             ->orderBy('updated_at', 'asc')
             ->take(8)

@@ -2918,6 +2918,20 @@ function openWhatsAppShare(message) {
         rebuildRandomPools();
     }
 
+    function resetRandomProgress() {
+        availableCompletedSet = new Set();
+        unsoldCompletedSet = new Set();
+        availableServedSet = new Set();
+        unsoldServedSet = new Set();
+        saveIdSet(availableCompletedStorageKey, availableCompletedSet);
+        saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
+        saveIdSet(availableServedStorageKey, availableServedSet);
+        saveIdSet(unsoldServedStorageKey, unsoldServedSet);
+        saveRandomPhase('available');
+        rebuildRandomPools();
+        enforcePhaseConsistency();
+    }
+
     function isAllAvailableCompleted() {
         return availableCompletedSet.size >= uniqueCount(availablePlayerPool);
     }
@@ -3090,6 +3104,19 @@ function openWhatsAppShare(message) {
         showControllerMessage(`${normalized.name} added to queue.`);
     }
 
+    function addToQueueSilent(player) {
+        const normalized = normalizePlayer(player);
+        if (!normalized.id || !normalized.user_id) {
+            return false;
+        }
+        const exists = playerQueue.some((p) => p.id === normalized.id);
+        if (exists) {
+            return false;
+        }
+        playerQueue.push(normalized);
+        return true;
+    }
+
     function removeFromQueue(playerId) {
         playerQueue = playerQueue.filter((p) => p.id !== playerId);
         saveQueue();
@@ -3253,6 +3280,32 @@ function openWhatsAppShare(message) {
         playerSearchResults.classList.remove('hidden');
     }
 
+    function queueRandomBatch(count = 3) {
+        let added = 0;
+        for (let i = 0; i < count; i++) {
+            const player = takeRandomPlayerForCurrentPhase();
+            if (!player) break;
+            if (addToQueueSilent(player)) {
+                added++;
+            }
+        }
+        if (added > 0) {
+            saveQueue();
+            renderQueue();
+        }
+        return added;
+    }
+
+    function reshuffleAndQueueRandom(count = 3) {
+        resetRandomProgress();
+        const added = queueRandomBatch(count);
+        if (added > 0) {
+            showControllerMessage(`Queued ${added} random player${added > 1 ? 's' : ''} after reshuffle.`);
+        } else {
+            showControllerMessage('No players available to pick right now.', 'error');
+        }
+    }
+
     if (playerSearchInput) {
         let searchTimeout;
         playerSearchInput.addEventListener('input', (event) => {
@@ -3288,21 +3341,21 @@ function openWhatsAppShare(message) {
 
     randomPlayerButton?.addEventListener('click', () => {
         if (currentRandomPhase === 'completed') {
-            showControllerMessage('All unsold players finished. Auction fully completed.');
+            reshuffleAndQueueRandom();
             return;
         }
         const { pool } = getActivePool();
         if (!pool.length) {
             const transition = handlePhaseTransitions();
             if (transition.pending) return;
-            showControllerMessage('No players to pick right now.', 'error');
+            reshuffleAndQueueRandom();
             return;
         }
         const player = takeRandomPlayerForCurrentPhase();
         if (!player) {
             const transition = handlePhaseTransitions();
             if (!transition.pending && currentRandomPhase !== 'completed') {
-                showControllerMessage('No players to pick right now.', 'error');
+                reshuffleAndQueueRandom();
             }
             return;
         }
