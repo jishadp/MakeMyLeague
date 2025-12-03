@@ -645,10 +645,11 @@ class AuctionController extends Controller
             ->where('league_team_id', $teamId)
             ->latest('id')
             ->first();
+        $alreadyDeducted = (float) ($winningBidPreview->amount ?? 0);
 
         $finalAmount = $validated['final_amount']
             ?? ($hasOverride ? $overrideAmount : null)
-            ?? ($winningBidPreview->amount ?? null)
+            ?? ($alreadyDeducted ?: null)
             ?? ($validated['current_bid_amount'] ?? null)
             ?? $basePrice;
         $finalAmount = max((float) $finalAmount, 0);
@@ -659,15 +660,11 @@ class AuctionController extends Controller
         $isFinalSlot = $minimumRosterSize > 0
             && $currentRosterCount < $minimumRosterSize
             && $projectedRosterCount >= $minimumRosterSize;
+        $totalRemainingBalance = max((float) ($team->wallet_balance ?? 0), 0) + $alreadyDeducted;
 
-        if ($isFinalSlot) {
-            $remainingWallet = (float) ($team->wallet_balance ?? 0);
-            $finalWalletOverride = $winningBidPreview
-                ? $winningBidPreview->amount + $remainingWallet
-                : $remainingWallet;
-
-            if ($finalWalletOverride > $finalAmount) {
-                $finalAmount = $finalWalletOverride;
+        if ($isFinalSlot || $playersNeeded === 1) {
+            if ($totalRemainingBalance > $finalAmount) {
+                $finalAmount = $totalRemainingBalance;
                 $hasOverride = true;
             }
         }
@@ -679,17 +676,21 @@ class AuctionController extends Controller
             ], 422);
         }
 
+        $remainingNeededAfterSale = max($playersNeeded - 1, 0);
+
         $availableWallet = $this->calculateAvailableWallet($team, $leaguePlayer->league);
+        $availableWallet = max($availableWallet, $totalRemainingBalance);
         $maxBidCap = $this->calculateMaxBidCap($team, $leaguePlayer->league, $playersNeeded, $availableWallet);
         $displayMaxCap = $this->calculateDisplayedMaxBidCap($team, $leaguePlayer->league, $availableWallet);
-        if ($maxBidCap > 0 && $finalAmount > $maxBidCap && $finalAmount > $displayMaxCap) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bid exceeds team cap/balance.'
-            ], 422);
+        if ($remainingNeededAfterSale > 0) {
+            if ($maxBidCap > 0 && $finalAmount > $maxBidCap && $finalAmount > $displayMaxCap) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bid exceeds team cap/balance.'
+                ], 422);
+            }
         }
 
-        $alreadyDeducted = $winningBidPreview->amount ?? 0;
         $extraNeeded = max($finalAmount - $alreadyDeducted, 0);
         if ($extraNeeded > $availableWallet) {
             return response()->json([
@@ -709,14 +710,15 @@ class AuctionController extends Controller
 
         $balanceAdjustment = $alreadyDeducted - $finalAmount; // positive = refund, negative = extra deduction
         $projectedBalance = $availableWallet + $balanceAdjustment;
-
-        $rosterValidation = $this->validateRosterBudget(
-            $team,
-            $leaguePlayer->league,
-            $projectedBalance,
-            $projectedRosterCount,
-            [$leaguePlayerId]
-        );
+        $rosterValidation = $remainingNeededAfterSale <= 0
+            ? ['ok' => true]
+            : $this->validateRosterBudget(
+                $team,
+                $leaguePlayer->league,
+                $projectedBalance,
+                $projectedRosterCount,
+                [$leaguePlayerId]
+            );
 
         if (!$rosterValidation['ok']) {
             return response()->json([
