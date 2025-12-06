@@ -10,39 +10,49 @@
 <section class="min-h-screen bg-gradient-to-b from-white via-indigo-50 to-blue-50 text-slate-900">
     <div class="max-w-3xl mx-auto px-4 py-10 space-y-6">
         <div class="bg-white border border-indigo-100 rounded-2xl p-6 shadow-xl">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200">Player Registration</span>
-                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500">Public player sign-up</p>
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200">Player Registration</span>
+                        <p class="text-xs uppercase tracking-[0.2em] text-indigo-500">Public player sign-up</p>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900">{{ $league->name }}</h1>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-slate-700 mt-3">
+                        <span class="px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700">
+                            Game: {{ $league->game->name ?? 'Any sport' }}
+                        </span>
+                        @if($league->localBody)
+                            <span class="px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700">
+                                {{ $league->localBody->name }} {{ $league->localBody->district?->name ? '- ' . $league->localBody->district->name : '' }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="w-full md:w-auto flex flex-col gap-2">
+                    <a href="https://wa.me/919400960223?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold text-white transition-colors">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        Payment on WhatsApp
+                    </a>
+                    <a href="https://wa.me/?text={{ urlencode('Register for ' . $league->name . ' here: ' . $shareUrl) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-semibold text-white transition-colors">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        Share to WhatsApp
+                    </a>
+                </div>
             </div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900">{{ $league->name }}</h1>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-slate-700 mt-3">
-                <span class="px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700">
-                    Game: {{ $league->game->name ?? 'Any sport' }}
-                </span>
-                @if($league->localBody)
-                    <span class="px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700">
-                        {{ $league->localBody->name }} {{ $league->localBody->district?->name ? '- ' . $league->localBody->district->name : '' }}
-                    </span>
-                @endif
-                <span class="px-3 py-1 rounded-full border border-blue-100 bg-blue-50 text-blue-700">
-                    Slots available: {{ $slotsRemaining }}
-                </span>
-                <span class="px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700">
-                    Registered (incl. pending): {{ $currentPlayerCount }} / {{ $maxPlayers }}
-                </span>
-                <span class="px-3 py-1 rounded-full border border-amber-100 bg-amber-50 text-amber-700">
-                    Registration fee: ₹{{ number_format($league->player_reg_fee ?? 0) }}
-                </span>
-            </div>
-            <div class="flex flex-wrap gap-3 mt-4">
-                <a href="https://wa.me/919400960223?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold text-white transition-colors">
-                    <i class="fa-brands fa-whatsapp text-lg"></i>
-                    Payment on WhatsApp
-                </a>
-                <a href="https://wa.me/?text={{ urlencode('Register for ' . $league->name . ' here: ' . $shareUrl) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-semibold text-white transition-colors">
-                    <i class="fa-brands fa-whatsapp text-lg"></i>
-                    Share to WhatsApp
-                </a>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
+                <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                    <p class="text-xs uppercase tracking-wide text-blue-600">Slots available</p>
+                    <p class="text-2xl font-bold text-blue-900 mt-1">{{ $slotsRemaining }}</p>
+                </div>
+                <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                    <p class="text-xs uppercase tracking-wide text-indigo-600">Registered (incl. pending)</p>
+                    <p class="text-2xl font-bold text-indigo-900 mt-1">{{ $currentPlayerCount }} / {{ $maxPlayers }}</p>
+                </div>
+                <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                    <p class="text-xs uppercase tracking-wide text-amber-600">Registration fee</p>
+                    <p class="text-2xl font-bold text-amber-800 mt-1">₹{{ number_format($league->player_reg_fee ?? 0) }}</p>
+                </div>
             </div>
             @if(!$registrationOpen)
                 <div class="mt-4 text-amber-200 bg-amber-500/10 border border-amber-400/40 rounded-xl px-4 py-3">
