@@ -1,260 +1,108 @@
 @extends('layouts.app')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <a href="{{ route('teams.index') }}" class="text-indigo-600 hover:text-indigo-900 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Back to Teams
+<div class="min-h-screen bg-slate-50 py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div class="space-y-1">
+                <a href="{{ route('teams.index') }}" class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Teams
+                </a>
+                <h1 class="text-3xl font-bold text-slate-900">Leagues by Game</h1>
+                <p class="text-slate-600">Browse leagues that have registered teams, organized under each game. Pick a league card to view its teams.</p>
+            </div>
+            <a href="{{ route('teams.league-players') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 transition">
+                View League Players →
             </a>
         </div>
 
-        <div class="mb-8">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">League Teams</h1>
-                    <p class="text-gray-600 mt-2">Browse teams organized by leagues</p>
-                </div>
-                <a href="{{ route('teams.league-players') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                    View League Players →
-                </a>
-            </div>
-        </div>
-
-        <!-- Tabs Navigation -->
-        @php
-            $activeLeague = $allLeagues->firstWhere('status', 'active') ?? $allLeagues->sortBy('name')->first();
-        @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-            @foreach($allLeagues->sortBy('name') as $index => $tabLeague)
-                <button onclick="showLeague({{ $tabLeague->id }})" 
-                        id="tab-{{ $tabLeague->id }}"
-                        class="futuristic-card relative p-1 rounded-2xl overflow-visible transition-all duration-500 {{ $tabLeague->id === $activeLeague->id ? 'active' : '' }}">
-                    <div class="card-content bg-gray-900 rounded-xl p-4 h-full flex flex-col justify-center items-center relative z-10 transition-colors duration-1000">
-                        <div class="text-center">
-                            <div class="font-extrabold text-sm leading-tight {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-white' }} transition-colors duration-1000 line-clamp-2">{{ $tabLeague->name }}</div>
-                            <div class="text-xs mt-2 opacity-70 font-semibold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-200' : 'text-gray-400' }}">{{ $tabLeague->leagueTeams->count() }} teams</div>
-                            @if($tabLeague->start_date->isFuture())
-                                <div class="text-xs mt-1 font-bold {{ $tabLeague->id === $activeLeague->id ? 'text-cyan-300' : 'text-emerald-400' }}" 
-                                     data-countdown="{{ $tabLeague->start_date->toIso8601String() }}"
-                                     id="countdown-{{ $tabLeague->id }}">
-                                </div>
-                            @endif
-                        </div>
+        @forelse($groupedLeagues as $gameName => $leagues)
+            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap bg-slate-50">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">Game</p>
+                        <h2 class="text-xl font-bold text-slate-900 mt-1">{{ $gameName }}</h2>
                     </div>
-                </button>
-            @endforeach
-        </div>
-
-        <style>
-        .futuristic-card {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-            min-height: 100px;
-        }
-        .futuristic-card.active {
-            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
-        }
-        .futuristic-card::after {
-            position: absolute;
-            content: "";
-            top: 30px;
-            left: 0;
-            right: 0;
-            z-index: -1;
-            height: 100%;
-            width: 100%;
-            transform: scale(0.8);
-            filter: blur(25px);
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-            transition: opacity 0.5s;
-        }
-        .futuristic-card.active::after {
-            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
-        }
-        .futuristic-card:hover::after {
-            opacity: 0;
-        }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            word-break: break-word;
-        }
-        </style>
-
-        <script>
-        function updateCountdowns() {
-            document.querySelectorAll('[data-countdown]').forEach(el => {
-                const targetDate = new Date(el.dataset.countdown);
-                const now = new Date();
-                const diff = targetDate - now;
-                
-                if (diff > 0) {
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                    
-                    el.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                } else {
-                    el.textContent = 'Started';
-                }
-            });
-        }
-        
-        updateCountdowns();
-        setInterval(updateCountdowns, 1000);
-        </script>
-
-        <!-- Tab Content -->
-        <div class="flex-1">
-
-        @forelse($allLeagues->sortBy('name') as $index => $league)
-            <div id="league-{{ $league->id }}" class="league-content bg-white rounded-lg shadow mb-8 {{ $league->id !== $activeLeague->id ? 'hidden' : '' }}">
-                <div class="p-6 border-b border-gray-200">
-                    <div class="flex items-center justify-between flex-wrap gap-4">
-                        <div class="flex items-center">
-                            @if($league->logo)
-                                <img src="{{ Storage::url($league->logo) }}" class="w-12 h-12 rounded-full object-cover mr-4">
-                            @endif
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900">{{ $league->name }}</h2>
-                                <p class="text-gray-600">{{ $league->game->name }} • Season {{ $league->season }}</p>
-                            </div>
-                        </div>
-                        <a href="{{ route('leagues.public-teams', $league) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
-                            View All →
-                        </a>
-                    </div>
+                    <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
+                        {{ $leagues->count() }} {{ Str::plural('league', $leagues->count()) }}
+                    </span>
                 </div>
 
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @foreach($league->leagueTeams->sortByDesc('created_at') as $leagueTeam)
-                            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">
-                                <!-- Team Header -->
-                                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            @if($leagueTeam->team->logo)
-                                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white mr-3">
-                                            @else
-                                                <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-3 border-2 border-white">
-                                                    <span class="text-xl font-bold text-white">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
-                                                </div>
-                                            @endif
-                                            <div>
-                                                <h3 class="font-bold text-white text-lg">{{ $leagueTeam->team->name }}</h3>
-                                                <p class="text-sm text-white/80">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-2xl font-bold text-white">{{ $leagueTeam->leaguePlayers->count() }}</div>
-                                            <div class="text-xs text-white/80">Players</div>
-                                        </div>
+                <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($leagues as $league)
+                        @php
+                            $teamCount = $league->leagueTeams->count();
+                            $startLabel = $league->start_date ? $league->start_date->format('M j, Y') : 'Date TBA';
+                        @endphp
+                        <div class="group rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                            <div class="p-5 space-y-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <p class="text-[11px] font-semibold uppercase tracking-wide text-indigo-600">League</p>
+                                        <h3 class="text-lg font-bold text-slate-900 leading-snug">{{ $league->name }}</h3>
+                                        <p class="text-sm text-slate-600">Season {{ $league->season ?? 'N/A' }}</p>
+                                        <p class="text-xs text-slate-500 mt-1">
+                                            Slug: <code class="text-slate-700">{{ $league->slug }}</code>
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                            {{ ucfirst($league->status ?? 'active') }}
+                                        </span>
+                                        <p class="text-xs text-slate-500 mt-2">Starts {{ $startLabel }}</p>
                                     </div>
                                 </div>
 
-                                <!-- All Players -->
-                                @php
-                                    $allPlayers = $leagueTeam->leaguePlayers->sortByDesc('retention');
-                                @endphp
-                                @if($allPlayers->count() > 0)
-                                    <div class="p-3">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <span class="text-xs font-semibold text-gray-700 uppercase">Squad</span>
-                                            <span class="text-xs text-gray-500">{{ $allPlayers->count() }} players</span>
-                                        </div>
-                                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                            @foreach($allPlayers as $player)
-                                                <div class="text-center">
-                                                    <div class="relative inline-block">
-                                                        @if($player->user && $player->user->photo)
-                                                            <img src="{{ Storage::url($player->user->photo) }}" class="{{ $player->retention ? 'w-14 h-14' : 'w-10 h-10' }} rounded-full object-cover mb-1 {{ $player->retention ? 'border-yellow-400 border-2 ring-2 ring-yellow-200' : 'border border-gray-200' }}">
-                                                        @else
-                                                            <div class="{{ $player->retention ? 'w-14 h-14' : 'w-10 h-10' }} rounded-full flex items-center justify-center mb-1 {{ $player->retention ? 'bg-yellow-100 border-2 border-yellow-400 ring-2 ring-yellow-200' : 'bg-gray-100 border border-gray-200' }}">
-                                                                <span class="{{ $player->retention ? 'text-base' : 'text-xs' }} font-bold {{ $player->retention ? 'text-yellow-600' : 'text-gray-600' }}">{{ $player->user ? substr($player->user->name, 0, 1) : '?' }}</span>
-                                                            </div>
-                                                        @endif
-                                                        @if($player->retention)
-                                                            <svg class="w-4 h-4 text-yellow-500 absolute -top-1 -right-1 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20" style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));">
-                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                            </svg>
-                                                        @endif
-                                                    </div>
-                                                    <p class="{{ $player->retention ? 'text-sm' : 'text-xs' }} {{ $player->retention ? 'text-yellow-700 font-semibold' : 'text-gray-900' }} truncate">{{ $player->user ? explode(' ', $player->user->name)[0] : 'Unknown' }}</p>
-                                                    @if($player->retention)
-                                                        <p class="text-xs text-yellow-600 font-semibold">Retained</p>
-                                                    @elseif($player->bid_price)
-                                                        <p class="text-xs text-green-600 font-bold">₹{{ number_format($player->bid_price) }}</p>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Team Stats Footer -->
-                                @php
-                                    $spentAmount = $leagueTeam->leaguePlayers->where('retention', false)->sum('bid_price');
-                                @endphp
-                                <div class="bg-gray-50 border-t border-gray-200 p-3">
-                                    <div class="grid grid-cols-3 gap-2 text-center">
-                                        <div>
-                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
-                                            <div class="text-xs text-gray-600">Remaining</div>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-gray-900">₹{{ number_format($spentAmount) }}</div>
-                                            <div class="text-xs text-gray-600">Spent</div>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-gray-900">{{ $leagueTeam->leaguePlayers->where('retention', true)->count() }}</div>
-                                            <div class="text-xs text-gray-600">Retained</div>
-                                        </div>
-                                    </div>
+                                <div class="flex items-center flex-wrap gap-2 text-xs text-slate-600">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16m10-9l-7 7-3-3"></path>
+                                        </svg>
+                                        {{ $teamCount }} {{ Str::plural('team', $teamCount) }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path>
+                                        </svg>
+                                        Season {{ $league->season ?? '—' }}
+                                    </span>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
-                    @if($league->leagueTeams->count() > 6)
-                        <div class="mt-4 text-center">
-                            <a href="{{ route('leagues.public-teams', $league) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                View all {{ $league->leagueTeams->count() }} teams →
-                            </a>
+                            <div class="px-5 pb-5 flex items-center justify-between gap-3">
+                                <div class="text-xs text-slate-500">
+                                    Updated {{ $league->updated_at?->diffForHumans() ?? 'recently' }}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('leagues.public-teams', $league) }}" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 transition">
+                                        View Teams
+                                    </a>
+                                    <a href="{{ route('leagues.fixtures', $league) }}" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
+                                        Fixtures
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    @endif
+                    @endforeach
                 </div>
-            </div>
+            </section>
         @empty
-            <div class="bg-white rounded-lg shadow p-12 text-center">
-                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                <p class="text-gray-500">No league teams found</p>
+            <div class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8a9 9 0 110-18 9 9 0 010 18z"></path>
+                    </svg>
+                </div>
+                <p class="text-slate-600 font-semibold">No leagues with teams yet.</p>
+                <p class="text-slate-500 text-sm mt-1">Create a league and add teams to see them listed here.</p>
             </div>
         @endforelse
-            </div>
     </div>
 </div>
-
-<script>
-function showLeague(leagueId) {
-    document.querySelectorAll('.league-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.league-tab').forEach(el => {
-        el.classList.remove('border-indigo-500', 'text-indigo-600');
-        el.classList.add('border-transparent', 'text-gray-500');
-    });
-    
-    document.getElementById('league-' + leagueId).classList.remove('hidden');
-    const tab = document.getElementById('tab-' + leagueId);
-    tab.classList.add('border-indigo-500', 'text-indigo-600');
-    tab.classList.remove('border-transparent', 'text-gray-500');
-}
-</script>
 @endsection

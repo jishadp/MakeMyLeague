@@ -708,6 +708,52 @@ class LeaguePlayerController extends Controller
     }
 
     /**
+     * Update payment status for a player from the roster table.
+     */
+    public function updatePaymentStatus(Request $request, League $league, LeaguePlayer $leaguePlayer)
+    {
+        if ($leaguePlayer->league_id !== $league->id) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+
+        if (!$user || !$user->canManageLeague($league->id)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to update payment status for this league.',
+                ], 403);
+            }
+
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'payment_status' => ['required', Rule::in(['paid', 'pay_later'])],
+        ]);
+
+        $leaguePlayer->payment_status = $validated['payment_status'];
+        $leaguePlayer->save();
+
+        $message = $validated['payment_status'] === 'paid'
+            ? 'Payment status updated to Paid.'
+            : 'Payment status updated to Pay Later.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'payment_status' => $leaguePlayer->payment_status,
+            ]);
+        }
+
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', $message);
+    }
+
+    /**
      * Bulk update player statuses.
      */
     public function bulkUpdateStatus(Request $request, League $league)

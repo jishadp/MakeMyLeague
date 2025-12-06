@@ -556,10 +556,33 @@
                                                 'pay_later' => 'bg-amber-100 text-amber-700',
                                             ];
                                             $paymentLabel = $paymentStatus === 'paid' ? 'Paid' : 'Pay Later';
+                                            $isPaid = $paymentStatus === 'paid';
                                         @endphp
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $paymentColors[$paymentStatus] ?? 'bg-gray-100 text-gray-700' }}">
-                                            {{ $paymentLabel }}
-                                        </span>
+                                        <div class="flex items-center gap-3" data-payment-cell @if($canManageLeague) onclick="event.stopPropagation();" @endif>
+                                            <span
+                                                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $paymentColors[$paymentStatus] ?? 'bg-gray-100 text-gray-700' }}"
+                                                data-payment-label
+                                                data-paid-class="bg-green-100 text-green-700"
+                                                data-unpaid-class="bg-amber-100 text-amber-700"
+                                            >
+                                                {{ $paymentLabel }}
+                                            </span>
+                                            @if($canManageLeague)
+                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        class="sr-only peer"
+                                                        data-payment-toggle
+                                                        data-update-url="{{ route('league-players.update-payment', [$league, $leaguePlayer]) }}"
+                                                        data-current-status="{{ $paymentStatus }}"
+                                                        data-paid-label="Paid"
+                                                        data-unpaid-label="Pay Later"
+                                                        {{ $isPaid ? 'checked' : '' }}
+                                                    >
+                                                    <div class="relative w-11 h-6 bg-gray-200 rounded-full shadow-inner transition peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-indigo-500 peer-checked:bg-green-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                                                </label>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
@@ -697,6 +720,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const classListFromString = (value = '') => value.split(' ').filter(Boolean);
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
     const applyChipStyles = (group) => {
         document.querySelectorAll(`[data-filter-group="${group}"]`).forEach((label) => {
             const input = label.querySelector('input');
@@ -737,6 +762,74 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 window.open(whatsappUrl, '_blank');
             }
+        });
+    });
+
+    document.querySelectorAll('[data-payment-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        toggle.addEventListener('change', (event) => {
+            event.stopPropagation();
+
+            const input = event.target;
+            const container = input.closest('[data-payment-cell]');
+            const label = container ? container.querySelector('[data-payment-label]') : null;
+            const paidClass = classListFromString(label?.dataset.paidClass);
+            const unpaidClass = classListFromString(label?.dataset.unpaidClass);
+            const previousStatus = input.dataset.currentStatus || 'pay_later';
+            const nextStatus = input.checked ? 'paid' : 'pay_later';
+
+            input.disabled = true;
+            if (label) {
+                label.textContent = 'Updating...';
+                label.classList.add('opacity-80');
+            }
+
+            fetch(input.dataset.updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ payment_status: nextStatus }),
+            })
+                .then(async (response) => {
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        const message = data?.message || 'Unable to update payment status.';
+                        throw new Error(message);
+                    }
+                    return data;
+                })
+                .then((data) => {
+                    const status = data.payment_status || nextStatus;
+                    if (label) {
+                        const labelText = status === 'paid' ? input.dataset.paidLabel : input.dataset.unpaidLabel;
+                        label.textContent = labelText;
+                        label.classList.remove('opacity-80', ...paidClass, ...unpaidClass);
+                        label.classList.add(...(status === 'paid' ? paidClass : unpaidClass));
+                    }
+                    input.dataset.currentStatus = status;
+                })
+                .catch((error) => {
+                    console.error(error);
+                    alert(error.message || 'Could not update payment status.');
+                    input.checked = previousStatus === 'paid';
+                    if (label) {
+                        label.textContent = previousStatus === 'paid' ? input.dataset.paidLabel : input.dataset.unpaidLabel;
+                        label.classList.remove('opacity-80', ...paidClass, ...unpaidClass);
+                        label.classList.add(...(previousStatus === 'paid' ? paidClass : unpaidClass));
+                    }
+                })
+                .finally(() => {
+                    input.disabled = false;
+                    if (label) {
+                        label.classList.remove('opacity-80');
+                    }
+                });
         });
     });
 

@@ -302,6 +302,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'destroy'])->name('league-players.destroy')->middleware('league.organizer');
     Route::patch('leagues/{league}/players/{leaguePlayer}/status', [LeaguePlayerController::class, 'updateStatus'])->name('league-players.updateStatus')->middleware('league.organizer');
     Route::patch('leagues/{league}/players/{leaguePlayer}/role', [LeaguePlayerController::class, 'updateRole'])->name('league-players.update-role')->middleware('league.organizer');
+    Route::patch('leagues/{league}/players/{leaguePlayer}/payment', [LeaguePlayerController::class, 'updatePaymentStatus'])->name('league-players.update-payment')->middleware('league.organizer');
     Route::match(['post', 'patch'], 'leagues/{league}/players/bulk-status', [LeaguePlayerController::class, 'bulkUpdateStatus'])->name('league-players.bulkStatus')->middleware('league.organizer');
     Route::post('leagues/{league}/players/{leaguePlayer}/toggle-retention', [LeaguePlayerController::class, 'toggleRetention'])->name('league-players.toggle-retention')->middleware('team.owner');
     Route::post('leagues/{league}/players/add-retention', [LeaguePlayerController::class, 'addRetentionPlayer'])->name('league-players.add-retention')->middleware('team.owner');

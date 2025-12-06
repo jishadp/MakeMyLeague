@@ -365,19 +365,16 @@ class TeamController extends Controller
      */
     public function leagueTeams(Request $request): View
     {
-        $query = League::with(['leagueTeams.team.owners', 'game'])
+        $leagues = League::with(['leagueTeams', 'game'])
             ->whereHas('leagueTeams')
-            ->latest();
-
-        $leagues = $query->paginate(10);
-        
-        // Get all leagues for sidebar
-        $allLeagues = League::whereHas('leagueTeams')
-            ->withCount('leagueTeams')
-            ->latest()
+            ->orderBy('name')
             ->get();
 
-        return view('teams.league-teams', compact('leagues', 'allLeagues'));
+        $groupedLeagues = $leagues->groupBy(function ($league) {
+            return $league->game->name ?? 'Other Games';
+        })->sortKeys();
+
+        return view('teams.league-teams', compact('groupedLeagues'));
     }
 
     /**
