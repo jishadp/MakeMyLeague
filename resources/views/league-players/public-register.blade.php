@@ -19,8 +19,6 @@
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
-    .stats-scroll::-webkit-scrollbar { display: none; }
-    .stats-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
 <section class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-blue-100/50 text-slate-900 pb-20">
@@ -72,46 +70,57 @@
                 </div>
             </div>
 
+            <!-- UPDATED 3 CARDS — fixed 3-column layout on mobile -->
             <div class="relative mt-8">
-                <div class="flex gap-4 overflow-x-auto pb-3 stats-scroll snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:snap-none sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-blue-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 snap-start">
-                        <div class="absolute -right-6 -top-10 h-24 w-24 rounded-full bg-blue-100/60 blur-3xl"></div>
-                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
-                        <div class="relative flex items-start justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-blue-600 shadow-sm shadow-blue-300/40">
-                                    <i class="fa-solid fa-users text-lg"></i>
+                <div class="grid grid-cols-3 gap-3 sm:gap-4 pb-3 sm:pb-0">
+
+                    <!-- CARD 1 -->
+                    <div class="group relative rounded-xl border border-blue-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div class="absolute -right-6 -top-10 h-16 w-16 rounded-full bg-blue-100/60 blur-2xl"></div>
+                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
+
+                        <div class="relative flex flex-col items-start gap-1">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-blue-600 shadow-sm shadow-blue-300/40">
+                                    <i class="fa-solid fa-users text-base"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-blue-600">Slots Left</p>
-                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">{{ $slotsRemaining }}</p>
+                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-blue-600">Slots Left</p>
+                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">{{ $slotsRemaining }}</p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-blue-100 text-blue-700">Live</span>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-700">Live</span>
                         </div>
-                        <p class="mt-4 text-xs text-slate-500 leading-relaxed flex items-center gap-2">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Updated in real-time by organizers
+
+                        <p class="mt-3 text-[10px] text-slate-500 flex items-center gap-1">
+                            <span class="h-1 w-1 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Updated live
                         </p>
                     </div>
-                    
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-indigo-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 snap-start">
-                        <div class="absolute -left-8 -bottom-10 h-28 w-28 rounded-full bg-indigo-100/60 blur-3xl"></div>
-                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
-                        <div class="relative flex items-start justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-indigo-600 shadow-sm shadow-indigo-300/40">
-                                    <i class="fa-solid fa-clipboard-list text-lg"></i>
+
+<!-- CARD 2 -->
+                    <div class="group relative rounded-xl border border-indigo-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
+                        <div class="absolute -left-6 -bottom-10 h-16 w-16 rounded-full bg-indigo-100/60 blur-2xl"></div>
+                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
+
+                        <div class="relative flex flex-col items-start gap-1">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-indigo-600 shadow-sm shadow-indigo-300/40">
+                                    <i class="fa-solid fa-clipboard-list text-base"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-indigo-600">Registered</p>
-                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">{{ $currentPlayerCount }} <span class="text-lg text-slate-400 font-medium">/ {{ $maxPlayers }}</span></p>
+                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-indigo-600">Registered</p>
+                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">
+                                        {{ $currentPlayerCount }}
+                                        <span class="text-sm text-slate-400 font-medium">/ {{ $maxPlayers }}</span>
+                                    </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-indigo-100 text-indigo-700">Status</span>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-100 text-indigo-700">Status</span>
                         </div>
-                        <div class="relative mt-5">
-                            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] font-semibold text-slate-500">
+
+                        <div class="relative mt-4">
+                            <div class="flex items-center justify-between text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                                 <span>Filled</span>
                                 <span>{{ number_format($playerFill, 0) }}%</span>
                             </div>
@@ -121,25 +130,34 @@
                         </div>
                     </div>
 
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 snap-start">
-                        <div class="absolute -right-6 -bottom-10 h-28 w-28 rounded-full bg-amber-100/60 blur-3xl"></div>
-                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
-                        <div class="relative flex items-start justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-amber-600 shadow-sm shadow-amber-300/40">
-                                    <i class="fa-solid fa-coins text-lg"></i>
+                    <!-- CARD 3 -->
+                    <div class="group relative rounded-xl border border-amber-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10">
+                        <div class="absolute -right-6 -bottom-10 h-16 w-16 rounded-full bg-amber-100/60 blur-2xl"></div>
+                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
+
+                        <div class="relative flex flex-col items-start gap-1">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-amber-600 shadow-sm shadow-amber-300/40">
+                                    <i class="fa-solid fa-coins text-base"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-amber-600">Reg. Fee</p>
-                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">₹{{ number_format($league->player_reg_fee ?? 0) }}</p>
+                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-amber-600">Reg. Fee</p>
+                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">
+                                        ₹{{ number_format($league->player_reg_fee ?? 0) }}
+                                    </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-700">Per Player</span>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-700">Per Player</span>
                         </div>
-                        <p class="mt-4 text-xs text-slate-500 leading-relaxed">Payment can be completed online or in person with the organizer.</p>
+
+                        <p class="mt-3 text-[10px] text-slate-500 leading-relaxed">
+                            Payment can be completed online or in person.
+                        </p>
                     </div>
-                </div>
-            </div>
+
+                </div> <!-- end grid -->
+            </div> <!-- end card wrapper -->
+
 
             @if(!$registrationOpen)
                 <div class="mt-6 flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl p-4 animate-pulse">
@@ -152,6 +170,7 @@
             @endif
         </div>
 
+        <!-- FORM CARD -->
         <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-900/5 animate-fade-in-up delay-100 relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
@@ -176,7 +195,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('league-players.public-register.store', $league) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+<form action="{{ route('league-players.public-register.store', $league) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <input type="hidden" name="country_code" value="{{ old('country_code', '+91') }}">
 
@@ -295,9 +314,11 @@
                 </div>
             </form>
         </div>
-    </div>
+
+</div> <!-- container end -->
 </section>
 
+<!-- CROP MODAL -->
 <div id="crop-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 opacity-0" role="dialog" aria-modal="true">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 transition-transform duration-300" id="crop-modal-content">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -310,8 +331,7 @@
         </div>
         
         <div class="p-5 bg-slate-50">
-            <div id="crop-container" class="w-full h-80 bg-slate-200 rounded-xl overflow-hidden border border-slate-300 shadow-inner relative">
-                </div>
+            <div id="crop-container" class="w-full h-80 bg-slate-200 rounded-xl overflow-hidden border border-slate-300 shadow-inner relative"></div>
             <p class="text-center text-xs text-slate-400 mt-2">Drag to position. Scroll to zoom.</p>
         </div>
 
@@ -326,6 +346,7 @@
     </div>
 </div>
 
+<!-- CROP SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" referrerpolicy="no-referrer" />
@@ -336,7 +357,7 @@ let selectedFile;
 const modal = document.getElementById('crop-modal');
 const modalContent = document.getElementById('crop-modal-content');
 
-// Form submit animation
+// Submit animation
 document.querySelector('form').addEventListener('submit', function() {
     const btn = document.getElementById('submitBtn');
     const loader = document.getElementById('btnLoader');
@@ -366,9 +387,7 @@ function showCropModal(input) {
                 guides: true,
             });
 
-            // Show Modal with animation
             modal.classList.remove('hidden');
-            // Small delay to allow display:block to apply before opacity transition
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 modalContent.classList.remove('scale-95');
@@ -380,7 +399,6 @@ function showCropModal(input) {
 }
 
 function closeCropModal(resetInput = false) {
-    // Hide animation
     modal.classList.add('opacity-0');
     modalContent.classList.remove('scale-100');
     modalContent.classList.add('scale-95');
@@ -395,7 +413,7 @@ function closeCropModal(resetInput = false) {
         if (resetInput) {
             document.getElementById('photo-input').value = '';
         }
-    }, 300); // Match transition duration
+    }, 300);
 }
 
 function applyCrop() {
@@ -423,4 +441,5 @@ function applyCrop() {
     }, 'image/jpeg', 0.9);
 }
 </script>
+
 @endsection
