@@ -70,94 +70,64 @@
                 </div>
             </div>
 
-            <!-- UPDATED 3 CARDS — fixed 3-column layout on mobile -->
             <div class="relative mt-8">
-                <div class="grid grid-cols-3 gap-3 sm:gap-4 pb-3 sm:pb-0">
+    <div class="grid grid-cols-3 gap-2">
 
-                    <!-- CARD 1 -->
-                    <div class="group relative rounded-xl border border-blue-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
-                        <div class="absolute -right-6 -top-10 h-16 w-16 rounded-full bg-blue-100/60 blur-2xl"></div>
-                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
+        <!-- CARD 1 -->
+        <div class="group relative rounded-xl border border-blue-100 bg-white p-3 min-w-0">
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-white/80 text-blue-600 shadow-sm">
+                    <i class="fa-solid fa-users text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] uppercase tracking-wide font-bold text-blue-600">Slots</p>
+                    <p class="text-xl font-black text-slate-900 leading-none">{{ $slotsRemaining }}</p>
+                </div>
+            </div>
+            <p class="mt-1 text-[9px] text-slate-500 flex items-center gap-1">
+                <span class="h-1 w-1 rounded-full bg-emerald-400 animate-pulse"></span> Live
+            </p>
+        </div>
 
-                        <div class="relative flex flex-col items-start gap-1">
-                            <div class="flex items-center gap-2">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-blue-600 shadow-sm shadow-blue-300/40">
-                                    <i class="fa-solid fa-users text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-blue-600">Slots Left</p>
-                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">{{ $slotsRemaining }}</p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-700">Live</span>
-                        </div>
+        <!-- CARD 2 -->
+        <div class="group relative rounded-xl border border-indigo-100 bg-white p-3 min-w-0">
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-white/80 text-indigo-600 shadow-sm">
+                    <i class="fa-solid fa-clipboard-list text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] uppercase tracking-wide font-bold text-indigo-600">Reg</p>
+                    <p class="text-xl font-black text-slate-900 leading-none">
+                        {{ $currentPlayerCount }} <span class="text-xs text-slate-400">/ {{ $maxPlayers }}</span>
+                    </p>
+                </div>
+            </div>
 
-                        <p class="mt-3 text-[10px] text-slate-500 flex items-center gap-1">
-                            <span class="h-1 w-1 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Updated live
-                        </p>
-                    </div>
+            <div class="mt-1">
+                <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-blue-500" style="width: {{ $playerFill }}%;"></div>
+                </div>
+            </div>
+        </div>
 
-<!-- CARD 2 -->
-                    <div class="group relative rounded-xl border border-indigo-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
-                        <div class="absolute -left-6 -bottom-10 h-16 w-16 rounded-full bg-indigo-100/60 blur-2xl"></div>
-                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
+        <!-- CARD 3 -->
+        <div class="group relative rounded-xl border border-amber-100 bg-white p-3 min-w-0">
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-white/80 text-amber-600 shadow-sm">
+                    <i class="fa-solid fa-coins text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] uppercase tracking-wide font-bold text-amber-600">Fee</p>
+                    <p class="text-xl font-black text-slate-900 leading-none">
+                        ₹{{ number_format($league->player_reg_fee ?? 0) }}
+                    </p>
+                </div>
+            </div>
+            <p class="mt-1 text-[9px] text-slate-500">Per player</p>
+        </div>
 
-                        <div class="relative flex flex-col items-start gap-1">
-                            <div class="flex items-center gap-2">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-indigo-600 shadow-sm shadow-indigo-300/40">
-                                    <i class="fa-solid fa-clipboard-list text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-indigo-600">Registered</p>
-                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">
-                                        {{ $currentPlayerCount }}
-                                        <span class="text-sm text-slate-400 font-medium">/ {{ $maxPlayers }}</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-100 text-indigo-700">Status</span>
-                        </div>
-
-                        <div class="relative mt-4">
-                            <div class="flex items-center justify-between text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                                <span>Filled</span>
-                                <span>{{ number_format($playerFill, 0) }}%</span>
-                            </div>
-                            <div class="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
-                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-blue-500" style="width: {{ $playerFill }}%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CARD 3 -->
-                    <div class="group relative rounded-xl border border-amber-100 bg-white p-4 sm:p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10">
-                        <div class="absolute -right-6 -bottom-10 h-16 w-16 rounded-full bg-amber-100/60 blur-2xl"></div>
-                        <div class="absolute inset-px rounded-xl border border-white/70 pointer-events-none"></div>
-
-                        <div class="relative flex flex-col items-start gap-1">
-                            <div class="flex items-center gap-2">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-amber-600 shadow-sm shadow-amber-300/40">
-                                    <i class="fa-solid fa-coins text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] uppercase tracking-wider font-extrabold text-amber-600">Reg. Fee</p>
-                                    <p class="text-2xl font-black text-slate-900 leading-none mt-1">
-                                        ₹{{ number_format($league->player_reg_fee ?? 0) }}
-                                    </p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-700">Per Player</span>
-                        </div>
-
-                        <p class="mt-3 text-[10px] text-slate-500 leading-relaxed">
-                            Payment can be completed online or in person.
-                        </p>
-                    </div>
-
-                </div> <!-- end grid -->
-            </div> <!-- end card wrapper -->
-
+    </div>
+            </div>
 
             @if(!$registrationOpen)
                 <div class="mt-6 flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl p-4 animate-pulse">
