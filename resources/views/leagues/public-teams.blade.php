@@ -44,93 +44,90 @@
                         return sprintf('%d-%012d', $player->retention ? 1 : 0, $value);
                     });
                 @endphp
-                <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col border border-gray-100">
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
+                    <!-- Team Header with Gradient -->
                     @if($leagueTeam->team->banner)
-                        <div class="h-28 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
+                        <div class="h-24 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
                     @else
-                        <div class="h-28 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                        <div class="h-24 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                     @endif
                     
-                    <div class="p-4 flex-1 flex flex-col gap-3">
-                        <div class="flex items-center">
+                    <div class="p-4">
+                        <!-- Team Info -->
+                        <div class="flex items-center gap-3 mb-4">
                             @if($leagueTeam->team->logo)
-                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-11 h-11 rounded-full object-cover mr-3">
+                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-16 h-16 rounded-full object-cover border-4 border-white -mt-10 shadow-lg">
                             @else
-                                <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                    <span class="text-lg font-bold text-gray-600">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
+                                <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white -mt-10 shadow-lg">
+                                    <span class="text-xl font-bold text-gray-600">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
                                 </div>
                             @endif
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900">{{ $leagueTeam->team->name }}</h3>
-                                <p class="text-xs text-gray-600">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg font-bold text-gray-900 truncate">{{ $leagueTeam->team->name }}</h3>
+                                <p class="text-sm text-gray-600 truncate">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-blue-600">{{ $leagueTeam->leaguePlayers->count() }}</div>
+                                <div class="text-xs text-gray-500">Players</div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-gray-50 rounded-lg p-2.5 text-center">
-                                <div class="text-xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->count() }}</div>
-                                <div class="text-[11px] text-gray-600">Players</div>
-                            </div>
-                            <div class="bg-gray-50 rounded-lg p-2.5 text-center">
-                                <div class="text-xl font-bold text-green-600">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
-                                <div class="text-[11px] text-gray-600">Wallet</div>
-                            </div>
-                        </div>
-
-                        <div class="text-center">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium
-                                @if($leagueTeam->status === 'active') bg-green-100 text-green-800
-                                @else bg-gray-100 text-gray-800 @endif">
-                                {{ ucfirst($leagueTeam->status) }}
-                            </span>
-                        </div>
-
+                        <!-- SQUAD Section -->
                         @if($players->count() > 0)
-                            <div class="border-t border-gray-200 pt-3 space-y-2.5">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm font-semibold text-gray-900">Players</p>
-                                    <span class="text-xs text-gray-500">{{ $players->count() }} total</span>
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wide">SQUAD</h4>
+                                    <span class="text-xs text-gray-500">{{ $players->count() }} players</span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-2 max-h-64 overflow-auto pr-1 sm:grid-cols-3 md:grid-cols-3">
+                                
+                                <!-- 3 Players Per Row Grid -->
+                                <div class="grid grid-cols-3 gap-3">
                                     @foreach($players as $player)
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
-                                            $valueLabel = $player->bid_price ? 'Sold' : 'Base';
                                         @endphp
-                                        <div class="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-2.5 py-2">
-                                            <div class="relative">
+                                        <div class="text-center">
+                                            <div class="relative inline-block mb-2">
                                                 @if($player->user?->photo)
-                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover">
+                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover mx-auto border-2 {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
                                                 @else
-                                                    <div class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
-                                                        {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                                    <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto border-2 {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
+                                                        <span class="text-sm font-bold text-gray-600">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
                                                     </div>
                                                 @endif
                                                 @if($player->retention)
-                                                    <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
-                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                        </svg>
-                                                    </span>
+                                                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white">
+                                                        <span class="text-xs">⭐</span>
+                                                    </div>
                                                 @endif
                                             </div>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-semibold text-gray-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
-                                                <p class="text-xs text-gray-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
-                                                <span class="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-gray-700">
-                                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.5 2-3.5 3-6 3 1.5 2 3.5 3 6 3m0-6c1.5 2 3.5 3 6 3-1.5 2-3.5 3-6 3m0-6v10" />
-                                                    </svg>
-                                                    ₹{{ number_format($value) }} <span class="text-[10px] text-gray-500">({{ $valueLabel }})</span>
-                                                </span>
-                                            </div>
+                                            <p class="text-xs font-semibold text-gray-900 truncate px-1">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                            @if($player->retention)
+                                                <p class="text-xs font-bold text-yellow-600">Retained</p>
+                                            @else
+                                                <p class="text-xs font-bold text-green-600">₹{{ number_format($value) }}</p>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
-                        @else
-                            <p class="text-xs text-gray-500 border-t border-gray-200 pt-4">No players added yet.</p>
                         @endif
+
+                        <!-- Stats Footer -->
+                        <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($leagueTeam->wallet_balance - $players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0)) }}</div>
+                                <div class="text-xs text-gray-500">Remaining</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0)) }}</div>
+                                <div class="text-xs text-gray-500">Spent</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-yellow-600">{{ $players->where('retention', true)->count() }}</div>
+                                <div class="text-xs text-gray-500">Retained</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @empty
