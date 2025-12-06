@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-3">
-                    <a href="https://wa.me/919400960223?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" 
+                    <a href="https://wa.me/918301867613?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" 
                        target="_blank" rel="noopener" 
                        class="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl text-sm font-bold text-black transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5">
                         <i class="fa-brands fa-whatsapp text-lg group-hover:scale-110 transition-transform"></i>
