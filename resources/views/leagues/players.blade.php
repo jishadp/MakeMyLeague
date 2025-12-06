@@ -74,52 +74,71 @@
                         <h2 class="text-xl font-bold text-slate-900">Roster</h2>
                         <p class="text-sm text-slate-600">Retained first, then value</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
+                        <div class="flex items-center gap-2 text-xs">
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow" data-filter="all">All</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200" data-filter="available">Available</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200" data-filter="auctioning">Auctioning</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200" data-filter="sold">Sold</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-red-100 text-red-700 border border-red-200" data-filter="unsold">Unsold</button>
+                        </div>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
                     </div>
                 </div>
 
                 <div id="player-tab-all" class="player-tab-panel">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-3 gap-3" data-player-list>
                         @foreach($playersOrdered as $player)
                             @php
                                 $value = $player->bid_price ?? $player->base_price ?? 0;
+                                $status = $player->status ?? 'available';
                                 $statusColors = [
-                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'pending' => 'bg-gray-100 text-gray-800',
                                     'available' => 'bg-blue-100 text-blue-800',
+                                    'auctioning' => 'bg-amber-100 text-amber-800',
                                     'sold' => 'bg-green-100 text-green-800',
                                     'unsold' => 'bg-red-100 text-red-800',
                                     'skip' => 'bg-gray-100 text-gray-800',
                                 ];
+                                $letterMap = [
+                                    'available' => 'A',
+                                    'auctioning' => 'B',
+                                    'sold' => 'S',
+                                    'unsold' => 'U',
+                                    'pending' => 'P',
+                                    'skip' => 'P',
+                                ];
+                                $statusLetter = $letterMap[$status] ?? 'A';
+                                $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                             @endphp
-                            <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-                                <div class="relative">
-                                    @if($player->user?->photo)
-                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover">
-                                    @else
-                                        <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600">
-                                            {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    @if($player->retention)
-                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                            </svg>
+                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $status }}">
+                                <div class="flex flex-col items-center text-center space-y-1">
+                                    <div class="relative">
+                                        @if($player->user?->photo)
+                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100">
+                                        @else
+                                            <div class="w-14 h-14 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow">
+                                                {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                            </div>
+                                        @endif
+                                        @if($player->retention)
+                                            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                            </span>
+                                        @endif
+                                        <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$status] ?? 'bg-gray-400 text-white' }}">
+                                            {{ $statusLetter }}
                                         </span>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-slate-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
-                                    <p class="text-xs text-slate-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
-                                    <p class="text-[11px] text-slate-600 truncate">{{ $player->leagueTeam?->team?->name ?? 'No team' }}</p>
-                                </div>
-                                <div class="text-right space-y-1">
-                                    <span class="inline-flex px-2 py-1 text-[11px] font-semibold rounded-full {{ $statusColors[$player->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ ucfirst($player->status) }}
-                                    </span>
-                                    <p class="text-sm font-bold text-slate-900">₹{{ number_format($value) }}</p>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-900 truncate w-full">{{ $firstName }}</p>
+                                    <p class="text-[11px] text-slate-500 truncate w-full">{{ $player->user?->position?->name ?? 'Role' }}</p>
+                                    <p class="text-sm font-bold {{ in_array($status, ['sold','available']) ? 'text-green-700' : ($status === 'auctioning' ? 'text-amber-700' : ($status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
+                                        ₹{{ number_format($value) }}
+                                    </p>
                                 </div>
                             </div>
                         @endforeach
@@ -137,7 +156,7 @@
                                     </div>
                                     <span class="text-xs text-slate-600">{{ $localPlayers->count() }} players</span>
                                 </div>
-                                <div class="p-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                <div class="p-3 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2">
                                     @foreach($localPlayers as $player)
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
@@ -148,34 +167,34 @@
                                                 'unsold' => 'bg-red-100 text-red-800',
                                                 'skip' => 'bg-gray-100 text-gray-800',
                                             ];
+                                            $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                         @endphp
-                                        <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-2.5 py-2">
-                                            <div class="relative">
-                                                @if($player->user?->photo)
-                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-9 h-9 rounded-full object-cover">
-                                                @else
-                                                    <div class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-[11px] font-semibold text-slate-600">
-                                                        {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
-                                                    </div>
-                                                @endif
-                                                @if($player->retention)
-                                                    <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-amber-500 text-white shadow">
-                                                        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                        </svg>
+                                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $player->status ?? 'available' }}">
+                                            <div class="flex flex-col items-center text-center space-y-1">
+                                                <div class="relative">
+                                                    @if($player->user?->photo)
+                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100">
+                                                    @else
+                                                        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow">
+                                                            {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                                        </div>
+                                                    @endif
+                                                    @if($player->retention)
+                                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
+                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                            </svg>
+                                                        </span>
+                                                    @endif
+                                                    <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$player->status ?? 'available'] ?? 'bg-gray-400 text-white' }}">
+                                                        {{ $statusLetter }}
                                                     </span>
-                                                @endif
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
-                                                <p class="text-[11px] text-slate-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
-                                                <p class="text-[11px] text-slate-500 truncate">{{ $player->leagueTeam?->team?->name ?? 'No team' }}</p>
-                                            </div>
-                                            <div class="text-right space-y-1">
-                                                <span class="inline-flex px-2 py-1 text-[10px] font-semibold rounded-full {{ $statusColors[$player->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                                    {{ ucfirst($player->status) }}
-                                                </span>
-                                                <p class="text-sm font-bold text-slate-900">₹{{ number_format($value) }}</p>
+                                                </div>
+                                                <p class="text-sm font-semibold text-slate-900 truncate w-full">{{ $firstName }}</p>
+                                                <p class="text-[11px] text-slate-500 truncate w-full">{{ $player->user?->position?->name ?? 'Role' }}</p>
+                                                <p class="text-sm font-bold {{ in_array($player->status, ['sold','available']) ? 'text-green-700' : ($player->status === 'auctioning' ? 'text-amber-700' : ($player->status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
+                                                    ₹{{ number_format($value) }}
+                                                </p>
                                             </div>
                                         </div>
                                     @endforeach
@@ -190,13 +209,17 @@
                 <p class="text-slate-600 font-semibold">No players available for this league yet.</p>
             </div>
         @endif
+        </div>
     </div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.player-tab');
     const panels = document.querySelectorAll('.player-tab-panel');
+    const searchInput = document.getElementById('playerSearch');
+    const playerCards = document.querySelectorAll('[data-player-name]');
+    const statusButtons = document.querySelectorAll('.status-filter');
+    let activeStatus = 'all';
 
     tabs.forEach((tab) => {
         tab.addEventListener('click', () => {
@@ -216,6 +239,37 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    const applyFilters = () => {
+        const term = searchInput?.value.trim().toLowerCase() || '';
+        playerCards.forEach((card) => {
+            const name = card.dataset.playerName || '';
+            const status = card.dataset.status || '';
+            const matchesName = !term || name.includes(term);
+            const matchesStatus = activeStatus === 'all' || status === activeStatus;
+            card.classList.toggle('hidden', !(matchesName && matchesStatus));
+        });
+    };
+
+    statusButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            activeStatus = button.dataset.filter || 'all';
+            statusButtons.forEach((btn) => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+                btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+            });
+            button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+            button.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+            applyFilters();
+        });
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            applyFilters();
+        });
+        applyFilters();
+    }
 });
 </script>
 @endsection

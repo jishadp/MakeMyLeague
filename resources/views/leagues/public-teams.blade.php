@@ -80,32 +80,32 @@
                                     <span class="text-xs text-gray-500">{{ $players->count() }} players</span>
                                 </div>
                                 
-                                <!-- 3 Players Per Row Grid -->
-                                <div class="grid grid-cols-3 gap-3">
+                                <!-- Players Grid -->
+                                <div class="grid grid-cols-3 gap-2">
                                     @foreach($players as $player)
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
                                         @endphp
                                         <div class="text-center">
-                                            <div class="relative inline-block mb-2">
+                                            <div class="relative inline-block mb-1.5">
                                                 @if($player->user?->photo)
-                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover mx-auto border-2 {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
+                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover mx-auto border {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
                                                 @else
-                                                    <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto border-2 {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
-                                                        <span class="text-sm font-bold text-gray-600">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
+                                                    <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mx-auto border {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
+                                                        <span class="text-xs font-bold text-gray-600">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
                                                     </div>
                                                 @endif
                                                 @if($player->retention)
-                                                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white">
-                                                        <span class="text-xs">⭐</span>
+                                                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center border border-white">
+                                                        <span class="text-[10px]">⭐</span>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p class="text-xs font-semibold text-gray-900 truncate px-1">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                            <p class="text-[10px] font-semibold text-gray-900 truncate px-1 leading-tight">{{ $player->user?->name ?? 'Unknown' }}</p>
                                             @if($player->retention)
-                                                <p class="text-xs font-bold text-yellow-600">Retained</p>
+                                                <p class="text-[10px] font-bold text-yellow-600 leading-tight">Retained</p>
                                             @else
-                                                <p class="text-xs font-bold text-green-600">₹{{ number_format($value) }}</p>
+                                                <p class="text-[10px] font-bold text-green-600 leading-tight break-words">₹{{ number_format($value) }}</p>
                                             @endif
                                         </div>
                                     @endforeach
@@ -123,16 +123,16 @@
                         @endphp
                         <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
                             <div class="text-center">
-                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($remainingWallet) }}</div>
-                                <div class="text-xs text-gray-500">Remaining</div>
+                                <div class="text-base sm:text-lg font-bold text-gray-900 break-words leading-tight">₹{{ number_format($remainingWallet) }}</div>
+                                <div class="text-[11px] text-gray-500">Remaining</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($totalSpent) }}</div>
-                                <div class="text-xs text-gray-500">Spent</div>
+                                <div class="text-base sm:text-lg font-bold text-gray-900 break-words leading-tight">₹{{ number_format($totalSpent) }}</div>
+                                <div class="text-[11px] text-gray-500">Spent</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-xl font-bold text-yellow-600">{{ $players->where('retention', true)->count() }}</div>
-                                <div class="text-xs text-gray-500">Retained</div>
+                                <div class="text-base sm:text-lg font-bold text-yellow-600 leading-tight">{{ $players->where('retention', true)->count() }}</div>
+                                <div class="text-[11px] text-gray-500">Retained</div>
                             </div>
                         </div>
                     </div>
