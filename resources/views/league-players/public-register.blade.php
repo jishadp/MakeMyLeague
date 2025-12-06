@@ -5,6 +5,8 @@
 @php
     $shareUrl = route('league-players.public-register', $league);
     $playerFill = $maxPlayers > 0 ? min(100, ($currentPlayerCount / $maxPlayers) * 100) : 0;
+    $isAuthenticated = auth()->check();
+    $authUser = auth()->user();
 @endphp
 
 @section('content')
@@ -169,39 +171,52 @@
 
 <form action="{{ route('league-players.public-register.store', $league) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
-                <input type="hidden" name="country_code" value="{{ old('country_code', '+91') }}">
+                <input type="hidden" name="country_code" value="{{ $isAuthenticated ? ($authUser->country_code ?? '+91') : old('country_code', '+91') }}">
 
-                <div class="space-y-1.5 group">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
-                    <div class="relative">
-                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Lionel Messi" 
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300" 
-                            @if(!$registrationOpen) disabled @endif>
-                        <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div class="space-y-1.5 group">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Mobile Number</label>
-                        <div class="flex rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all duration-300">
-                            <span class="px-4 py-3.5 bg-slate-100 text-slate-500 font-semibold border-r border-slate-200 text-sm flex items-center">+91</span>
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" name="mobile" value="{{ old('mobile') }}" required placeholder="98765 43210" 
-                                class="flex-1 px-4 py-3.5 bg-transparent border-none focus:ring-0 text-slate-900 font-medium placeholder-slate-400" 
-                                @if(!$registrationOpen) disabled @endif>
+                @if($isAuthenticated)
+                    <div class="flex items-center gap-3 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/60">
+                        <div class="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                            {{ strtoupper(substr($authUser->name ?? 'U', 0, 1)) }}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Logged in</p>
+                            <p class="font-bold text-slate-900">{{ $authUser->name }}</p>
+                            <p class="text-sm text-slate-600">{{ $authUser->mobile ?? 'No mobile number on profile' }}</p>
                         </div>
                     </div>
-
+                @else
                     <div class="space-y-1.5 group">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Secret PIN</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
                         <div class="relative">
-                            <input type="password" name="pin" minlength="4" maxlength="6" required placeholder="4 digits Only" 
+                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Lionel Messi" 
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300" 
                                 @if(!$registrationOpen) disabled @endif>
-                            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
                         </div>
                     </div>
-                </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5 group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Mobile Number</label>
+                            <div class="flex rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all duration-300">
+                                <span class="px-4 py-3.5 bg-slate-100 text-slate-500 font-semibold border-r border-slate-200 text-sm flex items-center">+91</span>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" name="mobile" value="{{ old('mobile') }}" required placeholder="98765 43210" 
+                                    class="flex-1 px-4 py-3.5 bg-transparent border-none focus:ring-0 text-slate-900 font-medium placeholder-slate-400" 
+                                    @if(!$registrationOpen) disabled @endif>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Secret PIN</label>
+                            <div class="relative">
+                                <input type="password" name="pin" minlength="4" maxlength="6" required placeholder="4 digits Only" 
+                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300" 
+                                    @if(!$registrationOpen) disabled @endif>
+                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <div class="space-y-1.5 group">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Preferred Position</label>
@@ -211,7 +226,7 @@
                             @if(!$registrationOpen) disabled @endif>
                             <option value="">Select Position...</option>
                             @foreach($gamePositions as $position)
-                                <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>
+                                <option value="{{ $position->id }}" {{ old('position_id', $authUser->position_id ?? null) == $position->id ? 'selected' : '' }}>
                                     {{ $position->name }}
                                 </option>
                             @endforeach
@@ -227,7 +242,7 @@
                             @if(!$registrationOpen) disabled @endif>
                             <option value="">Select Location...</option>
                             @foreach($localBodies as $localBody)
-                                <option value="{{ $localBody->id }}" {{ old('local_body_id', $league->local_body_id) == $localBody->id ? 'selected' : '' }}>
+                                <option value="{{ $localBody->id }}" {{ old('local_body_id', $authUser->local_body_id ?? $league->local_body_id) == $localBody->id ? 'selected' : '' }}>
                                     {{ $localBody->name }}{{ $localBody->district ? ' - ' . $localBody->district->name : '' }}
                                 </option>
                             @endforeach

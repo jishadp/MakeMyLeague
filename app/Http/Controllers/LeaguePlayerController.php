@@ -992,76 +992,130 @@ class LeaguePlayerController extends Controller
                 ->withInput();
         }
 
-        $normalizedMobile = preg_replace('/\\D+/', '', $request->input('mobile', ''));
-        $request->merge(['mobile' => $normalizedMobile]);
+        $isAuthenticated = Auth::check();
+        $authUser = $isAuthenticated ? Auth::user() : null;
+        $normalizedMobile = $isAuthenticated
+            ? preg_replace('/\\D+/', '', $authUser->mobile ?? '')
+            : preg_replace('/\\D+/', '', $request->input('mobile', ''));
 
-        $existingUser = $normalizedMobile
-            ? User::where('mobile', $normalizedMobile)->first()
-            : null;
-
-        $rules = [
-            'name' => 'required|string|max:255',
-            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
-            'pin' => 'required|string|min:4|max:6',
-            'local_body_id' => 'required|exists:local_bodies,id',
-            'position_id' => [
-                'required',
-                Rule::exists('game_positions', 'id')->where(function ($query) use ($league) {
-                    if ($league->game_id) {
-                        $query->where('game_id', $league->game_id);
-                    }
-                }),
-            ],
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
-            'country_code' => 'nullable|string|max:10',
-            'payment_status' => ['nullable', Rule::in(['paid', 'pay_later'])],
-        ];
-
-        if (!$existingUser) {
-            $rules['mobile'][] = Rule::unique('users', 'mobile');
+        if (!$isAuthenticated) {
+            $request->merge(['mobile' => $normalizedMobile]);
         }
 
-        $validated = $request->validate($rules);
+        if ($isAuthenticated) {
+            if (!$normalizedMobile || strlen($normalizedMobile) !== 10) {
+                return back()
+                    ->withErrors(['mobile' => 'Please add a valid 10-digit mobile number to your profile before registering.'])
+                    ->withInput();
+            }
 
-        if ($existingUser) {
             $alreadyInLeague = LeaguePlayer::where('league_id', $league->id)
-                ->where('user_id', $existingUser->id)
+                ->where('user_id', $authUser->id)
                 ->exists();
 
             if ($alreadyInLeague) {
                 return back()
-                    ->withErrors(['mobile' => 'This mobile number is already registered for this league.'])
+                    ->withErrors(['mobile' => 'You are already registered for this league.'])
                     ->withInput();
             }
 
-            if ($existingUser->pin && !Hash::check($validated['pin'], $existingUser->pin)) {
-                return back()
-                    ->withErrors(['pin' => 'PIN does not match the existing account for this mobile number.'])
-                    ->withInput();
-            }
+            $rules = [
+                'name' => 'nullable|string|max:255',
+                'local_body_id' => 'required|exists:local_bodies,id',
+                'position_id' => [
+                    'required',
+                    Rule::exists('game_positions', 'id')->where(function ($query) use ($league) {
+                        if ($league->game_id) {
+                            $query->where('game_id', $league->game_id);
+                        }
+                    }),
+                ],
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+                'country_code' => 'nullable|string|max:10',
+                'payment_status' => ['nullable', Rule::in(['paid', 'pay_later'])],
+            ];
 
-            $existingUser->fill([
-                'name' => $validated['name'],
+            $validated = $request->validate($rules);
+
+            $authUser->fill([
+                'name' => $validated['name'] ?? $authUser->name,
                 'local_body_id' => $validated['local_body_id'],
                 'position_id' => $validated['position_id'],
-                'country_code' => $validated['country_code'] ?? $existingUser->country_code ?? '+91',
+                'country_code' => $validated['country_code'] ?? $authUser->country_code ?? '+91',
+                'mobile' => $normalizedMobile,
             ]);
 
-            if (!$existingUser->pin) {
-                $existingUser->pin = bcrypt($validated['pin']);
-            }
-
-            $existingUser->save();
-            $user = $existingUser;
+            $authUser->save();
+            $user = $authUser;
         } else {
-            $user = User::create([
-                'name' => $validated['name'],
-                'mobile' => $validated['mobile'],
-                'country_code' => $validated['country_code'] ?? '+91',
-                'pin' => bcrypt($validated['pin']),
-                'position_id' => $validated['position_id'],
-                'local_body_id' => $validated['local_body_id'],
-            ]);
+            $existingUser = $normalizedMobile
+                ? User::where('mobile', $normalizedMobile)->first()
+                : null;
+
+            $rules = [
+                'name' => 'required|string|max:255',
+                'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
+                'pin' => 'required|string|min:4|max:6',
+                'local_body_id' => 'required|exists:local_bodies,id',
+                'position_id' => [
+                    'required',
+                    Rule::exists('game_positions', 'id')->where(function ($query) use ($league) {
+                        if ($league->game_id) {
+                            $query->where('game_id', $league->game_id);
+                        }
+                    }),
+                ],
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+                'country_code' => 'nullable|string|max:10',
+                'payment_status' => ['nullable', Rule::in(['paid', 'pay_later'])],
+            ];
+
+            if (!$existingUser) {
+                $rules['mobile'][] = Rule::unique('users', 'mobile');
+            }
+
+            $validated = $request->validate($rules);
+
+            if ($existingUser) {
+                $alreadyInLeague = LeaguePlayer::where('league_id', $league->id)
+                    ->where('user_id', $existingUser->id)
+                    ->exists();
+
+                if ($alreadyInLeague) {
+                    return back()
+                        ->withErrors(['mobile' => 'This mobile number is already registered for this league.'])
+                        ->withInput();
+                }
+
+                if ($existingUser->pin && !Hash::check($validated['pin'], $existingUser->pin)) {
+                    return back()
+                        ->withErrors(['pin' => 'PIN does not match the existing account for this mobile number.'])
+                        ->withInput();
+                }
+
+                $existingUser->fill([
+                    'name' => $validated['name'],
+                    'local_body_id' => $validated['local_body_id'],
+                    'position_id' => $validated['position_id'],
+                    'country_code' => $validated['country_code'] ?? $existingUser->country_code ?? '+91',
+                ]);
+
+                if (!$existingUser->pin) {
+                    $existingUser->pin = bcrypt($validated['pin']);
+                }
+
+                $existingUser->save();
+                $user = $existingUser;
+            } else {
+                $user = User::create([
+                    'name' => $validated['name'],
+                    'mobile' => $validated['mobile'],
+                    'country_code' => $validated['country_code'] ?? '+91',
+                    'pin' => bcrypt($validated['pin']),
+                    'position_id' => $validated['position_id'],
+                    'local_body_id' => $validated['local_body_id'],
+                ]);
+            }
         }
 
         $this->assignPlayerRole($user);
