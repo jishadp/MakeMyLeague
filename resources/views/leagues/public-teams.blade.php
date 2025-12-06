@@ -44,36 +44,36 @@
                         return sprintf('%d-%012d', $player->retention ? 1 : 0, $value);
                     });
                 @endphp
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col border border-gray-100">
                     @if($leagueTeam->team->banner)
-                        <div class="h-32 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
+                        <div class="h-28 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
                     @else
-                        <div class="h-32 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                        <div class="h-28 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
                     @endif
                     
-                    <div class="p-6 flex-1 flex flex-col gap-4">
-                        <div class="flex items-center mb-4">
+                    <div class="p-4 flex-1 flex flex-col gap-3">
+                        <div class="flex items-center">
                             @if($leagueTeam->team->logo)
-                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-12 h-12 rounded-full object-cover mr-3">
+                                <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-11 h-11 rounded-full object-cover mr-3">
                             @else
-                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                    <span class="text-xl font-bold text-gray-600">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
+                                <div class="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <span class="text-lg font-bold text-gray-600">{{ substr($leagueTeam->team->name, 0, 1) }}</span>
                                 </div>
                             @endif
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900">{{ $leagueTeam->team->name }}</h3>
-                                <p class="text-sm text-gray-600">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
+                                <p class="text-xs text-gray-600">{{ $leagueTeam->team->owners->first()->name ?? 'No owner' }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-50 rounded-lg p-3 text-center">
-                                <div class="text-2xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->count() }}</div>
-                                <div class="text-xs text-gray-600">Players</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 rounded-lg p-2.5 text-center">
+                                <div class="text-xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->count() }}</div>
+                                <div class="text-[11px] text-gray-600">Players</div>
                             </div>
-                            <div class="bg-gray-50 rounded-lg p-3 text-center">
-                                <div class="text-2xl font-bold text-green-600">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
-                                <div class="text-xs text-gray-600">Wallet</div>
+                            <div class="bg-gray-50 rounded-lg p-2.5 text-center">
+                                <div class="text-xl font-bold text-green-600">₹{{ number_format($leagueTeam->wallet_balance) }}</div>
+                                <div class="text-[11px] text-gray-600">Wallet</div>
                             </div>
                         </div>
 
@@ -86,41 +86,44 @@
                         </div>
 
                         @if($players->count() > 0)
-                            <div class="border-t border-gray-200 pt-4 space-y-3">
+                            <div class="border-t border-gray-200 pt-3 space-y-2.5">
                                 <div class="flex items-center justify-between">
                                     <p class="text-sm font-semibold text-gray-900">Players</p>
-                                    <span class="text-xs text-gray-500">Showing {{ $players->count() }}</span>
+                                    <span class="text-xs text-gray-500">{{ $players->count() }} total</span>
                                 </div>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-auto pr-1">
+                                <div class="grid grid-cols-3 gap-2 max-h-64 overflow-auto pr-1 sm:grid-cols-3 md:grid-cols-3">
                                     @foreach($players as $player)
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
                                             $valueLabel = $player->bid_price ? 'Sold' : 'Base';
                                         @endphp
-                                        <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                                            @if($player->user?->photo)
-                                                <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover">
-                                            @else
-                                                <div class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
-                                                    {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
-                                                </div>
-                                            @endif
+                                        <div class="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-2.5 py-2">
+                                            <div class="relative">
+                                                @if($player->user?->photo)
+                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover">
+                                                @else
+                                                    <div class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
+                                                        {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                                    </div>
+                                                @endif
+                                                @if($player->retention)
+                                                    <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                        </svg>
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
                                                 <p class="text-xs text-gray-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <p class="text-sm font-bold text-gray-900">₹{{ number_format($value) }}</p>
-                                                <p class="text-[11px] text-gray-500">{{ $valueLabel }}</p>
-                                            </div>
-                                            @if($player->retention)
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5">
-                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                <span class="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-gray-700">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.5 2-3.5 3-6 3 1.5 2 3.5 3 6 3m0-6c1.5 2 3.5 3 6 3-1.5 2-3.5 3-6 3m0-6v10" />
                                                     </svg>
-                                                    Retained
+                                                    ₹{{ number_format($value) }} <span class="text-[10px] text-gray-500">({{ $valueLabel }})</span>
                                                 </span>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
