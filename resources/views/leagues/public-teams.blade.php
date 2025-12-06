@@ -114,13 +114,20 @@
                         @endif
 
                         <!-- Stats Footer -->
+                        @php
+                            $playerSpend = $players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0);
+                            $remainingWallet = $leagueTeam->wallet_balance;
+                            $totalSpent = $league->team_wallet_limit
+                                ? max(0, ($league->team_wallet_limit - $remainingWallet))
+                                : $playerSpend;
+                        @endphp
                         <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
                             <div class="text-center">
-                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($leagueTeam->wallet_balance - $players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0)) }}</div>
+                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($remainingWallet) }}</div>
                                 <div class="text-xs text-gray-500">Remaining</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0)) }}</div>
+                                <div class="text-xl font-bold text-gray-900">₹{{ number_format($totalSpent) }}</div>
                                 <div class="text-xs text-gray-500">Spent</div>
                             </div>
                             <div class="text-center">
