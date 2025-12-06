@@ -7,6 +7,7 @@
     $playerFill = $maxPlayers > 0 ? min(100, ($currentPlayerCount / $maxPlayers) * 100) : 0;
     $isAuthenticated = auth()->check();
     $authUser = auth()->user();
+    $defaultLocalBodyId = old('local_body_id', $authUser->local_body_id ?? $league->localbody_id);
 @endphp
 
 @section('content')
@@ -25,7 +26,7 @@
     .stats-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
-<section class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-blue-100/50 text-slate-900 pb-20">
+<section class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-blue-100/50 text-slate-900 pb-20 overflow-x-hidden">
     <div class="fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
     <div class="fixed bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
 
@@ -74,8 +75,8 @@
                 </div>
             </div>
 
-            <div class="relative mt-8">
-    <div class="grid grid-cols-3 gap-2">
+    <div class="relative mt-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 
         <!-- CARD 1 -->
         <div class="group relative rounded-xl border border-blue-100 bg-white p-3 min-w-0">
@@ -242,7 +243,7 @@
                             @if(!$registrationOpen) disabled @endif>
                             <option value="">Select Location...</option>
                             @foreach($localBodies as $localBody)
-                                <option value="{{ $localBody->id }}" {{ old('local_body_id', $authUser->local_body_id ?? $league->local_body_id) == $localBody->id ? 'selected' : '' }}>
+                                <option value="{{ $localBody->id }}" {{ $defaultLocalBodyId == $localBody->id ? 'selected' : '' }}>
                                     {{ $localBody->name }}{{ $localBody->district ? ' - ' . $localBody->district->name : '' }}
                                 </option>
                             @endforeach
