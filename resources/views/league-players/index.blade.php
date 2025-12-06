@@ -503,11 +503,20 @@
                                                 @endif
                                             </div>
                                             <div class="ml-4">
+                                                @php
+                                                    $mobileNumber = $leaguePlayer->user?->mobile
+                                                        ? trim(($leaguePlayer->user?->country_code ?? '+91') . ' ' . $leaguePlayer->user->mobile)
+                                                        : null;
+                                                    $phoneDisplay = $mobileNumber ?? $leaguePlayer->user?->phone ?? 'Not provided';
+                                                @endphp
                                                 <div class="text-sm font-medium text-gray-900">
                                                     {{ $leaguePlayer->user->name }}
                                                 </div>
                                                 <div class="text-sm text-gray-500">
                                                     {{ $leaguePlayer->user->email }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    {{ $phoneDisplay }}
                                                 </div>
                                             </div>
                                         </div>

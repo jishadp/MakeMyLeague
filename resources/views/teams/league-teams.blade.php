@@ -35,22 +35,20 @@
                     </span>
                 </div>
 
-                <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-5 sm:p-6 space-y-5">
                     @foreach($leagues as $league)
                         @php
                             $teamCount = $league->leagueTeams->count();
                             $startLabel = $league->start_date ? $league->start_date->format('M j, Y') : 'Date TBA';
                         @endphp
-                        <div class="group rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
-                            <div class="p-5 space-y-4">
+                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                            <div class="p-5 space-y-3 border-b border-slate-100">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="space-y-1">
                                         <p class="text-[11px] font-semibold uppercase tracking-wide text-indigo-600">League</p>
                                         <h3 class="text-lg font-bold text-slate-900 leading-snug">{{ $league->name }}</h3>
                                         <p class="text-sm text-slate-600">Season {{ $league->season ?? 'N/A' }}</p>
-                                        <p class="text-xs text-slate-500 mt-1">
-                                            Slug: <code class="text-slate-700">{{ $league->slug }}</code>
-                                        </p>
+                                        <p class="text-xs text-slate-500 mt-1">Slug: <code class="text-slate-700">{{ $league->slug }}</code></p>
                                     </div>
                                     <div class="text-right">
                                         <span class="inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -59,7 +57,6 @@
                                         <p class="text-xs text-slate-500 mt-2">Starts {{ $startLabel }}</p>
                                     </div>
                                 </div>
-
                                 <div class="flex items-center flex-wrap gap-2 text-xs text-slate-600">
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-700">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,6 +72,57 @@
                                     </span>
                                 </div>
                             </div>
+
+                            <div class="divide-y divide-slate-100">
+                                @foreach($league->leagueTeams as $leagueTeam)
+                                    @php
+                                        $players = $leagueTeam->leaguePlayers->sortByDesc('retention');
+                                    @endphp
+                                    <div class="p-5 flex flex-col gap-3">
+                                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                                            <div class="flex items-center gap-3">
+                                                @if($leagueTeam->team?->logo)
+                                                    <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+                                                @else
+                                                    <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold">
+                                                        {{ strtoupper(substr($leagueTeam->team?->name ?? 'T', 0, 1)) }}
+                                                    </div>
+                                                @endif
+                                                <div>
+                                                    <p class="text-sm font-semibold text-slate-900">{{ $leagueTeam->team?->name ?? 'Team' }}</p>
+                                                    <p class="text-xs text-slate-500">Owner: {{ $leagueTeam->team?->owners->first()->name ?? 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                                                {{ $players->count() }} {{ Str::plural('player', $players->count()) }}
+                                            </span>
+                                        </div>
+
+                                        @if($players->count() > 0)
+                                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                                                @foreach($players as $player)
+                                                    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2 py-1">
+                                                        @if($player->user?->photo)
+                                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-8 h-8 rounded-full object-cover">
+                                                        @else
+                                                            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[11px] font-semibold text-slate-600">
+                                                                {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                                            </div>
+                                                        @endif
+                                                        <div class="flex-1 min-w-0">
+                                                            <p class="text-xs font-semibold text-slate-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                                            <p class="text-[11px] text-slate-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <p class="text-xs text-slate-500">No players added yet.</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+
                             <div class="px-5 pb-5 flex items-center justify-between gap-3">
                                 <div class="text-xs text-slate-500">
                                     Updated {{ $league->updated_at?->diffForHumans() ?? 'recently' }}

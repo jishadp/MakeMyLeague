@@ -365,7 +365,11 @@ class TeamController extends Controller
      */
     public function leagueTeams(Request $request): View
     {
-        $leagues = League::with(['leagueTeams', 'game'])
+        $leagues = League::with([
+                'leagueTeams.team.owners',
+                'leagueTeams.leaguePlayers.user',
+                'game'
+            ])
             ->whereHas('leagueTeams')
             ->orderBy('name')
             ->get();
