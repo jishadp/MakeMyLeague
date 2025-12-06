@@ -4,11 +4,11 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-6">
-            <a href="{{ route('leagues.show', $league) }}" class="text-indigo-600 hover:text-indigo-900 flex items-center">
+            <a href="{{ route('teams.league-teams') }}" class="text-indigo-600 hover:text-indigo-900 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Back to League
+                Back to League List
             </a>
         </div>
         
