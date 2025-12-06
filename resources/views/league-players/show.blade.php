@@ -62,7 +62,13 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                            <p class="text-gray-900">{{ $leaguePlayer->user->phone ?? 'Not provided' }}</p>
+                            @php
+                                $mobileNumber = $leaguePlayer->user->mobile
+                                    ? trim(($leaguePlayer->user->country_code ?? '+91') . ' ' . $leaguePlayer->user->mobile)
+                                    : null;
+                                $phoneDisplay = $mobileNumber ?? $leaguePlayer->user->phone ?? 'Not provided';
+                            @endphp
+                            <p class="text-gray-900">{{ $phoneDisplay }}</p>
                         </div>
                         
                         <div>
