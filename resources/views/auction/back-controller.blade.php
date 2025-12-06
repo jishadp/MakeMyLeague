@@ -969,6 +969,7 @@
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
         <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
         <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
+        <input type="hidden" id="controller-skip-action" value="{{ route('auction.skip-player', $league) }}">
         <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
         <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
         <script id="controller-available-players" type="application/json">
@@ -1299,6 +1300,9 @@
                                 Unsold
                             </button>
                         @endunless
+                        <button type="button" onclick="returnPlayerToAvailable(this)" class="px-4 py-3 rounded-2xl bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100 hover:bg-indigo-100 transition {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
+                            Skip (back to available)
+                        </button>
                         <button type="button" data-reset-bids onclick="resetControllerBids(this)" class="px-3 py-2 text-xs rounded-xl border border-amber-300 text-amber-700 bg-white hover:bg-amber-50 shadow-sm {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $currentPlayer ? '' : 'disabled' }}>
                             Reset bids
                         </button>
@@ -1510,6 +1514,7 @@ function openWhatsAppShare(message) {
     const overrideInput = document.getElementById('controller-override-amount');
     const overrideLabel = document.querySelector('[data-override-label]');
     const resetBidsAction = document.getElementById('controller-reset-action');
+    const skipPlayerAction = document.getElementById('controller-skip-action');
     const quickRulesModal = document.getElementById('controller-rules-modal');
     const quickRulesRows = document.getElementById('quick-rules-rows');
     const addQuickRuleBtn = document.querySelector('[data-add-quick-rule]');
@@ -2543,6 +2548,7 @@ function openWhatsAppShare(message) {
     window.placeControllerBid = placeControllerBid;
     window.markControllerSold = markControllerSold;
     window.markControllerUnsold = markControllerUnsold;
+    window.returnPlayerToAvailable = returnPlayerToAvailable;
     window.resetControllerBids = resetControllerBids;
     window.bidFromTeam = bidFromTeam;
 
@@ -2767,6 +2773,62 @@ function openWhatsAppShare(message) {
         }
     }
 
+    async function returnPlayerToAvailable(button) {
+        if (!ensurePlayerActive()) {
+            return;
+        }
+
+        const action = skipPlayerAction?.value;
+        const token = getControllerToken();
+        if (!action || !token) {
+            showControllerMessage('Missing configuration for skip action.', 'error');
+            return;
+        }
+
+        const leaguePlayerId = document.getElementById('controller-league-player-id').value;
+        const confirmMessage = 'Move this player back to the available list and clear any bids?';
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Skipping...</span>';
+
+        try {
+            const response = await fetch(action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    league_player_id: leaguePlayerId
+                })
+            });
+
+            const data = await response.json().catch(() => ({ success: false }));
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to move player to available.');
+            }
+
+            const currentPlayerIdInput = document.getElementById('controller-league-player-id');
+            if (currentPlayerIdInput) {
+                currentPlayerIdInput.value = '';
+            }
+            clearPlayerProgress(leaguePlayerId);
+            showControllerMessage('Player moved back to available. Refreshing...', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+            showControllerMessage(error.message || 'Unable to move player to available.', 'error');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    }
+
     async function resetControllerBids(button) {
         if (!ensurePlayerActive()) {
             return;
@@ -2916,6 +2978,35 @@ function openWhatsAppShare(message) {
             saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
         }
         rebuildRandomPools();
+    }
+
+    function clearPlayerProgress(playerId) {
+        const id = String(playerId || '');
+        if (!id) return;
+
+        let updated = false;
+
+        if (availableCompletedSet.delete(id)) {
+            saveIdSet(availableCompletedStorageKey, availableCompletedSet);
+            updated = true;
+        }
+        if (unsoldCompletedSet.delete(id)) {
+            saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
+            updated = true;
+        }
+        if (availableServedSet.delete(id)) {
+            saveIdSet(availableServedStorageKey, availableServedSet);
+            updated = true;
+        }
+        if (unsoldServedSet.delete(id)) {
+            saveIdSet(unsoldServedStorageKey, unsoldServedSet);
+            updated = true;
+        }
+
+        if (updated) {
+            rebuildRandomPools();
+            enforcePhaseConsistency();
+        }
     }
 
     function resetRandomProgress() {
