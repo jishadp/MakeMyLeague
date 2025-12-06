@@ -29,7 +29,7 @@
 
     <div class="relative max-w-3xl mx-auto px-4 py-8 sm:py-12 space-y-6">
         
-        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-900/5 border border-slate-100 animate-fade-in-up">
+        <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-900/5 animate-fade-in-up">
             <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2">
@@ -152,7 +152,7 @@
             @endif
         </div>
 
-        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8 animate-fade-in-up delay-100 relative overflow-hidden">
+        <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-900/5 animate-fade-in-up delay-100 relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
             @if(session('success'))
