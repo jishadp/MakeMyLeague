@@ -367,7 +367,7 @@ class TeamController extends Controller
     {
         $leagues = League::with([
                 'leagueTeams.team.owners',
-                'leagueTeams.leaguePlayers.user',
+                'leagueTeams.leaguePlayers.user.position',
                 'game'
             ])
             ->whereHas('leagueTeams')
@@ -378,7 +378,13 @@ class TeamController extends Controller
             return $league->game->name ?? 'Other Games';
         })->sortKeys();
 
-        return view('teams.league-teams', compact('groupedLeagues'));
+        $games = $groupedLeagues->keys()->map(function ($name) {
+            $slug = Str::slug($name) ?: 'other-games';
+            return ['name' => $name, 'slug' => $slug];
+        });
+        $activeGameSlug = $games->first()['slug'] ?? null;
+
+        return view('teams.league-teams', compact('groupedLeagues', 'games', 'activeGameSlug'));
     }
 
     /**

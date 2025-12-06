@@ -38,14 +38,17 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($league->leagueTeams->sortByDesc('created_at') as $leagueTeam)
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
+                @php
+                    $players = $leagueTeam->leaguePlayers->sortByDesc('bid_price')->sortByDesc('retention');
+                @endphp
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
                     @if($leagueTeam->team->banner)
                         <div class="h-32 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
                     @else
                         <div class="h-32 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
                     @endif
                     
-                    <div class="p-6">
+                    <div class="p-6 flex-1 flex flex-col gap-4">
                         <div class="flex items-center mb-4">
                             @if($leagueTeam->team->logo)
                                 <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="w-12 h-12 rounded-full object-cover mr-3">
@@ -60,9 +63,9 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
-                                <div class="text-2xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->where('status', 'sold')->count() }}</div>
+                                <div class="text-2xl font-bold text-indigo-600">{{ $leagueTeam->leaguePlayers->count() }}</div>
                                 <div class="text-xs text-gray-600">Players</div>
                             </div>
                             <div class="bg-gray-50 rounded-lg p-3 text-center">
@@ -78,6 +81,42 @@
                                 {{ ucfirst($leagueTeam->status) }}
                             </span>
                         </div>
+
+                        @if($players->count() > 0)
+                            <div class="border-t border-gray-200 pt-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-semibold text-gray-900">Players</p>
+                                    <span class="text-xs text-gray-500">Showing {{ $players->count() }}</span>
+                                </div>
+                                <div class="space-y-2 max-h-56 overflow-auto pr-1">
+                                    @foreach($players as $player)
+                                        @php
+                                            $value = $player->bid_price ?? $player->base_price ?? 0;
+                                            $valueLabel = $player->bid_price ? 'Sold' : 'Base';
+                                        @endphp
+                                        <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                                            @if($player->user?->photo)
+                                                <img src="{{ Storage::url($player->user->photo) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
+                                                    {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
+                                                </div>
+                                            @endif
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold text-gray-900 truncate">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                                <p class="text-xs text-gray-500 truncate">{{ $player->user?->position?->name ?? 'Role' }}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-sm font-bold text-gray-900">₹{{ number_format($value) }}</p>
+                                                <p class="text-[11px] text-gray-500">{{ $valueLabel }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-xs text-gray-500 border-t border-gray-200 pt-4">No players added yet.</p>
+                        @endif
                     </div>
                 </div>
             @empty

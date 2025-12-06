@@ -927,7 +927,7 @@ class LeagueController
     public function publicTeams($leagueSlug): View
     {
         $league = League::where('slug', $leagueSlug)
-            ->with(['game', 'leagueTeams.team.owners', 'leagueTeams.leaguePlayers.user'])
+            ->with(['game', 'leagueTeams.team.owners', 'leagueTeams.leaguePlayers.user.position'])
             ->firstOrFail();
         
         return view('leagues.public-teams', compact('league'));

@@ -23,8 +23,27 @@
             </a>
         </div>
 
+        @if(isset($games) && $games->isNotEmpty())
+            <div class="flex items-center gap-2 overflow-auto pb-1">
+                @foreach($games as $game)
+                    <button
+                        type="button"
+                        class="game-tab inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition @if($game['slug'] === $activeGameSlug) bg-indigo-600 text-white border-indigo-600 shadow @else bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700 @endif"
+                        data-game-target="{{ $game['slug'] }}"
+                        aria-pressed="{{ $game['slug'] === $activeGameSlug ? 'true' : 'false' }}"
+                    >
+                        <span class="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500"></span>
+                        {{ $game['name'] }}
+                    </button>
+                @endforeach
+            </div>
+        @endif
+
         @forelse($groupedLeagues as $gameName => $leagues)
-            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            @php
+                $gameSlug = Str::slug($gameName) ?: 'other-games';
+            @endphp
+            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden game-section {{ $gameSlug === $activeGameSlug ? '' : 'hidden' }}" data-game-section="{{ $gameSlug }}">
                 <div class="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap bg-slate-50">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">Game</p>
@@ -41,7 +60,13 @@
                             $teamCount = $league->leagueTeams->count();
                             $startLabel = $league->start_date ? $league->start_date->format('M j, Y') : 'Date TBA';
                         @endphp
-                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                        <div
+                            class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 block focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
+                            role="button"
+                            tabindex="0"
+                            data-league-card
+                            data-url="{{ route('leagues.public-teams', $league) }}"
+                        >
                             <div class="p-5 space-y-3 border-b border-slate-100">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="space-y-1">
@@ -128,10 +153,10 @@
                                     Updated {{ $league->updated_at?->diffForHumans() ?? 'recently' }}
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('leagues.public-teams', $league) }}" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 transition">
+                                    <a href="{{ route('leagues.public-teams', $league) }}" onclick="event.stopPropagation();" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow hover:bg-indigo-700 transition">
                                         View Teams
                                     </a>
-                                    <a href="{{ route('leagues.fixtures', $league) }}" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
+                                    <a href="{{ route('leagues.fixtures', $league) }}" onclick="event.stopPropagation();" class="inline-flex items-center px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
                                         Fixtures
                                     </a>
                                 </div>
@@ -150,7 +175,51 @@
                 <p class="text-slate-600 font-semibold">No leagues with teams yet.</p>
                 <p class="text-slate-500 text-sm mt-1">Create a league and add teams to see them listed here.</p>
             </div>
-        @endforelse
+@endforelse
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.game-tab');
+    const sections = document.querySelectorAll('.game-section');
+    const leagueCards = document.querySelectorAll('[data-league-card]');
+
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.gameTarget;
+
+            tabs.forEach((t) => {
+                const isActive = t.dataset.gameTarget === target;
+                t.classList.toggle('bg-indigo-600', isActive);
+                t.classList.toggle('text-white', isActive);
+                t.classList.toggle('border-indigo-600', isActive);
+                t.classList.toggle('shadow', isActive);
+                t.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                t.classList.toggle('bg-white', !isActive);
+                t.classList.toggle('text-slate-700', !isActive);
+                t.classList.toggle('border-slate-200', !isActive);
+            });
+
+            sections.forEach((section) => {
+                section.classList.toggle('hidden', section.dataset.gameSection !== target);
+            });
+        });
+    });
+
+    leagueCards.forEach((card) => {
+        const url = card.dataset.url;
+        if (!url) return;
+        card.addEventListener('click', () => {
+            window.location.href = url;
+        });
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                window.location.href = url;
+            }
+        });
+    });
+});
+</script>
 @endsection
