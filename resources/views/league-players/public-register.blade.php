@@ -4,6 +4,7 @@
 
 @php
     $shareUrl = route('league-players.public-register', $league);
+    $playerFill = $maxPlayers > 0 ? min(100, ($currentPlayerCount / $maxPlayers) * 100) : 0;
 @endphp
 
 @section('content')
@@ -18,6 +19,8 @@
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
+    .stats-scroll::-webkit-scrollbar { display: none; }
+    .stats-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
 <section class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-blue-100/50 text-slate-900 pb-20">
@@ -30,7 +33,7 @@
             <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2">
-                        <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
+                        <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-slate-50 shadow-md shadow-blue-500/20">
                             Player Registration
                         </span>
                     </div>
@@ -56,42 +59,85 @@
                 <div class="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-3">
                     <a href="https://wa.me/919400960223?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" 
                        target="_blank" rel="noopener" 
-                       class="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5">
+                       class="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl text-sm font-bold text-black transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5">
                         <i class="fa-brands fa-whatsapp text-lg group-hover:scale-110 transition-transform"></i>
-                        <span>Payment Chat</span>
+                        <span>Payment</span>
                     </a>
                     <a href="https://wa.me/?text={{ urlencode('Register for ' . $league->name . ' here: ' . $shareUrl) }}" 
                        target="_blank" rel="noopener" 
-                       class="group inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-700 transition-all duration-300 border border-slate-200">
-                        <i class="fa-solid fa-share-nodes text-indigo-500"></i>
-                        <span>Share Link</span>
+                       class="group inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white hover:bg-indigo-50 rounded-xl text-sm font-bold text-slate-900 transition-all duration-300 shadow-md shadow-indigo-100 border border-indigo-100">
+                        <i class="fa-brands fa-whatsapp text-lg text-indigo-600"></i>
+                        <span>Share Reg Link</span>
                     </a>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-                <div class="relative overflow-hidden group rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-users text-4xl text-blue-600"></i>
+            <div class="relative mt-8">
+                <div class="flex gap-4 overflow-x-auto pb-3 stats-scroll snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:snap-none sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 snap-start">
+                        <div class="absolute -right-6 -top-10 h-24 w-24 rounded-full bg-blue-100/60 blur-3xl"></div>
+                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
+                        <div class="relative flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-blue-600 shadow-sm shadow-blue-300/40">
+                                    <i class="fa-solid fa-users text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-blue-600">Slots Left</p>
+                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">{{ $slotsRemaining }}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-blue-100 text-blue-700">Live</span>
+                        </div>
+                        <p class="mt-4 text-xs text-slate-500 leading-relaxed flex items-center gap-2">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Updated in real-time by organizers
+                        </p>
                     </div>
-                    <p class="text-[10px] uppercase tracking-bold font-bold text-blue-500">Slots Left</p>
-                    <p class="text-3xl font-black text-slate-800 mt-1">{{ $slotsRemaining }}</p>
-                </div>
-                
-                <div class="relative overflow-hidden group rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-5 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-clipboard-list text-4xl text-indigo-600"></i>
+                    
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 snap-start">
+                        <div class="absolute -left-8 -bottom-10 h-28 w-28 rounded-full bg-indigo-100/60 blur-3xl"></div>
+                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
+                        <div class="relative flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-indigo-600 shadow-sm shadow-indigo-300/40">
+                                    <i class="fa-solid fa-clipboard-list text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-indigo-600">Registered</p>
+                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">{{ $currentPlayerCount }} <span class="text-lg text-slate-400 font-medium">/ {{ $maxPlayers }}</span></p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-indigo-100 text-indigo-700">Status</span>
+                        </div>
+                        <div class="relative mt-5">
+                            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] font-semibold text-slate-500">
+                                <span>Filled</span>
+                                <span>{{ number_format($playerFill, 0) }}%</span>
+                            </div>
+                            <div class="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-blue-500" style="width: {{ $playerFill }}%;"></div>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-[10px] uppercase tracking-bold font-bold text-indigo-500">Registered</p>
-                    <p class="text-3xl font-black text-slate-800 mt-1">{{ $currentPlayerCount }} <span class="text-lg text-slate-400 font-medium">/ {{ $maxPlayers }}</span></p>
-                </div>
 
-                <div class="relative overflow-hidden group rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-coins text-4xl text-amber-600"></i>
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 snap-start">
+                        <div class="absolute -right-6 -bottom-10 h-28 w-28 rounded-full bg-amber-100/60 blur-3xl"></div>
+                        <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
+                        <div class="relative flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-amber-600 shadow-sm shadow-amber-300/40">
+                                    <i class="fa-solid fa-coins text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] uppercase tracking-[0.18em] font-extrabold text-amber-600">Reg. Fee</p>
+                                    <p class="text-3xl font-black text-slate-900 leading-none mt-1">₹{{ number_format($league->player_reg_fee ?? 0) }}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-700">Per Player</span>
+                        </div>
+                        <p class="mt-4 text-xs text-slate-500 leading-relaxed">Payment can be completed online or in person with the organizer.</p>
                     </div>
-                    <p class="text-[10px] uppercase tracking-bold font-bold text-amber-600">Reg. Fee</p>
-                    <p class="text-3xl font-black text-slate-800 mt-1">₹{{ number_format($league->player_reg_fee ?? 0) }}</p>
                 </div>
             </div>
 
@@ -179,8 +225,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <i class="fa-solid fa-person-running absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                        <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
                     </div>
                 </div>
 
@@ -191,7 +235,7 @@
                                 <img id="photo-preview" src="{{ asset('images/defaultplayer.jpeg') }}" alt="Profile preview" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110">
                             </div>
                             <div class="absolute inset-0 bg-black/20 rounded-2xl flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                <i class="fa-solid fa-camera text-white text-lg drop-shadow-md"></i>
+                                <i class="fa-solid fa-camera text-slate-50 text-lg drop-shadow-md"></i>
                             </div>
                         </div>
                         <div class="flex-1">
@@ -233,13 +277,13 @@
 
                 <div class="pt-4">
                     <button type="submit" id="submitBtn"
-                        class="group relative w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-lg px-6 py-4 shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
+                        class="group relative w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-indigo-50 font-bold text-lg px-6 py-4 shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
                         @if(!$registrationOpen) disabled @endif>
                         <span>Submit Registration</span>
                         <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         
                         <div class="absolute inset-0 bg-indigo-600 rounded-xl flex items-center justify-center hidden" id="btnLoader">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-5 w-5 text-indigo-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -275,7 +319,7 @@
             <button type="button" onclick="closeCropModal(true)" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900 transition-colors">
                 Cancel
             </button>
-            <button type="button" onclick="applyCrop()" class="flex-1 px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-colors">
+            <button type="button" onclick="applyCrop()" class="flex-1 px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-colors">
                 Save Photo
             </button>
         </div>
