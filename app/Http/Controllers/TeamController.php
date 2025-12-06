@@ -389,32 +389,54 @@ class TeamController extends Controller
      */
     public function leaguePlayers(Request $request): View
     {
-        $allLeagues = League::with(['leaguePlayers.user.localBody', 'leaguePlayers.leagueTeam.team', 'game'])
+        $leagues = League::with(['game'])
             ->whereHas('leaguePlayers')
             ->withCount('leaguePlayers')
-            ->latest()
+            ->orderBy('name')
             ->get();
 
-        $groupedPlayers = [];
-        foreach ($allLeagues as $league) {
-            $groupedPlayers[$league->id] = $league->leaguePlayers->groupBy(function ($leaguePlayer) {
-                return $leaguePlayer->user->localBody->name ?? 'Unknown';
-            });
-        }
+        $groupedLeagues = $leagues->groupBy(function ($league) {
+            return $league->game->name ?? 'Other Games';
+        })->sortKeys();
+
+        $games = $groupedLeagues->keys()->map(function ($name) {
+            $slug = Str::slug($name) ?: 'other-games';
+            return ['name' => $name, 'slug' => $slug];
+        });
+        $activeGameSlug = $games->first()['slug'] ?? null;
 
         $requestedLeagueSlug = $request->query('league');
         $activeLeague = null;
 
         if ($requestedLeagueSlug) {
-            $activeLeague = $allLeagues->firstWhere('slug', $requestedLeagueSlug);
+            $activeLeague = $leagues->firstWhere('slug', $requestedLeagueSlug);
         }
 
         if (!$activeLeague) {
-            $activeLeague = $allLeagues->firstWhere('status', 'active')
-                ?? $allLeagues->sortBy('name')->first();
+            $activeLeague = $leagues->firstWhere('status', 'active')
+                ?? $leagues->sortBy('name')->first();
         }
 
-        return view('teams.league-players', compact('allLeagues', 'groupedPlayers', 'activeLeague'));
+        if ($activeLeague && $activeLeague->game) {
+            $activeGameSlug = Str::slug($activeLeague->game->name) ?: $activeGameSlug;
+        }
+
+        $activeLeaguePlayers = collect();
+        if ($activeLeague) {
+            $activeLeague->load([
+                'leaguePlayers.user.position',
+                'leaguePlayers.leagueTeam.team',
+            ]);
+            $activeLeaguePlayers = $activeLeague->leaguePlayers;
+        }
+
+        return view('teams.league-players', compact(
+            'groupedLeagues',
+            'games',
+            'activeGameSlug',
+            'activeLeague',
+            'activeLeaguePlayers'
+        ));
     }
 
     /**
