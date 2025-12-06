@@ -944,6 +944,10 @@ class LeaguePlayerController extends Controller
             ->orderBy('name')
             ->get();
 
+        $localBodies = LocalBody::with('district')
+            ->orderBy('name')
+            ->get();
+
         $maxPlayers = $league->max_teams * $league->max_team_players;
 
         $approvedCount = LeaguePlayer::where('league_id', $league->id)
@@ -963,6 +967,7 @@ class LeaguePlayerController extends Controller
             'currentPlayerCount' => $currentPlayerCount,
             'maxPlayers' => $maxPlayers,
             'approvedCount' => $approvedCount,
+            'localBodies' => $localBodies,
         ]);
     }
 
@@ -993,6 +998,7 @@ class LeaguePlayerController extends Controller
             'name' => 'required|string|max:255',
             'mobile' => ['required', 'regex:/^[0-9]{10}$/', Rule::unique('users', 'mobile')],
             'pin' => 'required|string|min:4|max:6',
+            'local_body_id' => 'required|exists:local_bodies,id',
             'position_id' => [
                 'required',
                 Rule::exists('game_positions', 'id')->where(function ($query) use ($league) {
@@ -1012,6 +1018,7 @@ class LeaguePlayerController extends Controller
             'country_code' => $validated['country_code'] ?? '+91',
             'pin' => bcrypt($validated['pin']),
             'position_id' => $validated['position_id'],
+            'local_body_id' => $validated['local_body_id'],
         ]);
 
         $this->assignPlayerRole($user);

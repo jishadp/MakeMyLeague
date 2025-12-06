@@ -466,6 +466,9 @@
                                     Base Price
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Payment
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -544,6 +547,19 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                         ₹{{ number_format($leaguePlayer->base_price) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $paymentStatus = $leaguePlayer->payment_status ?? 'pay_later';
+                                            $paymentColors = [
+                                                'paid' => 'bg-green-100 text-green-700',
+                                                'pay_later' => 'bg-amber-100 text-amber-700',
+                                            ];
+                                            $paymentLabel = $paymentStatus === 'paid' ? 'Paid' : 'Pay Later';
+                                        @endphp
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $paymentColors[$paymentStatus] ?? 'bg-gray-100 text-gray-700' }}">
+                                            {{ $paymentLabel }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php

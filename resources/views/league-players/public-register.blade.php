@@ -19,6 +19,8 @@
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
+    .stats-scroll::-webkit-scrollbar { display: none; }
+    .stats-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
 <section class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-blue-100/50 text-slate-900 pb-20">
@@ -205,12 +207,28 @@
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Preferred Position</label>
                     <div class="relative">
                         <select name="position_id" required 
-                            class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 cursor-pointer" 
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 cursor-pointer" 
                             @if(!$registrationOpen) disabled @endif>
                             <option value="">Select Position...</option>
                             @foreach($gamePositions as $position)
                                 <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>
                                     {{ $position->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 group">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Local Body</label>
+                    <div class="relative">
+                        <select name="local_body_id" required 
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 cursor-pointer" 
+                            @if(!$registrationOpen) disabled @endif>
+                            <option value="">Select Location...</option>
+                            @foreach($localBodies as $localBody)
+                                <option value="{{ $localBody->id }}" {{ old('local_body_id', $league->local_body_id) == $localBody->id ? 'selected' : '' }}>
+                                    {{ $localBody->name }}{{ $localBody->district ? ' - ' . $localBody->district->name : '' }}
                                 </option>
                             @endforeach
                         </select>
