@@ -74,7 +74,7 @@
 
             <div class="relative mt-8">
                 <div class="flex gap-4 overflow-x-auto pb-3 stats-scroll snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:snap-none sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 snap-start">
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-blue-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 snap-start">
                         <div class="absolute -right-6 -top-10 h-24 w-24 rounded-full bg-blue-100/60 blur-3xl"></div>
                         <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
                         <div class="relative flex items-start justify-between">
@@ -95,7 +95,7 @@
                         </p>
                     </div>
                     
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 snap-start">
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-indigo-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 snap-start">
                         <div class="absolute -left-8 -bottom-10 h-28 w-28 rounded-full bg-indigo-100/60 blur-3xl"></div>
                         <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
                         <div class="relative flex items-start justify-between">
@@ -121,7 +121,7 @@
                         </div>
                     </div>
 
-                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 snap-start">
+                    <div class="group relative min-w-[240px] sm:min-w-0 overflow-hidden rounded-2xl border border-amber-100 bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 snap-start">
                         <div class="absolute -right-6 -bottom-10 h-28 w-28 rounded-full bg-amber-100/60 blur-3xl"></div>
                         <div class="absolute inset-px rounded-2xl border border-white/70 pointer-events-none"></div>
                         <div class="relative flex items-start justify-between">
@@ -228,7 +228,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-3 p-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 hover:bg-indigo-50/50 hover:border-indigo-300 transition-colors duration-300">
+                <div class="space-y-3 p-5 rounded-2xl border border-slate-200 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
                     <div class="flex items-center gap-5">
                         <div class="relative group/img">
                             <div class="w-20 h-20 rounded-2xl overflow-hidden border-2 border-white shadow-md">
