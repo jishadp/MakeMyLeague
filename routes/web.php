@@ -77,6 +77,10 @@ Route::post('join-league/{league}', [LeagueController::class, 'processJoinLink']
 // League shareable public page
 Route::get('leagues/{league}/share', [LeagueController::class, 'shareable'])->name('leagues.shareable');
 
+// Public player registration for a league
+Route::get('leagues/{league}/player-register', [LeaguePlayerController::class, 'showPublicRegistration'])->name('league-players.public-register');
+Route::post('leagues/{league}/player-register', [LeaguePlayerController::class, 'storePublicRegistration'])->name('league-players.public-register.store');
+
 // Public live auction route (no auth required)
 Route::get('dashboard/auctions/{league}/live', [DashboardController::class, 'liveAuction'])->name('auctions.live');
 Route::get('dashboard/auctions/{league}/broadcast', [DashboardController::class, 'liveAuctionPublic'])->name('auctions.live.public');

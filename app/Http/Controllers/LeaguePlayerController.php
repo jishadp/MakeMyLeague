@@ -14,7 +14,11 @@ use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class LeaguePlayerController extends Controller
 {
@@ -926,6 +930,119 @@ class LeaguePlayerController extends Controller
         ]);
         
         return response()->json(['success' => true, 'message' => 'Registration successful']);
+    }
+
+    /**
+     * Show a public player registration form for a league.
+     */
+    public function showPublicRegistration(League $league): View
+    {
+        $league->loadMissing(['game', 'localBody.district']);
+
+        $gamePositions = GamePosition::query()
+            ->when($league->game_id, fn ($query) => $query->where('game_id', $league->game_id))
+            ->orderBy('name')
+            ->get();
+
+        $maxPlayers = $league->max_teams * $league->max_team_players;
+
+        $approvedCount = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', '!=', 'pending')
+            ->count();
+
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+
+        $slotsRemaining = max(0, $maxPlayers - $approvedCount);
+        $registrationOpen = in_array($league->status, ['active', 'pending']) && $slotsRemaining > 0;
+
+        return view('league-players.public-register', [
+            'league' => $league,
+            'gamePositions' => $gamePositions,
+            'slotsRemaining' => $slotsRemaining,
+            'registrationOpen' => $registrationOpen,
+            'currentPlayerCount' => $currentPlayerCount,
+            'maxPlayers' => $maxPlayers,
+            'approvedCount' => $approvedCount,
+        ]);
+    }
+
+    /**
+     * Store a public player registration and attach to the league as pending.
+     */
+    public function storePublicRegistration(Request $request, League $league)
+    {
+        $maxPlayers = $league->max_teams * $league->max_team_players;
+        $currentPlayerCount = LeaguePlayer::where('league_id', $league->id)->count();
+
+        if ($currentPlayerCount >= $maxPlayers) {
+            return back()
+                ->withErrors(['league' => 'Registration is closed. Player limit reached for this league.'])
+                ->withInput();
+        }
+
+        if (!in_array($league->status, ['active', 'pending'])) {
+            return back()
+                ->withErrors(['league' => 'Registration is only available for active or pending leagues.'])
+                ->withInput();
+        }
+
+        $normalizedMobile = preg_replace('/\\D+/', '', $request->input('mobile', ''));
+        $request->merge(['mobile' => $normalizedMobile]);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'mobile' => ['required', 'regex:/^[0-9]{10}$/', Rule::unique('users', 'mobile')],
+            'pin' => 'required|string|min:4|max:6',
+            'position_id' => [
+                'required',
+                Rule::exists('game_positions', 'id')->where(function ($query) use ($league) {
+                    if ($league->game_id) {
+                        $query->where('game_id', $league->game_id);
+                    }
+                }),
+            ],
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
+            'country_code' => 'nullable|string|max:10',
+            'payment_status' => ['nullable', Rule::in(['paid', 'pay_later'])],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'mobile' => $validated['mobile'],
+            'country_code' => $validated['country_code'] ?? '+91',
+            'pin' => bcrypt($validated['pin']),
+            'position_id' => $validated['position_id'],
+        ]);
+
+        $this->assignPlayerRole($user);
+
+        if ($request->hasFile('photo')) {
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($request->file('photo'));
+            $image->resize(300, 300);
+            $encoded = $image->toJpeg(85);
+
+            $filename = 'profile-photos/' . uniqid() . '.jpg';
+            Storage::disk('public')->put($filename, $encoded);
+            $user->photo = $filename;
+            $user->save();
+        }
+
+        LeaguePlayer::create([
+            'user_id' => $user->id,
+            'league_id' => $league->id,
+            'status' => 'pending',
+            'base_price' => $league->player_reg_fee ?? 0,
+            'retention' => false,
+            'created_by' => $user->id,
+            'payment_status' => $validated['payment_status'] ?? 'pay_later',
+        ]);
+
+        Auth::login($user);
+
+        return redirect()
+            ->route('league-players.public-register', $league)
+            ->with('success', 'Registration received! You have been added as pending. Organizers will review and confirm.');
     }
 
     /**

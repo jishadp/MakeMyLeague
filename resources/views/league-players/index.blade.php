@@ -26,6 +26,7 @@
             if (\Illuminate\Support\Str::length($shareInitials) < 2) {
                 $shareInitials = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($league->name, 0, 3));
             }
+            $publicRegisterUrl = route('league-players.public-register', $league);
             $shareLines = [
                 "⭐ {$shareInitials} – {$league->name} (Season {$league->season}) ⭐",
                 "────────────────────────────────────────",
@@ -92,6 +93,7 @@
             }
             $shareLines[] = "────────────────────────────────────────";
             $shareLines[] = route('teams.league-players', ['league' => $league->slug]);
+            $shareLines[] = "Player sign-up: {$publicRegisterUrl}";
             $shareText = trim(implode("\n", array_filter($shareLines, fn ($line) => $line !== null)));
         @endphp
         <textarea id="share-text-{{ $league->id }}" class="hidden">{{ $shareText }}</textarea>
@@ -127,6 +129,13 @@
                         </svg>
                         Share to WhatsApp
                     </button>
+                    <a href="{{ $publicRegisterUrl }}"
+                       class="ml-3 inline-flex items-center justify-center px-4 py-2 bg-white text-gray-800 font-semibold rounded-lg shadow border border-gray-200 hover:bg-gray-100 transition-colors w-full sm:w-auto">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Public registration
+                    </a>
                 </div>
                 <!-- Mobile: 2 buttons per row -->
                 <div class="grid grid-cols-2 gap-3 sm:hidden">

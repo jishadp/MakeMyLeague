@@ -2,6 +2,10 @@
 
 @section('title', $league->name . ' - Share Page')
 
+@php
+    $publicRegisterUrl = route('league-players.public-register', $league);
+@endphp
+
 @section('content')
 <div id="share-page-loader">
     <div class="loader-bubble">
@@ -67,6 +71,32 @@
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all">
                     <div class="text-3xl md:text-4xl font-bold text-white">{{ $auctionStats['total_players'] }}</div>
                     <div class="text-white/80 text-sm mt-1">Players</div>
+                </div>
+            </div>
+
+            <div class="mt-10 max-w-3xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 md:p-6">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <p class="text-sm text-white/80 uppercase tracking-[0.2em]">Player sign-ups</p>
+                            <h3 class="text-2xl font-semibold text-white mt-1">Share the open registration link</h3>
+                            <p class="text-white/70 text-sm mt-1">New players join as pending and will appear in your league roster automatically.</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <a href="{{ $publicRegisterUrl }}" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white text-slate-900 font-semibold rounded-xl shadow-lg shadow-slate-900/20 hover:bg-slate-100 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Open registration page
+                            </a>
+                            <a href="https://wa.me/?text={{ urlencode('Register for ' . $league->name . ' here: ' . $publicRegisterUrl) }}" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 .5C5.648.5.5 5.648.5 12c0 2.016.527 3.964 1.527 5.679L.5 23.5l6.012-1.513C8.16 22.973 10.056 23.5 12 23.5c6.352 0 11.5-5.148 11.5-11.5S18.352.5 12 .5zm0 20.905c-1.793 0-3.538-.48-5.05-1.385l-.361-.213-3.57.897.951-3.48-.235-.359A9.39 9.39 0 012.61 12C2.61 6.536 6.536 2.61 12 2.61c5.465 0 9.39 3.926 9.39 9.39 0 5.465-3.925 9.405-9.39 9.405z"/><path d="M17.174 14.83c-.293-.146-1.733-.853-2.002-.949-.27-.098-.468-.146-.666.146-.195.293-.768.949-.94 1.146-.171.195-.342.22-.635.073-.293-.146-1.236-.456-2.353-1.454-.869-.775-1.456-1.733-1.627-2.025-.171-.293-.018-.451.129-.597.132-.132.293-.342.439-.513.146-.171.195-.293.293-.488.098-.195.049-.366-.024-.512-.073-.146-.666-1.607-.914-2.2-.241-.579-.487-.5-.666-.51l-.566-.01c-.195 0-.512.073-.78.366-.269.293-1.024.999-1.024 2.438 0 1.438 1.05 2.826 1.195 3.018.146.195 2.07 3.163 5.018 4.433.702.303 1.25.484 1.676.62.704.223 1.344.192 1.852.116.565-.085 1.733-.707 1.979-1.389.244-.683.244-1.268.171-1.389-.073-.122-.268-.195-.561-.342z"/>
+                                </svg>
+                                Share to WhatsApp
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
