@@ -13,7 +13,10 @@
     $emptyDescription = $emptyDescription ?? 'Add fixtures to populate this poster.';
     $containerClass = $containerClass ?? 'space-y-8';
     $leagueSubtitle = $leagueSubtitle ?? null;
-    $posterDomId = 'fixture-poster-' . uniqid();
+    $posterGroupClass = 'poster-group-' . Str::random(6);
+
+    $matchesPerPoster = $matchesPerPoster ?? (int) request('poster_chunk', 4);
+    $matchesPerPoster = max(4, min(6, (int) $matchesPerPoster));
 
     $posterDays = $fixturesByDate->mapWithKeys(function ($dayFixtures, $dateLabel) {
         $groupedFixtures = collect($dayFixtures);
@@ -28,6 +31,10 @@
             'key' => $key,
             'label' => $fullDate,
         ]];
+    });
+
+    $chunkedFixturesByDate = $fixturesByDate->map(function ($dayFixtures) use ($matchesPerPoster) {
+        return collect($dayFixtures)->chunk($matchesPerPoster)->values();
     });
 @endphp
 
@@ -201,6 +208,20 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
     }
 
+    .fixture-chunk-switch {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
     .fixture-theme-label {
         font-size: 11px;
         font-weight: 800;
@@ -331,10 +352,6 @@
     
     .fixture-poster-date-section {
         margin-bottom: 28px;
-        display: none;
-    }
-
-    .fixture-poster-date-section.is-active {
         display: block;
     }
     
@@ -586,6 +603,7 @@
             padding: 16px 12px;
         }
 
+        .fixture-chunk-switch,
         .fixture-theme-switch {
             margin-bottom: 14px;
             justify-content: center;
@@ -701,7 +719,14 @@
         @endif
     </div>
 @else
-    <div class="fixture-theme-switch" role="group" aria-label="Poster theme" data-fixture-theme-control data-fixture-target="#{{ $posterDomId }}">
+    <div class="fixture-chunk-switch" role="group" aria-label="Matches per poster">
+        <span class="fixture-theme-label">Matches per poster</span>
+        @foreach([4,5,6] as $chunkSize)
+            <button type="button" class="fixture-theme-chip {{ $matchesPerPoster === $chunkSize ? 'is-active' : '' }}" data-poster-chunk-btn="{{ $chunkSize }}">{{ $chunkSize }}</button>
+        @endforeach
+    </div>
+
+    <div class="fixture-theme-switch" role="group" aria-label="Poster theme" data-fixture-theme-control data-fixture-target=".{{ $posterGroupClass }}">
         <span class="fixture-theme-label">Theme</span>
         <button type="button" class="fixture-theme-chip is-active" data-fixture-theme="green">Green</button>
         <button type="button" class="fixture-theme-chip" data-fixture-theme="sky">Sky</button>
@@ -712,145 +737,131 @@
         <button type="button" class="fixture-theme-chip" data-fixture-theme="slate">Slate</button>
     </div>
 
-    <div id="{{ $posterDomId }}" class="fixture-poster-container fixture-theme-green" data-fixture-poster>
-        <div class="fixture-poster-bg-pattern"></div>
-        <div class="fixture-poster-diagonal-accent"></div>
-        
-        <!-- Side Text -->
-        <div class="fixture-poster-side-text fixture-poster-side-text-left">#{{ Str::upper(Str::slug($league->name, '')) }}</div>
-        <div class="fixture-poster-side-text fixture-poster-side-text-right">#{{ Str::upper(Str::slug($league->name, '')) }}</div>
-        
-            <div class="fixture-poster-content">
-            <!-- Header -->
-            <div class="fixture-poster-header">
-                <div class="fixture-poster-title-block">
-                    <div class="fixture-poster-season-label">{{ $seasonText }}</div>
-                    <h1 class="fixture-poster-league-name">{{ Str::upper($league->name) }}</h1>
-                    @if(!empty($leagueSubtitle))
-                        <div class="fixture-poster-subtitle">{{ Str::upper($leagueSubtitle) }}</div>
-                    @endif
-                </div>
-                @if($league->logo)
-                    <div class="fixture-poster-header-logo">
-                        <div class="fixture-poster-logo-container">
-                            <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}">
-                        </div>
-                    </div>
-                @else
-                    <div class="fixture-poster-header-logo">
-                        <div class="fixture-poster-logo-container">
-                            <span class="fixture-poster-logo-placeholder">{{ Str::upper(Str::substr($league->name, 0, 2)) }}</span>
-                        </div>
-                    </div>
-                @endif
-            </div>
+    @foreach($chunkedFixturesByDate as $dateLabel => $chunks)
+        @php
+            $posterDay = $posterDays[$dateLabel] ?? [
+                'key' => Str::slug(($dateLabel ?: 'DATE TBA') . uniqid()),
+                'label' => Str::upper($dateLabel ?: 'DATE TBA'),
+            ];
+            $dateLabelText = $posterDay['label'];
+        @endphp
 
-            @if($posterDays->count() > 0)
-                <div class="fixture-poster-day-tabs" role="tablist">
-                    @foreach($posterDays as $posterDay)
-                        <button
-                            type="button"
-                            class="fixture-poster-day-tab {{ $loop->first ? 'is-active' : '' }}"
-                            data-fixture-day-tab="{{ $posterDay['key'] }}"
-                            aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
-                        >
-                            <span>{{ $posterDay['label'] }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            @endif
-            
-            <!-- Fixtures by Date -->
-            @foreach($fixturesByDate as $dateLabel => $dayFixtures)
-                @php
-                    $firstFixture = $dayFixtures->first();
-                    $matchDate = $firstFixture?->match_date;
-                    $fullDate = $matchDate
-                        ? Str::upper($matchDate->format('j M Y'))
-                        : ($dateLabel ?: 'DATE TBA');
-                    $posterDay = $posterDays[$dateLabel] ?? [
-                        'key' => Str::slug($fullDate ?: uniqid()),
-                        'label' => $fullDate,
-                    ];
-                    $dayKey = $posterDay['key'];
-                    $dateLabelText = $posterDay['label'] ?? $fullDate;
-                @endphp
-
-                <div class="fixture-poster-date-section {{ $loop->first ? 'is-active' : '' }}" data-fixture-day-section="{{ $dayKey }}">
-                    
-                    @foreach($dayFixtures as $fixture)
-                        @php
-                            $homeTeam = $fixture->homeTeam?->team;
-                            $awayTeam = $fixture->awayTeam?->team;
-                            $homeName = $homeTeam->name ?? 'Team TBA';
-                            $awayName = $awayTeam->name ?? 'Team TBA';
-                            $homeLogo = $homeTeam->logo ?? null;
-                            $awayLogo = $awayTeam->logo ?? null;
-                            
-                            $timeLabel = optional($fixture->match_time)->format('g:iA') ?? 'TBA';
-                            $venueLabel = $fixture->venue ?? $venueText;
-                            $matchInfo = $timeLabel . ' | ' . Str::upper($venueLabel);
-                        @endphp
-                        
-                        <div class="fixture-poster-match-card">
-                            <div class="fixture-poster-match-content">
-                                <!-- Home Team -->
-                                <div class="fixture-poster-team-section home-team">
-                                    <div class="fixture-poster-team-name">{{ Str::upper(Str::limit($homeName, 20, '')) }}</div>
-                                    <div class="fixture-poster-team-logo">
-                                        @if($homeLogo)
-                                            <img src="{{ Storage::url($homeLogo) }}" alt="{{ $homeName }}">
-                                        @else
-                                            <span class="fixture-poster-team-logo-text">{{ Str::upper(Str::substr($homeName, 0, 2)) }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                
-                                <!-- VS -->
-                                <div class="fixture-poster-vs-section">
-                                    <div class="fixture-poster-vs-text">VS</div>
-                                </div>
-                                
-                                <!-- Away Team -->
-                                <div class="fixture-poster-team-section away-team">
-                                    <div class="fixture-poster-team-logo">
-                                        @if($awayLogo)
-                                            <img src="{{ Storage::url($awayLogo) }}" alt="{{ $awayName }}">
-                                        @else
-                                            <span class="fixture-poster-team-logo-text">{{ Str::upper(Str::substr($awayName, 0, 2)) }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="fixture-poster-team-name">{{ Str::upper(Str::limit($awayName, 20, '')) }}</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Match Info Bar -->
-                            <div class="fixture-poster-match-info">
-                                <div class="fixture-poster-match-details">{{ $matchInfo }}</div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endforeach
-            
-            <!-- Footer -->
-            <div class="fixture-poster-footer">
-                @if(!empty($league->sponsor))
-                    <div class="fixture-poster-sponsor-text">
-                        Sponsor by: <span class="fixture-poster-sponsor-name">{{ Str::upper($league->sponsor) }}</span>
-                    </div>
-                @endif
+        @foreach($chunks as $chunkIndex => $dayFixtures)
+            <div class="fixture-poster-container fixture-theme-green {{ $posterGroupClass }}" data-fixture-poster>
+                <div class="fixture-poster-bg-pattern"></div>
+                <div class="fixture-poster-diagonal-accent"></div>
                 
-                @if(!empty($league->social_media))
-                    <div class="fixture-poster-social">
-                        @foreach(explode(',', $league->social_media) as $social)
-                            <div class="fixture-poster-social-item">{{ trim($social) }}</div>
+                <!-- Side Text -->
+                <div class="fixture-poster-side-text fixture-poster-side-text-left">#{{ Str::upper(Str::slug($league->name, '')) }}</div>
+                <div class="fixture-poster-side-text fixture-poster-side-text-right">#{{ Str::upper(Str::slug($league->name, '')) }}</div>
+                
+                <div class="fixture-poster-content">
+                    <!-- Header -->
+                    <div class="fixture-poster-header">
+                        <div class="fixture-poster-title-block">
+                            <div class="fixture-poster-season-label">{{ $seasonText }}</div>
+                            <h1 class="fixture-poster-league-name">{{ Str::upper($league->name) }}</h1>
+                            @if(!empty($leagueSubtitle))
+                                <div class="fixture-poster-subtitle">{{ Str::upper($leagueSubtitle) }}</div>
+                            @endif
+                        </div>
+                        @if($league->logo)
+                            <div class="fixture-poster-header-logo">
+                                <div class="fixture-poster-logo-container">
+                                    <img src="{{ Storage::url($league->logo) }}" alt="{{ $league->name }}">
+                                </div>
+                            </div>
+                        @else
+                            <div class="fixture-poster-header-logo">
+                                <div class="fixture-poster-logo-container">
+                                    <span class="fixture-poster-logo-placeholder">{{ Str::upper(Str::substr($league->name, 0, 2)) }}</span>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="fixture-poster-date-section">
+                        <div class="fixture-poster-date-header">
+                            <div class="fixture-poster-date-text">
+                                {{ $dateLabelText }}@if($chunks->count() > 1) — Poster {{ $chunkIndex + 1 }}@endif
+                            </div>
+                        </div>
+                        
+                        @foreach($dayFixtures as $fixture)
+                            @php
+                                $homeTeam = $fixture->homeTeam?->team;
+                                $awayTeam = $fixture->awayTeam?->team;
+                                $homeName = $homeTeam->name ?? 'Team TBA';
+                                $awayName = $awayTeam->name ?? 'Team TBA';
+                                $homeLogo = $homeTeam->logo ?? null;
+                                $awayLogo = $awayTeam->logo ?? null;
+                                
+                                $timeLabel = optional($fixture->match_time)->format('g:iA') ?? 'TBA';
+                                $venueLabel = $fixture->venue ?? $venueText;
+                                $matchInfo = $timeLabel . ' | ' . Str::upper($venueLabel);
+                            @endphp
+                            
+                            <div class="fixture-poster-match-card">
+                                <div class="fixture-poster-match-content">
+                                    <!-- Home Team -->
+                                    <div class="fixture-poster-team-section home-team">
+                                        <div class="fixture-poster-team-name">{{ Str::upper(Str::limit($homeName, 20, '')) }}</div>
+                                        <div class="fixture-poster-team-logo">
+                                            @if($homeLogo)
+                                                <img src="{{ Storage::url($homeLogo) }}" alt="{{ $homeName }}">
+                                            @else
+                                                <span class="fixture-poster-team-logo-text">{{ Str::upper(Str::substr($homeName, 0, 2)) }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- VS -->
+                                    <div class="fixture-poster-vs-section">
+                                        <div class="fixture-poster-vs-text">VS</div>
+                                    </div>
+                                    
+                                    <!-- Away Team -->
+                                    <div class="fixture-poster-team-section away-team">
+                                        <div class="fixture-poster-team-logo">
+                                            @if($awayLogo)
+                                                <img src="{{ Storage::url($awayLogo) }}" alt="{{ $awayName }}">
+                                            @else
+                                                <span class="fixture-poster-team-logo-text">{{ Str::upper(Str::substr($awayName, 0, 2)) }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="fixture-poster-team-name">{{ Str::upper(Str::limit($awayName, 20, '')) }}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Match Info Bar -->
+                                <div class="fixture-poster-match-info">
+                                    <div class="fixture-poster-match-details">{{ $matchInfo }}</div>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
-                @endif
+                    
+                    <!-- Footer -->
+                    <div class="fixture-poster-footer">
+                        @if(!empty($league->sponsor))
+                            <div class="fixture-poster-sponsor-text">
+                                Sponsor by: <span class="fixture-poster-sponsor-name">{{ Str::upper($league->sponsor) }}</span>
+                            </div>
+                        @endif
+                        
+                        @if(!empty($league->social_media))
+                            <div class="fixture-poster-social">
+                                @foreach(explode(',', $league->social_media) as $social)
+                                    <div class="fixture-poster-social-item">{{ trim($social) }}</div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        @endforeach
+    @endforeach
+@endif
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const themeClasses = ['fixture-theme-green', 'fixture-theme-sky', 'fixture-theme-red', 'fixture-theme-orange', 'fixture-theme-purple', 'fixture-theme-teal', 'fixture-theme-slate'];
@@ -888,14 +899,16 @@
 
             document.querySelectorAll('[data-fixture-theme-control]').forEach((control) => {
                 const targetSelector = control.dataset.fixtureTarget;
-                const poster = targetSelector ? document.querySelector(targetSelector) : null;
-                if (!poster) return;
+                const posters = targetSelector ? Array.from(document.querySelectorAll(targetSelector)) : [];
+                if (!posters.length) return;
 
                 const buttons = control.querySelectorAll('[data-fixture-theme]');
 
                 const applyTheme = (theme) => {
-                    themeClasses.forEach((cls) => poster.classList.remove(cls));
-                    poster.classList.add(`fixture-theme-${theme}`);
+                    posters.forEach((poster) => {
+                        themeClasses.forEach((cls) => poster.classList.remove(cls));
+                        poster.classList.add(`fixture-theme-${theme}`);
+                    });
                     buttons.forEach((btn) => {
                         const isActive = btn.dataset.fixtureTheme === theme;
                         btn.classList.toggle('is-active', isActive);
@@ -903,13 +916,21 @@
                     });
                 };
 
-                const initialTheme = themeClasses.find((cls) => poster.classList.contains(cls))?.replace('fixture-theme-', '') || 'green';
+                const initialTheme = themeClasses.find((cls) => posters[0].classList.contains(cls))?.replace('fixture-theme-', '') || 'green';
                 applyTheme(initialTheme);
 
                 buttons.forEach((btn) => {
                     btn.addEventListener('click', () => applyTheme(btn.dataset.fixtureTheme));
                 });
             });
+
+            document.querySelectorAll('[data-poster-chunk-btn]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const value = btn.dataset.posterChunkBtn;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('poster_chunk', value);
+                    window.location.href = url.toString();
+                });
+            });
         });
     </script>
-@endif
