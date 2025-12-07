@@ -58,6 +58,11 @@
         margin: 0;
     }
 
+    .fixture-poster-wrapper {
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+    }
+
     .fixture-theme-sky {
         --poster-primary: #0ea5e9;
         --poster-primary-strong: #0284c7;
@@ -747,6 +752,7 @@
         @endphp
 
         @foreach($chunks as $chunkIndex => $dayFixtures)
+            <div class="fixture-poster-wrapper">
             <div class="fixture-poster-container fixture-theme-green {{ $posterGroupClass }}" data-fixture-poster>
                 <div class="fixture-poster-bg-pattern"></div>
                 <div class="fixture-poster-diagonal-accent"></div>
@@ -783,7 +789,7 @@
                     <div class="fixture-poster-date-section">
                         <div class="fixture-poster-date-header">
                             <div class="fixture-poster-date-text">
-                                {{ $dateLabelText }}@if($chunks->count() > 1) — Poster {{ $chunkIndex + 1 }}@endif
+                                {{ $dateLabelText }}@if($chunks->count() > 1 && $chunkIndex > 0) — Poster {{ $chunkIndex + 1 }}@endif
                             </div>
                         </div>
                         
@@ -858,6 +864,7 @@
                         @endif
                     </div>
                 </div>
+            </div>
             </div>
         @endforeach
     @endforeach
