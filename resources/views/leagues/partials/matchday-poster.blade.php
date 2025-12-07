@@ -371,12 +371,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background-image: var(--league-logo, none);
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 70% auto;
-        opacity: 0.18;
-        filter: grayscale(100%);
+        background-image: none;
         pointer-events: none;
     }
     
@@ -717,7 +712,7 @@
         <button type="button" class="fixture-theme-chip" data-fixture-theme="slate">Slate</button>
     </div>
 
-    <div id="{{ $posterDomId }}" class="fixture-poster-container fixture-theme-green" data-fixture-poster style="{{ $league->logo ? '--league-logo: url(' . Storage::url($league->logo) . ');' : '' }}">
+    <div id="{{ $posterDomId }}" class="fixture-poster-container fixture-theme-green" data-fixture-poster>
         <div class="fixture-poster-bg-pattern"></div>
         <div class="fixture-poster-diagonal-accent"></div>
         
