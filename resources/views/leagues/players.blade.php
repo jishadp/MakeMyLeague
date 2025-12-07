@@ -19,6 +19,18 @@
     $playersByLocalBody = $playersOrdered->groupBy(function ($player) {
         return $player->user?->localBody?->name ?? 'Unknown';
     });
+    $posterFixturesByDate = $league->fixtures
+        ->sortBy(function ($fixture) {
+            $date = optional($fixture->match_date)->format('Ymd') ?? '99999999';
+            $time = optional($fixture->match_time)->format('Hi') ?? '9999';
+            return $date . '-' . $time;
+        })
+        ->groupBy(function ($fixture) {
+            return optional($fixture->match_date)->format('d.m.Y') ?? 'Date TBA';
+        })
+        ->map(function ($fixtures) {
+            return $fixtures->values();
+        });
 @endphp
 
 @section('content')
@@ -85,6 +97,7 @@
                         </div>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
+                        <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="poster">TBA Poster</button>
                     </div>
                 </div>
 
@@ -202,6 +215,16 @@
                             </div>
                         @endforeach
                     </div>
+                </div>
+
+                <div id="player-tab-poster" class="player-tab-panel hidden">
+                    @include('leagues.partials.matchday-poster', [
+                        'league' => $league,
+                        'fixturesByDate' => $posterFixturesByDate,
+                        'venueLabel' => optional($league->localBody)->name ?? ($league->venue_details ?? 'Venue TBA'),
+                        'emptyTitle' => 'Fixtures TBA',
+                        'emptyDescription' => 'Add fixtures for ' . $league->name . ' to populate this shareable card.',
+                    ])
                 </div>
             </div>
         @else

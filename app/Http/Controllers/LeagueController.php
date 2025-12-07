@@ -942,6 +942,9 @@ class LeagueController
             'game',
             'leaguePlayers.user.localBody',
             'leaguePlayers.leagueTeam.team',
+            'fixtures.homeTeam.team',
+            'fixtures.awayTeam.team',
+            'localBody',
         ]);
         return view('leagues.players', compact('league'));
     }

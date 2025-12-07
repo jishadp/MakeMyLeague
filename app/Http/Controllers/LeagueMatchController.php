@@ -221,7 +221,27 @@ class LeagueMatchController extends Controller
             return $players->take(2);
         });
 
-        return view('leagues.fixtures.index', compact('league', 'fixtures', 'retentionByTeam', 'topBoughtByTeam', 'topBoughtOverall', 'sortMode'));
+        $posterFixturesByDate = $league->fixtures()
+            ->with(['homeTeam.team', 'awayTeam.team'])
+            ->orderByRaw("CASE WHEN match_date IS NULL THEN 1 ELSE 0 END")
+            ->orderBy('match_date')
+            ->orderByRaw("CASE WHEN match_time IS NULL THEN 1 ELSE 0 END")
+            ->orderBy('match_time')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(function ($fixture) {
+                return optional($fixture->match_date)->format('d.m.Y') ?? 'Date TBA';
+            });
+
+        return view('leagues.fixtures.index', compact(
+            'league',
+            'fixtures',
+            'retentionByTeam',
+            'topBoughtByTeam',
+            'topBoughtOverall',
+            'sortMode',
+            'posterFixturesByDate'
+        ));
     }
 
     public function createFixture(Request $request, League $league)
