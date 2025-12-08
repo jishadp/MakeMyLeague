@@ -1298,4 +1298,31 @@ class AuctionController extends Controller
     }
 
 
+    /**
+     * API: Get recent sold players (replacing recent bids).
+     */
+    public function getRecentBids(League $league)
+    {
+        $soldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['sold', 'retained'])
+            ->whereNotNull('bid_price')
+            ->with(['player', 'leagueTeam.team'])
+            ->orderBy('updated_at', 'desc')
+            ->take(20)
+            ->get()
+            ->map(function ($lp) {
+                return [
+                    'amount' => $lp->bid_price,
+                    'team_name' => $lp->leagueTeam->team->name ?? 'Unknown',
+                    'player_name' => $lp->player->name,
+                    'time' => $lp->updated_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'bids' => $soldPlayers
+        ]);
+    }
+
 }
