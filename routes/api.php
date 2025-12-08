@@ -25,6 +25,11 @@ Route::prefix('auction')->name('auction.')->group(function () {
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('leagues/{league:slug}/teams', [\App\Http\Controllers\Api\LeagueTeamApiController::class, 'index']);
+    Route::get('leagues/{league:slug}/players', [\App\Http\Controllers\Api\LeaguePlayerApiController::class, 'index']);
+});
+
 // Auction API endpoints for live view
 Route::prefix('auctions/league/{league:slug}')->group(function () {
     Route::get('team-balances', [AuctionController::class, 'getTeamBalances']);
