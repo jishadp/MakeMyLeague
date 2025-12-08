@@ -45,7 +45,7 @@ class LeagueTeamApiController extends Controller
                 'slug' => $leagueTeam->team->slug,
                 'logo' => $leagueTeam->team->logo ? Storage::url($leagueTeam->team->logo) : null,
                 'banner' => $leagueTeam->team->banner ? Storage::url($leagueTeam->team->banner) : null,
-                'owner_name' => $leagueTeam->team->owners->first()->name ?? 'No owner',
+                'owner_name' => $leagueTeam->team->owners->first()?->name ?? 'No owner',
             ],
             'status' => $leagueTeam->status,
             'players_count' => $players->count(),
