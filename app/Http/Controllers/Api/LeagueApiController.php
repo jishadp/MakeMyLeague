@@ -79,7 +79,7 @@ class LeagueApiController extends Controller
     {
         $winnerTeam = optional($league->winnerTeam)->team;
         $runnerTeam = optional($league->runnerTeam)->team;
-        $logoUrl = $league->logo ? Storage::url($league->logo) : null;
+        $logoUrl = $league->logo ? url(Storage::url($league->logo)) : null;
 
         return [
             'id' => $league->id,

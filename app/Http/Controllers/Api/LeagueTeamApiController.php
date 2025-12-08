@@ -57,7 +57,7 @@ class LeagueTeamApiController extends Controller
             'squad' => $players->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->user->name ?? 'Unknown',
-                'photo' => $p->user->profile_photo_path ? url(Storage::url($p->user->profile_photo_path)) : null,
+                'photo' => $p->user->photo ? url(Storage::url($p->user->photo)) : null,
                 'price' => $p->bid_price ?? $p->base_price ?? 0,
                 'is_retained' => (bool) $p->retention,
                 'position' => $p->user->position->name ?? null,
