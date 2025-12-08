@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\LeagueApiController;
 
 Route::post('login', [AuthApiController::class, 'login']);
@@ -26,6 +27,12 @@ Route::prefix('auction')->name('auction.')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::get('/leagues', [LeagueApiController::class, 'index']);
+    Route::get('/leagues/{league}', [LeagueApiController::class, 'show']);
+    Route::get('/dashboard/widgets', [DashboardApiController::class, 'index']);
     Route::get('leagues/{league:slug}/teams', [\App\Http\Controllers\Api\LeagueTeamApiController::class, 'index']);
     Route::get('leagues/{league:slug}/players', [\App\Http\Controllers\Api\LeaguePlayerApiController::class, 'index']);
 });
