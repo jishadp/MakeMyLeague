@@ -1196,19 +1196,24 @@ class AuctionController extends Controller
             ->get()
             ->map(function ($lt) use ($league) {
                 $roster = $lt->leaguePlayers->map(function($lp) {
+                    // Check if player is actually retained (either status='retained' or retention flag is likely true)
+                    // We assume if status is NOT unsold and retention boolean is true, it is a retained player.
+                    $isRetained = ($lp->status === 'retained') || ($lp->retention == true);
+                    
                     return [
                         'id' => $lp->id,
                         'name' => $lp->player->name,
                         'position' => $lp->player->primaryGameRole->gamePosition->name ?? 'Player',
                         'price' => $lp->bid_price ?? $lp->base_price ?? 0,
-                        'status' => $lp->status,
+                        'status' => $isRetained ? 'retained' : $lp->status, // Normalize status for frontend
                         'photo' => $lp->player->photo ? asset($lp->player->photo) : null,
                     ];
                 });
 
                 // Stats Calculation
+                // Now simple filtering works because we normalized the status above
                 $soldCount = $roster->where('status', 'sold')->count();
-                $retainedCount = $roster->where('status', 'retained')->count() + $roster->where('retention', true)->where('status', '!=', 'retained')->count();
+                $retainedCount = $roster->where('status', 'retained')->count();
                 $totalSecured = $soldCount + $retainedCount;
                 
                 $maxPlayers = (int) ($league->max_team_players ?? 0);
