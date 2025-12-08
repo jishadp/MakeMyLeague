@@ -38,7 +38,10 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Auction API endpoints for live view
+Route::get('live-auctions', [AuctionController::class, 'getLiveAuctions']);
+
 Route::prefix('auctions/league/{league:slug}')->group(function () {
+    Route::get('current-state', [AuctionController::class, 'getCurrentState']);
     Route::get('team-balances', [AuctionController::class, 'getTeamBalances']);
     Route::get('recent-bids', [AuctionController::class, 'getRecentBids']);
 });
