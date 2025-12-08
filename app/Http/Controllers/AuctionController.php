@@ -1200,7 +1200,7 @@ class AuctionController extends Controller
                         'id' => $lp->id,
                         'name' => $lp->player->name,
                         'position' => $lp->player->primaryGameRole->gamePosition->name ?? 'Player',
-                        'price' => $lp->bid_price ?? 0,
+                        'price' => $lp->bid_price ?? $lp->base_price ?? 0,
                         'status' => $lp->status,
                         'photo' => $lp->player->photo ? asset($lp->player->photo) : null,
                     ];
