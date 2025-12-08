@@ -1217,6 +1217,9 @@ class AuctionController extends Controller
                 $retainedCount = $roster->where('status', 'retained')->count();
                 $totalSecured = $soldCount + $retainedCount;
                 
+                // Calculate Total Spent directly from roster to match displayed prices
+                $totalSpent = $roster->sum('price');
+                
                 $maxPlayers = (int) ($league->max_team_players ?? 0);
                 if ($maxPlayers == 0) $maxPlayers = 15; // Fallback default if not set
                 
@@ -1253,6 +1256,7 @@ class AuctionController extends Controller
                     'players_needed' => $playersNeeded,
                     'reserve_amount' => $reserveAmount,
                     'max_bid_cap' => $maxBidCap,
+                    'total_spent' => $totalSpent,
                     'roster' => $roster->values(),
                 ];
             });
