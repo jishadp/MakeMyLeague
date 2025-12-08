@@ -1194,7 +1194,7 @@ class AuctionController extends Controller
                   ->with(['player.position', 'player.primaryGameRole.gamePosition']);
             }])
             ->get()
-            ->map(function ($lt) {
+            ->map(function ($lt) use ($league) {
                 $roster = $lt->leaguePlayers->map(function($lp) {
                     return [
                         'id' => $lp->id,
@@ -1218,14 +1218,18 @@ class AuctionController extends Controller
                 
                 // Reserve calculation
                 $futureSlots = max($playersNeeded - 1, 0);
-                $availableBasePrices = LeaguePlayer::where('league_id', $league->id)
-                    ->where('status', 'available')
-                    ->orderBy('base_price')
-                    ->take($futureSlots)
-                    ->pluck('base_price')
-                    ->map(fn($p) => (float)$p);
                 
-                $reserveAmount = $availableBasePrices->sum();
+                // Note: Performing query inside loop is not ideal for performance but functional for now.
+                // Optimally should pre-fetch available base prices.
+                $reserveAmount = 0;
+                if ($futureSlots > 0) {
+                     $reserveAmount = \App\Models\LeaguePlayer::where('league_id', $league->id)
+                        ->where('status', 'available')
+                        ->orderBy('base_price')
+                        ->take($futureSlots)
+                        ->pluck('base_price')
+                        ->sum();
+                }
                 
                 // Max Bid Cap
                 // Logic: (Wallet - Reserve for future players)
