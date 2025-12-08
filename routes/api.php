@@ -35,6 +35,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/widgets', [DashboardApiController::class, 'index']);
     Route::get('leagues/{league:slug}/teams', [\App\Http\Controllers\Api\LeagueTeamApiController::class, 'index']);
     Route::get('leagues/{league:slug}/players', [\App\Http\Controllers\Api\LeaguePlayerApiController::class, 'index']);
+    
+    // User specific routes
+    Route::get('my-leagues', [\App\Http\Controllers\Api\MyLeaguesController::class, 'index']);
+    Route::get('my-teams', [\App\Http\Controllers\Api\MyTeamsController::class, 'index']);
 });
 
 // Auction API endpoints for live view
