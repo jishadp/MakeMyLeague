@@ -54,7 +54,7 @@ class LeaguePlayerApiController extends Controller
             'id' => $player->id,
             'slug' => $player->slug,
             'name' => $player->user->name ?? 'Unknown',
-            'photo' => $player->user->photo ? Storage::url($player->user->photo) : null,
+            'photo' => $player->user->photo ? url(Storage::url($player->user->photo)) : null,
             'position' => $player->user->position->name ?? 'Role',
             'local_body' => $player->user->localBody->name ?? 'Unknown',
             'status' => $player->status,

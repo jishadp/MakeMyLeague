@@ -43,8 +43,8 @@ class LeagueTeamApiController extends Controller
                 'id' => $leagueTeam->team->id,
                 'name' => $leagueTeam->team->name,
                 'slug' => $leagueTeam->team->slug,
-                'logo' => $leagueTeam->team->logo ? Storage::url($leagueTeam->team->logo) : null,
-                'banner' => $leagueTeam->team->banner ? Storage::url($leagueTeam->team->banner) : null,
+                'logo' => $leagueTeam->team->logo ? url(Storage::url($leagueTeam->team->logo)) : null,
+                'banner' => $leagueTeam->team->banner ? url(Storage::url($leagueTeam->team->banner)) : null,
                 'owner_name' => $leagueTeam->team->owners->first()?->name ?? 'No owner',
             ],
             'status' => $leagueTeam->status,
@@ -57,10 +57,11 @@ class LeagueTeamApiController extends Controller
             'squad' => $players->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->user->name ?? 'Unknown',
-                'photo' => $p->user->photo ? Storage::url($p->user->photo) : null,
+                'photo' => $p->user->profile_photo_path ? url(Storage::url($p->user->profile_photo_path)) : null,
                 'price' => $p->bid_price ?? $p->base_price ?? 0,
                 'is_retained' => (bool) $p->retention,
                 'position' => $p->user->position->name ?? null,
+                'current_club' => $p->leagueTeam ? $p->leagueTeam->team->name : null,
             ]),
         ];
     }
