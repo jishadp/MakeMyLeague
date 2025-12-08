@@ -1206,17 +1206,43 @@ class AuctionController extends Controller
                     ];
                 });
 
+                // Stats Calculation
                 $soldCount = $roster->where('status', 'sold')->count();
                 $retainedCount = $roster->where('status', 'retained')->count() + $roster->where('retention', true)->where('status', '!=', 'retained')->count();
+                $totalSecured = $soldCount + $retainedCount;
                 
+                $maxPlayers = (int) ($league->max_team_players ?? 0);
+                if ($maxPlayers == 0) $maxPlayers = 15; // Fallback default if not set
+                
+                $playersNeeded = max($maxPlayers - $totalSecured, 0);
+                
+                // Reserve calculation
+                $futureSlots = max($playersNeeded - 1, 0);
+                $availableBasePrices = LeaguePlayer::where('league_id', $league->id)
+                    ->where('status', 'available')
+                    ->orderBy('base_price')
+                    ->take($futureSlots)
+                    ->pluck('base_price')
+                    ->map(fn($p) => (float)$p);
+                
+                $reserveAmount = $availableBasePrices->sum();
+                
+                // Max Bid Cap
+                // Logic: (Wallet - Reserve for future players)
+                $walletBalance = (float) $lt->wallet_balance;
+                $maxBidCap = max($walletBalance - $reserveAmount, 0);
+
                 return [
                     'id' => $lt->id,
                     'name' => $lt->team->name,
                     'logo' => $lt->team->logo ? asset($lt->team->logo) : null,
-                    'wallet_balance' => $lt->wallet_balance,
-                    'players_count' => $roster->count(),
-                    'sold_count' => $soldCount,
-                    'retained_count' => $retainedCount,
+                    'wallet_balance' => $walletBalance,
+                    'players_count' => $totalSecured, // Total squad size
+                    'sold_players_count' => $soldCount,
+                    'retained_players_count' => $retainedCount,
+                    'players_needed' => $playersNeeded,
+                    'reserve_amount' => $reserveAmount,
+                    'max_bid_cap' => $maxBidCap,
                     'roster' => $roster->values(),
                 ];
             });
