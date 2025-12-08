@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AuctionController extends Controller
 {
@@ -1206,7 +1207,7 @@ class AuctionController extends Controller
                         'position' => $lp->player->primaryGameRole->gamePosition->name ?? 'Player',
                         'price' => $lp->bid_price ?? $lp->base_price ?? 0,
                         'status' => $isRetained ? 'retained' : $lp->status, // Normalize status for frontend
-                        'photo' => $lp->player->photo ? asset($lp->player->photo) : null,
+                        'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
                     ];
                 });
 
@@ -1244,7 +1245,7 @@ class AuctionController extends Controller
                 return [
                     'id' => $lt->id,
                     'name' => $lt->team->name,
-                    'logo' => $lt->team->logo ? asset($lt->team->logo) : null,
+                    'logo' => $lt->team->logo ? url(Storage::url($lt->team->logo)) : null,
                     'wallet_balance' => $walletBalance,
                     'players_count' => $totalSecured, // Total squad size
                     'sold_players_count' => $soldCount,
@@ -1319,7 +1320,7 @@ class AuctionController extends Controller
             'current_player' => $currentPlayer ? [
                 'id' => $currentPlayer->id,
                 'name' => $currentPlayer->player->name,
-                'photo' => $currentPlayer->player->photo ? asset($currentPlayer->player->photo) : null,
+                'photo' => $currentPlayer->player->photo ? url(Storage::url($currentPlayer->player->photo)) : null,
                 'position' => $currentPlayer->player->primaryGameRole->gamePosition->name ?? 'Player',
                 'base_price' => $currentPlayer->base_price,
             ] : null,
