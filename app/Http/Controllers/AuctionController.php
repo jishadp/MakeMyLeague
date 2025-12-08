@@ -1327,7 +1327,7 @@ class AuctionController extends Controller
             'current_bid' => $currentHighestBid ? [
                 'amount' => $currentHighestBid->amount,
                 'team_name' => $currentHighestBid->leagueTeam->team->name,
-                'team_logo' => $currentHighestBid->leagueTeam->team->logo ? asset($currentHighestBid->leagueTeam->team->logo) : null,
+                'team_logo' => $currentHighestBid->leagueTeam->team->logo ? url(Storage::url($currentHighestBid->leagueTeam->team->logo)) : null,
             ] : null,
             'stats' => $auctionStats,
         ]);
@@ -1346,11 +1346,13 @@ class AuctionController extends Controller
             ->orderBy('updated_at', 'desc')
             ->take(20)
             ->get()
-            ->map(function ($lp) {
+                ->map(function ($lp) {
                 return [
                     'amount' => $lp->bid_price,
                     'team_name' => $lp->leagueTeam->team->name ?? 'Unknown',
+                    'team_logo' => $lp->leagueTeam->team->logo ? url(Storage::url($lp->leagueTeam->team->logo)) : null,
                     'player_name' => $lp->player->name,
+                    'player_photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
                     'time' => $lp->updated_at->diffForHumans(),
                 ];
             });
