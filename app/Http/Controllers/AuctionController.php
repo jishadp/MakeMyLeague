@@ -1283,4 +1283,75 @@ class AuctionController extends Controller
 
         return ['ok' => true];
     }
+    /**
+     * API: Get list of active/live auctions.
+     */
+    public function getLiveAuctions()
+    {
+        // For now, return leagues that are 'active' or have a status indicating auction in progress.
+        // Adjust status check based on actual league statuses.
+        $leagues = League::whereIn('status', ['active', 'auction'])
+            ->withCount('leaguePlayers')
+            ->get()
+            ->map(function ($league) {
+                return [
+                    'id' => $league->id,
+                    'name' => $league->name,
+                    'slug' => $league->slug,
+                    'logo' => $league->logo ? asset($league->logo) : null,
+                    'status' => $league->status,
+                    'total_players' => $league->league_players_count,
+                    'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'leagues' => $leagues
+        ]);
+    }
+
+    /**
+     * API: Get current auction state for a league (Current Player, Highest Bid).
+     */
+    public function getCurrentState(League $league)
+    {
+        $currentPlayer = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'auctioning')
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->first();
+
+        $currentHighestBid = null;
+        if ($currentPlayer) {
+            $currentHighestBid = Auction::where('league_player_id', $currentPlayer->id)
+                ->with(['leagueTeam.team'])
+                ->latest('created_at')
+                ->first();
+        }
+
+        $auctionStats = [
+            'total_players' => $league->leaguePlayers()->count(),
+            'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+            'unsold_players' => $league->leaguePlayers()->where('status', 'unsold')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'current_player' => $currentPlayer ? [
+                'id' => $currentPlayer->id,
+                'name' => $currentPlayer->player->name,
+                'photo' => $currentPlayer->player->photo ? asset($currentPlayer->player->photo) : null,
+                'position' => $currentPlayer->player->primaryGameRole->gamePosition->name ?? 'Player',
+                'base_price' => $currentPlayer->base_price,
+            ] : null,
+            'current_bid' => $currentHighestBid ? [
+                'amount' => $currentHighestBid->amount,
+                'team_name' => $currentHighestBid->leagueTeam->team->name,
+                'team_logo' => $currentHighestBid->leagueTeam->team->logo ? asset($currentHighestBid->leagueTeam->team->logo) : null,
+            ] : null,
+            'stats' => $auctionStats,
+        ]);
+    }
+
+
 }
