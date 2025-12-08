@@ -2,36 +2,110 @@
 
 @section('title', 'Auction Dashboard')
 
+@php
+    $featureLeague = $liveAuctions->first() ?? $upcomingAuctions->first() ?? $pastAuctions->first();
+@endphp
+
 @section('content')
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-indigo-600 to-purple-600 py-8 px-4 sm:px-6 lg:px-8 text-white animate-fadeIn">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+    <section class="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-500 text-white">
+        <div class="absolute inset-0 opacity-25">
+            <div class="absolute -left-10 -top-10 w-52 h-52 bg-white/20 rounded-full blur-3xl"></div>
+            <div class="absolute right-0 bottom-0 w-64 h-64 bg-teal-300/30 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
                 <div>
-                    <h1 class="text-3xl font-extrabold mb-2 drop-shadow">
-                        Auction Dashboard
+                    <p class="uppercase tracking-widest text-emerald-100 text-xs font-semibold">Auction Center</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mt-2 leading-tight">
+                        Real-time bidding, history, and upcoming league auctions
                     </h1>
-                    <p class="text-indigo-100">
-                        Live auctions, past results, and upcoming events
+                    <p class="mt-3 text-emerald-50 text-sm md:text-base">
+                        Track live rooms, revisit completed auctions, and prepare for leagues that have not started selling players yet.
                     </p>
+                    <div class="flex flex-wrap gap-3 mt-5">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-300 animate-pulse"></span>
+                            Live: <strong>{{ $liveAuctions->count() }}</strong>
+                        </span>
+                        <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-200"></span>
+                            Upcoming: <strong>{{ $upcomingAuctions->count() }}</strong>
+                        </span>
+                        <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-200"></span>
+                            Past: <strong>{{ $pastAuctions->total() }}</strong>
+                        </span>
+                    </div>
                 </div>
-                <div class="mt-4 md:mt-0">
-                    <a href="{{ route('dashboard') }}"
-                       class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium 
-                              hover:bg-indigo-50 active:scale-95 transition-all shadow-md hover:shadow-lg">
-                        Back to Dashboard
-                    </a>
+                <div class="bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg backdrop-blur">
+                    @if($featureLeague)
+                        <p class="text-sm uppercase text-emerald-100 font-semibold">Featured</p>
+                        <h3 class="text-xl font-semibold mt-2">{{ $featureLeague->name }}</h3>
+                        <p class="text-emerald-50 text-sm">
+                            {{ optional($featureLeague->game)->name }}
+                            @if($featureLeague->localBody)
+                                • {{ $featureLeague->localBody->name }}
+                            @endif
+                        </p>
+                        <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+                            <div class="bg-white/10 rounded-lg py-3">
+                                <p class="text-sm text-emerald-100">Teams</p>
+                                <p class="text-lg font-bold">{{ $featureLeague->league_teams_count ?? $featureLeague->leagueTeams->count() }}</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg py-3">
+                                <p class="text-sm text-emerald-100">Players</p>
+                                <p class="text-lg font-bold">{{ $featureLeague->league_players_count ?? $featureLeague->leaguePlayers->count() }}</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg py-3">
+                                <p class="text-sm text-emerald-100">Status</p>
+                                @if($featureLeague->isAuctionActive())
+                                    <p class="text-lg font-bold text-red-200">Live</p>
+                                @elseif($featureLeague->auction_ended_at)
+                                    <p class="text-lg font-bold text-amber-200">Completed</p>
+                                @else
+                                    <p class="text-lg font-bold text-sky-100">Upcoming</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            @if($featureLeague->isAuctionActive())
+                                <a href="{{ route('auctions.live', $featureLeague) }}"
+                                   class="inline-flex items-center justify-center gap-2 bg-white text-emerald-700 font-semibold px-4 py-2 rounded-lg shadow hover:translate-y-[-1px] transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Watch Live
+                                </a>
+                            @else
+                                <a href="#upcomingSection"
+                                   class="inline-flex items-center justify-center gap-2 bg-white text-emerald-700 font-semibold px-4 py-2 rounded-lg shadow hover:translate-y-[-1px] transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Upcoming Schedule
+                                </a>
+                            @endif
+                            <a href="{{ route('dashboard') }}"
+                               class="inline-flex items-center gap-2 border border-white/50 text-white px-4 py-2 rounded-lg hover:bg-white/10">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-emerald-50">No leagues available yet.</div>
+                    @endif
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Tab Navigation -->
     <section class="bg-white border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex space-x-8">
-                <button onclick="showSection('live')" id="liveTab" 
-                        class="py-4 px-1 border-b-2 border-indigo-500 font-medium text-sm text-indigo-600">
+            <div class="flex flex-wrap gap-3 py-4 text-sm font-semibold">
+                <button onclick="showSection('live')" id="liveTab"
+                        class="tab-button border-b-2 border-transparent text-slate-500 hover:text-emerald-600 hover:border-emerald-200">
                     Live Auctions
                     @if($liveAuctions->count() > 0)
                         <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -39,15 +113,20 @@
                         </span>
                     @endif
                 </button>
-                <button onclick="showSection('past')" id="pastTab" 
-                        class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                <button onclick="showSection('past')" id="pastTab"
+                        class="tab-button border-b-2 border-transparent text-slate-500 hover:text-emerald-600 hover:border-emerald-200">
                     Past Auctions
+                    @if($pastAuctions->total() > 0)
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            {{ $pastAuctions->total() }}
+                        </span>
+                    @endif
                 </button>
-                <button onclick="showSection('upcoming')" id="upcomingTab" 
-                        class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                <button onclick="showSection('upcoming')" id="upcomingTab"
+                        class="tab-button border-b-2 border-transparent text-slate-500 hover:text-emerald-600 hover:border-emerald-200">
                     Upcoming Auctions
                     @if($upcomingAuctions->count() > 0)
-                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
                             {{ $upcomingAuctions->count() }}
                         </span>
                     @endif
@@ -56,318 +135,349 @@
         </div>
     </section>
 
-    <!-- Content Sections -->
-    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto">
-            
-            <!-- Live Auctions Section -->
-            <div id="liveSection" class="section-content">
-                @if($liveAuctions->isEmpty())
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center animate-fadeInUp">
-                        <div class="mb-4">
-                            <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">No Live Auctions</h3>
-                        <p class="text-gray-600 mb-6">There are currently no live auctions happening.</p>
-                    </div>
-                @else
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($liveAuctions as $league)
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                                <div class="p-6">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ $league->name }}</h3>
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                                            <span class="text-red-600 font-semibold text-sm">LIVE</span>
-                                        </div>
+    <section class="py-10 px-4 sm:px-6 lg:px-8 bg-slate-50 min-h-screen">
+        <div class="max-w-7xl mx-auto space-y-12">
+            <div id="liveSection" class="section-content space-y-6">
+                @forelse($liveAuctions as $league)
+                    @php
+                        $soldPlayers = $league->leaguePlayers->where('status', 'sold');
+                        $availablePlayers = $league->leaguePlayers->where('status', 'available');
+                        $topTeams = $league->leagueTeams->take(4);
+                    @endphp
+                    <div class="bg-white rounded-2xl shadow-lg border border-emerald-50 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+                                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Live
+                                        </span>
+                                        <span class="text-xs text-slate-500">
+                                            Started {{ optional($league->auction_started_at)->diffForHumans() ?? 'just now' }}
+                                        </span>
                                     </div>
-                                    
-                                    <p class="text-gray-600 mb-4">{{ $league->game->name }} League</p>
-                                    
-                                    <div class="grid grid-cols-2 gap-4 mb-4">
-                                        <div class="text-center">
-                                            <p class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}</p>
-                                            <p class="text-sm text-gray-500">Teams</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-2xl font-bold text-green-600">{{ $league->leaguePlayers->count() }}</p>
-                                            <p class="text-sm text-gray-500">Players</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-2 mb-6">
-                                        @foreach($league->leagueTeams->take(3) as $leagueTeam)
-                                            <div class="flex justify-between items-center text-sm">
-                                                <span class="text-gray-700">{{ $leagueTeam->team->name }}</span>
-                                                <span class="font-semibold text-green-600">₹{{ number_format($leagueTeam->wallet_balance, 0) }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    
-                                    <div class="space-y-2">
-                                        @if(auth()->user()->canParticipateInLeagueAuction($league->id))
-                                            <a href="{{ route('auction.index', $league) }}" 
-                                               class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium text-center block">
-                                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                Join Auction
-                                            </a>
+                                    <h3 class="text-xl font-semibold text-slate-900">{{ $league->name }}</h3>
+                                    <p class="text-sm text-slate-600">
+                                        {{ optional($league->game)->name }}
+                                        @if($league->localBody)
+                                            • {{ $league->localBody->name }}
                                         @endif
-                                        <a href="{{ route('auctions.live', $league) }}" 
-                                           class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium text-center block">
-                                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                            </svg>
-                                            Watch Live Auction
-                                        </a>
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap gap-3">
+                                    <div class="stat-chip bg-emerald-50 text-emerald-700">
+                                        <span class="font-bold text-lg">{{ $league->league_teams_count ?? $league->leagueTeams->count() }}</span>
+                                        <span class="text-xs uppercase">Teams</span>
+                                    </div>
+                                    <div class="stat-chip bg-sky-50 text-sky-700">
+                                        <span class="font-bold text-lg">{{ $league->league_players_count ?? $league->leaguePlayers->count() }}</span>
+                                        <span class="text-xs uppercase">Players</span>
+                                    </div>
+                                    <div class="stat-chip bg-amber-50 text-amber-700">
+                                        <span class="font-bold text-lg">{{ $soldPlayers->count() }}</span>
+                                        <span class="text-xs uppercase">Sold</span>
+                                    </div>
+                                    <div class="stat-chip bg-slate-100 text-slate-700">
+                                        <span class="font-bold text-lg">{{ $availablePlayers->count() }}</span>
+                                        <span class="text-xs uppercase">Remaining</span>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
+                                @foreach($topTeams as $leagueTeam)
+                                    <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                                        <div class="text-xs text-slate-500 uppercase">Team</div>
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-sm font-semibold text-slate-900">{{ $leagueTeam->team->name }}</p>
+                                            <span class="text-emerald-600 font-semibold text-sm">₹{{ number_format($leagueTeam->wallet_balance, 0) }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @if(auth()->user()->canParticipateInLeagueAuction($league->id))
+                                    <a href="{{ route('auction.index', $league) }}"
+                                       class="live-action-button bg-emerald-600 text-white hover:bg-emerald-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Join Auction Room
+                                    </a>
+                                @endif
+                                <a href="{{ route('auctions.live', $league) }}"
+                                   class="live-action-button bg-red-600 text-white hover:bg-red-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Watch Live Feed
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                @endif
+                @empty
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-2">No Live Auctions</h3>
+                        <p class="text-slate-600 mb-4">You do not have any active auction rooms right now.</p>
+                        <a href="#upcomingSection" class="inline-flex items-center gap-2 text-emerald-700 font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7H7m6 5H7m-2 5h14M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"></path>
+                            </svg>
+                            Browse upcoming leagues
+                        </a>
+                    </div>
+                @endforelse
             </div>
 
-            <!-- Past Auctions Section -->
-            <div id="pastSection" class="section-content hidden">
-                @if($pastAuctions->isEmpty())
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center animate-fadeInUp">
-                        <div class="mb-4">
-                            <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5
-                                         a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3
-                                         m-6-4h.01M9 16h.01"></path>
-                            </svg>
+            <div id="pastSection" class="section-content hidden space-y-6">
+                @forelse($pastAuctions as $league)
+                    @php
+                        $soldPlayers = $league->leaguePlayers->where('status', 'sold');
+                        $totalRevenue = $soldPlayers->sum('bid_price');
+                        $soldCount = $soldPlayers->count();
+                        $topTeam = $league->leagueTeams
+                            ->sortByDesc(function($team) {
+                                return $team->players->where('status', 'sold')->sum('bid_price');
+                            })
+                            ->first();
+                    @endphp
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                                        Completed
+                                    </span>
+                                    @if($league->auction_ended_at)
+                                        <span class="text-xs text-slate-500">
+                                            Ended {{ $league->auction_ended_at->format('M d, Y g:i A') }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <h3 class="text-xl font-semibold text-slate-900 mt-1">{{ $league->name }}</h3>
+                                <p class="text-sm text-slate-600">
+                                    {{ optional($league->game)->name }}
+                                    @if($league->localBody)
+                                        • {{ $league->localBody->name }}
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <div class="stat-chip bg-emerald-50 text-emerald-700">
+                                    <span class="font-bold text-lg">{{ $league->league_teams_count ?? $league->leagueTeams->count() }}</span>
+                                    <span class="text-xs uppercase">Teams</span>
+                                </div>
+                                <div class="stat-chip bg-slate-100 text-slate-700">
+                                    <span class="font-bold text-lg">{{ $soldCount }}</span>
+                                    <span class="text-xs uppercase">Players Sold</span>
+                                </div>
+                                <div class="stat-chip bg-amber-50 text-amber-700">
+                                    <span class="font-bold text-lg">₹{{ number_format($totalRevenue, 0) }}</span>
+                                    <span class="text-xs uppercase">Total Spend</span>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">No Past Auctions</h3>
-                        <p class="text-gray-600 mb-6">No completed auction records found.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Top spender</p>
+                                <p class="text-sm font-semibold text-slate-900">
+                                    {{ $topTeam?->team?->name ?? 'Not recorded' }}
+                                </p>
+                                @if($topTeam)
+                                    <p class="text-emerald-700 font-semibold text-sm">
+                                        ₹{{ number_format($topTeam->players->where('status', 'sold')->sum('bid_price'), 0) }}
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Average bid</p>
+                                <p class="text-lg font-bold text-slate-900">
+                                    ₹{{ $soldCount ? number_format($totalRevenue / $soldCount, 0) : 0 }}
+                                </p>
+                                <p class="text-xs text-slate-500">Across sold players</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Ended</p>
+                                <p class="text-lg font-semibold text-slate-900">
+                                    {{ optional($league->auction_ended_at)->diffForHumans() ?? 'N/A' }}
+                                </p>
+                                <p class="text-xs text-slate-500">Auction closed</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <a href="{{ route('auctions.live.public', $league) }}"
+                               class="live-action-button bg-white text-emerald-700 border border-emerald-100 hover:bg-emerald-50">
+                                View Broadcast Board
+                            </a>
+                            <a href="{{ route('auctions.live', $league) }}"
+                               class="live-action-button bg-slate-900 text-white hover:bg-black">
+                                Review Auction Room
+                            </a>
+                        </div>
                     </div>
-                @else
-                    <div class="overflow-x-auto bg-white rounded-xl shadow-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Player
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Team
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        League
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Amount
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Top Bids
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($pastAuctions as $auction)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->photo)
-                                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $auction->leaguePlayer->user->photo) }}" alt="{{ $auction->leaguePlayer->user->name }}">
-                                                    @else
-                                                        <svg class="h-10 w-10 rounded-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                                        </svg>
-                                                    @endif
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">
-                                                        @if($auction->leaguePlayer && $auction->leaguePlayer->user)
-                                                            {{ $auction->leaguePlayer->user->name }}
-                                                        @else
-                                                            Unknown Player
-                                                        @endif
-                                                    </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        @if($auction->leaguePlayer && $auction->leaguePlayer->user && $auction->leaguePlayer->user->position)
-                                                            {{ $auction->leaguePlayer->user->position->name }}
-                                                        @else
-                                                            Role Unknown
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">
-                                                @if($auction->leagueTeam && $auction->leagueTeam->team)
-                                                    {{ $auction->leagueTeam->team->name }}
-                                                @else
-                                                    Unknown Team
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">
-                                                @if($auction->leagueTeam && $auction->leagueTeam->league)
-                                                    {{ $auction->leagueTeam->league->name }}
-                                                @else
-                                                    Unknown League
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-emerald-600">
-                                                ₹{{ number_format($auction->amount, 2) }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $auction->created_at->format('M d, Y H:i') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm">
-                                                @php
-                                                    $topBids = \App\Models\Auction::where('league_player_id', $auction->league_player_id)
-                                                        ->orderBy('amount', 'desc')
-                                                        ->take(3)
-                                                        ->with('leagueTeam.team')
-                                                        ->get();
-                                                @endphp
-                                                <div class="space-y-1">
-                                                    @foreach($topBids as $index => $bid)
-                                                        <div class="flex justify-between items-center">
-                                                            <span class="text-xs {{ $index === 0 ? 'font-bold text-green-600' : 'text-gray-500' }}">
-                                                                {{ $index + 1 }}. {{ $bid->leagueTeam->team->name }}
-                                                            </span>
-                                                            <span class="text-xs {{ $index === 0 ? 'font-bold text-green-600' : 'text-gray-500' }}">
-                                                                ₹{{ number_format($bid->amount, 0) }}
-                                                            </span>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                @empty
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-2">No Past Auctions</h3>
+                        <p class="text-slate-600 mb-4">Completed auction summaries will appear here.</p>
                     </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mt-6">
+                @endforelse
+
+                @if($pastAuctions->hasPages())
+                    <div class="pt-2">
                         {{ $pastAuctions->links() }}
                     </div>
                 @endif
             </div>
 
-            <!-- Upcoming Auctions Section -->
-            <div id="upcomingSection" class="section-content hidden">
-                @if($upcomingAuctions->isEmpty())
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center animate-fadeInUp">
-                        <div class="mb-4">
-                            <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">No Upcoming Auctions</h3>
-                        <p class="text-gray-600 mb-6">No upcoming auctions scheduled.</p>
-                    </div>
-                @else
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($upcomingAuctions as $league)
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                                <div class="p-6">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ $league->name }}</h3>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Upcoming
+            <div id="upcomingSection" class="section-content hidden space-y-6">
+                @forelse($upcomingAuctions as $league)
+                    @php
+                        $targetDate = $league->start_date ?? $league->auction_started_at;
+                    @endphp
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold">
+                                        Upcoming
+                                    </span>
+                                    @if($league->auction_access_granted)
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                                            Access Granted
                                         </span>
-                                    </div>
-                                    
-                                    <p class="text-gray-600 mb-4">{{ $league->game->name }} League</p>
-                                    
-                                    <div class="grid grid-cols-2 gap-4 mb-4">
-                                        <div class="text-center">
-                                            <p class="text-2xl font-bold text-indigo-600">{{ $league->leagueTeams->count() }}</p>
-                                            <p class="text-sm text-gray-500">Teams</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-2xl font-bold text-green-600">{{ $league->leaguePlayers->count() }}</p>
-                                            <p class="text-sm text-gray-500">Players</p>
-                                        </div>
-                                    </div>
-                                    
-                                    @if($league->start_date)
-                                        <div class="mb-4">
-                                            <p class="text-sm text-gray-500">Start Date</p>
-                                            <p class="font-semibold text-gray-900">{{ $league->start_date->format('M d, Y') }}</p>
-                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                                            Awaiting Access
+                                        </span>
                                     @endif
-                                    
-                                    <div class="space-y-2 mb-6">
-                                        @foreach($league->leagueTeams->take(3) as $leagueTeam)
-                                            <div class="flex justify-between items-center text-sm">
-                                                <span class="text-gray-700">{{ $leagueTeam->team->name }}</span>
-                                                <span class="font-semibold text-green-600">₹{{ number_format($leagueTeam->wallet_balance, 0) }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    
-                                    <button disabled class="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-medium cursor-not-allowed">
-                                        Auction Not Started
-                                    </button>
+                                </div>
+                                <h3 class="text-xl font-semibold text-slate-900 mt-1">{{ $league->name }}</h3>
+                                <p class="text-sm text-slate-600">
+                                    {{ optional($league->game)->name }}
+                                    @if($league->localBody)
+                                        • {{ $league->localBody->name }}
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <div class="stat-chip bg-emerald-50 text-emerald-700">
+                                    <span class="font-bold text-lg">{{ $league->league_teams_count ?? $league->leagueTeams->count() }}</span>
+                                    <span class="text-xs uppercase">Teams</span>
+                                </div>
+                                <div class="stat-chip bg-slate-100 text-slate-700">
+                                    <span class="font-bold text-lg">{{ $league->league_players_count ?? $league->leaguePlayers->count() }}</span>
+                                    <span class="text-xs uppercase">Registered</span>
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Auction window</p>
+                                @if($targetDate)
+                                    <p class="text-lg font-semibold text-slate-900">{{ $targetDate->format('M d, Y') }}</p>
+                                    <p class="text-xs text-slate-500">In {{ $targetDate->diffForHumans() }}</p>
+                                @else
+                                    <p class="text-lg font-semibold text-slate-900">Not scheduled</p>
+                                    <p class="text-xs text-slate-500">Set a date to go live</p>
+                                @endif
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Capacity</p>
+                                <p class="text-lg font-semibold text-slate-900">
+                                    {{ $league->leagueTeams->count() * ($league->max_team_players ?? 0) }} slots
+                                </p>
+                                <p class="text-xs text-slate-500">Based on teams × max players</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                <p class="text-xs text-slate-500 uppercase">Status</p>
+                                <p class="text-lg font-semibold text-slate-900">
+                                    {{ $league->auction_active ? 'Staging' : 'Preparing' }}
+                                </p>
+                                <p class="text-xs text-slate-500">Auction has not started</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+                                League not auctioned yet
+                            </span>
+                            <a href="{{ route('auctions.live.public', $league) }}"
+                               class="live-action-button bg-white text-emerald-700 border border-emerald-100 hover:bg-emerald-50">
+                                Preview Broadcast View
+                            </a>
+                        </div>
                     </div>
-                @endif
+                @empty
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-2">No Upcoming Auctions</h3>
+                        <p class="text-slate-600 mb-4">Once leagues schedule their auctions, they will appear here.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
 
     <style>
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
-        .animate-fadeInUp { animation: fadeInUp 0.4s ease-in-out; }
+        .section-content { animation: fadeIn 0.2s ease-in-out; }
+        .tab-button { padding: 0.75rem 0.25rem; transition: all 0.2s ease; }
+        .stat-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.15rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+        }
+        .live-action-button {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
     </style>
 
     <script>
         function showSection(sectionName) {
-            // Hide all sections
             document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.add('hidden');
             });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
-                tab.classList.remove('border-indigo-500', 'text-indigo-600');
-                tab.classList.add('border-transparent', 'text-gray-500');
+
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.remove('border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+                tab.classList.add('border-transparent', 'text-slate-500');
             });
-            
-            // Show selected section
-            document.getElementById(sectionName + 'Section').classList.remove('hidden');
-            
-            // Add active class to selected tab
+
+            const targetSection = document.getElementById(sectionName + 'Section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+
             const activeTab = document.getElementById(sectionName + 'Tab');
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
-            activeTab.classList.add('border-indigo-500', 'text-indigo-600');
+            if (activeTab) {
+                activeTab.classList.remove('border-transparent', 'text-slate-500');
+                activeTab.classList.add('border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+            }
         }
 
-        // Auto-refresh every 5 seconds for live auctions
+        const defaultSection = '{{ $liveAuctions->isNotEmpty() ? 'live' : ($upcomingAuctions->isNotEmpty() ? 'upcoming' : 'past') }}';
+        showSection(defaultSection);
+
         setInterval(function() {
-            if (!document.getElementById('liveSection').classList.contains('hidden')) {
-                // Only refresh if we're on the live section
+            const liveSection = document.getElementById('liveSection');
+            if (liveSection && !liveSection.classList.contains('hidden') && {{ $liveAuctions->count() }} > 0) {
                 location.reload();
             }
-        }, 5000);
+        }, 8000);
     </script>
 @endsection

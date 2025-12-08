@@ -259,43 +259,43 @@ class DashboardController
      */
     public function auctionsIndex()
     {
-        // Get all leagues with auction access granted
-        $allAuctionLeagues = League::whereHas('organizers', function($query) {
-            $query->where('status', 'approved');
-        })->with(['game', 'leagueTeams.team', 'leaguePlayers'])
-            ->where('auction_access_granted', true)
+        $auctionLeagues = League::whereHas('organizers', function($query) {
+                $query->where('status', 'approved');
+            })
+            ->with(['game', 'localBody.district', 'leagueTeams.team', 'leagueTeams.players', 'leaguePlayers'])
+            ->withCount(['leagueTeams', 'leaguePlayers'])
+            ->orderByDesc('auction_started_at')
             ->get();
 
         // Categorize leagues based on auction status using isAuctionActive() method
-        $liveAuctions = [];
-        $pastAuctions = [];
-        $upcomingAuctions = [];
+        $liveAuctions = collect();
+        $pastAuctions = collect();
+        $upcomingAuctions = collect();
 
-        foreach ($allAuctionLeagues as $league) {
-            // Use the isAuctionActive method for consistent status checking
+        foreach ($auctionLeagues as $league) {
             if ($league->isAuctionActive()) {
-                // Live Auction: auction_active = true, auction_started_at is set, auction_ended_at is null
-                $liveAuctions[] = $league;
+                $liveAuctions->push($league);
             } elseif ($league->auction_ended_at) {
-                // Past Auction: auction has ended
-                $pastAuctions[] = $league;
+                $pastAuctions->push($league);
             } else {
-                // Upcoming Auction: auction not started yet
-                $upcomingAuctions[] = $league;
+                $upcomingAuctions->push($league);
             }
         }
-        
-        // Convert to collections for the view
-        $liveAuctions = collect($liveAuctions);
-        $upcomingAuctions = collect($upcomingAuctions);
-        
-        // Paginate past auctions manually
-        $perPage = 10;
-        $currentPage = request()->get('page', 1);
-        $pastAuctionsCollection = collect($pastAuctions);
+
+        $liveAuctions = $liveAuctions->sortByDesc('auction_started_at')->values();
+        $upcomingAuctions = $upcomingAuctions
+            ->sortBy(function($league) {
+                return $league->start_date ?? $league->created_at;
+            })
+            ->values();
+
+        $pastAuctions = $pastAuctions->sortByDesc('auction_ended_at')->values();
+
+        $perPage = 9;
+        $currentPage = request()->integer('page', 1);
         $pastAuctions = new \Illuminate\Pagination\LengthAwarePaginator(
-            $pastAuctionsCollection->forPage($currentPage, $perPage),
-            $pastAuctionsCollection->count(),
+            $pastAuctions->forPage($currentPage, $perPage),
+            $pastAuctions->count(),
             $perPage,
             $currentPage,
             ['path' => request()->url(), 'query' => request()->query()]
