@@ -799,13 +799,19 @@ class AuctionController extends Controller
 
         $updatedTeam = LeagueTeam::find($teamId);
 
+        $nextPlayer = null;
+        if ($request->boolean('auto_start')) {
+            $nextPlayer = $this->triggerNextRandomPlayer($leaguePlayer->league);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Player marked as sold successfully!',
             'sold_amount' => $finalAmount,
             'team_balance' => $updatedTeam->wallet_balance,
             'team_id' => $teamId,
-            'team_name' => $updatedTeam->team->name ?? 'Unknown'
+            'team_name' => $updatedTeam->team->name ?? 'Unknown',
+            'next_player' => $nextPlayer
         ]);
 
     } catch (\Exception $e) {
@@ -1301,20 +1307,74 @@ class AuctionController extends Controller
             ->withCount('leaguePlayers')
             ->get()
             ->map(function ($league) {
-                return [
-                    'id' => $league->id,
-                    'name' => $league->name,
-                    'slug' => $league->slug,
-                    'logo' => $league->logo ? asset($league->logo) : null,
-                    'status' => $league->status,
-                    'total_players' => $league->league_players_count,
-                    'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
-                ];
-            });
-
         return response()->json([
             'success' => true,
             'leagues' => $leagues
+        ]);
+    }
+
+    /**
+     * Helper to trigger next random player
+     */
+    protected function triggerNextRandomPlayer(League $league)
+    {
+        // Try Available first
+        $player = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->where('retention', false)
+            ->inRandomOrder() // Random selection
+            ->first();
+
+        // Then Try Unsold
+        if (!$player) {
+            $player = LeaguePlayer::where('league_id', $league->id)
+                ->where('status', 'unsold')
+                ->where('retention', false)
+                ->inRandomOrder()
+                ->first();
+        }
+
+        if ($player) {
+            $player->update([
+                'status' => 'auctioning',
+                'auctioned_at' => now(),
+            ]);
+            return $player->load(['player.position', 'player.primaryGameRole.gamePosition']);
+        }
+
+        return null;
+    }
+
+    public function startRandomPlayer(League $league)
+    {
+        $this->authorize('update', $league);
+
+        // check if any player is already in auction
+        $current = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'auctioning')
+            ->where('retention', false)
+            ->first();
+
+        if ($current) {
+            return response()->json([
+                'success' => true,
+                'message' => 'A player is already in auction.',
+                'data' => $current->load(['player.position', 'player.primaryGameRole.gamePosition'])
+            ]);
+        }
+
+        $player = $this->triggerNextRandomPlayer($league);
+
+        if (!$player) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No players remaining to auction.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $player
         ]);
     }
 

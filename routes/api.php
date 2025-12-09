@@ -30,6 +30,7 @@ Route::prefix('auction')->name('auction.')->group(function () {
 
 Route::middleware('auth:sanctum')->prefix('auction')->name('api.auction.')->group(function () {
     Route::post('call', [AuctionController::class, 'call'])->name('call');
+    Route::post('start-random', [AuctionController::class, 'startRandomPlayer'])->name('start-random');
     Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
     Route::post('reset-bids', [AuctionController::class, 'resetBids'])->name('reset-bids');
