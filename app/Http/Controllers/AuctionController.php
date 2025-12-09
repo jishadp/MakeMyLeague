@@ -876,9 +876,15 @@ class AuctionController extends Controller
         // Broadcast the player unsold event
         PlayerUnsold::dispatch($leaguePlayerId);
 
+        $nextPlayer = null;
+        if ($request->boolean('auto_start')) {
+            $nextPlayer = $this->triggerNextRandomPlayer($leaguePlayer->league);
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Player marked as unsold successfully!'
+            'message' => 'Player marked as unsold successfully!',
+            'next_player' => $nextPlayer
         ]);
     }
 
@@ -950,9 +956,15 @@ class AuctionController extends Controller
         \Cache::forget("auction_current_bid_{$leaguePlayer->id}");
         \Cache::forget("auction_latest_bid_{$league->id}");
 
+        $nextPlayer = null;
+        if ($request->boolean('auto_start')) {
+            $nextPlayer = $this->triggerNextRandomPlayer($league);
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Player returned to available pool.'
+            'message' => 'Player returned to available pool.',
+            'next_player' => $nextPlayer
         ]);
     }
 
@@ -1307,6 +1319,17 @@ class AuctionController extends Controller
             ->withCount('leaguePlayers')
             ->get()
             ->map(function ($league) {
+                return [
+                    'id' => $league->id,
+                    'name' => $league->name,
+                    'slug' => $league->slug,
+                    'logo' => $league->logo ? asset($league->logo) : null,
+                    'status' => $league->status,
+                    'total_players' => $league->league_players_count,
+                    'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+                ];
+            });
+
         return response()->json([
             'success' => true,
             'leagues' => $leagues
