@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User specific routes
     Route::get('my-leagues', [\App\Http\Controllers\Api\MyLeaguesController::class, 'index']);
     Route::get('my-teams', [\App\Http\Controllers\Api\MyTeamsController::class, 'index']);
+    Route::post('profile', [\App\Http\Controllers\ProfileController::class, 'update']);
 });
 
 // Auction API endpoints for live view
