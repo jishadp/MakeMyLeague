@@ -958,6 +958,7 @@
 @endphp
 <div class="control-room min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 space-y-6">
+        <input type="hidden" id="controller-api-token" value="{{ $apiToken ?? '' }}">
         <input type="hidden" id="controller-league-id" value="{{ $league->id }}">
         <input type="hidden" id="controller-league-slug" value="{{ $league->slug }}">
         <input type="hidden" id="controller-player-id" value="{{ $currentPlayer->player->id ?? '' }}">
@@ -2488,13 +2489,21 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Placing...</span>';
 
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            };
+
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_id: leagueId,
                     player_id: playerId,
@@ -2664,13 +2673,19 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Saving...</span>';
 
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId,
                     team_id: teamId,
@@ -2733,13 +2748,19 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Updating...</span>';
 
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })
@@ -2796,13 +2817,19 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Skipping...</span>';
 
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })
@@ -2852,13 +2879,19 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Resetting...</span>';
 
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })

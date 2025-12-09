@@ -262,6 +262,9 @@ class AuctionController extends Controller
             ->take(5)
             ->get();
 
+        // Generate a temporary API token for the web control room to bypass session/cookie issues
+        $apiToken = $user->createToken('web-control-room')->plainTextToken;
+
         return view('auction.back-controller', [
             'league' => $league,
             'currentPlayer' => $currentPlayer,
