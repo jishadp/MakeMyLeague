@@ -1383,4 +1383,29 @@ class AuctionController extends Controller
         ]);
     }
 
+    public function getAvailablePlayers(League $league)
+    {
+        $availablePlayers = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['available', 'unsold'])
+            ->where('retention', false)
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->orderBy('id', 'asc')
+            ->get()
+            ->map(function ($lp) {
+                return [
+                    'id' => $lp->id, // league_player_id
+                    'user_id' => $lp->player_id, // player_id
+                    'name' => $lp->player->name,
+                    'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
+                    'position' => $lp->player->primaryGameRole->gamePosition->name ?? $lp->player->position->name ?? 'Player',
+                    'base_price' => $lp->base_price,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'players' => $availablePlayers
+        ]);
+    }
+
 }

@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(fu
     Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
     Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
+    Route::get('league/{league}/available-players', [AuctionController::class, 'getAvailablePlayers'])->name('available-players');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
