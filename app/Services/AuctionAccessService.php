@@ -21,7 +21,7 @@ class AuctionAccessService
     /**
      * Cache duration in minutes
      */
-    const CACHE_DURATION = 60;
+    const CACHE_DURATION = 0;
 
     /**
      * Check if a user can bid in a specific league auction.
