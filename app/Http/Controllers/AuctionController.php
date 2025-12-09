@@ -279,6 +279,7 @@ class AuctionController extends Controller
             'switchableLeagues' => $switchableLeagues,
             'liveFixtures' => $liveFixtures,
             'upcomingFixtures' => $upcomingFixtures,
+            'apiToken' => $apiToken,
         ]);
     }
 
