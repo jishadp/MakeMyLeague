@@ -645,7 +645,7 @@ class AuctionController extends Controller
 
         $leaguePlayerId = $validated['league_player_id'];
         $teamId = $validated['team_id'];
-        $overrideInput = $validated['override_amount'];
+        $overrideInput = $validated['override_amount'] ?? null;
         $hasOverride = $overrideInput !== null && $overrideInput !== '';
         $overrideAmount = $hasOverride ? (float) $overrideInput : null;
         $basePrice = (float) ($validated['player_base_price'] ?? $leaguePlayer->base_price ?? 0);
