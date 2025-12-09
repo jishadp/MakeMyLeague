@@ -19,19 +19,23 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('leagues', [LeagueApiController::class, 'index']);
 });
-Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(function () {
-    Route::post('start', [AuctionController::class, 'start'])->name('start');
+
+Route::prefix('auction')->name('auction.')->group(function () {
+    Route::post('start/{league}', [AuctionController::class, 'startAuction'])->name('start');
     Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
     Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
-    Route::post('call', [AuctionController::class, 'call'])->name('call');
-    Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
-    Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
-    Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });
 
-Route::middleware('auth:sanctum,web')->group(function () {
+Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(function () {
+    Route::post('call', [AuctionController::class, 'call'])->name('call');
+    Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
+    Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
+    Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
+});
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
