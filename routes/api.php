@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\LeagueApiController;
 
 Route::post('login', [AuthApiController::class, 'login']);
+Route::post('register', [AuthApiController::class, 'register']);
 
 Route::get('/user', function (Request $request) {
     return $request->user();
