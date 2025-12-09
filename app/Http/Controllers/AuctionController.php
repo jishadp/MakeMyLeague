@@ -411,15 +411,23 @@ class AuctionController extends Controller
         $leaguePlayer->loadMissing('league');
         $league = $leaguePlayer->league;
         
-        $this->authorize('placeBid', $leaguePlayer->league);
+        $user = auth()->user(); // Define user before logging/authorizing
+        \Log::info("Bid Attempt: User {$user->id} on Player {$leaguePlayer->id} in League {$league->id}");
 
-        $user = auth()->user();
+        try {
+            $this->authorize('placeBid', $leaguePlayer->league);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            \Log::error("Bid Authorization Failed: User {$user->id} cannot placeBid in League {$league->id}. Error: {$e->getMessage()}");
+            return response()->json(['success' => false, 'message' => 'Authorization failed: You do not have permission to place bids in this league.'], 403);
+        }
+
         $newBid = $request->base_price + $request->increment;
 
         $bidTeam = null;
 
         if ($request->filled('league_team_id')) {
             if (!$user->canManageLeague($leaguePlayer->league_id)) {
+                \Log::warning("Bid Failed: User {$user->id} tried to manage league team without permission for league {$leaguePlayer->league_id}");
                 return response()->json([
                     'success' => false,
                     'message' => 'Only organizers or admins can place bids on behalf of other teams.'
@@ -442,6 +450,7 @@ class AuctionController extends Controller
             $accessValidation = $this->auctionAccessService->validateBidAccess($user, $leaguePlayer);
             
             if (!$accessValidation['valid']) {
+                \Log::warning("Bid Validation Failed for User {$user->id} on Player {$leaguePlayer->id}: " . $accessValidation['message']);
                 return response()->json([
                     'success' => false,
                     'message' => $accessValidation['message']
