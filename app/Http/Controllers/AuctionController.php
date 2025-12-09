@@ -1325,6 +1325,7 @@ class AuctionController extends Controller
     {
         $currentPlayer = LeaguePlayer::where('league_id', $league->id)
             ->where('status', 'auctioning')
+            ->where('retention', false)
             ->with(['player.position', 'player.primaryGameRole.gamePosition'])
             ->first();
 

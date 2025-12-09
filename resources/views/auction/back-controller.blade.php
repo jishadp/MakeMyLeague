@@ -972,6 +972,7 @@
         <input type="hidden" id="controller-skip-action" value="{{ route('auction.skip-player', $league) }}">
         <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
         <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
+        <input type="hidden" id="controller-rules-action" value="{{ route('auction.update-rules', $league) }}">
         <script id="controller-available-players" type="application/json">
             {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
                 'id' => $leaguePlayer->id,
@@ -1307,7 +1308,12 @@
                             Reset bids
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
+                    <div class="flex items-center justify-between gap-4 mt-2">
+                         <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
+                         <button type="button" class="text-[11px] font-semibold text-slate-500 hover:text-indigo-600 underline" onclick="openQuickRulesModal()">
+                             Quick Bid Rules
+                         </button>
+                    </div>
                 </div>
             </div>
 
@@ -2280,15 +2286,49 @@ function openWhatsAppShare(message) {
     }
 
     addQuickRuleBtn?.addEventListener('click', () => addQuickRuleRow());
-    saveQuickRulesBtn?.addEventListener('click', () => {
+    saveQuickRulesBtn?.addEventListener('click', async () => {
         const parsedRules = normalizeQuickRules(collectQuickRulesFromUI());
         if (!parsedRules.length) {
             showControllerMessage('Add at least one valid quick bid rule.', 'error');
             return;
         }
+
+        const action = document.getElementById('controller-rules-action')?.value;
+        const token = getControllerToken();
+
+        if (action && token) {
+            const originalText = saveQuickRulesBtn.innerHTML;
+            saveQuickRulesBtn.disabled = true;
+            saveQuickRulesBtn.innerHTML = 'Saving...';
+
+            try {
+                const response = await fetch(action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ rules: parsedRules })
+                });
+                
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to save rules');
+                }
+                
+                showControllerMessage('Global bid rules updated successfully.');
+            } catch (error) {
+                console.error('Failed to save global rules:', error);
+                showControllerMessage('Failed to save to server (saved locally).', 'error');
+            } finally {
+                saveQuickRulesBtn.disabled = false;
+                saveQuickRulesBtn.innerHTML = originalText;
+            }
+        }
+
         saveQuickRules(parsedRules);
         applyQuickBid();
-        showControllerMessage('Quick bid rules saved.');
         closeQuickRulesModal();
     });
     cancelQuickRulesBtn?.addEventListener('click', closeQuickRulesModal);
