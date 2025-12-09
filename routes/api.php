@@ -19,7 +19,7 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('leagues', [LeagueApiController::class, 'index']);
 });
-Route::prefix('auction')->name('auction.')->group(function () {
+Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(function () {
     Route::post('start', [AuctionController::class, 'start'])->name('start');
     Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
     Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
