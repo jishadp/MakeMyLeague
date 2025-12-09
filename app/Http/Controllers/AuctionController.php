@@ -1393,9 +1393,10 @@ class AuctionController extends Controller
             ->orderBy('id', 'asc')
             ->get()
             ->map(function ($lp) {
+                \Illuminate\Support\Facades\Log::info("Checking Player: " . $lp->id . " UserID: " . $lp->user_id);
                 return [
                     'id' => $lp->id, // league_player_id
-                    'user_id' => $lp->player_id, // player_id
+                    'user_id' => $lp->user_id, // player_id (user id)
                     'name' => $lp->player->name,
                     'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
                     'position' => $lp->player->primaryGameRole->gamePosition->name ?? $lp->player->position->name ?? 'Player',
