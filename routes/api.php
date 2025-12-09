@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(fu
     Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
     Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
     Route::post('call', [AuctionController::class, 'call'])->name('call');
+    Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
+    Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
+    Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });

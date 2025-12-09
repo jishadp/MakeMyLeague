@@ -1346,6 +1346,7 @@ class AuctionController extends Controller
             'current_bid' => $currentHighestBid ? [
                 'amount' => $currentHighestBid->amount,
                 'team_name' => $currentHighestBid->leagueTeam->team->name,
+                'league_team_id' => $currentHighestBid->league_team_id,
                 'team_logo' => $currentHighestBid->leagueTeam->team->logo ? url(Storage::url($currentHighestBid->leagueTeam->team->logo)) : null,
             ] : null,
             'stats' => $auctionStats,
