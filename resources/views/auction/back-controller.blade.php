@@ -1,5 +1,6 @@
 @extends('layouts.app')
-@section('title', $league->name . ' - Auction Control Room')
+
+@section('title', 'Auction Control Room - ' . $league->name)
 
 @section('styles')
 <style>
@@ -957,12 +958,20 @@
 @endphp
 <div class="control-room min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 space-y-6">
-        <input type="hidden" id="controller-bid-action" value="/auction/call">
-        <input type="hidden" id="controller-sold-action" value="/auction/sold">
-        <input type="hidden" id="controller-unsold-action" value="/auction/unsold">
-        <input type="hidden" id="controller-skip-action" value="/leagues/{{ $league->id }}/auction/skip-player">
-        <input type="hidden" id="controller-reset-action" value="/auction/reset-bids">
-        <input type="hidden" id="controller-start-action" value="/auction/start">
+        <input type="hidden" id="controller-league-id" value="{{ $league->id }}">
+        <input type="hidden" id="controller-league-slug" value="{{ $league->slug }}">
+        <input type="hidden" id="controller-player-id" value="{{ $currentPlayer->player->id ?? '' }}">
+        <input type="hidden" id="controller-league-player-id" value="{{ $currentPlayer->id ?? '' }}">
+        <input type="hidden" id="controller-base-price" value="{{ $currentBidAmount }}">
+        <input type="hidden" id="controller-player-base-price" value="{{ $currentPlayer->base_price ?? 0 }}">
+        <input type="hidden" id="controller-default-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
+        <input type="hidden" id="controller-bid-increments" value='@json($bidIncrements)'>
+        <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
+        <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
+        <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
+        <input type="hidden" id="controller-skip-action" value="{{ route('auction.skip-player', $league) }}">
+        <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
+        <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
         <script id="controller-available-players" type="application/json">
             {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
                 'id' => $leaguePlayer->id,
