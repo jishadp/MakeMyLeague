@@ -411,7 +411,13 @@ class AuctionController extends Controller
         $leaguePlayer->loadMissing('league');
         $league = $leaguePlayer->league;
         
-        $user = auth()->user(); // Define user before logging/authorizing
+        $user = auth()->user();
+        
+        if (!$user) {
+             \Log::warning("Bid Attempt Failed: Unauthenticated user.");
+             return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
+        }
+
         \Log::info("Bid Attempt: User {$user->id} on Player {$leaguePlayer->id} in League {$league->id}");
 
         try {
