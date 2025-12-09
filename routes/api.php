@@ -21,9 +21,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::prefix('auction')->name('auction.')->group(function () {
-    Route::post('start/{league}', [AuctionController::class, 'startAuction'])->name('start');
-    Route::post('pause', [AuctionController::class, 'pauseAuction'])->name('pause');
-    Route::post('end', [AuctionController::class, 'endAuction'])->name('end');
+    Route::post('start', [AuctionController::class, 'start'])->name('start');
+    Route::post('pause', [AuctionController::class, 'pause'])->name('pause');
+    Route::post('end', [AuctionController::class, 'end'])->name('end');
     Route::post('settings', [AuctionController::class, 'updateAuctionSettings'])->name('settings');
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });
