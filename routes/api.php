@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->prefix('auction')->name('auction.')->group(fu
     Route::get('stats', [AuctionController::class, 'getAuctionStats'])->name('stats');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum,web')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
