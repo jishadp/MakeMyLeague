@@ -33,4 +33,29 @@ class AuthApiController extends Controller
             'token' => $token,
         ]);
     }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'mobile' => 'required|string|unique:users,mobile',
+            'pin'    => 'required|string|min:4',
+        ]);
+
+        $user = User::create([
+            'name'   => $request->name,
+            'mobile' => $request->mobile,
+            'pin'    => Hash::make($request->pin),
+            'email'  => $request->mobile . '@makemyleague.app', // Placeholder email
+            // Add default role or other required fields here if necessary
+        ]);
+
+        $token = $user->createToken('mobile-app')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Registration successful',
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
 }
