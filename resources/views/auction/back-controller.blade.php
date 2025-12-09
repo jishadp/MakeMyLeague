@@ -966,12 +966,12 @@
         <input type="hidden" id="controller-player-base-price" value="{{ $currentPlayer->base_price ?? 0 }}">
         <input type="hidden" id="controller-default-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
         <input type="hidden" id="controller-bid-increments" value='@json($bidIncrements)'>
-        <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
-        <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
-        <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
-        <input type="hidden" id="controller-skip-action" value="{{ route('auction.skip-player', $league) }}">
-        <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
-        <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
+        <input type="hidden" id="controller-bid-action" value="/api/auction/call">
+        <input type="hidden" id="controller-sold-action" value="/api/auction/sold">
+        <input type="hidden" id="controller-unsold-action" value="/api/auction/unsold">
+        <input type="hidden" id="controller-skip-action" value="/api/auction/league/{{ $league->id }}/skip">
+        <input type="hidden" id="controller-reset-action" value="/api/auction/reset-bids">
+        <input type="hidden" id="controller-start-action" value="/api/auction/start">
         <script id="controller-available-players" type="application/json">
             {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
                 'id' => $leaguePlayer->id,
