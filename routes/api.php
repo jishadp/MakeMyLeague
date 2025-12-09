@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum,web', \Illuminate\Session\Middleware\StartSessi
     Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
     Route::post('reset-bids', [AuctionController::class, 'resetBids'])->name('reset-bids');
+    Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
     Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::get('league/{league}/available-players', [AuctionController::class, 'getAvailablePlayers'])->name('available-players');
 });

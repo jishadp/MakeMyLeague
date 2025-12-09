@@ -3303,13 +3303,19 @@ function openWhatsAppShare(message) {
             triggerButton.innerHTML = 'Starting...';
         }
         try {
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
             const response = await fetch(startAction, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
+                headers: headers,
                 body: JSON.stringify({
                     league_id: Number(leagueIdValue),
                     league_player_id: Number(player.id),
@@ -3340,11 +3346,17 @@ function openWhatsAppShare(message) {
         playerSearchResults.innerHTML = '<div class="player-finder__empty">Searching…</div>';
         playerSearchResults.classList.remove('hidden');
         try {
-            const response = await fetch(`/auction/search-players?query=${encodeURIComponent(query)}&league_id=${leagueIdValue}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
+            const apiToken = document.getElementById('controller-api-token')?.value;
+            const headers = {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (apiToken) {
+                headers['Authorization'] = `Bearer ${apiToken}`;
+            }
+
+            const response = await fetch(`/api/auction/search-players?query=${encodeURIComponent(query)}&league_id=${leagueIdValue}`, {
+                headers: headers,
                 credentials: 'same-origin'
             });
             const data = await response.json().catch(() => null);
