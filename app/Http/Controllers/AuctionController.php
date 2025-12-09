@@ -624,6 +624,8 @@ class AuctionController extends Controller
             'current_bid_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        $errorMessage = 'Unknown error';
+    try {
         $leaguePlayer = LeaguePlayer::find($validated['league_player_id']);
         if (!$leaguePlayer) {
             return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
@@ -634,6 +636,10 @@ class AuctionController extends Controller
         }
 
         $leaguePlayer->loadMissing('league');
+        
+        if (!$leaguePlayer->league) {
+             return response()->json(['success' => false, 'message' => 'Player league relationship missing.'], 500);
+        }
 
         $this->authorize('markSoldUnsold', $leaguePlayer->league);
 
@@ -746,67 +752,69 @@ class AuctionController extends Controller
             ], 422);
         }
 
-        // Use database transaction for atomic operations
-        DB::transaction(function () use ($leaguePlayerId, $teamId, $finalAmount) {
-            // Mark the winning bid as 'won'
-            $winningBid = Auction::where('league_player_id', $leaguePlayerId)
-                ->where('league_team_id', $teamId)
-                ->latest('id')
-                ->first();
+        DB::transaction(function () use ($leaguePlayer, $team, $finalAmount, $teamId, $leaguePlayerId) {
+            // Refund all other bids for this player
+            $bids = Auction::where('league_player_id', $leaguePlayer->id)->get();
+            
+            // Winning Bid (if any)
+            $winningBid = $bids->first(function($bid) use ($team) {
+                return $bid->league_team_id == $team->id;
+            });
 
-            if ($winningBid) {
-                $winningBid->update(['status' => 'won']);
+            foreach ($bids as $bid) {
+                if ($bid->status === 'refunded') continue;
+
+                if ($bid->league_team_id != $team->id) {
+                     LeagueTeam::where('id', $bid->league_team_id)->increment('wallet_balance', $bid->amount);
+                     $bid->update(['status' => 'refunded']);
+                 } else {
+                     $bid->update(['status' => 'won']); 
+                 }
+            }
+            
+            // Adjust winning team's balance if necessary (difference between already deducted and final amount)
+            // If winningBid existed, its amount was deducted.
+            // If no previous bid, 0 deducted.
+            $alreadyDeducted = $winningBid ? $winningBid->amount : 0;
+            $balanceAdjustment = $alreadyDeducted - $finalAmount;
+            
+            if ($balanceAdjustment != 0) {
+                 $team->increment('wallet_balance', $balanceAdjustment);
             }
 
-            // Mark all other bids for this player as 'lost'
-            // Refund losing teams
-            $otherBids = Auction::where('league_player_id', $leaguePlayerId)
-                ->where('id', '!=', $winningBid ? $winningBid->id : 0)
-                ->get();
-
-            foreach ($otherBids as $bid) {
-                // Refund the bid amount to losing teams only if not already refunded
-                if ($bid->status !== 'refunded') {
-                    LeagueTeam::find($bid->league_team_id)
-                        ->increment('wallet_balance', $bid->amount);
-                    $bid->update(['status' => 'refunded']);
-                } else {
-                    $bid->update(['status' => 'lost']);
-                }
-            }
-
-            // Adjust winning team's balance relative to final amount
-            if ($winningBid) {
-                $balanceAdjustment = $winningBid->amount - $finalAmount;
-                if ($balanceAdjustment != 0) {
-                    LeagueTeam::find($teamId)->increment('wallet_balance', $balanceAdjustment);
-                }
-            } elseif ($finalAmount > 0) {
-                // No bid existed – deduct the manual sale amount directly
-                LeagueTeam::find($teamId)->decrement('wallet_balance', $finalAmount);
-            }
-
-            // Update the league player status to 'sold' and assign to team
-            LeaguePlayer::where('id', $leaguePlayerId)->update([
-                'league_team_id' => $teamId,
+            // Update Player
+            $leaguePlayer->update([
                 'status' => 'sold',
+                'league_team_id' => $team->id,
                 'bid_price' => $finalAmount
             ]);
+            
+            // Clear caches
+             \Cache::forget("auction_current_bid_{$leaguePlayer->id}");
+             \Cache::forget("auction_latest_bid_{$leaguePlayer->league_id}");
         });
+        
+        // Broadcast
+        PlayerSold::dispatch($leaguePlayerId, $teamId, $finalAmount);
 
-        // Get updated team balance for response
-        $updatedTeam = LeagueTeam::with('team')->find($teamId);
-
-        // Broadcast the player sold event
-        PlayerSold::dispatch($leaguePlayerId, $teamId);
+        $updatedTeam = LeagueTeam::find($teamId);
 
         return response()->json([
             'success' => true,
             'message' => 'Player marked as sold successfully!',
+            'sold_amount' => $finalAmount,
             'team_balance' => $updatedTeam->wallet_balance,
             'team_id' => $teamId,
             'team_name' => $updatedTeam->team->name ?? 'Unknown'
         ]);
+
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error("Sold Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        return response()->json([
+            'success' => false,
+            'message' => 'Server Error: ' . $e->getMessage()
+        ], 500);
+    }
     }
     
     public function unsold(Request $request)
