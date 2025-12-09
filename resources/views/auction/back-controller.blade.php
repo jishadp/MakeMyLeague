@@ -1,6 +1,6 @@
 @extends('layouts.app')
-
-@section('title', 'Auction Control Room - ' . $league->name)
+<div style="background:red;color:white;text-align:center;font-weight:bold;padding:10px;z-index:9999;position:fixed;top:0;left:0;right:0;">LOCAL DEV MODE - FIXES ACTIVE</div>
+@section('title', $league->name . ' - Auction Control Room')
 
 @section('styles')
 <style>
@@ -2490,6 +2490,7 @@ function openWhatsAppShare(message) {
 
         try {
             const apiToken = document.getElementById('controller-api-token')?.value;
+            console.log('Attempting Bid with Token:', apiToken ? 'Found' : 'Missing', action);
 
             const headers = {
                 'Content-Type': 'application/json',
