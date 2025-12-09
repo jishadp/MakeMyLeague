@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum,web')->prefix('auction')->name('auction.')->grou
     Route::post('call', [AuctionController::class, 'call'])->name('call');
     Route::post('sold', [AuctionController::class, 'sold'])->name('sold');
     Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
+    Route::post('reset-bids', [AuctionController::class, 'resetBids'])->name('reset-bids');
     Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::get('league/{league}/available-players', [AuctionController::class, 'getAvailablePlayers'])->name('available-players');
 });
