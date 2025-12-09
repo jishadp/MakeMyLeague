@@ -1,5 +1,4 @@
 @extends('layouts.app')
-<div style="background:red;color:white;text-align:center;font-weight:bold;padding:10px;z-index:9999;position:fixed;top:0;left:0;right:0;">LOCAL DEV MODE - FIXES ACTIVE</div>
 @section('title', $league->name . ' - Auction Control Room')
 
 @section('styles')
@@ -958,21 +957,12 @@
 @endphp
 <div class="control-room min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 space-y-6">
-        <input type="hidden" id="controller-api-token" value="{{ $apiToken ?? '' }}">
-        <input type="hidden" id="controller-league-id" value="{{ $league->id }}">
-        <input type="hidden" id="controller-league-slug" value="{{ $league->slug }}">
-        <input type="hidden" id="controller-player-id" value="{{ $currentPlayer->player->id ?? '' }}">
-        <input type="hidden" id="controller-league-player-id" value="{{ $currentPlayer->id ?? '' }}">
-        <input type="hidden" id="controller-base-price" value="{{ $currentBidAmount }}">
-        <input type="hidden" id="controller-player-base-price" value="{{ $currentPlayer->base_price ?? 0 }}">
-        <input type="hidden" id="controller-default-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
-        <input type="hidden" id="controller-bid-increments" value='@json($bidIncrements)'>
-        <input type="hidden" id="controller-bid-action" value="/api/auction/call">
-        <input type="hidden" id="controller-sold-action" value="/api/auction/sold">
-        <input type="hidden" id="controller-unsold-action" value="/api/auction/unsold">
-        <input type="hidden" id="controller-skip-action" value="/api/auction/league/{{ $league->id }}/skip">
-        <input type="hidden" id="controller-reset-action" value="/api/auction/reset-bids">
-        <input type="hidden" id="controller-start-action" value="/api/auction/start">
+        <input type="hidden" id="controller-bid-action" value="/auction/call">
+        <input type="hidden" id="controller-sold-action" value="/auction/sold">
+        <input type="hidden" id="controller-unsold-action" value="/auction/unsold">
+        <input type="hidden" id="controller-skip-action" value="/leagues/{{ $league->id }}/auction/skip-player">
+        <input type="hidden" id="controller-reset-action" value="/auction/reset-bids">
+        <input type="hidden" id="controller-start-action" value="/auction/start">
         <script id="controller-available-players" type="application/json">
             {!! json_encode($availablePlayers->map(fn ($leaguePlayer) => [
                 'id' => $leaguePlayer->id,
@@ -2489,22 +2479,13 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Placing...</span>';
 
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            console.log('Attempting Bid with Token:', apiToken ? 'Found' : 'Missing', action);
-
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            };
-
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(action, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     league_id: leagueId,
                     player_id: playerId,
@@ -2674,19 +2655,13 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Saving...</span>';
 
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(action, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId,
                     team_id: teamId,
@@ -2749,19 +2724,13 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Updating...</span>';
 
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(action, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })
@@ -2818,19 +2787,13 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Skipping...</span>';
 
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(action, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })
@@ -2880,19 +2843,13 @@ function openWhatsAppShare(message) {
         button.innerHTML = '<span class="flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.536-3.536A8 8 0 014 12z"></path></svg>Resetting...</span>';
 
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(action, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     league_player_id: leaguePlayerId
                 })
@@ -3304,19 +3261,13 @@ function openWhatsAppShare(message) {
             triggerButton.innerHTML = 'Starting...';
         }
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': token
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
             const response = await fetch(startAction, {
                 method: 'POST',
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
                 body: JSON.stringify({
                     league_id: Number(leagueIdValue),
                     league_player_id: Number(player.id),
@@ -3347,17 +3298,11 @@ function openWhatsAppShare(message) {
         playerSearchResults.innerHTML = '<div class="player-finder__empty">Searching…</div>';
         playerSearchResults.classList.remove('hidden');
         try {
-            const apiToken = document.getElementById('controller-api-token')?.value;
-            const headers = {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            };
-            if (apiToken) {
-                headers['Authorization'] = `Bearer ${apiToken}`;
-            }
-
-            const response = await fetch(`/api/auction/search-players?query=${encodeURIComponent(query)}&league_id=${leagueIdValue}`, {
-                headers: headers,
+            const response = await fetch(`/auction/search-players?query=${encodeURIComponent(query)}&league_id=${leagueIdValue}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 credentials: 'same-origin'
             });
             const data = await response.json().catch(() => null);
