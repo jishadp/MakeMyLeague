@@ -1336,6 +1336,7 @@ class AuctionController extends Controller
 
         return response()->json([
             'success' => true,
+            'league_id' => $league->id,
             'current_player' => $currentPlayer ? [
                 'id' => $currentPlayer->id,
                 'name' => $currentPlayer->player->name,
