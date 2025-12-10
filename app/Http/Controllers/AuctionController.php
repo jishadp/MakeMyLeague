@@ -1314,11 +1314,29 @@ class AuctionController extends Controller
     public function getLiveAuctions()
     {
         // For now, return leagues that are 'active' or have a status indicating auction in progress.
-        // Adjust status check based on actual league statuses.
         $leagues = League::whereIn('status', ['active', 'auction'])
             ->withCount('leaguePlayers')
+            ->with(['leaguePlayers' => function ($query) {
+                $query->where('status', 'auctioning')
+                      ->with(['player', 'auctionBids' => function ($q) {
+                          $q->orderBy('amount', 'desc')->limit(1)->with('team');
+                      }]);
+            }])
             ->get()
             ->map(function ($league) {
+                $currentPlayer = $league->leaguePlayers->first();
+                $currentData = null;
+
+                if ($currentPlayer) {
+                    $highestBid = $currentPlayer->auctionBids->first();
+                    $currentData = [
+                        'name' => $currentPlayer->player->name ?? 'Unknown',
+                        'bid' => $highestBid ? $highestBid->amount : $currentPlayer->base_price,
+                        'team' => $highestBid ? ($highestBid->team->name ?? 'No Team') : 'Base Price',
+                        'photo' => $currentPlayer->player->profile_photo_path ? asset('storage/' . $currentPlayer->player->profile_photo_path) : null,
+                    ];
+                }
+
                 return [
                     'id' => $league->id,
                     'name' => $league->name,
@@ -1327,6 +1345,7 @@ class AuctionController extends Controller
                     'status' => $league->status,
                     'total_players' => $league->league_players_count,
                     'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+                    'current_player' => $currentData,
                 ];
             });
 
