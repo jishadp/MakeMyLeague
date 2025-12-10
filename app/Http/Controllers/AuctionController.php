@@ -1538,4 +1538,29 @@ class AuctionController extends Controller
         ]);
     }
 
+    /**
+     * API: Update bid increment rules.
+     */
+    public function updateBidRules(Request $request, League $league)
+    {
+        $request->validate([
+            'type' => 'required|in:predefined,custom',
+            'custom_increment' => 'nullable|numeric|min:1',
+        ]);
+
+        $league->update([
+            'bid_increment_type' => $request->type,
+            'custom_bid_increment' => $request->custom_increment,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bid rules updated successfully',
+            'rules' => [
+                'type' => $league->bid_increment_type,
+                'custom_increment' => $league->custom_bid_increment,
+            ]
+        ]);
+    }
+
 }

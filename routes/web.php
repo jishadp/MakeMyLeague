@@ -328,6 +328,7 @@ Route::middleware('auth')->group(function () {
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
         Route::post('skip-player/{league}', [AuctionController::class, 'skipPlayer'])->name('skip-player');
         Route::post('update-rules/{league}', [AuctionController::class, 'updateBidRules'])->name('update-rules');
+
         
         // League-specific auction routes
         Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids')->middleware('live.auction:view');
