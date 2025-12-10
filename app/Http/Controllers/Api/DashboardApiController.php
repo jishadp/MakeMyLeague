@@ -41,7 +41,7 @@ class DashboardApiController extends Controller
 
         // ============ LATEST LEAGUES ============
         $latestLeagues = \App\Models\League::latest('id')
-            ->take(3)
+            ->take(10)
             ->with(['game', 'winnerTeam.team', 'runnerTeam.team']) // Basic needed relations
             ->get()
             ->map(function ($league) {
