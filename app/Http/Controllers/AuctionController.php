@@ -1546,11 +1546,16 @@ class AuctionController extends Controller
         $request->validate([
             'type' => 'required|in:predefined,custom',
             'custom_increment' => 'nullable|numeric|min:1',
+            'rules' => 'nullable|array',
+            'rules.*.min' => 'required_with:rules|numeric|min:0',
+            'rules.*.max' => 'nullable|numeric|gt:rules.*.min',
+            'rules.*.increment' => 'required_with:rules|numeric|min:1',
         ]);
 
         $league->update([
             'bid_increment_type' => $request->type,
             'custom_bid_increment' => $request->custom_increment,
+            'predefined_increments' => $request->rules,
         ]);
 
         return response()->json([
@@ -1559,6 +1564,7 @@ class AuctionController extends Controller
             'rules' => [
                 'type' => $league->bid_increment_type,
                 'custom_increment' => $league->custom_bid_increment,
+                'rules' => $league->predefined_increments,
             ]
         ]);
     }
