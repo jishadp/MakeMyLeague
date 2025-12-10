@@ -1316,10 +1316,11 @@ class AuctionController extends Controller
         // For now, return leagues that are 'active' or have a status indicating auction in progress.
         $leagues = League::whereIn('status', ['active', 'auction'])
             ->withCount('leaguePlayers')
-                    $query->where('status', 'auctioning')
-                          ->with(['player', 'auctionBids' => function ($q) {
-                              $q->orderBy('amount', 'desc')->limit(1)->with('leagueTeam.team');
-                          }]);
+            ->with(['leaguePlayers' => function ($query) {
+                $query->where('status', 'auctioning')
+                      ->with(['player', 'auctionBids' => function ($q) {
+                          $q->orderBy('amount', 'desc')->limit(1)->with('leagueTeam.team');
+                      }]);
             }])
             ->get()
             ->map(function ($league) {
