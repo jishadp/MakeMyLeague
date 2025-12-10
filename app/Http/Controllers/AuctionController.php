@@ -1316,23 +1316,29 @@ class AuctionController extends Controller
         // For now, return leagues that are 'active' or have a status indicating auction in progress.
         $leagues = League::whereIn('status', ['active', 'auction'])
             ->withCount('leaguePlayers')
-            ->with(['leaguePlayers' => function ($query) {
-                $query->where('status', 'auctioning')
-                      ->with(['player', 'auctionBids' => function ($q) {
-                          $q->orderBy('amount', 'desc')->limit(1)->with('team');
-                      }]);
+                    $query->where('status', 'auctioning')
+                          ->with(['player', 'auctionBids' => function ($q) {
+                              $q->orderBy('amount', 'desc')->limit(1)->with('leagueTeam.team');
+                          }]);
             }])
             ->get()
             ->map(function ($league) {
                 $currentPlayer = $league->leaguePlayers->first();
                 $currentData = null;
 
-                if ($currentPlayer) {
+                if ($currentPlayer && $currentPlayer->player) {
                     $highestBid = $currentPlayer->auctionBids->first();
+                    $teamName = 'Base Price';
+                    if ($highestBid && $highestBid->leagueTeam && $highestBid->leagueTeam->team) {
+                        $teamName = $highestBid->leagueTeam->team->name;
+                    } elseif ($highestBid) {
+                         $teamName = 'Bid placed'; 
+                    }
+
                     $currentData = [
                         'name' => $currentPlayer->player->name ?? 'Unknown',
                         'bid' => $highestBid ? $highestBid->amount : $currentPlayer->base_price,
-                        'team' => $highestBid ? ($highestBid->team->name ?? 'No Team') : 'Base Price',
+                        'team' => $teamName,
                         'photo' => $currentPlayer->player->profile_photo_path ? asset('storage/' . $currentPlayer->player->profile_photo_path) : null,
                     ];
                 }
