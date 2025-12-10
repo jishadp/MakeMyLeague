@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->prefix('auction')->name('api.auction.')->grou
     Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
     Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::get('league/{league}/available-players', [AuctionController::class, 'getAvailablePlayers'])->name('available-players');
+    Route::post('update-rules/{league}', [AuctionController::class, 'updateBidRules'])->name('update-rules');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
