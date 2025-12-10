@@ -1464,10 +1464,20 @@ class AuctionController extends Controller
             ] : null,
             'current_bid' => $currentHighestBid ? [
                 'amount' => $currentHighestBid->amount,
+                'team_id' => $currentHighestBid->league_team_id,
                 'team_name' => $currentHighestBid->leagueTeam->team->name,
-                'league_team_id' => $currentHighestBid->league_team_id,
-                'team_logo' => $currentHighestBid->leagueTeam->team->logo ? url(Storage::url($currentHighestBid->leagueTeam->team->logo)) : null,
             ] : null,
+            'bid_rules' => [
+                'type' => $league->bid_increment_type,
+                'custom_increment' => $league->custom_bid_increment,
+                'rules' => $league->predefined_increments ?? [
+                    ['min' => 0, 'max' => 100, 'increment' => 5],
+                    ['min' => 101, 'max' => 500, 'increment' => 10],
+                    ['min' => 501, 'max' => 1000, 'increment' => 25],
+                    ['min' => 1001, 'max' => null, 'increment' => 50],
+                ]
+            ],
+
             'stats' => $auctionStats,
         ]);
     }
