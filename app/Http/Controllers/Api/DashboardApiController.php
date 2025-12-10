@@ -39,9 +39,26 @@ class DashboardApiController extends Controller
                 return $this->transformPlayer($player, $index + 1);
             });
 
+        // ============ LATEST LEAGUES ============
+        $latestLeagues = \App\Models\League::latest('id')
+            ->take(3)
+            ->with(['game', 'winnerTeam.team', 'runnerTeam.team']) // Basic needed relations
+            ->get()
+            ->map(function ($league) {
+                $logoUrl = $league->logo ? url(Storage::url($league->logo)) : null;
+                return [
+                    'name' => $league->name,
+                    'slug' => $league->slug,
+                    'logo' => $logoUrl,
+                    'start_date' => optional($league->start_date)->toDateString(),
+                    'game_name' => optional($league->game)->name,
+                ];
+            });
+
         return response()->json([
             'spotlight' => $spotlight,
             'leaderboard' => $leaderboard,
+            'latest_leagues' => $latestLeagues,
         ]);
     }
 
@@ -57,6 +74,7 @@ class DashboardApiController extends Controller
             'role' => $player->user->position->name ?? 'Player',
             'team_name' => $player->leagueTeam->team->name ?? 'N/A',
             'league_name' => $player->league->name ?? 'N/A',
+            'league_slug' => $player->league->slug ?? '',
             'rank' => $rank,
         ];
     }

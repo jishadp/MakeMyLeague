@@ -111,8 +111,17 @@ class LeagueApiController extends Controller
         ];
     }
 
-    public function show(Request $request, League $league)
+    public function show(Request $request, $slug)
     {
+        $league = League::where('slug', $slug)->first();
+        
+        if (!$league) {
+            return response()->json([
+                'success' => false,
+                'message' => 'League not found',
+            ], 404);
+        }
+
         $baseWith = [
             'game',
             'localBody',
