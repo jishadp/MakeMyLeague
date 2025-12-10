@@ -110,4 +110,39 @@ class LeagueApiController extends Controller
             'context' => $context,
         ];
     }
+
+    public function show(Request $request, League $league)
+    {
+        $baseWith = [
+            'game',
+            'localBody',
+            'winnerTeam.team',
+            'runnerTeam.team',
+        ];
+
+        $baseCounts = [
+            'leagueTeams as teams_count',
+            'leaguePlayers as players_count',
+        ];
+        
+        $league->load($baseWith);
+        $league->loadCount($baseCounts);
+
+        $user = $request->user();
+        
+        // Determine context (organizer, player, etc.) - simplify to 'view' for now or logic check
+        // For simplicity, we can use a generic context or check roles.
+        // Let's reuse logic from index but for single item.
+        $context = 'view';
+        if ($league->organizer_id == $user->id) {
+            $context = 'organizer';
+        } elseif ($user->leaguePlayers()->where('league_id', $league->id)->exists()) {
+            $context = 'player';
+        }
+
+        return response()->json([
+            'success' => true,
+            'league' => $this->transformLeague($league, $context),
+        ]);
+    }
 }

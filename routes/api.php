@@ -45,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::get('/leagues', [LeagueApiController::class, 'index']);
-    Route::get('/leagues/{league}', [LeagueApiController::class, 'show']);
+    Route::get('/leagues/{league:slug}', [LeagueApiController::class, 'show']);
     Route::get('/dashboard/widgets', [DashboardApiController::class, 'index']);
     Route::get('leagues/{league:slug}/teams', [\App\Http\Controllers\Api\LeagueTeamApiController::class, 'index']);
     Route::get('leagues/{league:slug}/players', [\App\Http\Controllers\Api\LeaguePlayerApiController::class, 'index']);
