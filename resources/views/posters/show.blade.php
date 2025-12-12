@@ -405,7 +405,7 @@
                         @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
                     </div>
 
-                    <!-- Players Grid (Vertical Optimized) -->
+                    <!-- Players Grid (Vertical Optimized - 4 cols) -->
                     <div class="flex-grow flex flex-col justify-center gap-5">
                          <!-- Retained Group (Golden) -->
                          @php
@@ -466,25 +466,26 @@
                         </div>
                     </div>
 
-                    <!-- Players Grid (Wide Optimized) -->
+                    <!-- Players Grid (Wide Optimized - 5 cols) -->
                     <div class="flex-grow flex flex-col justify-center items-center gap-8">
                         @php
                             $allPlayers = $leagueTeam->players->sortByDesc('retention');
                         @endphp
                         
-                        <div class="flex flex-wrap justify-center gap-x-12 gap-y-10 max-w-6xl mx-auto">
+                        <!-- Grid 5 Cols -->
+                        <div class="grid grid-cols-5 gap-8 max-w-7xl mx-auto w-full px-8">
                             @foreach($allPlayers as $player)
                                 <div class="flex flex-col items-center">
                                     <!-- Dynamic size based on importance -->
-                                    <div class="{{ $player->retention ? 'w-32 h-32 border-[#FFD700] ring-[#FFD700]/30' : 'w-24 h-24 border-white' }} rounded-full border-4 p-1 bg-white/10 shadow-xl overflow-hidden relative group transition-transform hover:scale-105">
+                                    <div class="{{ $player->retention ? 'w-32 h-32 border-[#FFD700] ring-[#FFD700]/30' : 'w-24 h-24 border-white' }} rounded-full border-4 p-1 bg-white/10 shadow-xl overflow-hidden relative group transition-transform hover:scale-105 mx-auto">
                                         <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                         @if($player->retention)
                                             <div class="absolute bottom-0 inset-x-0 bg-[#FFD700] h-2"></div>
                                         @endif
                                     </div>
-                                    <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow">{{ $player->user->name }}</p>
+                                    <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow text-center">{{ $player->user->name }}</p>
                                     @if($player->user->position)
-                                        <p class="text-blue-200 text-[10px] uppercase font-bold">{{ $player->user->position->name }}</p>
+                                        <p class="text-blue-200 text-[10px] uppercase font-bold text-center">{{ $player->user->position->name }}</p>
                                     @endif
                                 </div>
                             @endforeach
@@ -543,6 +544,14 @@
         'auto': document.getElementById('btn-ratio-auto')
     };
 
+    // Print Style Injection
+    let printStyle = document.getElementById('print-orientation-style');
+    if (!printStyle) {
+        printStyle = document.createElement('style');
+        printStyle.id = 'print-orientation-style';
+        document.head.appendChild(printStyle);
+    }
+
     function updateUI() {
         // 1. Reset all views
         classicDesign.classList.remove('flex'); classicDesign.classList.add('hidden');
@@ -585,6 +594,9 @@
                 sportingPortrait.classList.remove('hidden');
                 sportingLandscape.classList.add('hidden');
             }
+            // Update Print Orientation
+            printStyle.innerHTML = '@media print { @page { size: portrait; margin: 0; } }';
+
         } else if (currentRatio === '16/9') {
             container.classList.add('aspect-[16/9]', 'max-w-6xl');
             updateGridColumns(5);
@@ -593,6 +605,9 @@
                 sportingPortrait.classList.add('hidden');
                 sportingLandscape.classList.remove('hidden');
             }
+            // Update Print Orientation
+            printStyle.innerHTML = '@media print { @page { size: landscape; margin: 0; } }';
+
         } else {
              container.classList.add('w-full', 'max-w-5xl', 'min-h-[800px]');
              updateGridColumns(4);
@@ -601,6 +616,8 @@
                 sportingPortrait.classList.add('hidden');
                 sportingLandscape.classList.remove('hidden');
             }
+             // Auto Print - often portrait default, but let's default to standard
+             printStyle.innerHTML = '@media print { @page { size: auto; margin: 0; } }';
         }
     }
 
