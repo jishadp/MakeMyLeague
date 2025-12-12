@@ -413,6 +413,11 @@
                          @php
                             $retained = $leagueTeam->players->filter(fn($p) => $p->retention);
                             $others = $leagueTeam->players->reject(fn($p) => $p->retention);
+
+                            if ($owner) {
+                                $retained = $retained->reject(fn($p) => $p->user_id == $owner->id);
+                                $others = $others->reject(fn($p) => $p->user_id == $owner->id);
+                            }
                          @endphp
                          
                          <div class="flex flex-wrap justify-center gap-4">
@@ -481,6 +486,10 @@
                     <div class="flex-grow flex flex-col justify-center items-center gap-8">
                         @php
                             $allPlayers = $leagueTeam->players->sortByDesc('retention');
+
+                            if ($owner) {
+                                $allPlayers = $allPlayers->reject(fn($p) => $p->user_id == $owner->id);
+                            }
                         @endphp
                         
                         <!-- Grid 5 Cols -->
