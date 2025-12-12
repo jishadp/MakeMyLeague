@@ -174,20 +174,22 @@
                     <div class="col-span-12 md:col-span-3 space-y-4">
                          <!-- Owner Card -->
                          @php
-                            $owner = $leagueTeam->team->owners->where('role', 'owner')->first();
+                            $owner = $leagueTeam->team->owner ?? $leagueTeam->team->owners->first(function($u) {
+                                return $u->pivot && $u->pivot->role === 'owner';
+                            });
                          @endphp
                          @if($owner)
                          <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
                             <p class="text-[10px] uppercase tracking-widest text-amber-400 mb-2">Team Owner</p>
                             <div class="flex items-center gap-3">
-                                @if($owner->user->photo)
-                                    <img src="{{ Storage::url($owner->user->photo) }}" class="w-10 h-10 rounded-full object-cover border border-white/20">
+                                @if($owner->photo)
+                                    <img src="{{ Storage::url($owner->photo) }}" class="w-10 h-10 rounded-full object-cover border border-white/20">
                                 @else
                                     <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-200 font-bold text-xs ring-1 ring-amber-500/40">
-                                        {{ substr($owner->user->name, 0, 2) }}
+                                        {{ substr($owner->name, 0, 2) }}
                                     </div>
                                 @endif
-                                <p class="text-white font-semibold text-sm">{{ $owner->user->name }}</p>
+                                <p class="text-white font-semibold text-sm">{{ $owner->name }}</p>
                             </div>
                          </div>
                          @endif
@@ -365,13 +367,13 @@
                              @if($owner)
                              <div class="flex flex-col items-center">
                                  <div class="w-16 h-16 rounded grayscale mb-2 overflow-hidden border-2 border-amber-500/50">
-                                    @if($owner->user->photo)
-                                        <img src="{{ Storage::url($owner->user->photo) }}" class="w-full h-full object-cover">
+                                    @if($owner->photo)
+                                        <img src="{{ Storage::url($owner->photo) }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full bg-gray-800"></div>
                                     @endif
                                  </div>
-                                 <p class="font-bold text-sm uppercase">{{ $owner->user->name }}</p>
+                                 <p class="font-bold text-sm uppercase">{{ $owner->name }}</p>
                                  <p class="text-xs text-white/50 uppercase tracking-wider">Owner</p>
                              </div>
                              @endif
@@ -418,9 +420,9 @@
                                 @if($owner)
                                 <div class="flex flex-col items-center w-[30%]">
                                     <div class="w-full aspect-square rounded-full border-4 border-white p-1 bg-white/10 shadow-lg shadow-white/30 overflow-hidden relative">
-                                        <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                        <img src="{{ $owner->photo ? Storage::url($owner->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                     </div>
-                                    <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $owner->user->name }}</p>
+                                    <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $owner->name }}</p>
                                     <span class="text-[8px] text-white font-bold uppercase tracking-wider">Owner</span>
                                 </div>
                                 @endif
@@ -453,7 +455,7 @@
                     <div class="mt-auto pt-6 text-center border-t border-white/10">
                         @if($owner)
                             <p class="text-blue-200 text-xs uppercase tracking-widest">Team Manager</p>
-                            <p class="text-white font-bold font-sports text-xl uppercase">{{ $owner->user->name }}</p>
+                            <p class="text-white font-bold font-sports text-xl uppercase">{{ $owner->name }}</p>
                         @endif
                     </div>
                 </div>
@@ -487,10 +489,10 @@
                             @if($owner)
                             <div class="flex flex-col items-center">
                                 <div class="w-32 h-32 border-white ring-white/30 rounded-full border-4 p-1 bg-white/10 shadow-xl overflow-hidden relative group transition-transform hover:scale-105 mx-auto">
-                                    <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                    <img src="{{ $owner->photo ? Storage::url($owner->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                     <div class="absolute bottom-0 inset-x-0 bg-white h-2"></div>
                                 </div>
-                                <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow text-center">{{ $owner->user->name }}</p>
+                                <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow text-center">{{ $owner->name }}</p>
                                 <p class="text-white text-[10px] uppercase font-bold text-center">OWNER</p>
                             </div>
                             @endif
@@ -519,9 +521,9 @@
                          @if($owner)
                             <div class="text-center">
                                 <div class="w-16 h-16 rounded-full border-2 border-blue-300 mx-auto overflow-hidden mb-1">
-                                    <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover">
+                                    <img src="{{ $owner->photo ? Storage::url($owner->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover">
                                 </div>
-                                <p class="text-white font-bold uppercase text-xs">Manager: {{ $owner->user->name }}</p>
+                                <p class="text-white font-bold uppercase text-xs">Manager: {{ $owner->name }}</p>
                             </div>
                          @endif
                          <div class="flex items-center gap-2 text-white/60">
