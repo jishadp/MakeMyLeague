@@ -5,6 +5,13 @@
 @section('styles')
 <style>
     @font-face {
+        font-family: 'BrushFont';
+        src: url('https://fonts.cdnfonts.com/s/11591/BrushScriptMTItalic.woff') format('woff');
+    }
+    .font-brush {
+        font-family: 'BrushFont', 'Brush Script MT', cursive;
+    }
+    @font-face {
         font-family: 'SportsFont';
         src: url('https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap');
     }
@@ -85,6 +92,9 @@
                 </button>
                 <button onclick="switchDesign('sporting')" id="btn-sporting" class="px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all">
                     Sporting
+                </button>
+                <button onclick="switchDesign('lineup')" id="btn-lineup" class="px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all">
+                    Line-Up
                 </button>
             </div>
 
@@ -377,6 +387,135 @@
                 </div>
             </div>
 
+            <!-- LINE-UP DESIGN (Renamed from Sporting) -->
+            <div id="design-lineup" class="w-full h-full relative bg-[#3C91E6] flex-col hidden">
+                <!-- Background Texture -->
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0e2a47] to-transparent opacity-60"></div>
+
+                <!-- SEPARATE CODE: PORTRAIT LAYOUT (9:16) -->
+                <div id="sporting-portrait" class="relative z-10 h-full flex flex-col px-6 py-8 hidden">
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <div class="font-brush text-5xl text-white transform -rotate-2 -ml-4 tracking-wider" style="text-shadow: 0 4px 6px rgba(0,0,0,0.3);">Line-Up</div>
+                        <div class="h-1 w-24 bg-[#0e2a47] mx-auto mt-2 rounded-full"></div>
+                    </div>
+
+                    <!-- Team & League Info -->
+                    <div class="flex justify-between items-center mb-6 px-4">
+                        @if($league->logo) <img src="{{ Storage::url($league->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
+                         <div>
+                            <h2 class="text-3xl font-black text-white text-center uppercase leading-none font-sports">{{ $leagueTeam->team->name }}</h2>
+                            <p class="text-center text-blue-100 text-xs tracking-widest uppercase mt-1">{{ $league->name }}</p>
+                         </div>
+                        @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
+                    </div>
+
+                    <!-- Players Grid (Vertical Optimized) -->
+                    <div class="flex-grow flex flex-col justify-center gap-5">
+                         <!-- Retained Group (Golden) -->
+                         @php
+                            $retained = $leagueTeam->players->filter(fn($p) => $p->retention);
+                            $others = $leagueTeam->players->reject(fn($p) => $p->retention);
+                         @endphp
+                         
+                         @if($retained->isNotEmpty())
+                            <div class="flex flex-wrap justify-center gap-4">
+                                @foreach($retained as $player)
+                                    <div class="flex flex-col items-center w-28">
+                                        <div class="w-24 h-24 rounded-full border-4 border-[#FFD700] p-1 bg-white/10 shadow-lg shadow-amber-500/30 overflow-hidden relative">
+                                            <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                        </div>
+                                        <p class="text-white font-bold text-sm uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $player->user->name }}</p>
+                                        <span class="text-[10px] text-[#FFD700] font-bold uppercase tracking-wider">Star Player</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                         @endif
+
+                         <!-- Others Group -->
+                         <div class="flex flex-wrap justify-center gap-x-4 gap-y-6">
+                            @foreach($others as $player)
+                                <div class="flex flex-col items-center w-24">
+                                    <div class="w-20 h-20 rounded-full border-2 border-white p-0.5 bg-white/10 shadow-md overflow-hidden">
+                                        <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                    </div>
+                                    <p class="text-white font-bold text-xs uppercase mt-1 text-center leading-tight">{{ $player->user->name }}</p>
+                                </div>
+                            @endforeach
+                         </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-auto pt-6 text-center border-t border-white/10">
+                        @if($owner)
+                            <p class="text-blue-200 text-xs uppercase tracking-widest">Team Manager</p>
+                            <p class="text-white font-bold font-sports text-xl uppercase">{{ $owner->user->name }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- SEPARATE CODE: LANDSCAPE LAYOUT (16:9) -->
+                <div id="sporting-landscape" class="relative z-10 h-full flex flex-col px-12 py-10 hidden">
+                     <!-- Header -->
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="flex items-center gap-4">
+                            @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-24 w-24 object-contain drop-shadow-lg"> @endif
+                            <div>
+                                <h1 class="text-6xl font-black text-white uppercase leading-none font-sports">{{ $leagueTeam->team->name }}</h1>
+                                <p class="text-blue-200 text-sm tracking-[0.5em] uppercase">{{ $league->name }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                             <div class="font-brush text-7xl text-white opacity-90 transform -rotate-3 mr-4">Line-Up</div>
+                             <div class="h-1.5 w-32 bg-[#0e2a47] ml-auto rounded-full mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Players Grid (Wide Optimized) -->
+                    <div class="flex-grow flex flex-col justify-center items-center gap-8">
+                        @php
+                            $allPlayers = $leagueTeam->players->sortByDesc('retention');
+                        @endphp
+                        
+                        <div class="flex flex-wrap justify-center gap-x-12 gap-y-10 max-w-6xl mx-auto">
+                            @foreach($allPlayers as $player)
+                                <div class="flex flex-col items-center">
+                                    <!-- Dynamic size based on importance -->
+                                    <div class="{{ $player->retention ? 'w-32 h-32 border-[#FFD700] ring-[#FFD700]/30' : 'w-24 h-24 border-white' }} rounded-full border-4 p-1 bg-white/10 shadow-xl overflow-hidden relative group transition-transform hover:scale-105">
+                                        <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                        @if($player->retention)
+                                            <div class="absolute bottom-0 inset-x-0 bg-[#FFD700] h-2"></div>
+                                        @endif
+                                    </div>
+                                    <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow">{{ $player->user->name }}</p>
+                                    @if($player->user->position)
+                                        <p class="text-blue-200 text-[10px] uppercase font-bold">{{ $player->user->position->name }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-auto flex justify-between items-end border-t-2 border-white/5 pt-4">
+                         <div class="text-white/40 font-brush text-2xl">#{{ str_replace(' ', '', $leagueTeam->team->name) }}</div>
+                         @if($owner)
+                            <div class="text-center">
+                                <div class="w-16 h-16 rounded-full border-2 border-blue-300 mx-auto overflow-hidden mb-1">
+                                    <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover">
+                                </div>
+                                <p class="text-white font-bold uppercase text-xs">Manager: {{ $owner->user->name }}</p>
+                            </div>
+                         @endif
+                         <div class="flex items-center gap-2 text-white/60">
+                            @if($league->logo) <img src="{{ Storage::url($league->logo) }}" class="h-8 w-8 object-contain opacity-70"> @endif
+                            <span class="text-xs uppercase tracking-widest">{{ $league->short_name }}</span>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
@@ -386,17 +525,24 @@
 @section('scripts')
 <script>
     // State
-    let currentDesign = 'sporting'; // Default to new design
-    let currentRatio = 'auto';
+    let currentDesign = 'sporting'; // Default
+    let currentRatio = 'auto'; // Default
 
     // Elements
     const container = document.getElementById('poster-container');
     const classicDesign = document.getElementById('design-classic');
     const sportingDesign = document.getElementById('design-sporting');
+    const lineupDesign = document.getElementById('design-lineup');
     
+    // Sub-layouts for Line-Up
+    const sportingPortrait = document.getElementById('sporting-portrait');
+    const sportingLandscape = document.getElementById('sporting-landscape');
+
     // Controls
     const btnClassic = document.getElementById('btn-classic');
     const btnSporting = document.getElementById('btn-sporting');
+    const btnLineup = document.getElementById('btn-lineup');
+    
     const btnsRatio = {
         '9/16': document.getElementById('btn-ratio-9-16'),
         '16/9': document.getElementById('btn-ratio-16-9'),
@@ -404,51 +550,63 @@
     };
 
     function updateUI() {
-        // Update Design Visibility
+        // 1. Reset all views
+        classicDesign.classList.remove('flex'); classicDesign.classList.add('hidden');
+        sportingDesign.classList.remove('flex'); sportingDesign.classList.add('hidden');
+        lineupDesign.classList.remove('flex'); lineupDesign.classList.add('hidden');
+
+        // Reset Button Styles
+        btnClassic.className = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all";
+        btnSporting.className = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all";
+        btnLineup.className = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all";
+
+        // 2. Activate Current Design
         if (currentDesign === 'classic') {
-            classicDesign.classList.remove('hidden');
-            classicDesign.classList.add('flex');
-            sportingDesign.classList.add('hidden');
-            sportingDesign.classList.remove('flex');
-            
-            // Button Styles
-            btnClassic.className = "px-4 py-1.5 rounded-md text-sm font-medium bg-white shadow-sm text-gray-900 transition-all";
-            btnSporting.className = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all";
-        } else {
-            classicDesign.classList.add('hidden');
-            classicDesign.classList.remove('flex');
-            sportingDesign.classList.remove('hidden');
-            sportingDesign.classList.add('flex');
-            
-            // Button Styles
-            btnSporting.className = "px-4 py-1.5 rounded-md text-sm font-medium bg-black text-white shadow-sm transition-all";
-            btnClassic.className = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all";
+            classicDesign.classList.remove('hidden'); classicDesign.classList.add('flex');
+            btnClassic.className = "px-4 py-1.5 rounded-md text-sm font-medium bg-white shadow-sm text-gray-900";
+        } else if (currentDesign === 'sporting') {
+            sportingDesign.classList.remove('hidden'); sportingDesign.classList.add('flex');
+            btnSporting.className = "px-4 py-1.5 rounded-md text-sm font-medium bg-black text-white shadow-sm";
+        } else if (currentDesign === 'lineup') {
+            lineupDesign.classList.remove('hidden'); lineupDesign.classList.add('flex');
+            btnLineup.className = "px-4 py-1.5 rounded-md text-sm font-medium bg-[#0e2a47] text-white shadow-sm";
         }
 
-        // Update Ratio
-        container.classList.remove('aspect-[9/16]', 'aspect-[16/9]', 'max-w-md', 'max-w-4xl', 'w-full');
+        // 3. Handle Orientation & Container Shape
+        container.classList.remove('aspect-[9/16]', 'aspect-[16/9]', 'max-w-md', 'max-w-6xl', 'min-h-[800px]', 'max-w-5xl', 'w-full');
         
-        // Reset button styles
-        Object.values(btnsRatio).forEach(btn => {
-            btn.className = "px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all flex items-center gap-1";
-            // Check if it has svg, simpler reset logic
-        });
-
-        // Set Active Ratio Button Style
-        const activeBtn = btnsRatio[currentRatio];
-        if(activeBtn) {
-            activeBtn.className = "px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow-sm text-gray-900 transition-all flex items-center gap-1";
+        // Reset Ratio Buttons
+        Object.values(btnsRatio).forEach(btn => 
+            btn.className = "px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all flex items-center gap-1"
+        );
+        if(btnsRatio[currentRatio]) {
+            btnsRatio[currentRatio].className = "px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow-sm text-gray-900 transition-all flex items-center gap-1";
         }
 
         if (currentRatio === '9/16') {
-            container.classList.add('aspect-[9/16]', 'max-w-md'); // Portrait constraint
-            updateGridColumns(2); // Fewer cols for portrait
+            container.classList.add('aspect-[9/16]', 'max-w-md');
+            updateGridColumns(2);
+            // Toggle Internal Layouts for Lineup
+            if(currentDesign === 'lineup') {
+                sportingPortrait.classList.remove('hidden');
+                sportingLandscape.classList.add('hidden');
+            }
         } else if (currentRatio === '16/9') {
-            container.classList.add('aspect-[16/9]', 'max-w-6xl'); // Landscape constraint
-            updateGridColumns(5); // More cols for landscape
+            container.classList.add('aspect-[16/9]', 'max-w-6xl');
+            updateGridColumns(5);
+             // Toggle Internal Layouts for Lineup
+             if(currentDesign === 'lineup') {
+                sportingPortrait.classList.add('hidden');
+                sportingLandscape.classList.remove('hidden');
+            }
         } else {
-            container.classList.add('w-full', 'max-w-5xl', 'min-h-[800px]'); // Auto/Responsive
-            updateGridColumns(4); // Default responsive
+             container.classList.add('w-full', 'max-w-5xl', 'min-h-[800px]');
+             updateGridColumns(4);
+             // Default to landscape layout for Auto if lineup
+             if(currentDesign === 'lineup') {
+                sportingPortrait.classList.add('hidden');
+                sportingLandscape.classList.remove('hidden');
+            }
         }
     }
 
@@ -462,13 +620,10 @@
                 } else {
                     grid.classList.add('grid-cols-5');
                 }
+            } else {
+                 grid.classList.add('grid-cols-3'); // Auto default
             }
         });
-        
-        const sportingGrid = document.getElementById('sporting-others-grid');
-        if(sportingGrid) {
-            // No strict column adjustments for Sporting flex grid, handled by flex-wrap
-        }
     }
 
     window.switchDesign = function(design) {
