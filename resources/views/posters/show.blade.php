@@ -405,18 +405,28 @@
                         @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
                     </div>
 
-                    <!-- Players Grid (Vertical Optimized - 4 cols) -->
+                    <!-- Players Grid (Vertical Optimized) -->
                     <div class="flex-grow flex flex-col justify-center gap-5">
-                         <!-- Retained Group (Golden) -->
+                         <!-- Retained Group & Owner (First Row) -->
                          @php
                             $retained = $leagueTeam->players->filter(fn($p) => $p->retention);
                             $others = $leagueTeam->players->reject(fn($p) => $p->retention);
                          @endphp
                          
-                         @if($retained->isNotEmpty())
-                            <div class="flex flex-wrap justify-center gap-2">
+                         <div class="flex flex-wrap justify-center gap-4">
+                                <!-- OWNER (First Item) -->
+                                @if($owner)
+                                <div class="flex flex-col items-center w-[30%]">
+                                    <div class="w-full aspect-square rounded-full border-4 border-white p-1 bg-white/10 shadow-lg shadow-white/30 overflow-hidden relative">
+                                        <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                    </div>
+                                    <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $owner->user->name }}</p>
+                                    <span class="text-[8px] text-white font-bold uppercase tracking-wider">Owner</span>
+                                </div>
+                                @endif
+
                                 @foreach($retained as $player)
-                                    <div class="flex flex-col items-center w-[23%]">
+                                    <div class="flex flex-col items-center w-[30%]">
                                         <div class="w-full aspect-square rounded-full border-4 border-[#FFD700] p-1 bg-white/10 shadow-lg shadow-amber-500/30 overflow-hidden relative">
                                             <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                         </div>
@@ -424,8 +434,7 @@
                                         <span class="text-[8px] text-[#FFD700] font-bold uppercase tracking-wider">Star</span>
                                     </div>
                                 @endforeach
-                            </div>
-                         @endif
+                         </div>
 
                          <!-- Others Group 4 per row means w ~ 23% -->
                          <div class="flex flex-wrap justify-center gap-x-2 gap-y-6">
@@ -474,6 +483,18 @@
                         
                         <!-- Grid 5 Cols -->
                         <div class="grid grid-cols-5 gap-8 max-w-7xl mx-auto w-full px-8">
+                            <!-- OWNER CARD -->
+                            @if($owner)
+                            <div class="flex flex-col items-center">
+                                <div class="w-32 h-32 border-white ring-white/30 rounded-full border-4 p-1 bg-white/10 shadow-xl overflow-hidden relative group transition-transform hover:scale-105 mx-auto">
+                                    <img src="{{ $owner->user->photo ? Storage::url($owner->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
+                                    <div class="absolute bottom-0 inset-x-0 bg-white h-2"></div>
+                                </div>
+                                <p class="text-white font-bold text-lg font-sports uppercase mt-2 tracking-wide text-shadow text-center">{{ $owner->user->name }}</p>
+                                <p class="text-white text-[10px] uppercase font-bold text-center">OWNER</p>
+                            </div>
+                            @endif
+
                             @foreach($allPlayers as $player)
                                 <div class="flex flex-col items-center">
                                     <!-- Dynamic size based on importance -->
