@@ -395,14 +395,8 @@
 
                 <!-- SEPARATE CODE: PORTRAIT LAYOUT (9:16) -->
                 <div id="sporting-portrait" class="relative z-10 h-full flex flex-col px-6 py-8 hidden">
-                    <!-- Header -->
-                    <div class="text-center mb-6">
-                        <div class="font-brush text-5xl text-white transform -rotate-2 -ml-4 tracking-wider" style="text-shadow: 0 4px 6px rgba(0,0,0,0.3);">Line-Up</div>
-                        <div class="h-1 w-24 bg-[#0e2a47] mx-auto mt-2 rounded-full"></div>
-                    </div>
-
                     <!-- Team & League Info -->
-                    <div class="flex justify-between items-center mb-6 px-4">
+                    <div class="flex justify-between items-center mb-6 px-4 pt-10">
                         @if($league->logo) <img src="{{ Storage::url($league->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
                          <div>
                             <h2 class="text-3xl font-black text-white text-center uppercase leading-none font-sports">{{ $leagueTeam->team->name }}</h2>
@@ -420,27 +414,27 @@
                          @endphp
                          
                          @if($retained->isNotEmpty())
-                            <div class="flex flex-wrap justify-center gap-4">
+                            <div class="flex flex-wrap justify-center gap-2">
                                 @foreach($retained as $player)
-                                    <div class="flex flex-col items-center w-28">
-                                        <div class="w-24 h-24 rounded-full border-4 border-[#FFD700] p-1 bg-white/10 shadow-lg shadow-amber-500/30 overflow-hidden relative">
+                                    <div class="flex flex-col items-center w-[23%]">
+                                        <div class="w-full aspect-square rounded-full border-4 border-[#FFD700] p-1 bg-white/10 shadow-lg shadow-amber-500/30 overflow-hidden relative">
                                             <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                         </div>
-                                        <p class="text-white font-bold text-sm uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $player->user->name }}</p>
-                                        <span class="text-[10px] text-[#FFD700] font-bold uppercase tracking-wider">Star Player</span>
+                                        <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $player->user->name }}</p>
+                                        <span class="text-[8px] text-[#FFD700] font-bold uppercase tracking-wider">Star</span>
                                     </div>
                                 @endforeach
                             </div>
                          @endif
 
-                         <!-- Others Group -->
-                         <div class="flex flex-wrap justify-center gap-x-4 gap-y-6">
+                         <!-- Others Group 4 per row means w ~ 23% -->
+                         <div class="flex flex-wrap justify-center gap-x-2 gap-y-6">
                             @foreach($others as $player)
-                                <div class="flex flex-col items-center w-24">
-                                    <div class="w-20 h-20 rounded-full border-2 border-white p-0.5 bg-white/10 shadow-md overflow-hidden">
+                                <div class="flex flex-col items-center w-[23%]">
+                                    <div class="w-full aspect-square rounded-full border-2 border-white p-0.5 bg-white/10 shadow-md overflow-hidden">
                                         <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                     </div>
-                                    <p class="text-white font-bold text-xs uppercase mt-1 text-center leading-tight">{{ $player->user->name }}</p>
+                                    <p class="text-white font-bold text-[10px] uppercase mt-1 text-center leading-tight truncate w-full">{{ $player->user->name }}</p>
                                 </div>
                             @endforeach
                          </div>
