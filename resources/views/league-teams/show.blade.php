@@ -39,6 +39,10 @@
                        class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
                         Edit Team
                     </a>
+                    <a href="{{ route('league-teams.replace-form', [$league, $leagueTeam]) }}" 
+                       class="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors">
+                        Replace Team
+                    </a>
                     <a href="{{ route('league-teams.index', $league) }}" 
                        class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors">
                         Back to Teams

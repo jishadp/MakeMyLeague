@@ -181,6 +181,25 @@ class LeagueTeamController extends Controller
     }
 
     /**
+     * Show the form for replacing a league team.
+     */
+    public function replaceForm(League $league, LeagueTeam $leagueTeam): View
+    {
+        // Check if auction has started
+        if ($league->auction_started_at) {
+            return back()->withErrors(['error' => 'Cannot replace team after auction has started.']);
+        }
+
+        $availableTeams = Team::whereNotIn('id', function($query) use ($league) {
+            $query->select('team_id')
+                  ->from('league_teams')
+                  ->where('league_id', $league->id);
+        })->get();
+
+        return view('league-teams.replace', compact('league', 'leagueTeam', 'availableTeams'));
+    }
+
+    /**
      * Replace a league team with another team.
      */
     public function replace(Request $request, League $league, LeagueTeam $leagueTeam)
