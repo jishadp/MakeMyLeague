@@ -94,6 +94,7 @@
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200" data-filter="auctioning">Auctioning</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200" data-filter="sold">Sold</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-red-100 text-red-700 border border-red-200" data-filter="unsold">Unsold</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200" data-filter="pending">Pending</button>
                         </div>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
