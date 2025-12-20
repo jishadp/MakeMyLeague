@@ -208,13 +208,23 @@
                         </div>
 
                         <div class="space-y-1.5 group">
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Secret PIN</label>
-                            <div class="relative">
-                                <input type="password" name="pin" minlength="4" maxlength="6" required placeholder="4 digits Only" 
-                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300" 
-                                    @if(!$registrationOpen) disabled @endif>
-                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
-                            </div>
+    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+        Secret PIN
+    </label>
+    <div class="relative">
+        <input 
+            type="password"
+            name="pin"
+            minlength="4"
+            maxlength="6"
+            required
+            placeholder="4 digits Only"
+            value="9999"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300"
+            @if(!$registrationOpen) disabled @endif
+        >
+        <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+    </div>
                         </div>
                     </div>
                 @endif
