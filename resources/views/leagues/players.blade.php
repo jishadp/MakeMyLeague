@@ -90,12 +90,19 @@
                         <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
                         <div class="flex items-center gap-2 text-xs">
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow" data-filter="all">All</button>
+                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-600 text-white border border-amber-600" data-filter="retained">Retained</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200" data-filter="available">Available</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200" data-filter="auctioning">Auctioning</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200" data-filter="sold">Sold</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-red-100 text-red-700 border border-red-200" data-filter="unsold">Unsold</button>
                             <button type="button" class="status-filter px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200" data-filter="pending">Pending</button>
                         </div>
+                        <a href="https://wa.me/?text={{ urlencode('Check out players for ' . $league->name . ': ' . request()->url()) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 shadow">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 .5C5.648.5.5 5.648.5 12c0 2.016.527 3.964 1.527 5.679L.5 23.5l6.012-1.513C8.16 22.973 10.056 23.5 12 23.5c6.352 0 11.5-5.148 11.5-11.5S18.352.5 12 .5zm0 20.905c-1.793 0-3.538-.48-5.05-1.385l-.361-.213-3.57.897.951-3.48-.235-.359A9.39 9.39 0 012.61 12C2.61 6.536 6.536 2.61 12 2.61c5.465 0 9.39 3.926 9.39 9.39 0 5.465-3.925 9.405-9.39 9.405z"/><path d="M17.174 14.83c-.293-.146-1.733-.853-2.002-.949-.27-.098-.468-.146-.666.146-.195.293-.768.949-.94 1.146-.171.195-.342.22-.635.073-.293-.146-1.236-.456-2.353-1.454-.869-.775-1.456-1.733-1.627-2.025-.171-.293-.018-.451.129-.597.132-.132.293-.342.439-.513.146-.171.195-.293.293-.488.098-.195.049-.366-.024-.512-.073-.146-.666-1.607-.914-2.2-.241-.579-.487-.5-.666-.51l-.566-.01c-.195 0-.512.073-.78.366-.269.293-1.024.999-1.024 2.438 0 1.438 1.05 2.826 1.195 3.018.146.195 2.07 3.163 5.018 4.433.702.303 1.25.484 1.676.62.704.223 1.344.192 1.852.116.565-.085 1.733-.707 1.979-1.389.244-.683.244-1.268.171-1.389-.073-.122-.268-.195-.561-.342z"/>
+                            </svg>
+                            Share
+                        </a>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
                         <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="poster">TBA Poster</button>
@@ -127,7 +134,7 @@
                                 $statusLetter = $letterMap[$status] ?? 'A';
                                 $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                             @endphp
-                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $status }}">
+                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $status }}" data-retained="{{ $player->retention ? 'true' : 'false' }}">
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <div class="relative">
                                         @if($player->user?->photo)
@@ -269,8 +276,19 @@ document.addEventListener('DOMContentLoaded', () => {
         playerCards.forEach((card) => {
             const name = card.dataset.playerName || '';
             const status = card.dataset.status || '';
+            const retained = card.dataset.retained === 'true';
+            
             const matchesName = !term || name.includes(term);
-            const matchesStatus = activeStatus === 'all' || status === activeStatus;
+            let matchesStatus = false;
+            
+            if (activeStatus === 'all') {
+                matchesStatus = true;
+            } else if (activeStatus === 'retained') {
+                matchesStatus = retained;
+            } else {
+                matchesStatus = status === activeStatus;
+            }
+            
             card.classList.toggle('hidden', !(matchesName && matchesStatus));
         });
     };
@@ -279,11 +297,37 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             activeStatus = button.dataset.filter || 'all';
             statusButtons.forEach((btn) => {
+                // Remove active classes
                 btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+                btn.classList.remove('bg-amber-600'); 
+                
+                // Add inactive background based on original class
+                if (btn.dataset.filter === 'retained') {
+                   // Special handling for retained button inactive state if needed, 
+                   // but here we just reset to default button look or specific look if it had one.
+                   // It was bg-amber-600 text-white active, so we need to decide inactive look.
+                   // Let's assume inactive is white background like others.
+                }
+                
+                // Reset all to white/default look first
                 btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+                
+                // Remove specific color classes if they were added inline for active state
+                 if (btn.dataset.filter === 'retained') {
+                    btn.classList.remove('text-white', 'bg-amber-600', 'border-amber-600');
+                    btn.classList.add('text-amber-700', 'bg-amber-100', 'border-amber-200');
+                 }
             });
-            button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+            
+            // Apply active class to clicked button
             button.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+             if (activeStatus === 'retained') {
+                button.classList.remove('text-amber-700', 'bg-amber-100', 'border-amber-200');
+                button.classList.add('bg-amber-600', 'text-white', 'border-amber-600', 'shadow');
+            } else {
+                button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+            }
+            
             applyFilters();
         });
     });
