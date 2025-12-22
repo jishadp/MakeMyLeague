@@ -27,6 +27,19 @@
                         @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Team Owner</label>
+                        <select name="owner_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Select Owner</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ (old('owner_id', $team->owner_id) == $user->id) ? 'selected' : '' }}>
+                                    {{ $user->name }} ({{ $user->mobile }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('owner_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
                     <div class="flex gap-4">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Update Team</button>
                     </div>
