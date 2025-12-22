@@ -106,6 +106,12 @@
                             </svg>
                             Share
                         </a>
+                        <button id="exportCsvBtn" type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow flex-shrink-0">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Export
+                        </button>
                         
                         <div class="hidden sm:flex items-center gap-2">
                              <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
@@ -148,7 +154,13 @@
                                  data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                  data-status="{{ $status }}" 
                                  data-retained="{{ $player->retention ? 'true' : 'false' }}"
-                                 data-share-info="{{ $displayName }} - {{ $displayRole }} ({{ $displayValue }})">
+                                 data-share-info="{{ $displayName }} - {{ $displayRole }} ({{ $displayValue }})"
+                                 data-csv-name="{{ $displayName }}"
+                                 data-csv-role="{{ $displayRole }}"
+                                 data-csv-price="{{ $val }}"
+                                 data-csv-status="{{ ucfirst($status) }}"
+                                 data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
+                                 >
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <div class="relative">
                                         @if($player->user?->photo)
@@ -266,6 +278,7 @@
     const playerCards = document.querySelectorAll('[data-player-name]');
     const statusButtons = document.querySelectorAll('.status-filter');
     const whatsappBtn = document.getElementById('whatsappShareBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
     let activeStatus = 'all';
 
     // League info for share text
@@ -298,13 +311,12 @@
         let count = 0;
         
         // Collect visible players (only from the main list 'player-tab-all' for simplicity)
-        // If we want to support search results from other tabs, logic would need to be broader
         const mainListCards = document.querySelector('#player-tab-all').querySelectorAll('.player-card');
         
         mainListCards.forEach(card => {
              if (!card.classList.contains('hidden')) {
                  const info = card.dataset.shareInfo;
-                 if (info && count < 30) { // Limit to 30 players to avoid URL length issues
+                 if (info && count < 30) { 
                      visiblePlayers.push(info);
                      count++;
                  }
@@ -312,8 +324,6 @@
         });
 
         let shareText = `*${leagueName} - Players List*\n`;
-        
-        // Add filter context
         shareText += `Filter: ${activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}\n\n`;
         
         if (visiblePlayers.length > 0) {
@@ -332,6 +342,39 @@
         
         whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
     };
+    
+    const exportCSV = () => {
+        // Collect visible players from main list
+        const mainListCards = document.querySelector('#player-tab-all').querySelectorAll('.player-card');
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // CSV Header
+        csvContent += "Name,Role,Price,Status,Retained\n";
+        
+        mainListCards.forEach(card => {
+             if (!card.classList.contains('hidden')) {
+                 const name = `"${(card.dataset.csvName || '').replace(/"/g, '""')}"`;
+                 const role = `"${(card.dataset.csvRole || '').replace(/"/g, '""')}"`;
+                 const price = `"${(card.dataset.csvPrice || '0').replace(/"/g, '""')}"`;
+                 const status = `"${(card.dataset.csvStatus || '').replace(/"/g, '""')}"`;
+                 const retained = `"${(card.dataset.csvRetained || '').replace(/"/g, '""')}"`;
+                 
+                 csvContent += `${name},${role},${price},${status},${retained}\n`;
+             }
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `players-${activeStatus}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', exportCSV);
+    }
 
     const applyFilters = () => {
         const term = searchInput?.value.trim().toLowerCase() || '';
