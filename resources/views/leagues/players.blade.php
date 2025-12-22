@@ -88,24 +88,30 @@
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
-                        <div class="flex items-center gap-2 text-xs">
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow" data-filter="all">All</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-600 text-white border border-amber-600" data-filter="retained">Retained</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200" data-filter="available">Available</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200" data-filter="auctioning">Auctioning</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200" data-filter="sold">Sold</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-red-100 text-red-700 border border-red-200" data-filter="unsold">Unsold</button>
-                            <button type="button" class="status-filter px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200" data-filter="pending">Pending</button>
+                        
+                        <!-- Mobile-friendly filter container -->
+                        <div class="flex items-center gap-2 text-xs overflow-x-auto pb-2 no-scrollbar max-w-[100vw] sm:max-w-none -mx-4 px-4 sm:mx-0 sm:px-0">
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow flex-shrink-0" data-filter="all">All</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-amber-600 text-white border border-amber-600 flex-shrink-0" data-filter="retained">Retained</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0" data-filter="available">Available</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 flex-shrink-0" data-filter="auctioning">Auctioning</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0" data-filter="sold">Sold</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-red-100 text-red-700 border border-red-200 flex-shrink-0" data-filter="unsold">Unsold</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 flex-shrink-0" data-filter="pending">Pending</button>
                         </div>
-                        <a href="https://wa.me/?text={{ urlencode('Check out players for ' . $league->name . ': ' . request()->url()) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 shadow">
+
+                        <a id="whatsappShareBtn" href="https://wa.me/?text={{ urlencode('Check out players for ' . $league->name . ': ' . request()->url()) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 shadow flex-shrink-0">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 .5C5.648.5.5 5.648.5 12c0 2.016.527 3.964 1.527 5.679L.5 23.5l6.012-1.513C8.16 22.973 10.056 23.5 12 23.5c6.352 0 11.5-5.148 11.5-11.5S18.352.5 12 .5zm0 20.905c-1.793 0-3.538-.48-5.05-1.385l-.361-.213-3.57.897.951-3.48-.235-.359A9.39 9.39 0 012.61 12C2.61 6.536 6.536 2.61 12 2.61c5.465 0 9.39 3.926 9.39 9.39 0 5.465-3.925 9.405-9.39 9.405z"/><path d="M17.174 14.83c-.293-.146-1.733-.853-2.002-.949-.27-.098-.468-.146-.666.146-.195.293-.768.949-.94 1.146-.171.195-.342.22-.635.073-.293-.146-1.236-.456-2.353-1.454-.869-.775-1.456-1.733-1.627-2.025-.171-.293-.018-.451.129-.597.132-.132.293-.342.439-.513.146-.171.195-.293.293-.488.098-.195.049-.366-.024-.512-.073-.146-.666-1.607-.914-2.2-.241-.579-.487-.5-.666-.51l-.566-.01c-.195 0-.512.073-.78.366-.269.293-1.024.999-1.024 2.438 0 1.438 1.05 2.826 1.195 3.018.146.195 2.07 3.163 5.018 4.433.702.303 1.25.484 1.676.62.704.223 1.344.192 1.852.116.565-.085 1.733-.707 1.979-1.389.244-.683.244-1.268.171-1.389-.073-.122-.268-.195-.561-.342z"/>
                             </svg>
                             Share
                         </a>
-                        <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
-                        <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
-                        <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="poster">TBA Poster</button>
+                        
+                        <div class="hidden sm:flex items-center gap-2">
+                             <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
+                             <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
+                             <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="poster">TBA Poster</button>
+                        </div>
                     </div>
                 </div>
 
@@ -113,7 +119,11 @@
                     <div class="grid grid-cols-3 gap-3" data-player-list>
                         @foreach($playersOrdered as $player)
                             @php
-                                $value = $player->bid_price ?? $player->base_price ?? 0;
+                                $val = $player->bid_price ?? $player->base_price ?? 0;
+                                $displayValue = '₹' . number_format($val);
+                                $displayRole = $player->user?->position?->name ?? 'Role';
+                                $displayName = $player->user?->name ? trim($player->user->name) : 'Unknown';
+                                
                                 $status = $player->status ?? 'available';
                                 $statusColors = [
                                     'pending' => 'bg-gray-100 text-gray-800',
@@ -134,7 +144,11 @@
                                 $statusLetter = $letterMap[$status] ?? 'A';
                                 $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                             @endphp
-                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $status }}" data-retained="{{ $player->retention ? 'true' : 'false' }}">
+                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
+                                 data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
+                                 data-status="{{ $status }}" 
+                                 data-retained="{{ $player->retention ? 'true' : 'false' }}"
+                                 data-share-info="{{ $displayName }} - {{ $displayRole }} ({{ $displayValue }})">
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <div class="relative">
                                         @if($player->user?->photo)
@@ -158,7 +172,7 @@
                                     <p class="text-sm font-semibold text-slate-900 truncate w-full">{{ $firstName }}</p>
                                     <p class="text-[11px] text-slate-500 truncate w-full">{{ $player->user?->position?->name ?? 'Role' }}</p>
                                     <p class="text-sm font-bold {{ in_array($status, ['sold','available']) ? 'text-green-700' : ($status === 'auctioning' ? 'text-amber-700' : ($status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
-                                        ₹{{ number_format($value) }}
+                                        {{ $displayValue }}
                                     </p>
                                 </div>
                             </div>
@@ -180,7 +194,8 @@
                                 <div class="p-3 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2">
                                     @foreach($localPlayers as $player)
                                         @php
-                                            $value = $player->bid_price ?? $player->base_price ?? 0;
+                                            $val = $player->bid_price ?? $player->base_price ?? 0;
+                                            $displayValue = '₹' . number_format($val);
                                             $statusColors = [
                                                 'pending' => 'bg-yellow-100 text-yellow-800',
                                                 'available' => 'bg-blue-100 text-blue-800',
@@ -214,7 +229,7 @@
                                                 <p class="text-sm font-semibold text-slate-900 truncate w-full">{{ $firstName }}</p>
                                                 <p class="text-[11px] text-slate-500 truncate w-full">{{ $player->user?->position?->name ?? 'Role' }}</p>
                                                 <p class="text-sm font-bold {{ in_array($player->status, ['sold','available']) ? 'text-green-700' : ($player->status === 'auctioning' ? 'text-amber-700' : ($player->status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
-                                                    ₹{{ number_format($value) }}
+                                                    {{ $displayValue }}
                                                 </p>
                                             </div>
                                         </div>
@@ -243,14 +258,19 @@
         </div>
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.player-tab');
     const panels = document.querySelectorAll('.player-tab-panel');
     const searchInput = document.getElementById('playerSearch');
     const playerCards = document.querySelectorAll('[data-player-name]');
     const statusButtons = document.querySelectorAll('.status-filter');
+    const whatsappBtn = document.getElementById('whatsappShareBtn');
     let activeStatus = 'all';
+
+    // League info for share text
+    const leagueName = "{{ $league->name }}";
+    const pageUrl = "{{ request()->url() }}";
 
     tabs.forEach((tab) => {
         tab.addEventListener('click', () => {
@@ -271,8 +291,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const updateShareLink = () => {
+        if (!whatsappBtn) return;
+        
+        let visiblePlayers = [];
+        let count = 0;
+        
+        // Collect visible players (only from the main list 'player-tab-all' for simplicity)
+        // If we want to support search results from other tabs, logic would need to be broader
+        const mainListCards = document.querySelector('#player-tab-all').querySelectorAll('.player-card');
+        
+        mainListCards.forEach(card => {
+             if (!card.classList.contains('hidden')) {
+                 const info = card.dataset.shareInfo;
+                 if (info && count < 30) { // Limit to 30 players to avoid URL length issues
+                     visiblePlayers.push(info);
+                     count++;
+                 }
+             }
+        });
+
+        let shareText = `*${leagueName} - Players List*\n`;
+        
+        // Add filter context
+        shareText += `Filter: ${activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}\n\n`;
+        
+        if (visiblePlayers.length > 0) {
+            visiblePlayers.forEach(p => {
+                shareText += `• ${p}\n`;
+            });
+            
+            if (count >= 30) {
+                shareText += `\n...and more.\n`;
+            }
+        } else {
+            shareText += `No players found for this filter.\n`;
+        }
+
+        shareText += `\nCheck full list here: ${pageUrl}`;
+        
+        whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    };
+
     const applyFilters = () => {
         const term = searchInput?.value.trim().toLowerCase() || '';
+        
         playerCards.forEach((card) => {
             const name = card.dataset.playerName || '';
             const status = card.dataset.status || '';
@@ -291,42 +354,37 @@ document.addEventListener('DOMContentLoaded', () => {
             
             card.classList.toggle('hidden', !(matchesName && matchesStatus));
         });
+        
+        // Update share link after filtering
+        setTimeout(updateShareLink, 100);
     };
 
     statusButtons.forEach((button) => {
         button.addEventListener('click', () => {
             activeStatus = button.dataset.filter || 'all';
             statusButtons.forEach((btn) => {
-                // Remove active classes
-                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
-                btn.classList.remove('bg-amber-600'); 
-                
-                // Add inactive background based on original class
-                if (btn.dataset.filter === 'retained') {
-                   // Special handling for retained button inactive state if needed, 
-                   // but here we just reset to default button look or specific look if it had one.
-                   // It was bg-amber-600 text-white active, so we need to decide inactive look.
-                   // Let's assume inactive is white background like others.
-                }
-                
-                // Reset all to white/default look first
-                btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
-                
-                // Remove specific color classes if they were added inline for active state
-                 if (btn.dataset.filter === 'retained') {
-                    btn.classList.remove('text-white', 'bg-amber-600', 'border-amber-600');
-                    btn.classList.add('text-amber-700', 'bg-amber-100', 'border-amber-200');
-                 }
-            });
-            
-            // Apply active class to clicked button
-            button.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
-             if (activeStatus === 'retained') {
-                button.classList.remove('text-amber-700', 'bg-amber-100', 'border-amber-200');
-                button.classList.add('bg-amber-600', 'text-white', 'border-amber-600', 'shadow');
-            } else {
-                button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
-            }
+                 // Remove active classes
+                 btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+                 btn.classList.remove('bg-amber-600'); 
+                 
+                 // Reset all to white/default look first
+                 btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+                 
+                 // Remove specific color classes if they were added inline for active state
+                  if (btn.dataset.filter === 'retained') {
+                     btn.classList.remove('text-white', 'bg-amber-600', 'border-amber-600');
+                     btn.classList.add('text-amber-700', 'bg-amber-100', 'border-amber-200');
+                  }
+             });
+             
+             // Apply active class to clicked button
+             button.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+              if (activeStatus === 'retained') {
+                 button.classList.remove('text-amber-700', 'bg-amber-100', 'border-amber-200');
+                 button.classList.add('bg-amber-600', 'text-white', 'border-amber-600', 'shadow');
+             } else {
+                 button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'shadow');
+             }
             
             applyFilters();
         });
@@ -338,6 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         applyFilters();
     }
+    
+    // Initial share link update
+    updateShareLink();
 });
 </script>
 @endsection
