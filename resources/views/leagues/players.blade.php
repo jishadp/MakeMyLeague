@@ -89,8 +89,21 @@
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
                         
-                        <!-- Mobile-friendly filter container -->
-                        <div class="flex items-center gap-2 text-xs overflow-x-auto pb-2 no-scrollbar max-w-[100vw] sm:max-w-none -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <!-- Mobile: Dropdown filter -->
+                        <div class="sm:hidden">
+                            <select id="statusFilterMobile" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 bg-white shadow-sm text-slate-700">
+                                <option value="all">All Players</option>
+                                <option value="retained">Retained</option>
+                                <option value="available">Available</option>
+                                <option value="auctioning">Auctioning</option>
+                                <option value="sold">Sold</option>
+                                <option value="unsold">Unsold</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Desktop: Button filters -->
+                        <div class="hidden sm:flex items-center gap-2 text-xs flex-wrap">
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow flex-shrink-0" data-filter="all">All</button>
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-amber-600 text-white border border-amber-600 flex-shrink-0" data-filter="retained">Retained</button>
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0" data-filter="available">Available</button>
@@ -113,7 +126,7 @@
                             Export
                         </button>
                         
-                        <div class="hidden sm:flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                              <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
                              <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="local">Local Body</button>
                              <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700" data-player-tab="poster">TBA Poster</button>
@@ -217,7 +230,17 @@
                                             ];
                                             $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                         @endphp
-                                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" data-player-name="{{ strtolower($player->user?->name ?? '') }}" data-status="{{ $player->status ?? 'available' }}">
+                                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
+                                             data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
+                                             data-status="{{ $player->status ?? 'available' }}"
+                                             data-retained="{{ $player->retention ? 'true' : 'false' }}"
+                                             data-share-info="{{ $player->user?->name ? trim($player->user->name) : 'Unknown' }} - {{ $player->user?->position?->name ?? 'Role' }} (₹{{ number_format($val) }})"
+                                             data-csv-name="{{ $player->user?->name ? trim($player->user->name) : 'Unknown' }}"
+                                             data-csv-role="{{ $player->user?->position?->name ?? 'Role' }}"
+                                             data-csv-price="{{ $val }}"
+                                             data-csv-status="{{ ucfirst($player->status ?? 'available') }}"
+                                             data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
+                                             >
                                             <div class="flex flex-col items-center text-center space-y-1">
                                                 <div class="relative">
                                                     @if($player->user?->photo)
@@ -280,6 +303,7 @@
     const whatsappBtn = document.getElementById('whatsappShareBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
     let activeStatus = 'all';
+    let activeTab = 'all'; // Track current active tab
 
     // League info for share text
     const leagueName = "{{ $league->name }}";
@@ -288,6 +312,7 @@
     tabs.forEach((tab) => {
         tab.addEventListener('click', () => {
             const target = tab.dataset.playerTab;
+            activeTab = target; // Update active tab
             tabs.forEach((t) => {
                 const isActive = t.dataset.playerTab === target;
                 t.classList.toggle('bg-indigo-600', isActive);
@@ -301,6 +326,8 @@
             panels.forEach((panel) => {
                 panel.classList.toggle('hidden', panel.id !== `player-tab-${target}`);
             });
+            // Update share link when tab changes
+            setTimeout(updateShareLink, 100);
         });
     });
 
@@ -308,32 +335,30 @@
         if (!whatsappBtn) return;
         
         let visiblePlayers = [];
-        let count = 0;
         
-        // Collect visible players (only from the main list 'player-tab-all' for simplicity)
-        const mainListCards = document.querySelector('#player-tab-all').querySelectorAll('.player-card');
+        // Collect visible players from the currently active tab
+        const activePanel = document.querySelector(`#player-tab-${activeTab}`);
+        if (!activePanel) return;
         
-        mainListCards.forEach(card => {
+        const cards = activePanel.querySelectorAll('.player-card');
+        
+        cards.forEach(card => {
              if (!card.classList.contains('hidden')) {
                  const info = card.dataset.shareInfo;
-                 if (info && count < 30) { 
+                 if (info) {
                      visiblePlayers.push(info);
-                     count++;
                  }
              }
         });
 
         let shareText = `*${leagueName} - Players List*\n`;
+        shareText += `Tab: ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}\n`;
         shareText += `Filter: ${activeStatus.charAt(0).toUpperCase() + activeStatus.slice(1)}\n\n`;
         
         if (visiblePlayers.length > 0) {
             visiblePlayers.forEach(p => {
                 shareText += `• ${p}\n`;
             });
-            
-            if (count >= 30) {
-                shareText += `\n...and more.\n`;
-            }
         } else {
             shareText += `No players found for this filter.\n`;
         }
@@ -344,29 +369,70 @@
     };
     
     const exportCSV = () => {
-        // Collect visible players from main list
-        const mainListCards = document.querySelector('#player-tab-all').querySelectorAll('.player-card');
         let csvContent = "data:text/csv;charset=utf-8,";
+        let filename = `players-${activeTab}`;
         
-        // CSV Header
-        csvContent += "Name,Role,Price,Status,Retained\n";
+        if (activeTab === 'local') {
+            // Export with local body grouping
+            csvContent += "Local Body,Name,Role,Price,Status,Retained\n";
+            
+            const localPanel = document.querySelector('#player-tab-local');
+            if (localPanel) {
+                const localBodySections = localPanel.querySelectorAll('.border-slate-200.rounded-xl');
+                
+                localBodySections.forEach(section => {
+                    const locationHeader = section.querySelector('.bg-slate-100 p');
+                    const localBody = locationHeader ? locationHeader.textContent.trim() : 'Unknown';
+                    
+                    const cards = section.querySelectorAll('.player-card');
+                    cards.forEach(card => {
+                        if (!card.classList.contains('hidden')) {
+                            const name = `"${(card.dataset.csvName || '').replace(/"/g, '""')}"`;
+                            const role = `"${(card.dataset.csvRole || '').replace(/"/g, '""')}"`;
+                            const price = `"${(card.dataset.csvPrice || '0').replace(/"/g, '""')}"`;
+                            const status = `"${(card.dataset.csvStatus || '').replace(/"/g, '""')}"`;
+                            const retained = `"${(card.dataset.csvRetained || '').replace(/"/g, '""')}"`;
+                            
+                            csvContent += `"${localBody}",${name},${role},${price},${status},${retained}\n`;
+                        }
+                    });
+                });
+            }
+            
+            if (activeStatus !== 'all') {
+                filename += `-${activeStatus}`;
+            }
+        } else {
+            // Export from All tab or other tabs
+            csvContent += "Name,Role,Price,Status,Retained\n";
+            
+            const activePanel = document.querySelector(`#player-tab-${activeTab}`);
+            if (activePanel) {
+                const cards = activePanel.querySelectorAll('.player-card');
+                cards.forEach(card => {
+                     if (!card.classList.contains('hidden')) {
+                         const name = `"${(card.dataset.csvName || '').replace(/"/g, '""')}"`;
+                         const role = `"${(card.dataset.csvRole || '').replace(/"/g, '""')}"`;
+                         const price = `"${(card.dataset.csvPrice || '0').replace(/"/g, '""')}"`;
+                         const status = `"${(card.dataset.csvStatus || '').replace(/"/g, '""')}"`;
+                         const retained = `"${(card.dataset.csvRetained || '').replace(/"/g, '""')}"`;
+                         
+                         csvContent += `${name},${role},${price},${status},${retained}\n`;
+                     }
+                });
+            }
+            
+            if (activeStatus !== 'all') {
+                filename += `-${activeStatus}`;
+            }
+        }
         
-        mainListCards.forEach(card => {
-             if (!card.classList.contains('hidden')) {
-                 const name = `"${(card.dataset.csvName || '').replace(/"/g, '""')}"`;
-                 const role = `"${(card.dataset.csvRole || '').replace(/"/g, '""')}"`;
-                 const price = `"${(card.dataset.csvPrice || '0').replace(/"/g, '""')}"`;
-                 const status = `"${(card.dataset.csvStatus || '').replace(/"/g, '""')}"`;
-                 const retained = `"${(card.dataset.csvRetained || '').replace(/"/g, '""')}"`;
-                 
-                 csvContent += `${name},${role},${price},${status},${retained}\n`;
-             }
-        });
+        filename += '.csv';
         
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `players-${activeStatus}.csv`);
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -432,6 +498,15 @@
             applyFilters();
         });
     });
+
+    // Mobile dropdown filter handler
+    const mobileFilterSelect = document.getElementById('statusFilterMobile');
+    if (mobileFilterSelect) {
+        mobileFilterSelect.addEventListener('change', (e) => {
+            activeStatus = e.target.value || 'all';
+            applyFilters();
+        });
+    }
 
     if (searchInput) {
         searchInput.addEventListener('input', () => {
