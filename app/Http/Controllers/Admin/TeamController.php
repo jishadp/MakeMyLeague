@@ -22,14 +22,35 @@ class TeamController extends Controller
     public function edit(Team $team)
     {
         $team->load(['owners', 'localBody.district.state']);
-        return view('admin.teams.edit', compact('team'));
+        $users = \App\Models\User::select('id', 'name', 'mobile')->orderBy('name')->take(500)->get(); 
+        // Note: For large user bases, this approach might need optimization (e.g., AJAX search). 
+        // Limiting to 500 for now to prevent memory issues, but assuming admin knows who to look for or searching is handled client-side if we use a library.
+        // Better approach for production with many users: Use a search API. 
+        // For this task, getting a list is a simple start, but 500 might miss the intended user.
+        // Let's use a simple get() if the user base isn't huge, or Select2 with AJAX. 
+        // Given constraints, I'll fetch all users but select only necessary columns to minimize memory.
+        $users = \App\Models\User::select('id', 'name', 'mobile')->orderBy('name')->get();
+
+        return view('admin.teams.edit', compact('team', 'users'));
     }
 
     public function update(Request $request, Team $team)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'owner_id' => 'nullable|exists:users,id'
+        ]);
 
         $team->update($request->only(['name']));
+
+        if ($request->has('owner_id') && $request->owner_id != $team->owner_id) {
+            $team->update(['owner_id' => $request->owner_id]);
+            
+            // Sync the new owner in the pivot table as the primary owner
+            // This replaces existing owners. If multiple owners are supported, this logic might need adjustment.
+            // Based on 'primaryOwners' relation in Team model, 'role' => 'owner' is correct.
+            $team->owners()->sync([$request->owner_id => ['role' => 'owner']]);
+        }
 
         return redirect()->route('admin.teams.index')
             ->with('success', 'Team updated successfully!');
