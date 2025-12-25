@@ -44,20 +44,22 @@
                     
                     <!-- Home Team -->
                     <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
-                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full p-2 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden"
                               :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
-                             @if($fixture->homeTeam->team->logo_url)
-                                 <img src="{{ $fixture->homeTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
+                             @if($fixture->homeTeam->team->logo)
+                                 <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->homeTeam->team->logo) }}" class="w-full h-full object-cover">
                              @else
-                                 <span class="font-black text-lg md:text-xl" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->homeTeam->team->name, 0, 1) }}</span>
+                                 <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
                              @endif
                              
                              <!-- Red Card Indicator -->
                              @if(isset($redCards[$fixture->home_team_id]))
-                                 <div class="absolute -top-1 -right-1 flex">
-                                     @foreach($redCards[$fixture->home_team_id] as $rc)
-                                        <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -ml-1 first:ml-0" title="Red Card"></div>
-                                     @endforeach
+                                 <div class="absolute top-0 right-0 p-1 bg-white/80 rounded-bl-lg backdrop-blur-sm">
+                                     <div class="flex gap-0.5">
+                                         @foreach($redCards[$fixture->home_team_id] as $rc)
+                                            <div class="w-2.5 h-3.5 bg-rose-500 border border-white shadow-sm rounded-[1px]" title="Red Card"></div>
+                                         @endforeach
+                                     </div>
                                  </div>
                              @endif
                          </div>
@@ -111,20 +113,22 @@
 
                     <!-- Away Team -->
                     <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
-                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full p-2 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden"
                               :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
-                             @if($fixture->awayTeam->team->logo_url)
-                                 <img src="{{ $fixture->awayTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
+                             @if($fixture->awayTeam->team->logo)
+                                 <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->awayTeam->team->logo) }}" class="w-full h-full object-cover">
                              @else
-                                 <span class="font-black text-lg md:text-xl" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->awayTeam->team->name, 0, 1) }}</span>
+                                 <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
                              @endif
 
                              <!-- Red Card Indicator -->
                              @if(isset($redCards[$fixture->away_team_id]))
-                                 <div class="absolute -top-1 -right-1 flex">
-                                     @foreach($redCards[$fixture->away_team_id] as $rc)
-                                        <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -ml-1 first:ml-0" title="Red Card"></div>
-                                     @endforeach
+                                 <div class="absolute top-0 right-0 p-1 bg-white/80 rounded-bl-lg backdrop-blur-sm">
+                                     <div class="flex gap-0.5">
+                                         @foreach($redCards[$fixture->away_team_id] as $rc)
+                                            <div class="w-2.5 h-3.5 bg-rose-500 border border-white shadow-sm rounded-[1px]" title="Red Card"></div>
+                                         @endforeach
+                                     </div>
                                  </div>
                              @endif
                          </div>
@@ -201,20 +205,23 @@
                             
                              <!-- Player Photo (Absolute positioned left) -->
                              <div class="absolute left-3 top-3 md:left-4 md:top-4">
-                                @if($event->player && $event->player->user && $event->player->user->photo)
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($event->player->user->photo) }}" 
-                                         class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 shadow-sm {{ $event->event_type == 'GOAL' ? 'border-emerald-500' : 'border-white' }}">
-                                @else
-                                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-xs md:text-sm border-2 shadow-sm"
-                                         :class="darkMode ? 'bg-slate-700 text-slate-400 border-slate-600' : 'bg-slate-100 text-slate-500 border-white'">
-                                        {{ substr($event->player->user->name ?? $event->player_name ?? 'P', 0, 1) }}
-                                    </div>
-                                @endif
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-sm relative overflow-hidden ring-1" 
+                                     class="{{ $event->event_type == 'GOAL' ? 'ring-emerald-500' : 'ring-white' }}">
+                                    @if($event->player && $event->player->user && $event->player->user->photo)
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($event->player->user->photo) }}" 
+                                             class="w-full h-full object-cover">
+                                    @elseif($event->player && $event->player->user)
+                                        <div class="w-full h-full flex items-center justify-center font-bold text-xs md:text-sm"
+                                             :class="darkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'">
+                                            <img src="{{ asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover opacity-90">
+                                        </div>
+                                    @endif
+                                </div>
                                 
                                 <!-- Team Logo Badge on Photo -->
-                                @if($event->team && $event->team->team->logo_url)
-                                    <div class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white shadow-sm border p-0.5 flex items-center justify-center">
-                                        <img src="{{ $event->team->team->logo_url }}" class="max-w-full max-h-full object-contain">
+                                @if($event->team && $event->team->team->logo)
+                                    <div class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($event->team->team->logo) }}" class="w-full h-full object-cover">
                                     </div>
                                 @endif
                              </div>
@@ -267,8 +274,14 @@
                                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                                         <span class="font-semibold">IN:</span> 
                                         <span class="text-slate-600" :class="darkMode ? '!text-slate-400' : ''">{{ $event->relatedPlayer->user->name ?? $event->related_player_name }}</span>
-                                        @if($event->relatedPlayer && $event->relatedPlayer->user && $event->relatedPlayer->user->photo)
-                                             <img src="{{ \Illuminate\Support\Facades\Storage::url($event->relatedPlayer->user->photo) }}" class="w-4 h-4 rounded-full object-cover">
+                                        @if($event->relatedPlayer && $event->relatedPlayer->user)
+                                             <div class="w-5 h-5 rounded-full overflow-hidden shadow-sm">
+                                                 @if($event->relatedPlayer->user->photo)
+                                                     <img src="{{ \Illuminate\Support\Facades\Storage::url($event->relatedPlayer->user->photo) }}" class="w-full h-full object-cover">
+                                                 @else
+                                                     <img src="{{ asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover opacity-90">
+                                                 @endif
+                                             </div>
                                         @endif
                                     </div>
                                 </div>

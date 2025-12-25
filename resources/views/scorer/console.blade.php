@@ -22,26 +22,43 @@
             </div>
 
             <!-- Scoreboard -->
-            <div class="flex items-center justify-between gap-4 mt-1">
+            <!-- Scoreboard -->
+            <div class="flex items-center justify-between gap-2 mt-4 relative">
                 <!-- Home Team -->
-                <div class="flex-1 flex items-center justify-end gap-3 text-right">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-sm md:text-base leading-tight">{{ $fixture->homeTeam->team->name }}</span>
-                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Home</span>
+                <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center bg-white border border-slate-100 relative overflow-hidden">
+                        @if($fixture->homeTeam->team->logo)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->homeTeam->team->logo) }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                        @endif
+                    </div>
+                    <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
+                        <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->homeTeam->team->name }}</h2>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Home</span>
                     </div>
                 </div>
 
                 <!-- Score -->
-                <div class="flex items-center gap-3 bg-slate-100 px-4 py-1.5 rounded-full font-bold text-xl md:text-2xl shadow-inner border border-slate-200/60">
-                    <span class="text-blue-600" x-text="homeScore">{{ $fixture->home_score ?? 0 }}</span>
-                    <span class="text-slate-300 text-lg">-</span>
-                    <span class="text-rose-500" x-text="awayScore">{{ $fixture->away_score ?? 0 }}</span>
+                <div class="flex flex-col items-center justify-start mx-2 shrink-0 z-10">
+                    <div class="text-3xl md:text-5xl font-black font-mono tracking-tighter flex items-center gap-2 leading-none text-slate-900">
+                        <span x-text="homeScore">{{ $fixture->home_score ?? 0 }}</span>
+                        <span class="opacity-30 text-xl md:text-3xl">-</span>
+                        <span x-text="awayScore">{{ $fixture->away_score ?? 0 }}</span>
+                    </div>
                 </div>
 
                 <!-- Away Team -->
-                <div class="flex-1 flex items-center justify-start gap-3 text-left">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-sm md:text-base leading-tight">{{ $fixture->awayTeam->team->name }}</span>
+                <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center bg-white border border-slate-100 relative overflow-hidden">
+                        @if($fixture->awayTeam->team->logo)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->awayTeam->team->logo) }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                        @endif
+                    </div>
+                    <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
+                        <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->awayTeam->team->name }}</h2>
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Away</span>
                     </div>
                 </div>
@@ -120,37 +137,94 @@
                     </div>
                 </div>
                 
-                <div class="max-h-[300px] overflow-y-auto p-0" id="feed-container">
-                    <template x-for="(event, index) in events" :key="event.id">
-                        <div class="flex gap-3 p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors relative group">
-                            <div class="min-w-[40px] text-center">
-                                <span class="font-mono text-xs font-black text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded" x-text="event.minute + '\''"></span>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-0.5">
-                                    <span class="text-sm font-bold"
-                                        :class="{
-                                            'text-blue-600': event.event_type == 'GOAL',
-                                            'text-amber-500': event.event_type == 'YELLOW_CARD',
-                                            'text-rose-500': event.event_type == 'RED_CARD',
-                                            'text-purple-500': event.event_type == 'SUB',
-                                            'text-slate-700': !['GOAL', 'YELLOW_CARD', 'RED_CARD', 'SUB'].includes(event.event_type)
-                                        }" 
-                                        x-text="event.event_type.replace('_', ' ')">
-                                    </span>
-                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wide" x-show="event.team_id" x-text="getTeamName(event.team_id).substring(0,3)"></span>
+                    <div class="p-3 space-y-3" id="feed-container">
+                        <template x-for="(event, index) in events" :key="event.id">
+                            <div class="relative rounded-xl border p-3 pl-16 shadow-sm overflow-hidden group transition-all"
+                                 :class="{
+                                    'bg-gradient-to-br from-white to-emerald-50 border-emerald-100': event.event_type == 'GOAL',
+                                    'bg-gradient-to-br from-white to-rose-50 border-rose-100': event.event_type == 'RED_CARD',
+                                    'bg-gradient-to-br from-white to-amber-50 border-amber-100': event.event_type == 'YELLOW_CARD',
+                                    'bg-gradient-to-br from-white to-purple-50 border-purple-100': event.event_type == 'SUB',
+                                    'bg-white border-slate-100': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB'].includes(event.event_type)
+                                 }">
+                                
+                                <!-- Player Photo -->
+                                <div class="absolute left-3 top-3">
+                                    <div class="w-10 h-10 rounded-full shadow-sm relative overflow-hidden ring-1 ring-white">
+                                        <template x-if="event.player && event.player.user">
+                                            <img :src="getPhotoUrl(event.player.user.photo)" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!event.player || !event.player.user">
+                                            <div class="w-full h-full flex items-center justify-center font-bold text-xs bg-slate-100 text-slate-500">
+                                                <img :src="getPhotoUrl(null)" class="w-full h-full object-cover opacity-90">
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <!-- Team Badge -->
+                                    <template x-if="event.team && event.team.team">
+                                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden flex items-center justify-center">
+                                            <img :src="getTeamLogoUrl(event.team.team.logo)" class="w-full h-full object-cover">
+                                        </div>
+                                    </template>
                                 </div>
-                                <p class="text-sm text-slate-600 leading-snug" x-text="event.description || event.player_name || 'Event'"></p>
+
+                                <!-- Minute and Type -->
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/80 border border-slate-200 text-slate-600 shadow-sm" x-text="event.minute + '\''"></span>
+                                        <h3 class="font-bold text-xs uppercase tracking-wide" 
+                                            :class="{
+                                                'text-emerald-600': event.event_type == 'GOAL',
+                                                'text-rose-600': event.event_type == 'RED_CARD',
+                                                'text-amber-600': event.event_type == 'YELLOW_CARD',
+                                                'text-purple-600': event.event_type == 'SUB',
+                                                'text-slate-600': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB'].includes(event.event_type)
+                                            }" x-text="event.event_type.replace('_', ' ')"></h3>
+                                    </div>
+                                    
+                                    <!-- Delete Button (Only for latest) -->
+                                    <div x-show="index === 0">
+                                        <button @click="deleteEvent(event.id)" class="text-slate-400 hover:text-rose-500 transition-colors p-1">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Description / Player Name -->
+                                <div class="text-sm font-bold text-slate-900 leading-tight">
+                                    <span x-text="event.player?.user?.name || event.player_name || event.description"></span>
+                                </div>
+
+                                <!-- Sub / Assist Details -->
+                                <template x-if="event.event_type == 'GOAL' && (event.assistPlayer || event.assist_player_name)">
+                                    <div class="mt-1 text-xs font-medium flex items-center gap-1.5 text-slate-500">
+                                        <span class="bg-emerald-100 text-emerald-700 px-1 rounded text-[10px]">Ast</span>
+                                        <span x-text="event.assistPlayer?.user?.name || event.assist_player_name"></span>
+                                    </div>
+                                </template>
+
+                                <template x-if="event.event_type == 'SUB'">
+                                    <div class="mt-2 text-xs flex flex-col gap-1.5 rounded bg-white/50 p-2 border border-slate-200/50">
+                                        <div class="flex items-center gap-2 text-rose-500">
+                                            <i class="fa-solid fa-arrow-right-from-bracket rotate-180"></i>
+                                            <span class="font-semibold">OUT:</span> 
+                                            <span class="text-slate-600" x-text="event.player?.user?.name || event.player_name"></span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-emerald-500">
+                                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                            <span class="font-semibold">IN:</span> 
+                                            <span class="text-slate-600" x-text="event.relatedPlayer?.user?.name || event.related_player_name"></span>
+                                            <!-- In Player Photo -->
+                                            <template x-if="event.relatedPlayer && event.relatedPlayer.user">
+                                                 <div class="w-4 h-4 rounded-full overflow-hidden shadow-sm">
+                                                     <img :src="getPhotoUrl(event.relatedPlayer.user.photo)" class="w-full h-full object-cover">
+                                                 </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
-                            
-                            <!-- Delete Button (Only for latest event) -->
-                            <div x-show="index === 0" class="absolute right-2 top-3">
-                                <button @click="deleteEvent(event.id)" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 flex items-center justify-center transition-all shadow-sm">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
+                        </template>
                     <template x-if="events.length === 0">
                         <div class="py-12 text-center">
                             <i class="fa-regular fa-clock text-3xl text-slate-200 mb-3 block"></i>
@@ -564,6 +638,16 @@ function scorerConsole() {
                 p.team_id == teamId && 
                 (!p.player_id || !sentOffIds.includes(p.player_id))
             );
+        },
+
+        getPhotoUrl(path) {
+            if (path) return '{{ \Illuminate\Support\Facades\Storage::url("") }}' + path;
+            return '{{ asset("images/defaultplayer.jpeg") }}';
+        },
+
+        getTeamLogoUrl(path) {
+            if (path) return '{{ \Illuminate\Support\Facades\Storage::url("") }}' + path;
+            return '{{ asset("images/default.jpeg") }}';
         },
 
         // --- Goal Logic ---

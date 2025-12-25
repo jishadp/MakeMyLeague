@@ -14,9 +14,14 @@ class ScorerController extends Controller
 
         // Load specific relationships needed for the view
         $fixture->load([
+            'homeTeam.team', 
+            'awayTeam.team',
             'homeTeam.leaguePlayers.user', 
             'awayTeam.leaguePlayers.user', 
-            'events', 
+            'events.player.user',
+            'events.assistPlayer.user',
+            'events.relatedPlayer.user',
+            'events.team.team',
             'fixturePlayers.player.user'
         ]);
         
