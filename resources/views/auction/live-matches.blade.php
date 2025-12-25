@@ -91,15 +91,33 @@
                                 @endif
                             </p>
                             <div class="flex items-center justify-center">
-                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-100 text-[12px] font-semibold border border-white/10">
-                                    <span class="text-xs font-bold text-emerald-300">72'</span>
-                                    @if($homeLogo)
-                                        <img src="{{ $homeLogo }}" alt="{{ $homeTeam?->name ?? 'Team' }} logo" class="w-6 h-6 rounded-md border border-white/10">
-                                    @else
-                                        <span class="w-6 h-6 rounded-md bg-slate-700 flex items-center justify-center text-[11px]">{{ strtoupper(substr($homeTeam?->name ?? 'T', 0, 1)) }}</span>
-                                    @endif
-                                    <span>Scorer TBD ({{ $homeTeam?->name ?? 'Team' }})</span>
-                                </span>
+                                @if($headline->status == 'in_progress' && $headline->started_at)
+                                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-100 text-[12px] font-semibold border border-white/10">
+                                         <span class="text-xs font-bold text-emerald-300" x-data="{ time: '00:00', start: '{{ $headline->started_at }}' }" x-init="
+                                            setInterval(() => {
+                                                let startTime = new Date(start).getTime();
+                                                let now = new Date().getTime();
+                                                let diff = Math.floor((now - startTime) / 1000 / 60);
+                                                time = diff + '\'';
+                                            }, 1000);
+                                         "><span x-text="time"></span></span>
+                                         
+                                         @php
+                                             $lastEvent = $headline->events->first();
+                                         @endphp
+                                         @if($lastEvent)
+                                             <span>
+                                                 {{ $lastEvent->minute }}' 
+                                                 @if($lastEvent->event_type == 'GOAL') ⚽ @elseif($lastEvent->event_type == 'RED_CARD') 🟥 @endif 
+                                                 {{ $lastEvent->player->user->name ?? $lastEvent->player_name ?? 'Event' }}
+                                             </span>
+                                         @else
+                                             <span>Live</span>
+                                         @endif
+                                     </span>
+                                @elseif($headline->status == 'completed')
+                                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-100 text-[12px] font-semibold border border-white/10">FT</span>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-3 justify-end">
@@ -164,42 +182,7 @@
             </div>
         @endforelse
 
-        {{-- Static sample cards --}}
-        <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-xl space-y-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-semibold">Sample Matches</p>
-            <div class="grid gap-4 sm:grid-cols-2">
-                @php
-                    $sampleMatches = [
-                        ['home' => 'FC Barcelona', 'away' => 'Chelsea', 'homeScore' => 3, 'awayScore' => 0, 'status' => "Full-time", 'league' => 'UEFA Champions League', 'event' => "67' Lewandowski"],
-                        ['home' => 'Manchester City', 'away' => 'Real Madrid', 'homeScore' => 1, 'awayScore' => 1, 'status' => "Live 72’", 'league' => 'UEFA Champions League', 'event' => "72' Haaland"],
-                    ];
-                @endphp
-                @foreach($sampleMatches as $sample)
-                    <div class="rounded-xl border border-white/10 bg-slate-900/60 p-4 flex flex-col gap-3">
-                        <div class="flex items-center justify-between text-xs text-slate-400">
-                            <span>{{ $sample['league'] }}</span>
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-800 text-slate-100 text-[11px] font-semibold border border-white/10">
-                                {{ $sample['status'] }}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-lg font-semibold text-white">{{ $sample['home'] }}</p>
-                                <p class="text-4xl font-black">{{ $sample['homeScore'] }}</p>
-                            </div>
-                            <div class="text-center text-slate-400 font-semibold">vs</div>
-                            <div class="text-right">
-                                <p class="text-lg font-semibold text-white">{{ $sample['away'] }}</p>
-                                <p class="text-4xl font-black">{{ $sample['awayScore'] }}</p>
-                            </div>
-                        </div>
-                        <div class="text-xs text-slate-300">
-                            Last score: <span class="font-semibold text-white">{{ $sample['event'] }}</span>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+
     </div>
 </div>
 @endsection

@@ -10,6 +10,18 @@ class Fixture extends Model
 {
     protected $guarded = [];
 
+    public function fixturePlayers()
+    {
+        return $this->hasMany(FixturePlayer::class);
+    }
+
+    public function players()
+    {
+        return $this->belongsToMany(LeaguePlayer::class, 'fixture_players', 'fixture_id', 'player_id')
+                    ->withPivot('status', 'is_active')
+                    ->withTimestamps();
+    }
+
     protected $casts = [
         'match_date' => 'date',
         'match_time' => 'datetime:H:i',
@@ -46,6 +58,26 @@ class Fixture extends Model
     public function leagueGroup(): BelongsTo
     {
         return $this->belongsTo(LeagueGroup::class);
+    }
+
+    public function scorer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'scorer_id');
+    }
+
+    public function events()
+    {
+        return $this->hasMany(MatchEvent::class);
+    }
+
+    public function scopeLive($query)
+    {
+        return $query->where('status', 'in_progress');
+    }
+
+    public function scopeFinished($query)
+    {
+        return $query->where('status', 'completed');
     }
 
     private function generateUniqueSlug()

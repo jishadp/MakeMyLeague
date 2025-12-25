@@ -545,7 +545,7 @@
                     <div class="flex items-center space-x-6">
                         <div class="text-right">
                             <div class="text-sm text-gray-600">Match Date</div>
-                            <div class="font-bold text-gray-900">{{ $match->match_date->format('M d, Y') }}</div>
+                            <div class="font-bold text-gray-900">{{ $match->match_date ? $match->match_date->format('M d, Y') : 'TBD' }}</div>
                             <div class="text-sm text-gray-600">{{ $match->match_time ? $match->match_time : 'TBD' }}</div>
                         </div>
                         
@@ -651,7 +651,7 @@
                                 </div>
                                 
                     <div class="text-center pt-4 border-t border-gray-200">
-                        <div class="text-sm text-gray-600">{{ $result->match_date->format('M d, Y') }}</div>
+                        <div class="text-sm text-gray-600">{{ $result->match_date ? $result->match_date->format('M d, Y') : 'Date TBD' }}</div>
                         @if($result->venue)
                             <div class="text-sm text-gray-500">{{ $result->venue }}</div>
                         @endif

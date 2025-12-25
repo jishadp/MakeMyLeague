@@ -10,18 +10,7 @@ class LeagueFinance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'league_id',
-        'expense_category_id',
-        'user_id',
-        'title',
-        'description',
-        'amount',
-        'type',
-        'transaction_date',
-        'reference_number',
-        'attachment',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'amount' => 'decimal:2',

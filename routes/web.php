@@ -23,6 +23,9 @@ use App\Http\Controllers\Admin\DocumentController as AdminDocumentController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\LiveMatchController;
+use App\Http\Controllers\FixtureController;
+use App\Http\Controllers\ScorerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index']);
@@ -104,7 +107,7 @@ Route::middleware('auth')->group(function () {
     Route::get('my-teams', [\App\Http\Controllers\MyTeamsController::class, 'index'])->name('my-teams');
     
     // My Auctions route
-    Route::get('auctions', [\App\Http\Controllers\AuctionsController::class, 'index'])->name('auctions.index');
+    Route::get('auctions', [\App\Http\Controllers\AuctionsController::class, 'index'])->name('my-auctions.index');
 
     // Auctioneer assignment routes - only team owners can assign auctioneers
     Route::prefix('leagues/{league}/teams/{leagueTeam}')->middleware('team.owner')->group(function () {
@@ -327,7 +330,7 @@ Route::middleware('auth')->group(function () {
         Route::post('unsold', [AuctionController::class, 'unsold'])->name('unsold');
         Route::post('reset-bids', [AuctionController::class, 'resetBids'])->name('reset-bids');
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
-        Route::post('skip-player/{league}', [AuctionController::class, 'skipPlayer'])->name('skip-player');
+        Route::post('skip-player/{league}', [AuctionController::class, 'skipPlayer'])->name('global-skip-player');
         Route::post('update-rules/{league}', [AuctionController::class, 'updateBidRules'])->name('update-rules');
 
         
@@ -370,10 +373,24 @@ Route::middleware('auth')->group(function () {
         Route::post('fixtures/shuffle', [\App\Http\Controllers\LeagueMatchController::class, 'shuffleFixtures'])->name('fixtures.shuffle');
         Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
     });
+
+
+    // Scorer Console Routes
+    Route::post('fixtures/{fixture}/assign-scorer', [FixtureController::class, 'assignScorer'])->name('fixtures.assign-scorer');
+    
+    Route::prefix('console/{fixture}')->name('scorer.')->group(function () {
+        Route::get('/', [ScorerController::class, 'index'])->name('console');
+        Route::post('start', [ScorerController::class, 'startMatch'])->name('start');
+        Route::post('event', [ScorerController::class, 'storeEvent'])->name('event');
+        Route::delete('delete-event/{event}', [ScorerController::class, 'deleteEvent'])->name('event.delete');
+        Route::post('substitute', [ScorerController::class, 'substitute'])->name('substitute');
+        Route::post('finish', [ScorerController::class, 'finishMatch'])->name('finish');
+    });
 });
 
 // Public fixtures viewing
 Route::get('leagues/{league}/fixtures', [\App\Http\Controllers\LeagueMatchController::class, 'fixtures'])->name('leagues.fixtures');
+Route::get('matches/{fixture}/live', [LiveMatchController::class, 'show'])->name('matches.live');
 
 // API route for local bodies by district
 Route::get('api/local-bodies', [RegisterController::class, 'getLocalBodiesByDistrict'])->name('api.local-bodies');

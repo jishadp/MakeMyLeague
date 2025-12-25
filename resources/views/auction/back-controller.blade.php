@@ -969,7 +969,7 @@
         <input type="hidden" id="controller-bid-action" value="{{ route('auction.call') }}">
         <input type="hidden" id="controller-sold-action" value="{{ route('auction.sold') }}">
         <input type="hidden" id="controller-unsold-action" value="{{ route('auction.unsold') }}">
-        <input type="hidden" id="controller-skip-action" value="{{ route('auction.skip-player', $league) }}">
+        <input type="hidden" id="controller-skip-action" value="{{ route('auction.global-skip-player', $league) }}">
         <input type="hidden" id="controller-reset-action" value="{{ route('auction.reset-bids') }}">
         <input type="hidden" id="controller-start-action" value="{{ route('auction.start') }}">
         <input type="hidden" id="controller-rules-action" value="{{ route('auction.update-rules', $league) }}">

@@ -40,7 +40,9 @@ class AuctionController extends Controller
             ->orderBy('name')
             ->get();
 
-        $fixtures = Fixture::with(['homeTeam.team', 'awayTeam.team', 'league'])
+        $fixtures = Fixture::with(['homeTeam.team', 'awayTeam.team', 'league', 'events' => function($q) {
+                $q->latest();
+            }])
             ->whereIn('league_id', $leagues->pluck('id'))
             ->whereIn('status', ['in_progress', 'scheduled', 'unscheduled'])
             ->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'unscheduled')")

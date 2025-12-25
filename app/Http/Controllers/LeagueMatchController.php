@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class LeagueMatchController extends Controller
@@ -173,7 +174,8 @@ class LeagueMatchController extends Controller
             ->with([
                 'homeTeam.team',
                 'awayTeam.team',
-                'leagueGroup'
+                'leagueGroup',
+                'scorer'
             ]);
 
         if ($sortMode === 'time') {
@@ -233,6 +235,8 @@ class LeagueMatchController extends Controller
                 return optional($fixture->match_date)->format('d.m.Y') ?? 'Date TBA';
             });
 
+        $scorers = User::orderBy('name')->get(['id', 'name']);
+
         return view('leagues.fixtures.index', compact(
             'league',
             'fixtures',
@@ -240,7 +244,8 @@ class LeagueMatchController extends Controller
             'topBoughtByTeam',
             'topBoughtOverall',
             'sortMode',
-            'posterFixturesByDate'
+            'posterFixturesByDate',
+            'scorers'
         ));
     }
 

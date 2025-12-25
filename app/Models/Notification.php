@@ -15,14 +15,7 @@ class Notification extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'user_id',
-        'type',
-        'title',
-        'message',
-        'data',
-        'read',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be cast.

@@ -6,8 +6,10 @@ use App\Models\League;
 use App\Models\LeaguePlayer;
 use App\Models\Team;
 use App\Models\TeamAuctioneer;
+use App\Models\Fixture;
 use App\Models\TeamOwner;
 use App\Models\User;
+use App\Observers\FixtureObserver;
 use App\Observers\LeaguePlayerObserver;
 use App\Observers\TeamAuctioneerObserver;
 use App\Observers\TeamOwnerObserver;
@@ -83,5 +85,6 @@ class AppServiceProvider extends ServiceProvider
         LeaguePlayer::observe(new LeaguePlayerObserver($auctionAccessService));
         TeamOwner::observe(new TeamOwnerObserver($auctionAccessService));
         TeamAuctioneer::observe(new TeamAuctioneerObserver($auctionAccessService));
+        Fixture::observe(FixtureObserver::class);
     }
 }
