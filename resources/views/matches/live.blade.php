@@ -40,55 +40,52 @@
         <!-- Compact Scoreboard -->
         <div class="px-3 py-3 md:py-4">
             <div class="container mx-auto max-w-lg">
-                <div class="flex items-start justify-between gap-1 md:gap-4 relative">
+                <div class="flex items-start justify-between gap-2 md:gap-8 relative">
                     
                     <!-- Home Team -->
-                    <div class="flex-1 flex flex-col items-start gap-1 min-w-0">
-                        <div class="flex items-center gap-2 md:gap-3 w-full">
-                             <div class="w-8 h-8 md:w-12 md:h-12 rounded-full p-1 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
-                                  :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
-                                 @if($fixture->homeTeam->team->logo_url)
-                                     <img src="{{ $fixture->homeTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
-                                 @else
-                                     <span class="font-black text-sm md:text-lg" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->homeTeam->team->name, 0, 1) }}</span>
-                                 @endif
-                                 
-                                 <!-- Red Card Indicator -->
-                                 @if(isset($redCards[$fixture->home_team_id]))
-                                     <div class="absolute -top-1 -right-1 flex">
-                                         @foreach($redCards[$fixture->home_team_id] as $rc)
-                                            <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -ml-1 first:ml-0" title="Red Card"></div>
-                                         @endforeach
-                                     </div>
-                                 @endif
+                    <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full p-2 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
+                              :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
+                             @if($fixture->homeTeam->team->logo_url)
+                                 <img src="{{ $fixture->homeTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
+                             @else
+                                 <span class="font-black text-lg md:text-xl" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->homeTeam->team->name, 0, 1) }}</span>
+                             @endif
+                             
+                             <!-- Red Card Indicator -->
+                             @if(isset($redCards[$fixture->home_team_id]))
+                                 <div class="absolute -top-1 -right-1 flex">
+                                     @foreach($redCards[$fixture->home_team_id] as $rc)
+                                        <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -ml-1 first:ml-0" title="Red Card"></div>
+                                     @endforeach
+                                 </div>
+                             @endif
+                         </div>
+                         <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
+                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->homeTeam->team->name }}</h2>
+                             
+                             <!-- Scorers -->
+                             <div class="mt-1 space-y-0.5 w-full">
+                                @foreach($goals->where('team_id', $fixture->home_team_id) as $goal)
+                                    <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-slate-400' : 'text-slate-600'">
+                                        {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
+                                    </div>
+                                @endforeach
                              </div>
-                             <div class="flex flex-col min-w-0 overflow-hidden">
-                                 <h2 class="text-xs md:text-sm font-bold truncate leading-tight">{{ $fixture->homeTeam->team->name }}</h2>
-                                 <span class="text-[9px] uppercase tracking-wider opacity-60">Home</span>
-                             </div>
-                        </div>
-                        
-                        <!-- Home Scorers (Visible below team) -->
-                        <div class="pl-1 mt-1 space-y-0.5">
-                            @foreach($goals->where('team_id', $fixture->home_team_id) as $goal)
-                                <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-slate-400' : 'text-slate-600'">
-                                    {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
-                                </div>
-                            @endforeach
-                        </div>
+                         </div>
                     </div>
 
                     <!-- Score Center -->
-                    <div class="flex flex-col items-center justify-start mx-1 md:mx-4 shrink-0 z-10 pt-1">
-                        <div class="text-2xl md:text-4xl font-black font-mono tracking-tighter flex items-center gap-1.5 leading-none transition-colors"
+                    <div class="flex flex-col items-center justify-start mx-1 md:mx-4 shrink-0 z-10 pt-2">
+                        <div class="text-3xl md:text-5xl font-black font-mono tracking-tighter flex items-center gap-2 leading-none transition-colors"
                              :class="darkMode ? 'text-white' : 'text-slate-900'">
                             <span>{{ $fixture->home_score ?? 0 }}</span>
-                            <span class="opacity-30 text-lg md:text-2xl">-</span>
+                            <span class="opacity-30 text-xl md:text-3xl">-</span>
                             <span>{{ $fixture->away_score ?? 0 }}</span>
                         </div>
                         
                         <!-- Timer Badge -->
-                        <div class="mt-1 px-2 py-0.5 rounded text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1 shadow-sm"
+                        <div class="mt-2 px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1.5 shadow-sm"
                              :class="darkMode ? 'bg-slate-800 text-emerald-400 border-slate-700' : 'bg-emerald-50 text-emerald-600 border-emerald-100'"
                              x-data="{ time: '00:00', start: '{{ $fixture->started_at }}', status: '{{ $fixture->status }}' }"
                              x-init="
@@ -113,41 +110,37 @@
                     </div>
 
                     <!-- Away Team -->
-                    <div class="flex-1 flex flex-col items-end gap-1 min-w-0 text-right">
-                        <div class="flex flex-row-reverse items-center gap-2 md:gap-3 w-full">
-                             <div class="w-8 h-8 md:w-12 md:h-12 rounded-full p-1 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
-                                  :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
-                                 @if($fixture->awayTeam->team->logo_url)
-                                     <img src="{{ $fixture->awayTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
-                                 @else
-                                     <span class="font-black text-sm md:text-lg" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->awayTeam->team->name, 0, 1) }}</span>
-                                 @endif
+                    <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full p-2 shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative"
+                              :class="darkMode ? 'bg-slate-800' : 'bg-white border border-slate-100'">
+                             @if($fixture->awayTeam->team->logo_url)
+                                 <img src="{{ $fixture->awayTeam->team->logo_url }}" class="max-w-full max-h-full object-contain">
+                             @else
+                                 <span class="font-black text-lg md:text-xl" :class="darkMode ? 'text-white' : 'text-slate-900'">{{ substr($fixture->awayTeam->team->name, 0, 1) }}</span>
+                             @endif
 
-                                 <!-- Red Card Indicator -->
-                                 @if(isset($redCards[$fixture->away_team_id]))
-                                     <div class="absolute -top-1 -left-1 flex flex-row-reverse">
-                                         @foreach($redCards[$fixture->away_team_id] as $rc)
-                                            <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -mr-1 first:mr-0" title="Red Card"></div>
-                                         @endforeach
-                                     </div>
-                                 @endif
+                             <!-- Red Card Indicator -->
+                             @if(isset($redCards[$fixture->away_team_id]))
+                                 <div class="absolute -top-1 -right-1 flex">
+                                     @foreach($redCards[$fixture->away_team_id] as $rc)
+                                        <div class="w-3 h-4 bg-rose-500 border border-white shadow-sm rounded-[1px] -ml-1 first:ml-0" title="Red Card"></div>
+                                     @endforeach
+                                 </div>
+                             @endif
+                         </div>
+                         <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
+                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->awayTeam->team->name }}</h2>
+                             
+                             <!-- Scorers -->
+                             <div class="mt-1 space-y-0.5 w-full">
+                                @foreach($goals->where('team_id', $fixture->away_team_id) as $goal)
+                                    <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-slate-400' : 'text-slate-600'">
+                                        {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
+                                    </div>
+                                @endforeach
                              </div>
-                             <div class="flex flex-col min-w-0 overflow-hidden text-right">
-                                 <h2 class="text-xs md:text-sm font-bold truncate leading-tight">{{ $fixture->awayTeam->team->name }}</h2>
-                                 <span class="text-[9px] uppercase tracking-wider opacity-60">Away</span>
-                             </div>
-                        </div>
-
-                        <!-- Away Scorers -->
-                        <div class="pr-1 mt-1 space-y-0.5 flex flex-col items-end">
-                            @foreach($goals->where('team_id', $fixture->away_team_id) as $goal)
-                                <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-slate-400' : 'text-slate-600'">
-                                    {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
-                                </div>
-                            @endforeach
-                        </div>
+                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
