@@ -1503,11 +1503,17 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="sold-count" class="player-finder__pill">0 sold</span>
-                        <button type="button" onclick="downloadSoldPlayersPDF()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold hover:from-indigo-700 hover:to-purple-700 flex items-center gap-2">
+                        <button type="button" onclick="downloadSoldPlayersPDF()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-semibold hover:from-red-700 hover:to-rose-700 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            Download PDF
+                            PDF
+                        </button>
+                        <button type="button" onclick="downloadSoldPlayersCSV()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs font-semibold hover:from-green-700 hover:to-emerald-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            CSV
                         </button>
                     </div>
                 </div>
@@ -3964,6 +3970,45 @@ function openWhatsAppShare(message) {
         } catch (error) {
             console.error('Error downloading PDF:', error);
             showControllerMessage('Failed to download PDF. Please try again.', 'error');
+        }
+    };
+
+    window.downloadSoldPlayersCSV = async function() {
+        const leagueSlug = document.getElementById('controller-league-slug')?.value;
+        if (!leagueSlug) {
+            showControllerMessage('League information not found', 'error');
+            return;
+        }
+
+        try {
+            showControllerMessage('Generating CSV...', 'success');
+            
+            const response = await fetch(`/api/leagues/${leagueSlug}/sold-players/csv`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/csv',
+                    'X-CSRF-TOKEN': getControllerToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate CSV');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sold-players-${leagueSlug}-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showControllerMessage('CSV downloaded successfully', 'success');
+        } catch (error) {
+            console.error('Error downloading CSV:', error);
+            showControllerMessage('Failed to download CSV. Please try again.', 'error');
         }
     };
 

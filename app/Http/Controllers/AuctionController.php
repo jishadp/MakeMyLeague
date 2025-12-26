@@ -1795,13 +1795,57 @@ class AuctionController extends Controller
             ->orderBy('updated_at', 'asc')
             ->get();
 
-        // Using dompdf or similar library
-        $pdf = \PDF::loadView('auction.sold-players-pdf', [
+        // Using dompdf library
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('auction.sold-players-pdf', [
             'league' => $league,
             'soldPlayers' => $soldPlayers
         ]);
 
         return $pdf->download('sold-players-' . $league->slug . '-' . now()->format('Y-m-d') . '.pdf');
     }
+
+    /**
+     * API: Download sold players as CSV
+     */
+    public function downloadSoldPlayersCSV(League $league)
+    {
+        $soldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->whereNotNull('bid_price')
+            ->with(['player', 'leagueTeam.team'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        $filename = 'sold-players-' . $league->slug . '-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($soldPlayers) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, ['SL', 'Player Name', 'Role', 'Team', 'Amount', 'Sold Time']);
+
+            // Add data rows
+            foreach ($soldPlayers as $index => $player) {
+                fputcsv($file, [
+                    $index + 1,
+                    $player->player->name ?? 'Unknown',
+                    $player->player->primaryGameRole->gamePosition->name ?? $player->player->position->name ?? 'N/A',
+                    $player->leagueTeam->team->name ?? 'Unknown',
+                    $player->bid_price ?? 0,
+                    $player->updated_at->format('M d, Y h:i A')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
 
 }
