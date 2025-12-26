@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->prefix('auction')->name('api.auction.')->grou
     Route::post('league/{league}/skip', [AuctionController::class, 'skipPlayer'])->name('skip');
     Route::get('league/{league}/available-players', [AuctionController::class, 'getAvailablePlayers'])->name('available-players');
     Route::post('update-rules/{league}', [AuctionController::class, 'updateBidRules'])->name('update-rules');
+    Route::get('league/{league:slug}/control-room', [AuctionController::class, 'getControlRoomData'])->name('control-room');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -56,8 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('profile', [\App\Http\Controllers\ProfileController::class, 'update']);
 });
 
-// Auction API endpoints for live view
-Route::get('live-auctions', [AuctionController::class, 'getLiveAuctions']);
+// Auction API endpoints for live view  
+Route::middleware('auth:sanctum')->get('live-auctions', [AuctionController::class, 'getLiveAuctions']);
 
 Route::prefix('auctions/league/{league:slug}')->group(function () {
     Route::get('current-state', [AuctionController::class, 'getCurrentState']);

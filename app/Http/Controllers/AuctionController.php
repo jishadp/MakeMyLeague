@@ -282,6 +282,182 @@ class AuctionController extends Controller
     }
 
     /**
+     * API: Get control room data for mobile app
+     */
+    public function getControlRoomData(League $league)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->canManageLeague($league->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only league organizers or admins can access the auction control room.'
+            ], 403);
+        }
+
+        $league->load(['game', 'localBody.district', 'approvedOrganizers']);
+        $league->loadCount('leagueTeams');
+
+        $currentPlayer = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'auctioning')
+            ->where('retention', false)
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->first();
+
+        $currentHighestBid = null;
+
+        if ($currentPlayer) {
+            $currentHighestBid = Auction::where('league_player_id', $currentPlayer->id)
+                ->with(['leagueTeam.team'])
+                ->latest('created_at')
+                ->first();
+        }
+
+        $availablePlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'available')
+            ->where('retention', false)
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+            
+        $unsoldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'unsold')
+            ->where('retention', false)
+            ->with(['player.position', 'player.primaryGameRole.gamePosition'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        $teams = LeagueTeam::where('league_id', $league->id)
+            ->with(['team', 'teamAuctioneer.auctioneer'])
+            ->withCount([
+                'leaguePlayers as total_players_count',
+                'leaguePlayers as sold_players_count' => function ($query) {
+                    $query->where('status', 'sold');
+                }
+            ])
+            ->withSum([
+                'leaguePlayers as spent_amount' => function ($query) {
+                    $query->where('status', 'sold');
+                }
+            ], 'bid_price')
+            ->orderBy('team_id')
+            ->get();
+            
+        $availableBasePrices = $league->leaguePlayers()
+            ->where('status', 'available')
+            ->orderBy('base_price')
+            ->pluck('base_price')
+            ->map(fn ($price) => max((float) $price, 0))
+            ->values();
+            
+        $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->groupBy('league_team_id')
+            ->select('league_team_id', DB::raw('count(*) as count'))
+            ->pluck('count', 'league_team_id');
+            
+        $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
+        
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts, $currentPlayer) {
+            $retainedCount = $retainedCounts[$team->id] ?? 0;
+            $playersNeeded = max($auctionSlotsPerTeam - ($team->sold_players_count ?? 0), 0);
+            $futureSlots = max($playersNeeded - 1, 0);
+            $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
+            $baseWallet = $league->team_wallet_limit ?? ($team->wallet_balance ?? 0);
+            $spentAmount = (float) ($team->spent_amount ?? 0);
+            $availableWallet = max($baseWallet - $spentAmount, 0);
+            $maxBidCap = max($availableWallet - $reserveAmount, 0);
+            
+            $currentBidAmount = $currentPlayer ? ($currentPlayer->base_price ?? 0) : 0;
+            if ($currentPlayer && $currentPlayer->auctionBids()->exists()) {
+                $latestBid = $currentPlayer->auctionBids()->latest('created_at')->first();
+                if ($latestBid) {
+                    $currentBidAmount = $latestBid->amount;
+                }
+            }
+            
+            $teamDisabled = ($playersNeeded === 0) || ($currentPlayer && $maxBidCap < $currentBidAmount);
+            
+            return [
+                'id' => $team->id,
+                'name' => $team->team->name ?? 'Team #' . $team->id,
+                'logo' => $team->team->logo ? url(Storage::url($team->team->logo)) : null,
+                'wallet_balance' => $availableWallet,
+                'players_needed' => $playersNeeded,
+                'reserve_amount' => $reserveAmount,
+                'max_bid_cap' => $maxBidCap,
+                'retained_players_count' => $retainedCount,
+                'sold_players_count' => $team->sold_players_count ?? 0,
+                'disabled' => $teamDisabled,
+            ];
+        });
+
+        $auctionStats = [
+            'total_players' => $league->leaguePlayers()->count(),
+            'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
+            'available_players' => $league->leaguePlayers()->where('status', 'available')->count(),
+            'unsold_players' => $league->leaguePlayers()->where('status', 'unsold')->count(),
+            'wallet_spent' => $league->leaguePlayers()->where('status', 'sold')->sum('bid_price'),
+        ];
+
+        $bidIncrements = $league->bid_increment_type === 'predefined' && !empty($league->predefined_increments)
+            ? $league->predefined_increments
+            : [['min' => 0, 'max' => 1000, 'increment' => 50], ['min' => 1000, 'max' => null, 'increment' => 100]];
+
+        return response()->json([
+            'success' => true,
+            'league' => [
+                'id' => $league->id,
+                'name' => $league->name,
+                'slug' => $league->slug,
+                'status' => $league->status,
+                'season' => $league->season,
+                'game_name' => $league->game->name ?? 'Game TBA',
+                'teams_count' => $league->league_teams_count,
+            ],
+            'current_player' => $currentPlayer ? [
+                'id' => $currentPlayer->id,
+                'player_id' => $currentPlayer->player->id,
+                'name' => $currentPlayer->player->name,
+                'photo' => $currentPlayer->player->photo ? url(Storage::url($currentPlayer->player->photo)) : null,
+                'role' => $currentPlayer->player->primaryGameRole->gamePosition->name ?? 
+                         $currentPlayer->player->position->name ?? 'Role TBA',
+                'base_price' => $currentPlayer->base_price,
+            ] : null,
+            'current_highest_bid' => $currentHighestBid ? [
+                'amount' => $currentHighestBid->amount,
+                'league_team_id' => $currentHighestBid->league_team_id,
+                'team_name' => $currentHighestBid->leagueTeam->team->name ?? 'Unknown',
+            ] : null,
+            'available_players' => $availablePlayers->map(function ($lp) {
+                return [
+                    'id' => $lp->id,
+                    'user_id' => $lp->user_id,
+                    'name' => $lp->player->name,
+                    'role' => $lp->player->primaryGameRole->gamePosition->name ?? 
+                             $lp->player->position->name ?? '',
+                    'base_price' => $lp->base_price,
+                    'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
+                ];
+            })->values(),
+            'unsold_players' => $unsoldPlayers->map(function ($lp) {
+                return [
+                    'id' => $lp->id,
+                    'user_id' => $lp->user_id,
+                    'name' => $lp->player->name,
+                    'role' => $lp->player->primaryGameRole->gamePosition->name ?? 
+                             $lp->player->position->name ?? '',
+                    'base_price' => $lp->base_price,
+                    'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
+                ];
+            })->values(),
+            'teams' => $teams->values(),
+            'bid_increments' => $bidIncrements,
+            'auction_stats' => $auctionStats,
+        ]);
+    }
+
+    /**
      * Start the auction.
      */
     public function start(Request $request)
@@ -1315,6 +1491,8 @@ class AuctionController extends Controller
      */
     public function getLiveAuctions()
     {
+        $user = auth()->user();
+        
         // For now, return leagues that are 'active' or have a status indicating auction in progress.
         $leagues = League::whereIn('status', ['active', 'auction'])
             ->withCount('leaguePlayers')
@@ -1325,7 +1503,7 @@ class AuctionController extends Controller
                       }]);
             }])
             ->get()
-            ->map(function ($league) {
+            ->map(function ($league) use ($user) {
                 $currentPlayer = $league->leaguePlayers->first();
                 $currentData = null;
 
@@ -1346,6 +1524,9 @@ class AuctionController extends Controller
                     ];
                 }
 
+                // Check if user can manage this league
+                $canManage = $user && $user->canManageLeague($league->id);
+
                 return [
                     'id' => $league->id,
                     'name' => $league->name,
@@ -1355,6 +1536,7 @@ class AuctionController extends Controller
                     'total_players' => $league->league_players_count,
                     'sold_players' => $league->leaguePlayers()->where('status', 'sold')->count(),
                     'current_player' => $currentData,
+                    'can_manage' => $canManage,
                 ];
             });
 
