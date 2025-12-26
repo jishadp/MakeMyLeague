@@ -1796,7 +1796,7 @@ class AuctionController extends Controller
             ->get();
 
         // Using dompdf library
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('auction.sold-players-pdf', [
+        $pdf = \PDF::loadView('auction.sold-players-pdf', [
             'league' => $league,
             'soldPlayers' => $soldPlayers
         ]);
