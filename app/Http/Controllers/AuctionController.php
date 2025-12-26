@@ -1753,4 +1753,55 @@ class AuctionController extends Controller
         ]);
     }
 
+    /**
+     * API: Get sold players for a league ordered by time
+     */
+    public function getSoldPlayers(League $league)
+    {
+        $soldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->whereNotNull('bid_price')
+            ->with(['player', 'leagueTeam.team'])
+            ->orderBy('updated_at', 'asc') // Order by sold time (earliest first)
+            ->get()
+            ->map(function ($lp) {
+                return [
+                    'id' => $lp->id,
+                    'name' => $lp->player->name ?? 'Unknown',
+                    'photo' => $lp->player->photo ? url(Storage::url($lp->player->photo)) : null,
+                    'role' => $lp->player->primaryGameRole->gamePosition->name ?? $lp->player->position->name ?? 'N/A',
+                    'team_name' => $lp->leagueTeam->team->name ?? 'Unknown',
+                    'team_logo' => $lp->leagueTeam->team->logo ? url(Storage::url($lp->leagueTeam->team->logo)) : null,
+                    'final_amount' => $lp->bid_price,
+                    'sold_at' => $lp->updated_at->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'sold_players' => $soldPlayers
+        ]);
+    }
+
+    /**
+     * API: Download sold players as PDF
+     */
+    public function downloadSoldPlayersPDF(League $league)
+    {
+        $soldPlayers = LeaguePlayer::where('league_id', $league->id)
+            ->where('status', 'sold')
+            ->whereNotNull('bid_price')
+            ->with(['player', 'leagueTeam.team'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        // Using dompdf or similar library
+        $pdf = \PDF::loadView('auction.sold-players-pdf', [
+            'league' => $league,
+            'soldPlayers' => $soldPlayers
+        ]);
+
+        return $pdf->download('sold-players-' . $league->slug . '-' . now()->format('Y-m-d') . '.pdf');
+    }
+
 }

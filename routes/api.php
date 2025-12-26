@@ -65,3 +65,8 @@ Route::prefix('auctions/league/{league:slug}')->group(function () {
     Route::get('team-balances', [AuctionController::class, 'getTeamBalances']);
     Route::get('recent-bids', [AuctionController::class, 'getRecentBids']);
 });
+
+Route::prefix('leagues/{league:slug}')->group(function () {
+    Route::get('sold-players', [AuctionController::class, 'getSoldPlayers']);
+    Route::get('sold-players/pdf', [AuctionController::class, 'downloadSoldPlayersPDF']);
+});

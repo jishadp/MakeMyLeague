@@ -1131,14 +1131,29 @@
                         <input type="text" class="player-finder__input" placeholder="Search available players..." data-controller-player-search autocomplete="off">
                         <div id="controller-search-results" class="player-finder__results hidden"></div>
                     </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
-                        <button type="button" class="player-finder__random" data-controller-random>
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
-                            </svg>
-                            Random available player
-                        </button>
+                    <div class="space-y-2">
+                        <!-- Random Phase Info -->
+                        <div id="random-phase-info" class="rounded-lg border border-indigo-200 bg-indigo-50 p-2.5" style="display: none;">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold text-indigo-900" id="random-phase-title">Random Selection Phase</p>
+                                    <p class="text-[10px] text-indigo-700 mt-0.5" id="random-phase-desc">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-[11px] text-slate-500">Queue players even when no one is currently auctioning.</p>
+                            <button type="button" class="player-finder__random" data-controller-random>
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l6 6-6 6m10-12h6m-6 12h6" />
+                                </svg>
+                                <span id="random-button-text">Random available player</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
@@ -1372,6 +1387,170 @@
                         @endforeach
                     </div>
                     <div id="quick-jump-grid" class="quick-grid"></div>
+                </div>
+            </div>
+
+            <!-- Team Stats Cards Section -->
+            <div class="control-card space-y-4" style="grid-column: 1 / -1;">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Team Statistics</p>
+                        <p class="text-xs text-slate-500">Overview of all teams with their spending and balance</p>
+                    </div>
+                </div>
+
+                <!-- Team Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    @foreach($teams as $leagueTeam)
+                    @php
+                        $soldPlayers = $leagueTeam->leaguePlayers()->where('status', 'sold')->with('player')->get();
+                        $soldCount = $soldPlayers->count();
+                        $totalSpent = $soldPlayers->sum('bid_price');
+                        $walletBalance = $leagueTeam->wallet_balance ?? 0;
+                    @endphp
+                    <div class="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-lg transition-all duration-200">
+                        <!-- Team Header -->
+                        <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100">
+                            <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                @if($leagueTeam->team->logo)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($leagueTeam->team->logo) }}" 
+                                         alt="{{ $leagueTeam->team->name }}" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.src='{{ asset('images/default.jpeg') }}'">
+                                @else
+                                    <span class="text-lg font-bold text-slate-400">{{ substr($leagueTeam->team->name, 0, 2) }}</span>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-bold text-slate-900 truncate">{{ $leagueTeam->team->name }}</h3>
+                                <p class="text-xs text-slate-500">Team</p>
+                            </div>
+                        </div>
+
+                        <!-- Team Stats -->
+                        <div class="space-y-2 mb-3">
+                            <!-- Players Bought -->
+                            <div class="flex items-center justify-between py-1.5 px-2 rounded-lg bg-blue-50">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <span class="text-xs font-semibold text-blue-900">Players</span>
+                                </div>
+                                <span class="text-sm font-bold text-blue-700">{{ $soldCount }}</span>
+                            </div>
+
+                            <!-- Amount Spent -->
+                            <div class="flex items-center justify-between py-1.5 px-2 rounded-lg bg-red-50">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <span class="text-xs font-semibold text-red-900">Spent</span>
+                                </div>
+                                <span class="text-sm font-bold text-red-700">₹{{ number_format($totalSpent) }}</span>
+                            </div>
+
+                            <!-- Wallet Balance -->
+                            <div class="flex items-center justify-between py-1.5 px-2 rounded-lg bg-green-50">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
+                                    <span class="text-xs font-semibold text-green-900">Balance</span>
+                                </div>
+                                <span class="text-sm font-bold text-green-700">₹{{ number_format($walletBalance) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Players List -->
+                        @if($soldPlayers->count() > 0)
+                        <div class="border-t border-slate-100 pt-3">
+                            <p class="text-xs font-semibold text-slate-600 mb-2">Squad</p>
+                            <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                @foreach($soldPlayers as $soldPlayer)
+                                <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                                    <img src="{{ $soldPlayer->player->photo ? \Illuminate\Support\Facades\Storage::url($soldPlayer->player->photo) : asset('images/defaultplayer.jpeg') }}" 
+                                         alt="{{ $soldPlayer->player->name }}" 
+                                         class="w-8 h-8 rounded-lg object-cover bg-slate-200 flex-shrink-0"
+                                         onerror="this.src='{{ asset('images/defaultplayer.jpeg') }}'">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-900 truncate">{{ $soldPlayer->player->name }}</p>
+                                        <p class="text-[10px] text-slate-500">{{ $soldPlayer->player->primaryGameRole->gamePosition->name ?? $soldPlayer->player->position->name ?? 'Player' }}</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-green-700 whitespace-nowrap">₹{{ number_format($soldPlayer->bid_price) }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @else
+                        <div class="border-t border-slate-100 pt-3">
+                            <p class="text-xs text-slate-400 text-center py-2">No players yet</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Sold Players Table Section -->
+
+            <div class="control-card space-y-4" style="grid-column: 1 / -1;">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-600">Sold Players</p>
+                        <p class="text-xs text-slate-500">Complete list of players sold in this auction, ordered by time</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="sold-count" class="player-finder__pill">0 sold</span>
+                        <button type="button" onclick="downloadSoldPlayersPDF()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold hover:from-indigo-700 hover:to-purple-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">SL</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Player</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Role</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Team</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sold-players-tbody" class="bg-white divide-y divide-slate-200">
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">
+                                    Loading sold players...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="sold-pagination" class="flex items-center justify-between flex-wrap gap-3 pt-2">
+                    <p class="text-xs text-slate-600">
+                        Showing <span id="sold-showing-from">0</span> to <span id="sold-showing-to">0</span> of <span id="sold-total">0</span> players
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="changeSoldPage(-1)" id="sold-prev-btn" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Previous
+                        </button>
+                        <span class="text-xs font-semibold text-slate-700">
+                            Page <span id="sold-current-page">1</span> of <span id="sold-total-pages">1</span>
+                        </span>
+                        <button type="button" onclick="changeSoldPage(1)" id="sold-next-btn" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2738,6 +2917,12 @@ function openWhatsAppShare(message) {
             teamButton.dataset.teamWallet = String(updatedWallet);
             updateTeamBudgetLabels(teamId);
             markPlayerCompleted(leaguePlayerId);
+            
+            // Refresh sold players table
+            if (typeof window.refreshSoldPlayers === 'function') {
+                window.refreshSoldPlayers();
+            }
+            
             const transition = handlePhaseTransitions({ autoStart: autoStartEnabled });
             if (autoStartEnabled && !transition.pending && startNextQueued(true)) {
                 return;
@@ -2975,7 +3160,42 @@ function openWhatsAppShare(message) {
         if (randomPhaseStorageKey) {
             localStorage.setItem(randomPhaseStorageKey, currentRandomPhase);
         }
+        updateRandomPhaseUI();
     }
+
+    function updateRandomPhaseUI() {
+        const phaseInfo = document.getElementById('random-phase-info');
+        const phaseTitle = document.getElementById('random-phase-title');
+        const phaseDesc = document.getElementById('random-phase-desc');
+        const randomButtonText = document.getElementById('random-button-text');
+        
+        if (!phaseInfo || !phaseTitle || !phaseDesc || !randomButtonText) {
+            return;
+        }
+
+        const availableCount = uniqueCount(availableRandomPool);
+        const unsoldCount = uniqueCount(unsoldRandomPool);
+        
+        if (currentRandomPhase === 'available') {
+            phaseInfo.style.display = 'block';
+            phaseTitle.textContent = '📋 Available Phase';
+            phaseDesc.textContent = `Random picks will select from ${availableCount} available player${availableCount !== 1 ? 's' : ''}. After all available players are done, you'll move to unsold players.`;
+            randomButtonText.textContent = 'Random available player';
+        } else if (currentRandomPhase === 'unsold') {
+            phaseInfo.style.display = 'block';
+            phaseTitle.textContent = '🔄 Unsold Phase';
+            phaseDesc.textContent = `Random picks now select from ${unsoldCount} unsold player${unsoldCount !== 1 ? 's' : ''}. These are players who were skipped during the available phase.`;
+            randomButtonText.textContent = 'Random unsold player';
+        } else if (currentRandomPhase === 'completed') {
+            phaseInfo.style.display = 'block';
+            phaseTitle.textContent = '✅ Auction Complete';
+            phaseDesc.textContent = 'All players have been processed. No more random selections available.';
+            randomButtonText.textContent = 'Auction completed';
+        } else {
+            phaseInfo.style.display = 'none';
+        }
+    }
+
 
     function uniqueCount(pool) {
         return new Set((pool || []).map(p => String(p.id))).size;
@@ -2991,6 +3211,7 @@ function openWhatsAppShare(message) {
     function rebuildRandomPools() {
         availableRandomPool = buildRandomPool(availablePlayerPool, availableCompletedSet, availableServedSet);
         unsoldRandomPool = buildRandomPool(unsoldPlayerPool, unsoldCompletedSet, unsoldServedSet);
+        updateRandomPhaseUI();
     }
 
     function isAvailablePlayer(id) {
@@ -3570,6 +3791,190 @@ function openWhatsAppShare(message) {
             saveAutoStart(value);
         });
     });
+    // Sold Players Table Management
+    let allSoldPlayers = [];
+    let soldCurrentPage = 1;
+    const soldPlayersPerPage = 15;
+
+    async function fetchSoldPlayers() {
+        const leagueSlug = document.getElementById('controller-league-slug')?.value;
+        if (!leagueSlug) {
+            console.error('League slug not found');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/leagues/${leagueSlug}/sold-players`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getControllerToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch sold players');
+            }
+
+            const data = await response.json();
+            allSoldPlayers = data.sold_players || [];
+            
+            // Sort by sold_at timestamp (most recent first for display order, but SL number starts from 1)
+            allSoldPlayers.sort((a, b) => new Date(a.sold_at) - new Date(b.sold_at));
+            
+            updateSoldCount();
+            renderSoldPlayers();
+        } catch (error) {
+            console.error('Error fetching sold players:', error);
+            const tbody = document.getElementById('sold-players-tbody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">
+                            Unable to load sold players. Please refresh the page.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    }
+
+    function updateSoldCount() {
+        const countEl = document.getElementById('sold-count');
+        if (countEl) {
+            const count = allSoldPlayers.length;
+            countEl.textContent = `${count} sold`;
+        }
+    }
+
+    function renderSoldPlayers() {
+        const tbody = document.getElementById('sold-players-tbody');
+        if (!tbody) return;
+
+        if (allSoldPlayers.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">
+                        No players sold yet
+                    </td>
+                </tr>
+            `;
+            updatePaginationControls();
+            return;
+        }
+
+        const totalPages = Math.ceil(allSoldPlayers.length / soldPlayersPerPage);
+        const startIdx = (soldCurrentPage - 1) * soldPlayersPerPage;
+        const endIdx = Math.min(startIdx + soldPlayersPerPage, allSoldPlayers.length);
+        const playersToShow = allSoldPlayers.slice(startIdx, endIdx);
+
+        tbody.innerHTML = playersToShow.map((player, idx) => {
+            const serialNumber = startIdx + idx + 1;
+            const soldTime = player.sold_at ? new Date(player.sold_at).toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : 'N/A';
+
+            return `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm font-bold text-slate-900">${serialNumber}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <img src="${player.photo || '/images/defaultplayer.jpeg'}" 
+                                 alt="${player.name}" 
+                                 class="w-8 h-8 rounded-lg object-cover bg-slate-200"
+                                 onerror="this.src='/images/defaultplayer.jpeg'">
+                            <span class="text-sm font-semibold text-slate-900">${player.name || 'Unknown'}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-700">${player.role || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            ${player.team_logo ? `<img src="${player.team_logo}" alt="${player.team_name}" class="w-6 h-6 rounded object-cover" onerror="this.src='/images/default.jpeg'">` : ''}
+                            <span class="text-sm font-semibold text-slate-900">${player.team_name || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm font-bold text-green-700">${formatCurrency(player.final_amount || 0)}</td>
+                    <td class="px-4 py-3 text-xs text-slate-600">${soldTime}</td>
+                </tr>
+            `;
+        }).join('');
+
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        const totalPages = Math.ceil(allSoldPlayers.length / soldPlayersPerPage);
+        const startIdx = (soldCurrentPage - 1) * soldPlayersPerPage;
+        const endIdx = Math.min(startIdx + soldPlayersPerPage, allSoldPlayers.length);
+
+        document.getElementById('sold-showing-from').textContent = allSoldPlayers.length > 0 ? startIdx + 1 : 0;
+        document.getElementById('sold-showing-to').textContent = endIdx;
+        document.getElementById('sold-total').textContent = allSoldPlayers.length;
+        document.getElementById('sold-current-page').textContent = soldCurrentPage;
+        document.getElementById('sold-total-pages').textContent = totalPages || 1;
+
+        const prevBtn = document.getElementById('sold-prev-btn');
+        const nextBtn = document.getElementById('sold-next-btn');
+
+        if (prevBtn) prevBtn.disabled = soldCurrentPage <= 1;
+        if (nextBtn) nextBtn.disabled = soldCurrentPage >= totalPages;
+    }
+
+    window.changeSoldPage = function(direction) {
+        const totalPages = Math.ceil(allSoldPlayers.length / soldPlayersPerPage);
+        soldCurrentPage = Math.max(1, Math.min(soldCurrentPage + direction, totalPages));
+        renderSoldPlayers();
+    };
+
+    window.downloadSoldPlayersPDF = async function() {
+        const leagueSlug = document.getElementById('controller-league-slug')?.value;
+        if (!leagueSlug) {
+            showControllerMessage('League information not found', 'error');
+            return;
+        }
+
+        try {
+            showControllerMessage('Generating PDF...', 'success');
+            
+            const response = await fetch(`/api/leagues/${leagueSlug}/sold-players/pdf`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/pdf',
+                    'X-CSRF-TOKEN': getControllerToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate PDF');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sold-players-${leagueSlug}-${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showControllerMessage('PDF downloaded successfully', 'success');
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            showControllerMessage('Failed to download PDF. Please try again.', 'error');
+        }
+    };
+
+    // Fetch sold players on page load
+    fetchSoldPlayers();
+
+    // Refresh sold players when a player is sold (you can call this after successful sold action)
+    window.refreshSoldPlayers = function() {
+        fetchSoldPlayers();
+    };
+
 })();
 </script>
 @endsection
