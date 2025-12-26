@@ -2859,7 +2859,17 @@ function openWhatsAppShare(message) {
                 currentPlayerIdInput.value = '';
             }
             clearPlayerProgress(leaguePlayerId);
-            showControllerMessage('Player moved back to available. Refreshing...', 'success');
+            showControllerMessage('Player skipped. Loading next player...', 'success');
+            
+            // Automatically load next random player after skip
+            const transition = handlePhaseTransitions({ autoStart: autoStartEnabled });
+            if (autoStartEnabled && !transition.pending && startNextQueued(true)) {
+                return;
+            }
+            if (transition.pending) {
+                return;
+            }
+            
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             showControllerMessage(error.message || 'Unable to move player to available.', 'error');
