@@ -22,10 +22,10 @@
                     </p>
                 </div>
                 <div>
-                     <a href="{{ route('leagues.index') }}" 
+                     <a href="{{ route('auctions.live-matches') }}" 
                        class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-semibold hover:bg-zinc-700 hover:text-white transition-all border border-white/5 hover:border-orange-500/30 shadow-lg shadow-black/20">
                         <i class="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
-                        <span>Back to Leagues</span>
+                        <span>Back to Live Matches</span>
                     </a>
                 </div>
             </div>

@@ -16,8 +16,13 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500" x-text="status.replace('_', ' ')"></span>
                 </div>
                 
-                <div class="font-mono font-black text-2xl tracking-tight text-slate-800 tabular-nums">
-                    <span x-text="matchTimeDisplay">00:00</span>
+                <div class="flex items-center gap-3">
+                    <button @click="shareMatch()" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm" title="Share Lineups & Link">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </button>
+                    <div class="font-mono font-black text-2xl tracking-tight text-slate-800 tabular-nums">
+                        <span x-text="matchTimeDisplay">00:00</span>
+                    </div>
                 </div>
             </div>
 
@@ -599,6 +604,43 @@ function scorerConsole() {
         init() {
             this.updateTimer();
             setInterval(() => this.updateTimer(), 1000); 
+        },
+
+        shareMatch() {
+            let leagueName = '{{ addslashes($fixture->league->name ?? "League") }}';
+            let homeTeam = '{{ addslashes($fixture->homeTeam->team->name) }}';
+            let awayTeam = '{{ addslashes($fixture->awayTeam->team->name) }}';
+            let venue = '{{ addslashes($fixture->venue ?? "Main Ground") }}';
+            let date = '{{ $fixture->match_date ? $fixture->match_date->format("d M, Y") : "Today" }}';
+            let liveLink = '{{ route("matches.live", $fixture->slug) }}';
+
+            let formatPlayer = (p) => {
+                let name = p.player?.user?.name || p.custom_name || 'Guest';
+                let num = p.player?.jersey_number ? ` (#${p.player.jersey_number})` : '';
+                return `• ${name}${num}`;
+            };
+
+            // Get Starters
+            let homeXI = this.players.filter(p => p.team_id == {{ $fixture->home_team_id }} && p.is_active)
+                                     .map(formatPlayer).join('\n');
+            let awayXI = this.players.filter(p => p.team_id == {{ $fixture->away_team_id }} && p.is_active)
+                                     .map(formatPlayer).join('\n');
+
+            let text = `\uD83C\uDFC6 *${leagueName}*\n` +
+                       `\u26BD ${homeTeam} \uD83C\uDD9A ${awayTeam}\n` +
+                       `\uD83D\uDCC5 ${date} | \uD83D\uDCCD ${venue}\n\n`;
+
+            if (homeXI || awayXI) {
+                text += `\uD83D\uDCCB *LINEUPS*\n\n` +
+                        `*${homeTeam} XI:*\n${homeXI || 'Not announced'}\n\n` +
+                        `*${awayTeam} XI:*\n${awayXI || 'Not announced'}\n\n`;
+            }
+
+            text += `\uD83D\uDD34 *Watch Live & Score:*\n${liveLink}\n\n`;
+            text += `_(Refresh the page for live updates)_`;
+
+            let url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
         },
 
         updateTimer() {
