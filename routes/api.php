@@ -60,6 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
 // Auction API endpoints for live view  
 Route::middleware('auth:sanctum')->get('live-auctions', [AuctionController::class, 'getLiveAuctions']);
 
+// Live Matches API (Mobile)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('live-matches-listing', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'index']);
+    Route::get('leagues/{league:slug}/matches', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'leagueMatches']);
+    Route::get('fixtures/{fixture:slug}/details', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'show']);
+});
+
 Route::prefix('auctions/league/{league:slug}')->group(function () {
     Route::get('current-state', [AuctionController::class, 'getCurrentState']);
     Route::get('team-balances', [AuctionController::class, 'getTeamBalances']);
