@@ -90,6 +90,7 @@ Route::get('dashboard/auctions/{league}/broadcast', [DashboardController::class,
 
 // Public live matches view
 Route::get('league-live-matches', [AuctionController::class, 'liveMatchesIndex'])->name('auctions.live-matches');
+Route::get('league/{league:slug}/matches', [AuctionController::class, 'leagueMatches'])->name('leagues.matches');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'view'])->name('dashboard');
