@@ -65,7 +65,7 @@
 </style>
 
 <div class="min-h-screen theme-transition bg-[var(--bg-page)] text-[var(--text-main)]" 
-     x-data="{ activeTab: 'summary', theme: localStorage.getItem('liveMatchTheme') || 'white' }"
+     x-data="{ activeTab: 'summary', theme: localStorage.getItem('liveMatchTheme') || 'green' }"
      x-init="$watch('theme', val => localStorage.setItem('liveMatchTheme', val))"
      :class="'theme-' + theme">
     
