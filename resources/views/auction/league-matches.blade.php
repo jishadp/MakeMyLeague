@@ -288,7 +288,7 @@
                                                 <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
                                             @endif
                                        </div>
-                                       <span class="font-bold text-sm sm:text-base truncate text-[var(--text-main)]">{{ $homeTeam?->name ?? 'TBD' }}</span>
+                                       <span class="font-bold text-xs sm:text-sm leading-tight text-[var(--text-main)] line-clamp-2">{{ $homeTeam?->name ?? 'TBD' }}</span>
                                   </div>
                                   
                                   <div class="px-2 sm:px-4 flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
@@ -297,7 +297,7 @@
                                   </div>
 
                                   <div class="flex items-center gap-4 flex-1 justify-end">
-                                       <span class="font-bold text-sm sm:text-base text-right truncate text-[var(--text-main)]">{{ $awayTeam?->name ?? 'TBD' }}</span>
+                                       <span class="font-bold text-xs sm:text-sm text-right leading-tight text-[var(--text-main)] line-clamp-2">{{ $awayTeam?->name ?? 'TBD' }}</span>
                                        <div class="w-10 h-10 rounded-full p-1.5 border flex-shrink-0 bg-[var(--bg-element)] border-[var(--border)]">
                                             @if($awayTeam && $awayTeam->logo)
                                                 <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-full h-full object-contain" alt="">
