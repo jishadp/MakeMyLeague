@@ -195,7 +195,7 @@
                         @endphp
                         <div class="bg-zinc-900 rounded-xl border border-white/5 p-4 sm:p-5 flex items-center justify-between group hover:border-orange-500/20 transition-all">
                              <a href="{{ route('matches.live', $match->slug) }}" class="flex-1 flex items-center justify-between">
-                                  <div class="flex items-center gap-4 flex-1">
+                                   <div class="flex items-center gap-4 flex-1">
                                        <div class="w-10 h-10 rounded-full bg-zinc-800 p-1.5 border border-white/5 flex-shrink-0">
                                             @if($homeTeam && $homeTeam->logo)
                                                 <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-full h-full object-contain" alt="">
@@ -203,16 +203,16 @@
                                                 <div class="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-600">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
                                             @endif
                                        </div>
-                                       <span class="font-bold text-sm sm:text-base text-zinc-200">{{ $homeTeam?->name ?? 'TBD' }}</span>
+                                       <span class="font-bold text-sm sm:text-base text-zinc-200 truncate">{{ $homeTeam?->name ?? 'TBD' }}</span>
                                   </div>
                                   
-                                  <div class="px-4 flex flex-col items-center min-w-[100px]">
+                                  <div class="px-2 sm:px-4 flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
                                        <span class="text-xs font-bold text-zinc-500 bg-zinc-800 px-2 py-1 rounded mb-1">{{ $match->match_time ? $match->match_time->format('h:i A') : 'TBA' }}</span>
                                        <span class="text-[10px] text-zinc-600 uppercase font-medium">{{ $match->match_date ? $match->match_date->format('M d') : 'Date TBA' }}</span>
                                   </div>
 
                                   <div class="flex items-center gap-4 flex-1 justify-end">
-                                       <span class="font-bold text-sm sm:text-base text-zinc-200 text-right">{{ $awayTeam?->name ?? 'TBD' }}</span>
+                                       <span class="font-bold text-sm sm:text-base text-zinc-200 text-right truncate">{{ $awayTeam?->name ?? 'TBD' }}</span>
                                        <div class="w-10 h-10 rounded-full bg-zinc-800 p-1.5 border border-white/5 flex-shrink-0">
                                             @if($awayTeam && $awayTeam->logo)
                                                 <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-full h-full object-contain" alt="">
@@ -225,9 +225,9 @@
                              <!-- Scorer Action for Upcoming -->
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
-                                    <div class="ml-4 pl-4 border-l border-white/5 hidden sm:block">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all" title="Start Scoring">
-                                            <i class="fa-solid fa-play text-xs"></i>
+                                    <div class="ml-2 pl-2 sm:ml-4 sm:pl-4 border-l border-white/5">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-zinc-800 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all shadow-lg border border-white/5" title="Start Scoring">
+                                            <i class="fa-solid fa-play text-xs sm:text-[10px]"></i>
                                         </a>
                                     </div>
                                 @endif
