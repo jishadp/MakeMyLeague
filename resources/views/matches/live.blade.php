@@ -73,12 +73,12 @@
     <div class="sticky top-0 z-40 shadow-xl backdrop-blur-md theme-transition border-b bg-[var(--bg-header)]/95 border-[var(--border)]">
         
         <!-- Top Bar: Status & Theme Switcher -->
-        <div class="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b border-[var(--border)] bg-[var(--bg-card)]/50 text-[var(--text-muted)]">
-            <div class="truncate max-w-[200px]">{{ $fixture->league->name ?? 'League Match' }}</div>
-            <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between px-4 py-4 text-sm font-bold uppercase tracking-widest border-b border-[var(--border)] bg-[var(--bg-card)]/50 text-[var(--text-muted)]">
+            <div class="truncate max-w-[200px] sm:max-w-md text-base">{{ $fixture->league->name ?? 'League Match' }}</div>
+            <div class="flex items-center gap-3">
                 @if($fixture->status == 'in_progress')
-                    <span class="flex items-center gap-1.5 animate-pulse text-[var(--accent)]">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span> LIVE
+                    <span class="flex items-center gap-2 animate-pulse text-[var(--accent)]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent)]"></span> LIVE
                     </span>
                  @else
                     <span>{{ str_replace('_', ' ', $fixture->status) }}</span>
@@ -86,27 +86,27 @@
                 
                 @auth
                     @if(auth()->id() == $fixture->scorer_id || ($fixture->league && auth()->id() == $fixture->league->organizer_id) || auth()->user()->is_admin)
-                        <a href="{{ route('scorer.console', $fixture->slug) }}" class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors border bg-[var(--bg-element)] text-[var(--accent)] border-[var(--accent)]/30 hover:bg-[var(--bg-hover)]">
-                            <i class="fa-solid fa-pen-to-square mr-1"></i> Score
+                        <a href="{{ route('scorer.console', $fixture->slug) }}" class="ml-3 px-4 py-1.5 rounded text-xs font-bold uppercase transition-colors border bg-[var(--bg-element)] text-[var(--accent)] border-[var(--accent)]/30 hover:bg-[var(--bg-hover)]">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Score
                         </a>
                     @endif
                 @endauth
                 
                 <!-- Reload Button -->
-                <button @click="window.location.reload()" class="ml-2 w-5 h-5 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--bg-hover)] ring-offset-[var(--bg-page)]" title="Refresh">
-                    <i class="fa-solid fa-rotate-right text-[10px]"></i>
+                <button @click="window.location.reload()" class="ml-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--bg-hover)] ring-offset-[var(--bg-page)]" title="Refresh">
+                    <i class="fa-solid fa-rotate-right text-sm"></i>
                 </button>
 
                 <!-- Theme Switcher -->
-                <div class="flex items-center gap-1 ml-2 bg-[var(--bg-element)] p-0.5 rounded-full border border-[var(--border)]">
-                    <button @click="theme = 'dark'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'dark' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
-                        <i class="fa-solid fa-moon text-[8px]"></i>
+                <div class="flex items-center gap-1.5 ml-3 bg-[var(--bg-element)] p-1 rounded-full border border-[var(--border)]">
+                    <button @click="theme = 'dark'" class="w-8 h-8 rounded-full flex items-center justify-center transition-all" :class="theme === 'dark' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-moon text-xs"></i>
                     </button>
-                    <button @click="theme = 'white'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'white' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
-                        <i class="fa-solid fa-sun text-[8px]"></i>
+                    <button @click="theme = 'white'" class="w-8 h-8 rounded-full flex items-center justify-center transition-all" :class="theme === 'white' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-sun text-xs"></i>
                     </button>
-                     <button @click="theme = 'green'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'green' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
-                        <i class="fa-solid fa-leaf text-[8px]"></i>
+                     <button @click="theme = 'green'" class="w-8 h-8 rounded-full flex items-center justify-center transition-all" :class="theme === 'green' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-leaf text-xs"></i>
                     </button>
                 </div>
             </div>
