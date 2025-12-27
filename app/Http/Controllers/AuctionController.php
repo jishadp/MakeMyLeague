@@ -31,27 +31,52 @@ class AuctionController extends Controller
     /**
      * Live matches hub for organizers/admins.
      */
+    /**
+     * Live matches hub for organizers/admins.
+     */
     public function liveMatchesIndex(Request $request)
     {
-        $leagues = League::with('game')
+        // 1. Get all leagues that have at least one fixture in relevant status
+        // We'll group them by Game later in the collection
+        $leagues = League::with(['game', 'localBody.district'])
             ->whereHas('fixtures', function ($query) {
-                $query->whereIn('status', ['in_progress', 'scheduled', 'unscheduled']);
+                // Include completed matches now
+                $query->whereIn('status', ['in_progress', 'scheduled', 'unscheduled', 'completed']);
             })
-            ->orderBy('name')
             ->get();
 
-        $fixtures = Fixture::with(['homeTeam.team', 'awayTeam.team', 'league', 'events' => function($q) {
+        if ($leagues->isEmpty()) {
+            return view('auction.live-matches', [
+                'games' => collect(), 
+                'leaguesByGame' => collect(), 
+                'fixturesByLeague' => collect()
+            ]);
+        }
+
+        // 2. Fetch Fixtures for these leagues
+        // We fetch ALL status types now.
+        $fixtures = Fixture::with(['homeTeam.team', 'awayTeam.team', 'league', 'scorer', 'events' => function($q) {
                 $q->latest();
             }])
             ->whereIn('league_id', $leagues->pluck('id'))
-            ->whereIn('status', ['in_progress', 'scheduled', 'unscheduled'])
-            ->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'unscheduled')")
-            ->orderBy('match_date')
-            ->orderBy('match_time')
-            ->get()
-            ->groupBy('league_id');
+            ->whereIn('status', ['in_progress', 'scheduled', 'unscheduled', 'completed'])
+            ->orderBy('match_date', 'desc') // Default sort, we will split them in the view or here
+            ->orderBy('match_time', 'desc')
+            ->get();
 
-        return view('auction.live-matches', compact('leagues', 'fixtures'));
+        // 3. Structure Data: Game -> League -> Fixtures
+        // First, group fixtures by league_id
+        $fixturesByLeague = $fixtures->groupBy('league_id');
+
+        // Then group leagues by Game Name
+        $leaguesByGame = $leagues->groupBy(function($league) {
+            return $league->game ? $league->game->name : 'Other';
+        });
+
+        // Get unique games list for tabs
+        $games = $leaguesByGame->keys();
+
+        return view('auction.live-matches', compact('games', 'leaguesByGame', 'fixturesByLeague'));
     }
     /**
      * Display the auction bidding page.
