@@ -270,8 +270,74 @@ class LiveMatchApiController extends Controller
             'success' => true,
             'new_scores' => [
                 'home' => $fixture->refresh()->home_score,
-                'away' => $fixture->away_score
             ]
         ]);
+    }
+
+    public function substitute(Request $request, Fixture $fixture)
+    {
+        // Authorization
+        if ($request->user()->id !== $fixture->scorer_id && 
+            !$request->user()->is_admin && 
+            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'team_id' => 'required|exists:league_teams,id',
+            'player_out_id' => 'nullable|exists:league_players,id',
+            'player_in_id' => 'nullable|exists:league_players,id',
+            'minute' => 'required|integer',
+        ]);
+
+        // Record Substitution Event
+        $fixture->events()->create([
+            'event_type' => 'SUB',
+            'minute' => $validated['minute'],
+            'team_id' => $validated['team_id'],
+            'player_id' => $validated['player_out_id'],
+            'related_player_id' => $validated['player_in_id'],
+            'description' => 'Substitution',
+        ]);
+
+        // Update Statuses
+        if ($validated['player_out_id']) {
+            $fixture->fixturePlayers()
+                ->where('player_id', $validated['player_out_id'])
+                ->update(['status' => 'subbed_out', 'is_active' => false]);
+        }
+
+        if ($validated['player_in_id']) {
+            $playerIn = $fixture->fixturePlayers()->where('player_id', $validated['player_in_id'])->first();
+            if ($playerIn) {
+                $playerIn->update(['status' => 'subbed_in', 'is_active' => true]);
+            } else {
+                // If not in bench list (unlikely if data is consistent, but safe to add)
+                $fixture->fixturePlayers()->create([
+                    'team_id' => $validated['team_id'],
+                    'player_id' => $validated['player_in_id'],
+                    'status' => 'subbed_in',
+                    'is_active' => true
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Substitution recorded']);
+    }
+
+    public function finishMatch(Request $request, Fixture $fixture)
+    {
+         // Authorization
+        if ($request->user()->id !== $fixture->scorer_id && 
+            !$request->user()->is_admin && 
+            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $fixture->update([
+            'status' => 'completed',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Match Finished']);
     }
 }
