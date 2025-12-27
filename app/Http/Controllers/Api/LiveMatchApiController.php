@@ -179,7 +179,12 @@ class LiveMatchApiController extends Controller
                 'started_at' => $fixture->started_at,
                 'match_duration' => $fixture->match_duration,
                 'venue' => $fixture->venue,
-                'league_name' => $fixture->league->name,
+                'league' => [
+                    'id' => $fixture->league->id,
+                    'name' => $fixture->league->name,
+                    'slug' => $fixture->league->slug,
+                    'organizer_id' => $fixture->league->organizer_id,
+                ],
                 'scorer_id' => $fixture->scorer_id,
                 'home_team' => [
                     'id' => $fixture->home_team_id,
