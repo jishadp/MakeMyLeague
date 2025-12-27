@@ -62,7 +62,10 @@
             <div class="flex justify-center gap-8">
                 @php
                     $liveMatches = $fixtures->where('status', 'in_progress');
-                    $upcomingMatches = $fixtures->whereIn('status', ['scheduled', 'unscheduled']);
+                    $upcomingMatches = $fixtures->whereIn('status', ['scheduled', 'unscheduled'])->sortBy(function($match) {
+                        return ($match->match_date ? $match->match_date->format('Y-m-d') : '9999-12-31') . 
+                               ($match->match_time ? $match->match_time->format('H:i:s') : '00:00:00');
+                    });
                     $pastMatches = $fixtures->where('status', 'completed');
                 @endphp
                 
@@ -193,9 +196,10 @@
                             $homeTeam = $match->homeTeam?->team;
                             $awayTeam = $match->awayTeam?->team;
                         @endphp
-                        <div class="bg-zinc-900 rounded-xl border border-white/5 p-4 sm:p-5 flex items-center justify-between group hover:border-orange-500/20 transition-all">
-                             <a href="{{ route('matches.live', $match->slug) }}" class="flex-1 flex items-center justify-between">
-                                   <div class="flex items-center gap-4 flex-1">
+                        <div class="bg-zinc-900 rounded-xl border border-white/5 flex flex-col group hover:border-orange-500/20 transition-all overflow-hidden">
+                             <!-- Match Details -->
+                             <a href="{{ route('matches.live', $match->slug) }}" class="p-4 sm:p-5 flex items-center justify-between flex-grow">
+                                  <div class="flex items-center gap-4 flex-1">
                                        <div class="w-10 h-10 rounded-full bg-zinc-800 p-1.5 border border-white/5 flex-shrink-0">
                                             @if($homeTeam && $homeTeam->logo)
                                                 <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-full h-full object-contain" alt="">
@@ -222,12 +226,13 @@
                                        </div>
                                   </div>
                              </a>
-                             <!-- Scorer Action for Upcoming -->
+
+                             <!-- Scorer Action for Upcoming (Separate Row) -->
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
-                                    <div class="ml-2 pl-2 sm:ml-4 sm:pl-4 border-l border-white/5">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-zinc-800 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all shadow-lg border border-white/5" title="Start Scoring">
-                                            <i class="fa-solid fa-play text-xs sm:text-[10px]"></i>
+                                    <div class="bg-zinc-800/30 border-t border-white/5 p-2">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg hover:shadow-orange-500/20">
+                                            <i class="fa-solid fa-play"></i> Start Scoring
                                         </a>
                                     </div>
                                 @endif
