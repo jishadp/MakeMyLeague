@@ -65,8 +65,38 @@
 </style>
 
 <div class="min-h-screen theme-transition bg-[var(--bg-page)] text-[var(--text-main)]" 
-     x-data="{ activeTab: 'summary', theme: localStorage.getItem('liveMatchTheme') || 'green' }"
-     x-init="$watch('theme', val => localStorage.setItem('liveMatchTheme', val))"
+     x-data="{ 
+         activeTab: 'summary', 
+         theme: localStorage.getItem('liveMatchTheme') || 'green',
+         currentMinute: {{ $fixture->current_minute ?? 0 }},
+         isRunning: {{ $fixture->is_running ? 'true' : 'false' }},
+         matchState: '{{ $fixture->match_state ?? 'NOT_STARTED' }}',
+         matchDuration: {{ $fixture->match_duration ?? 45 }},
+         
+         get timeDisplay() {
+             if(this.matchState === 'HALF_TIME') return 'HT';
+             if(this.matchState === 'FULL_TIME') return 'FT';
+             
+             // Stoppage time display
+             if (this.matchState == 'FIRST_HALF' && this.currentMinute > this.matchDuration) {
+                 return this.matchDuration + '+' + (this.currentMinute - this.matchDuration);
+             }
+             if (this.matchState == 'SECOND_HALF' && this.currentMinute > this.matchDuration * 2) {
+                 return (this.matchDuration * 2) + '+' + (this.currentMinute - this.matchDuration * 2);
+             }
+             
+             // Just show minute with apostrophe
+             return this.currentMinute + String.fromCharCode(39);
+         }
+     }"
+     x-init="
+         $watch('theme', val => localStorage.setItem('liveMatchTheme', val));
+         
+         // Auto-refresh every 15 seconds to get latest from server
+         setInterval(() => {
+             window.location.reload();
+         }, 15000);
+     "
      :class="'theme-' + theme">
     
     <!-- Ultra-Compact Sticky Match Header -->
@@ -159,27 +189,14 @@
                             <span>{{ $fixture->away_score ?? 0 }}</span>
                         </div>
                         
-                        <!-- Timer Badge -->
-                        <div class="mt-2 px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1.5 shadow-sm bg-[var(--bg-element)] text-[var(--accent)] border-[var(--border)]"
-                             x-data="{ time: '00:00', start: '{{ $fixture->started_at }}', status: '{{ $fixture->status }}' }"
-                             x-init="
-                                if(status == 'in_progress' && start) {
-                                    setInterval(() => {
-                                        let startTime = new Date(start).getTime();
-                                        let now = new Date().getTime();
-                                        let diff = Math.floor((now - startTime) / 1000);
-                                        let m = Math.floor(diff / 60);
-                                        let s = diff % 60;
-                                        time = m + '\'' + (s < 10 ? '0' : '') + s;
-                                    }, 1000);
-                                } else if (status == 'completed') {
-                                    time = 'FT';
-                                } else {
-                                    time = '--:--';
-                                }
-                             ">
-                             <span x-show="status == 'in_progress'" class="w-1.5 h-1.5 rounded-full animate-pulse bg-[var(--accent)]"></span>
-                            <span x-text="time"></span>
+                        <!-- Match State & Timer -->
+                        <div class="flex flex-col items-center">
+                            <span x-show="matchState && matchState !== 'NOT_STARTED'" class="text-[10px] font-bold uppercase tracking-wider mb-0.5 text-[var(--text-muted)]" x-text="matchState.replace(/_/g, ' ')"></span>
+
+                            <div class="px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1.5 shadow-sm bg-[var(--bg-element)] text-[var(--accent)] border-[var(--border)]">
+                                <span x-show="isRunning" class="w-1.5 h-1.5 rounded-full animate-pulse bg-[var(--accent)]"></span>
+                                <span x-text="timeDisplay"></span>
+                            </div>
                         </div>
                     </div>
 

@@ -386,6 +386,7 @@ Route::middleware('auth')->group(function () {
         Route::post('event', [ScorerController::class, 'storeEvent'])->name('event');
         Route::delete('delete-event/{event}', [ScorerController::class, 'deleteEvent'])->name('event.delete');
         Route::post('substitute', [ScorerController::class, 'substitute'])->name('substitute');
+        Route::post('timer', [ScorerController::class, 'updateTimer'])->name('timer');
         Route::post('finish', [ScorerController::class, 'finishMatch'])->name('finish');
     });
 });

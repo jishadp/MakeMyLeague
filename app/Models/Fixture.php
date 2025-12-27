@@ -22,9 +22,21 @@ class Fixture extends Model
                     ->withTimestamps();
     }
 
+    // Match States
+    const STATE_NOT_STARTED = 'NOT_STARTED';
+    const STATE_FIRST_HALF = 'FIRST_HALF';
+    const STATE_HALF_TIME = 'HALF_TIME';
+    const STATE_SECOND_HALF = 'SECOND_HALF';
+    const STATE_EXTRA_TIME_FIRST = 'EXTRA_TIME_FIRST';
+    const STATE_EXTRA_TIME_BREAK = 'EXTRA_TIME_BREAK';
+    const STATE_EXTRA_TIME_SECOND = 'EXTRA_TIME_SECOND';
+    const STATE_FULL_TIME = 'FULL_TIME';
+
     protected $casts = [
         'match_date' => 'date',
         'match_time' => 'datetime:H:i',
+        'is_running' => 'boolean',
+        'last_tick_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -32,7 +44,28 @@ class Fixture extends Model
         parent::boot();
         static::creating(function ($fixture) {
             $fixture->slug = $fixture->generateUniqueSlug();
+            if (!$fixture->match_state) {
+                $fixture->match_state = self::STATE_NOT_STARTED;
+            }
         });
+    }
+
+    // ... (rest of methods)
+
+    public function getMatchTimeDisplayAttribute()
+    {
+        $min = $this->current_minute;
+        $added = 0;
+
+        // Helper to format
+        $format = function($m, $add) {
+            return $add > 0 ? "{$m}+{$add}" : "{$m}:00"; // Simplified for attributes, but Scorer Console does detailed logic
+        };
+
+        if ($this->match_state === self::STATE_HALF_TIME) return 'HT';
+        if ($this->match_state === self::STATE_FULL_TIME) return 'FT';
+        
+        return $this->current_minute . "'";
     }
 
     public function getRouteKeyName()

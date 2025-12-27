@@ -1,30 +1,53 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 lg:pb-0 relative overflow-x-hidden selection:bg-blue-100 selection:text-blue-900" 
-     x-data="scorerConsole()">
+<style>
+    /* Theme Variables */
+    .theme-dark {
+        --bg-page: #09090b; --bg-header: #18181b; --bg-card: #18181b; --bg-element: #27272a; --bg-hover: #27272a; --text-main: #e4e4e7; --text-muted: #a1a1aa; --border: #27272a; --accent: #f97316;
+    }
+    .theme-white {
+        --bg-page: #f3f4f6; --bg-header: #ffffff; --bg-card: #ffffff; --bg-element: #f3f4f6; --bg-hover: #f9fafb; --text-main: #18181b; --text-muted: #71717a; --border: #e4e4e7; --accent: #f97316;
+    }
+    .theme-green {
+        --bg-page: #f0fdf4; --bg-header: #ffffff; --bg-card: #ffffff; --bg-element: #dcfce7; --bg-hover: #f0fdf4; --text-main: #14532d; --text-muted: #15803d; --border: #bbf7d0; --accent: #16a34a;
+    }
+    .theme-transition { transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+</style>
+
+<div class="min-h-screen theme-transition bg-[var(--bg-page)] text-[var(--text-main)] pb-24 lg:pb-0 relative overflow-x-hidden selection:bg-blue-100 selection:text-blue-900" 
+     :class="'theme-' + theme"
+     x-data="scorerConsole()"
+     x-init="$watch('theme', val => localStorage.setItem('scorerTheme', val))">
 
     <!-- Modern Sticky Header -->
     <div class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 py-3 flex flex-col gap-2">
             
-            <!-- Match Status & Timer -->
-            <div class="flex justify-between items-center">
+            <!-- Match Status & Header -->
+            <div class="flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full animate-pulse" 
                           :class="status == 'in_progress' ? 'bg-emerald-500' : (status == 'completed' ? 'bg-slate-400' : 'bg-amber-400')"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500" x-text="status.replace('_', ' ')"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500" x-text="matchState.replace(/_/g, ' ')"></span>
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('matches.live', $fixture->slug) }}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm" title="Open Public Live View">
+                    <a href="{{ route('matches.live', $fixture->slug) }}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm" title="Public View">
                         <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
                     </a>
-                    <button @click="shareMatch()" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm" title="Share Lineups & Link">
+                    <button @click="shareMatch()" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm" title="Share">
                         <i class="fa-brands fa-whatsapp text-lg"></i>
                     </button>
-                    <div class="font-mono font-black text-2xl tracking-tight text-slate-800 tabular-nums">
-                        <span x-text="matchTimeDisplay">00:00</span>
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center gap-1 bg-slate-100 rounded-full p-0.5 border border-slate-200 ms-1">
+                        <button @click="theme = 'dark'" class="w-6 h-6 rounded-full flex items-center justify-center transition-all" :class="theme === 'dark' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-slate-600'"><i class="fa-solid fa-moon text-[10px]"></i></button>
+                        <button @click="theme = 'white'" class="w-6 h-6 rounded-full flex items-center justify-center transition-all" :class="theme === 'white' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-slate-600'"><i class="fa-solid fa-sun text-[10px]"></i></button>
+                        <button @click="theme = 'green'" class="w-6 h-6 rounded-full flex items-center justify-center transition-all" :class="theme === 'green' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-slate-600'"><i class="fa-solid fa-leaf text-[10px]"></i></button>
+                    </div>
+                    <!-- Header Timer Display -->
+                    <div class="font-mono font-black text-2xl tracking-tight text-slate-800 tabular-nums ms-2">
+                        <span x-text="timeDisplay"></span>
                     </div>
                 </div>
             </div>
@@ -71,6 +94,81 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Moved Match Controls (Below Scoreboard) - Hidden when completed -->
+            <div x-show="status !== 'completed'" class="bg-slate-800 text-white rounded-xl p-3 shadow-lg mt-4">
+                <div class="flex items-center justify-between">
+                     <div class="flex items-center gap-3">
+                         <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Control Panel</span>
+                         <div class="w-px h-6 bg-slate-600 mx-1"></div>
+                         <div class="font-mono font-black text-xl tabular-nums leading-none tracking-tight text-white">
+                            <span x-text="timeDisplay"></span>
+                         </div>
+                         <!-- Period Info (Added Time) -->
+                         <div x-show="periodInfo" class="ms-3 px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300 uppercase tracking-wide">
+                            <span x-text="periodInfo"></span>
+                         </div>
+                    </div>
+
+                    <!-- Main Controls -->
+                    <div class="flex items-center gap-2">
+                         <button @click="togglePause()" class="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95"
+                                :class="isRunning ? 'bg-slate-700 hover:bg-slate-600 text-rose-400' : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/30'">
+                            <i class="fa-solid" :class="isRunning ? 'fa-pause' : 'fa-play ps-0.5'"></i>
+                        </button>
+                        
+                        <button @click="showTimeAdjust = !showTimeAdjust" class="w-9 h-9 rounded-full bg-slate-700 text-slate-300 hover:text-white hover:bg-slate-600 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-gear text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Expanded Controls Panel -->
+                <div x-show="showTimeAdjust" style="display: none;" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mt-3 pt-3 border-t border-slate-700">
+                    
+                    <!-- Phase Controls -->
+                    <div class="mb-4">
+                         <h4 class="text-[10px] font-bold uppercase text-slate-400 mb-2">Match Phase Actions</h4>
+                         <div class="grid grid-cols-2 gap-2">
+                             <button @click="changeState('HALF_TIME')" x-show="matchState == 'FIRST_HALF'" class="p-2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 hover:bg-indigo-500/30 font-bold text-xs">End 1st Half</button>
+                             <button @click="changeState('SECOND_HALF')" x-show="matchState == 'HALF_TIME'" class="p-2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-500/30 font-bold text-xs">Start 2nd Half</button>
+                             <button @click="changeState('FULL_TIME')" x-show="matchState == 'SECOND_HALF' || matchState == 'EXTRA_TIME_SECOND'" class="p-2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/50 hover:bg-rose-500/30 font-bold text-xs">End Match</button>
+                             <button @click="changeState('EXTRA_TIME_FIRST')" x-show="(matchState == 'SECOND_HALF' || matchState == 'FULL_TIME') && matchState != 'EXTRA_TIME_SECOND'" class="p-2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/50 hover:bg-purple-500/30 font-bold text-xs">Start Overtime (ET)</button>
+                         </div>
+                    </div>
+
+                    <!-- Injury Time Direct Access -->
+                    <div class="mb-4 bg-slate-900/50 p-2 rounded border border-slate-700">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Add Injury Time (Mins)</div>
+                        <div class="flex items-center gap-2">
+                             <input type="number" x-model="injuryTimeInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="submitInjuryTime()">
+                             <button @click="submitInjuryTime()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded uppercase tracking-wide">Update</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Adjust -->
+                    <div>
+                        <h4 class="text-[10px] font-bold uppercase text-slate-400 mb-2">Manual Clock (Minute)</h4>
+                        <div class="flex items-center gap-2 bg-slate-900/50 rounded p-2 border border-slate-700">
+                             <input type="number" x-model="manualMinuteInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-blue-500 focus:outline-none" @keydown.enter="setManualTime()">
+                             <button @click="setManualTime()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded uppercase tracking-wide">Set</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Match Duration Adjust -->
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <h4 class="text-[10px] font-bold uppercase text-slate-400 mb-2">Total Match Duration (Mins)</h4>
+                        <div class="flex items-center gap-2 bg-slate-900/50 rounded p-2 border border-slate-700">
+                             <input type="number" x-model="matchDuration" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="updateDuration()">
+                             <button @click="updateDuration()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded uppercase tracking-wide">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -94,8 +192,8 @@
         <!-- Live Game Controls -->
         <div x-show="status == 'in_progress' || status == 'completed'" class="space-y-6">
             
-            <!-- Primary Actions (Goals) -->
-            <div class="grid grid-cols-2 gap-4">
+            <!-- Primary Actions (Goals) - Hidden when completed -->
+            <div x-show="status !== 'completed'" class="grid grid-cols-2 gap-4">
                 <button @click="openGoalModal({{ $fixture->home_team_id }})" class="group relative overflow-hidden bg-white hover:bg-blue-50 border-2 border-blue-100 hover:border-blue-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 h-32 active:scale-95 transition-all shadow-sm">
                     <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                         <i class="fa-regular fa-futbol text-6xl text-blue-600 rotate-12"></i>
@@ -113,8 +211,8 @@
                 </button>
             </div>
 
-            <!-- Secondary Actions -->
-            <div class="grid grid-cols-3 gap-3">
+            <!-- Secondary Actions - Hidden when completed -->
+            <div x-show="status !== 'completed'" class="grid grid-cols-3 gap-3">
                 <button @click="openCardModal('YELLOW_CARD')" class="bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-200 rounded-xl p-3 flex flex-col items-center justify-center gap-1 h-20 active:scale-95 transition-all shadow-sm">
                     <div class="w-6 h-8 bg-amber-400 rounded-[2px] shadow-sm mb-1 transform -rotate-6"></div>
                     <span class="text-[10px] font-bold uppercase text-slate-600">Yellow</span>
@@ -567,7 +665,8 @@
 function scorerConsole() {
     return {
         status: '{{ $fixture->status }}',
-        startedAt: '{{ $fixture->started_at }}',
+        matchState: '{{ $fixture->match_state }}',
+        currentTime: '{{ now() }}',
         events: @json($fixture->events),
         players: @json($fixture->fixturePlayers->load('player.user')),
         homeRoster: @json($fixture->homeTeam->leaguePlayers),
@@ -575,13 +674,28 @@ function scorerConsole() {
         homeScore: {{ $fixture->home_score ?? 0 }},
         awayScore: {{ $fixture->away_score ?? 0 }},
 
-        currentMinute: 0,
+        currentMinute: {{ $fixture->current_minute }},
+        currentSeconds: 0, 
+        isRunning: {{ $fixture->is_running ? 'true' : 'false' }},
+        lastTickAt: '{{ $fixture->last_tick_at }}',
+        serverTime: '{{ now() }}',
+        
+        addedTimeFirst: {{ $fixture->added_time_first_half }},
+        addedTimeSecond: {{ $fixture->added_time_second_half }},
+        
         commentaryText: '',
-        matchTimeDisplay: '00:00',
+        
+        // UI Controls
+        showTimeAdjust: false,
+        addExtraTimePanel: false,
+
+        theme: localStorage.getItem('scorerTheme') || 'green',
 
         // Setup Modal State
         showSetupModal: false,
-        matchDuration: 45,
+        matchDuration: {{ $fixture->match_duration ?? 45 }},
+        manualMinuteInput: {{ $fixture->current_minute }}, // Initialize with current
+        injuryTimeInput: 0,
         selectedHomeStarters: [],
         selectedAwayStarters: [],
         
@@ -616,8 +730,153 @@ function scorerConsole() {
         confirmCallback: null,
 
         init() {
-            this.updateTimer();
-            setInterval(() => this.updateTimer(), 1000); 
+            // Initialize Seconds from Last Tick if running
+            if (this.isRunning && this.lastTickAt) {
+                let last = new Date(this.lastTickAt).getTime();
+                let now = new Date(this.serverTime).getTime();
+                let diffInSeconds = Math.floor((now - last) / 1000);
+                this.currentSeconds = diffInSeconds % 60;
+            }
+
+            // Real-Time Ticker (1s = 1s)
+            setInterval(async () => {
+                if (this.isRunning) {
+                     this.currentSeconds++;
+                     if(this.currentSeconds >= 60) {
+                         this.currentSeconds = 0;
+                         // AWAIT server response - it may auto-pause
+                         await this.performTick();
+                         // currentMinute is updated from server response in performTick
+                     }
+                }
+            }, 1000);
+        },
+
+        get timeDisplay() {
+            let m = this.currentMinute;
+            let s = String(Math.min(59, this.currentSeconds)).padStart(2, '0');
+            
+            // If stopped at HT/FT
+            if(this.matchState === 'HALF_TIME') return 'HT';
+            if(this.matchState === 'FULL_TIME') return 'FT';
+            
+            let halftimeMark = this.matchDuration;
+            let fulltimeMark = this.matchDuration * 2;
+            
+            // Stoppage time display: 45+3, 90+2
+            if (this.matchState == 'FIRST_HALF' && m > halftimeMark) {
+                return halftimeMark + '+' + (m - halftimeMark);
+            }
+            if (this.matchState == 'SECOND_HALF' && m > fulltimeMark) {
+                return fulltimeMark + '+' + (m - fulltimeMark);
+            }
+            
+            // Normal MM:SS format
+            return String(m).padStart(2, '0') + ':' + s;
+        },
+
+        get periodInfo() {
+            let base = this.matchDuration; // e.g. 45
+            let added = 0;
+            
+            // Determine context based on state
+            if (this.matchState == 'FIRST_HALF' || this.matchState == 'HALF_TIME') {
+                added = this.addedTimeFirst;
+                // If added time exists, show Total: 45 + X'
+                if(added > 0) return `Total: ${base} + ${added}'`;
+            }
+            else if (this.matchState == 'SECOND_HALF' || this.matchState == 'FULL_TIME') {
+                added = this.addedTimeSecond;
+                let totalBase = base * 2;
+                // If added time exists, show Total: 90 + X'
+                if(added > 0) return `Total: ${totalBase} + ${added}'`;
+            }
+            return '';
+        },
+        
+        async performTick() {
+             let res = await this.callTimerAction('tick');
+             if(res.success) {
+                 this.currentMinute = res.fixture.current_minute;
+                 this.currentSeconds = 0; // Reset seconds on sync tick
+                 this.matchState = res.fixture.match_state;
+                 this.isRunning = res.fixture.is_running;
+                 
+                 // Handle auto-pause notification
+                 if(res.auto_paused) {
+                     let msg = res.new_state === 'HALF_TIME' ? '⏸️ HALF TIME!' : '🏁 FULL TIME!';
+                     alert(msg); // Simple alert, can be replaced with toast
+                 }
+             }
+        },
+
+        togglePause() {
+             let action = this.isRunning ? 'pause' : 'resume';
+             this.callTimerAction(action).then(res => {
+                 this.isRunning = res.fixture.is_running;
+             });
+        },
+        
+        changeState(newState) {
+             this.callTimerAction('change_state', { state: newState }).then(res => {
+                 this.matchState = res.fixture.match_state;
+                 this.currentMinute = res.fixture.current_minute;
+                 this.isRunning = res.fixture.is_running;
+                 
+                 if(this.matchState === 'HALF_TIME' || this.matchState === 'FULL_TIME') {
+                     this.showTimeAdjust = false;
+                 }
+             });
+        },
+        
+        adjustTime(delta) {
+             let newMin = this.currentMinute + delta;
+             this.callTimerAction('set_minute', { minute: newMin }).then(res => {
+                 this.currentMinute = res.fixture.current_minute;
+                 this.manualMinuteInput = this.currentMinute;
+             });
+        },
+        
+        setManualTime() {
+             this.callTimerAction('set_minute', { minute: this.manualMinuteInput }).then(res => {
+                 this.currentMinute = res.fixture.current_minute;
+                 this.showTimeAdjust = false; // Close panel on set
+             });
+        },
+        
+        updateDuration() {
+             // Warning if match is in progress
+             if(this.status === 'in_progress') {
+                 if(!confirm('Warning: Changing match duration while the match is in progress will affect halftime/fulltime triggers. Are you sure?')) {
+                     return;
+                 }
+             }
+             this.callTimerAction('set_duration', { duration: this.matchDuration }).then(res => {
+                 this.showTimeAdjust = false;
+             });
+        },
+        
+        submitInjuryTime() {
+             let min = parseInt(this.injuryTimeInput);
+             if(isNaN(min)) return;
+             
+             this.callTimerAction('add_time', { minutes: min }).then(res => {
+                 this.showTimeAdjust = false;
+                 // Update local state is handled by reactivity via timer sync usually, 
+                 // but let's update local added vars for immediate feedback if possible
+                 if (this.matchState == 'FIRST_HALF' || this.matchState == 'HALF_TIME') this.addedTimeFirst = min;
+                 else this.addedTimeSecond = min;
+             });
+        },
+        
+        async callTimerAction(action, data = {}) {
+             let payload = { action, ...data };
+             let r = await fetch('{{ route("scorer.timer", $fixture->slug) }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+             });
+             return await r.json();
         },
 
         shareMatch() {
@@ -663,18 +922,7 @@ function scorerConsole() {
         },
 
         updateTimer() {
-            if (this.status === 'in_progress' && this.startedAt) {
-                 let start = new Date(this.startedAt).getTime();
-                 let now = new Date().getTime();
-                 let diff = now - start;
-                 let totalSeconds = Math.floor(diff / 1000);
-                 let minutes = Math.floor(totalSeconds / 60);
-                 let seconds = totalSeconds % 60;
-                 this.currentMinute = minutes;
-                 this.matchTimeDisplay = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
-            } else {
-                 this.matchTimeDisplay = '00:00';
-            }
+             // Deprecated legacy timer
         },
 
         getTeamName(teamId) {
@@ -794,9 +1042,11 @@ function scorerConsole() {
             }).then(r => r.json()).then(data => {
                 if(data.success) {
                     this.status = 'in_progress';
-                    this.startedAt = new Date().toISOString();
+                    this.matchState = data.fixture.match_state;
+                    this.currentMinute = data.fixture.current_minute;
+                    this.isRunning = !!data.fixture.is_running;
                     this.showSetupModal = false;
-                    window.location.reload();
+                    // No reload needed now
                 }
             });
         },
@@ -807,7 +1057,11 @@ function scorerConsole() {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
                 }).then(r => r.json()).then(data => {
-                    if(data.success) this.status = 'completed';
+                    if(data.success) {
+                        this.status = 'completed';
+                        this.matchState = data.fixture.match_state;
+                        this.isRunning = false;
+                    }
                 });
              });
         },

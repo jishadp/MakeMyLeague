@@ -103,11 +103,114 @@ class ScorerController extends Controller
 
         $fixture->update([
             'status' => 'in_progress', // LIVE
+            'match_state' => Fixture::STATE_FIRST_HALF,
+            'current_minute' => 0,
+            'is_running' => true,
+            'last_tick_at' => now(),
             'started_at' => now(),
             'match_duration' => $validated['duration']
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Match Started']);
+        return response()->json([
+            'success' => true, 
+            'message' => 'Match Started',
+            'fixture' => $fixture->fresh()
+        ]);
+    }
+
+    public function updateTimer(Request $request, Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+        
+        $action = $request->input('action');
+        
+        switch ($action) {
+            case 'resume':
+                $fixture->update(['is_running' => true, 'last_tick_at' => now()]);
+                break;
+            case 'pause':
+                $fixture->update(['is_running' => false, 'last_tick_at' => null]);
+                break;
+            case 'tick':
+                $autoPaused = false;
+                $newState = null;
+                
+                if ($fixture->is_running) {
+                    $fixture->increment('current_minute');
+                    $fixture->update(['last_tick_at' => now()]);
+                    
+                    $matchDuration = $fixture->match_duration ?? 45;
+                    $halftimeMark = $matchDuration;
+                    $fulltimeMark = $matchDuration * 2;
+                    
+                    // Auto-pause at halftime
+                    if ($fixture->match_state === Fixture::STATE_FIRST_HALF && $fixture->current_minute >= $halftimeMark) {
+                        $fixture->update([
+                            'match_state' => Fixture::STATE_HALF_TIME,
+                            'is_running' => false,
+                            'last_tick_at' => null
+                        ]);
+                        $autoPaused = true;
+                        $newState = Fixture::STATE_HALF_TIME;
+                    }
+                    
+                    // Auto-pause at fulltime
+                    if ($fixture->match_state === Fixture::STATE_SECOND_HALF && $fixture->current_minute >= $fulltimeMark) {
+                        $fixture->update([
+                            'match_state' => Fixture::STATE_FULL_TIME,
+                            'is_running' => false,
+                            'last_tick_at' => null
+                        ]);
+                        $autoPaused = true;
+                        $newState = Fixture::STATE_FULL_TIME;
+                    }
+                }
+                
+                // Return early with auto_paused info
+                return response()->json([
+                    'success' => true,
+                    'fixture' => $fixture->fresh(),
+                    'auto_paused' => $autoPaused,
+                    'new_state' => $newState
+                ]);
+                break;
+            case 'set_minute':
+                $fixture->update(['current_minute' => (int) $request->input('minute')]);
+                break;
+            case 'change_state':
+                $newState = $request->input('state');
+                $updates = ['match_state' => $newState, 'is_running' => false, 'last_tick_at' => null];
+                
+                // Reset/Set time logic based on state
+                if ($newState === Fixture::STATE_SECOND_HALF) {
+                    $updates['current_minute'] = 45;
+                } elseif ($newState === Fixture::STATE_EXTRA_TIME_FIRST) {
+                    $updates['current_minute'] = 90;
+                } elseif ($newState === Fixture::STATE_EXTRA_TIME_SECOND) {
+                    $updates['current_minute'] = 105;
+                }
+                
+                $fixture->update($updates);
+                break;
+            case 'add_time': 
+                $minutes = (int) $request->input('minutes');
+                // If in First Half OR Half Time, update first half added time
+                if (in_array($fixture->match_state, [Fixture::STATE_FIRST_HALF, Fixture::STATE_HALF_TIME])) {
+                    $fixture->update(['added_time_first_half' => $minutes]);
+                } else {
+                    $fixture->update(['added_time_second_half' => $minutes]);
+                }
+                break;
+            case 'set_duration':
+                $fixture->update(['match_duration' => (int) $request->input('duration')]);
+                break;
+        }
+
+        return response()->json([
+            'success' => true, 
+            'fixture' => $fixture->fresh(),
+            'match_time' => $fixture->match_time_display
+        ]);
     }
 
     public function storeEvent(Request $request, Fixture $fixture)
@@ -206,9 +309,12 @@ class ScorerController extends Controller
 
         $fixture->update([
             'status' => 'completed',
+            'match_state' => Fixture::STATE_FULL_TIME,
+            'is_running' => false,
+            'last_tick_at' => null
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Match Finished']);
+        return response()->json(['success' => true, 'message' => 'Match Finished', 'fixture' => $fixture->fresh()]);
     }
     public function deleteEvent(Request $request, Fixture $fixture, $eventId)
     {
