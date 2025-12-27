@@ -13,23 +13,72 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen transition-colors duration-300" 
-     x-data="{ activeTab: 'summary', darkMode: localStorage.getItem('liveMatchDarkMode') === 'true' }"
-     :class="darkMode ? 'bg-zinc-950 text-zinc-200' : 'bg-zinc-100 text-zinc-800'"
-     x-init="$watch('darkMode', val => localStorage.setItem('liveMatchDarkMode', val))">
+<style>
+    /* Theme Variables */
+    .theme-dark {
+        --bg-page: #09090b; /* zinc-950 */
+        --bg-header: #18181b; /* zinc-900/90 */
+        --bg-card: #18181b; /* zinc-900 */
+        --bg-element: #27272a; /* zinc-800 */
+        --bg-hover: #27272a;
+        --text-main: #e4e4e7; /* zinc-200 */
+        --text-muted: #a1a1aa; /* zinc-400 */
+        --border: #27272a; /* zinc-800 */
+        --accent: #f97316; /* orange-500 */
+        --accent-hover: #ea580c; /* orange-600 */
+        --shadow-color: rgba(0,0,0,0.5);
+    }
+
+    .theme-white {
+        --bg-page: #f3f4f6; /* zinc-100 */
+        --bg-header: #ffffff; /* zinc-50 */
+        --bg-card: #ffffff;
+        --bg-element: #f3f4f6; /* zinc-100 */
+        --bg-hover: #f9fafb; /* zinc-50 */
+        --text-main: #18181b; /* zinc-900 */
+        --text-muted: #71717a; /* zinc-500 */
+        --border: #e4e4e7; /* zinc-200 */
+        --accent: #f97316; /* orange-500 */
+        --accent-hover: #ea580c;
+        --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    .theme-green {
+        --bg-page: #f0fdf4; /* green-50 */
+        --bg-header: #ffffff;
+        --bg-card: #ffffff;
+        --bg-element: #dcfce7; /* green-100 */
+        --bg-hover: #f0fdf4;
+        --text-main: #14532d; /* green-900 */
+        --text-muted: #15803d; /* green-700 */
+        --border: #bbf7d0; /* green-200 */
+        --accent: #16a34a; /* green-600 */
+        --accent-hover: #15803d; /* green-700 */
+        --shadow-color: rgba(22, 163, 74, 0.1);
+    }
+
+    .theme-transition {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+</style>
+
+<div class="min-h-screen theme-transition bg-[var(--bg-page)] text-[var(--text-main)]" 
+     x-data="{ activeTab: 'summary', theme: localStorage.getItem('liveMatchTheme') || 'white' }"
+     x-init="$watch('theme', val => localStorage.setItem('liveMatchTheme', val))"
+     :class="'theme-' + theme">
     
     <!-- Ultra-Compact Sticky Match Header -->
-    <div class="sticky top-0 z-40 shadow-xl backdrop-blur-md transition-colors duration-300 border-b"
-         :class="darkMode ? 'bg-zinc-900/90 border-zinc-800' : 'bg-zinc-50/95 border-zinc-200'">
+    <div class="sticky top-0 z-40 shadow-xl backdrop-blur-md theme-transition border-b bg-[var(--bg-header)]/95 border-[var(--border)]">
         
-        <!-- Top Bar: Status & Dark Mode -->
-        <div class="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b"
-             :class="darkMode ? 'border-zinc-800 bg-zinc-950/50 text-zinc-400' : 'border-zinc-200 bg-zinc-100/80 text-zinc-500'">
+        <!-- Top Bar: Status & Theme Switcher -->
+        <div class="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b border-[var(--border)] bg-[var(--bg-card)]/50 text-[var(--text-muted)]">
             <div class="truncate max-w-[200px]">{{ $fixture->league->name ?? 'League Match' }}</div>
             <div class="flex items-center gap-2">
                 @if($fixture->status == 'in_progress')
-                    <span class="flex items-center gap-1.5 text-orange-500 animate-pulse">
-                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> LIVE
+                    <span class="flex items-center gap-1.5 animate-pulse text-[var(--accent)]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span> LIVE
                     </span>
                  @else
                     <span>{{ str_replace('_', ' ', $fixture->status) }}</span>
@@ -37,24 +86,29 @@
                 
                 @auth
                     @if(auth()->id() == $fixture->scorer_id || ($fixture->league && auth()->id() == $fixture->league->organizer_id) || auth()->user()->is_admin)
-                        <a href="{{ route('scorer.console', $fixture->slug) }}" class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors border"
-                           :class="darkMode ? 'bg-zinc-800 text-purple-400 border-purple-500/30 hover:bg-zinc-700' : 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200'">
+                        <a href="{{ route('scorer.console', $fixture->slug) }}" class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors border bg-[var(--bg-element)] text-[var(--accent)] border-[var(--accent)]/30 hover:bg-[var(--bg-hover)]">
                             <i class="fa-solid fa-pen-to-square mr-1"></i> Score
                         </a>
                     @endif
                 @endauth
                 
                 <!-- Reload Button -->
-                <button @click="window.location.reload()" class="ml-2 w-5 h-5 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1"
-                        :class="darkMode ? 'bg-zinc-800 text-orange-400 hover:bg-zinc-700 ring-offset-zinc-900' : 'bg-zinc-200 text-orange-600 hover:bg-zinc-300 ring-offset-white'" title="Refresh">
+                <button @click="window.location.reload()" class="ml-2 w-5 h-5 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--bg-hover)] ring-offset-[var(--bg-page)]" title="Refresh">
                     <i class="fa-solid fa-rotate-right text-[10px]"></i>
                 </button>
 
-                <!-- Dark Mode Button -->
-                <button @click="darkMode = !darkMode" class="w-5 h-5 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1"
-                        :class="darkMode ? 'bg-zinc-800 text-yellow-400 hover:bg-zinc-700 ring-offset-zinc-900' : 'bg-zinc-200 text-zinc-500 hover:bg-zinc-300 ring-offset-white'">
-                    <i class="fa-solid text-[10px]" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-                </button>
+                <!-- Theme Switcher -->
+                <div class="flex items-center gap-1 ml-2 bg-[var(--bg-element)] p-0.5 rounded-full border border-[var(--border)]">
+                    <button @click="theme = 'dark'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'dark' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-moon text-[8px]"></i>
+                    </button>
+                    <button @click="theme = 'white'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'white' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-sun text-[8px]"></i>
+                    </button>
+                     <button @click="theme = 'green'" class="w-4 h-4 rounded-full flex items-center justify-center transition-all" :class="theme === 'green' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-leaf text-[8px]"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -65,8 +119,7 @@
                     
                     <!-- Home Team -->
                     <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
-                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden"
-                              :class="darkMode ? 'bg-zinc-800' : 'bg-white border border-zinc-200'">
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden bg-[var(--bg-card)] border border-[var(--border)]">
                              @if($fixture->homeTeam->team->logo)
                                  <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->homeTeam->team->logo) }}" class="w-full h-full object-cover">
                              @else
@@ -85,12 +138,12 @@
                              @endif
                          </div>
                          <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
-                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->homeTeam->team->name }}</h2>
+                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full text-[var(--text-main)]">{{ $fixture->homeTeam->team->name }}</h2>
                              
                              <!-- Scorers -->
                              <div class="mt-1 space-y-0.5 w-full">
                                 @foreach($goals->where('team_id', $fixture->home_team_id) as $goal)
-                                    <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-zinc-400' : 'text-zinc-600'">
+                                    <div class="text-[10px] whitespace-nowrap leading-tight text-[var(--text-muted)]">
                                         {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
                                     </div>
                                 @endforeach
@@ -100,16 +153,14 @@
 
                     <!-- Score Center -->
                     <div class="flex flex-col items-center justify-start mx-1 md:mx-4 shrink-0 z-10 pt-2">
-                        <div class="text-3xl md:text-5xl font-black font-mono tracking-tighter flex items-center gap-2 leading-none transition-colors"
-                             :class="darkMode ? 'text-white' : 'text-zinc-900'">
+                        <div class="text-3xl md:text-5xl font-black font-mono tracking-tighter flex items-center gap-2 leading-none transition-colors text-[var(--text-main)]">
                             <span>{{ $fixture->home_score ?? 0 }}</span>
                             <span class="opacity-30 text-xl md:text-3xl">-</span>
                             <span>{{ $fixture->away_score ?? 0 }}</span>
                         </div>
                         
                         <!-- Timer Badge -->
-                        <div class="mt-2 px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1.5 shadow-sm"
-                             :class="darkMode ? 'bg-zinc-800 text-orange-400 border-zinc-700' : 'bg-white text-orange-600 border-zinc-200'"
+                        <div class="mt-2 px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold border transition-colors duration-300 flex items-center gap-1.5 shadow-sm bg-[var(--bg-element)] text-[var(--accent)] border-[var(--border)]"
                              x-data="{ time: '00:00', start: '{{ $fixture->started_at }}', status: '{{ $fixture->status }}' }"
                              x-init="
                                 if(status == 'in_progress' && start) {
@@ -127,15 +178,14 @@
                                     time = '--:--';
                                 }
                              ">
-                             <span x-show="status == 'in_progress'" class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></span>
+                             <span x-show="status == 'in_progress'" class="w-1.5 h-1.5 rounded-full animate-pulse bg-[var(--accent)]"></span>
                             <span x-text="time"></span>
                         </div>
                     </div>
 
                     <!-- Away Team -->
                     <div class="flex-1 flex flex-col items-center gap-2 min-w-0 text-center">
-                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden"
-                              :class="darkMode ? 'bg-zinc-800' : 'bg-white border border-zinc-200'">
+                         <div class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-sm flex-shrink-0 flex items-center justify-center transition-colors duration-300 relative overflow-hidden bg-[var(--bg-card)] border border-[var(--border)]">
                              @if($fixture->awayTeam->team->logo)
                                  <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->awayTeam->team->logo) }}" class="w-full h-full object-cover">
                              @else
@@ -154,12 +204,12 @@
                              @endif
                          </div>
                          <div class="flex flex-col min-w-0 w-full overflow-hidden items-center">
-                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full">{{ $fixture->awayTeam->team->name }}</h2>
+                             <h2 class="text-xs md:text-base font-bold truncate leading-tight w-full text-[var(--text-main)]">{{ $fixture->awayTeam->team->name }}</h2>
                              
                              <!-- Scorers -->
                              <div class="mt-1 space-y-0.5 w-full">
                                 @foreach($goals->where('team_id', $fixture->away_team_id) as $goal)
-                                    <div class="text-[10px] whitespace-nowrap leading-tight" :class="darkMode ? 'text-zinc-400' : 'text-zinc-600'">
+                                    <div class="text-[10px] whitespace-nowrap leading-tight text-[var(--text-muted)]">
                                         {{ $goal->player->user->name ?? $goal->player_name }} <span class="font-mono font-bold opacity-70">{{ $goal->minute }}'</span>
                                     </div>
                                 @endforeach
@@ -171,15 +221,14 @@
         </div>
         
         <!-- Modern Scrollable Tabs -->
-        <div class="border-t transition-colors duration-300 overflow-x-auto no-scrollbar"
-             :class="darkMode ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-200 bg-white'">
+        <div class="border-t transition-colors duration-300 overflow-x-auto no-scrollbar border-[var(--border)] bg-[var(--bg-card)]">
             <div class="container mx-auto max-w-lg flex min-w-max md:min-w-0">
                 @foreach(['summary' => 'Timeline', 'lineups' => 'Lineups', 'info' => 'Info & Stats'] as $key => $label)
                 <button @click="activeTab = '{{ $key }}'" 
                         class="flex-1 px-4 py-2.5 text-xs font-bold uppercase tracking-wide border-b-[3px] transition-all duration-200 whitespace-nowrap"
                         :class="activeTab === '{{ $key }}' 
-                            ? (darkMode ? 'border-orange-500 text-orange-400 bg-zinc-800/50' : 'border-orange-500 text-orange-600 bg-zinc-50 shadow-inner') 
-                            : (darkMode ? 'border-transparent text-zinc-500 hover:text-zinc-300' : 'border-transparent text-zinc-400 hover:text-zinc-600')">
+                            ? 'border-[var(--accent)] text-[var(--accent)] bg-[var(--bg-element)]' 
+                            : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'">
                     {{ $label }}
                 </button>
                 @endforeach
@@ -196,8 +245,7 @@
             @if($events->count() > 0)
             <div class="relative pl-6 space-y-8 my-4">
                 <!-- Timeline Line -->
-                <div class="absolute left-[11px] top-2 bottom-6 w-0.5 rounded-full" 
-                     :class="darkMode ? 'bg-zinc-800' : 'bg-zinc-200'"></div>
+                <div class="absolute left-[11px] top-2 bottom-6 w-0.5 rounded-full bg-[var(--border)]"></div>
 
                 @foreach($events as $event)
                     <div class="relative group">
@@ -219,10 +267,7 @@
                         </div>
                         
                         <!-- Event Card -->
-                        <div class="rounded-2xl p-4 shadow-sm border transition-colors duration-300 relative pl-16 md:pl-20 min-h-[5rem]"
-                             :class="darkMode ? 
-                                ( '{{ $event->event_type == 'RED_CARD' ? 'bg-rose-900/10 border-rose-500/20' : ($event->event_type == 'YELLOW_CARD' ? 'bg-amber-900/10 border-amber-500/20' : 'bg-zinc-900 border-zinc-800') }}' ) : 
-                                ( '{{ $event->event_type == 'RED_CARD' ? 'bg-rose-50 border-rose-100' : ($event->event_type == 'YELLOW_CARD' ? 'bg-amber-50 border-amber-100' : 'bg-white border-zinc-200') }}' )">
+                        <div class="rounded-2xl p-4 shadow-sm border transition-colors duration-300 relative pl-16 md:pl-20 min-h-[5rem] bg-[var(--bg-card)] border-[var(--border)]">
                             
                              <!-- Player Photo (Absolute positioned left) -->
                              <div class="absolute left-3 top-3 md:left-4 md:top-4">
@@ -232,8 +277,7 @@
                                         <img src="{{ \Illuminate\Support\Facades\Storage::url($event->player->user->photo) }}" 
                                              class="w-full h-full object-cover">
                                     @elseif($event->player && $event->player->user)
-                                        <div class="w-full h-full flex items-center justify-center font-bold text-xs md:text-sm"
-                                             :class="darkMode ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-100 text-zinc-500'">
+                                        <div class="w-full h-full flex items-center justify-center font-bold text-xs md:text-sm bg-[var(--bg-element)] text-[var(--text-muted)]">
                                             <img src="{{ asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover opacity-90">
                                         </div>
                                     @endif
@@ -248,7 +292,7 @@
                              </div>
 
                              <!-- Minute Tag -->
-                            <div class="absolute top-3 right-3 text-[10px] font-mono opacity-50 font-bold" :class="darkMode ? 'text-zinc-400' : 'text-zinc-400'">
+                            <div class="absolute top-3 right-3 text-[10px] font-mono opacity-50 font-bold text-[var(--text-muted)]">
                                 {{ $event->minute }}'
                             </div>
                             
@@ -262,22 +306,21 @@
                                     {{ str_replace('_', ' ', $event->event_type) }}
                                 </h3>
                                 @if($event->team)
-                                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase hidden md:inline-block" 
-                                          :class="darkMode ? 'bg-zinc-700 text-zinc-300' : 'bg-zinc-100 text-zinc-500'">
+                                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase hidden md:inline-block bg-[var(--bg-element)] text-[var(--text-muted)]">
                                         {{ substr($event->team->team->name, 0, 3) }}
                                     </span>
                                 @endif
                             </div>
 
                             <!-- Main Description -->
-                             <div class="text-sm md:text-lg font-bold leading-tight" :class="darkMode ? 'text-white' : 'text-zinc-800'">
+                             <div class="text-sm md:text-lg font-bold leading-tight text-[var(--text-main)]">
                                 {{ $event->player->user->name ?? $event->player_name ?? $event->description ?? 'Player' }}
                              </div>
 
                              <!-- Sub / Assist Details -->
                              @if($event->event_type == 'GOAL')
                                 @if($event->assistPlayer || $event->assist_player_name)
-                                    <div class="mt-1 text-xs font-medium flex items-center gap-1.5" :class="darkMode ? 'text-zinc-400' : 'text-zinc-500'">
+                                    <div class="mt-1 text-xs font-medium flex items-center gap-1.5 text-[var(--text-muted)]">
                                         <span class="bg-orange-500/10 text-orange-500 px-1 rounded">Ast</span>
                                         <span>{{ $event->assistPlayer->user->name ?? $event->assist_player_name }}</span>
                                     </div>
@@ -285,16 +328,16 @@
                              @endif
 
                              @if($event->event_type == 'SUB')
-                                <div class="mt-2 text-xs flex flex-col gap-1 rounded bg-zinc-50/50 p-2 border border-zinc-100" :class="darkMode ? '!bg-zinc-900/50 !border-zinc-700' : ''">
+                                <div class="mt-2 text-xs flex flex-col gap-1 rounded p-2 border bg-[var(--bg-element)] border-[var(--border)]">
                                     <div class="flex items-center gap-2 text-rose-500">
                                         <i class="fa-solid fa-arrow-right-from-bracket rotate-180"></i>
                                         <span class="font-semibold">OUT:</span> 
-                                        <span class="text-zinc-600" :class="darkMode ? '!text-zinc-400' : ''">{{ $event->player->user->name ?? $event->player_name }}</span>
+                                        <span class="text-[var(--text-muted)]">{{ $event->player->user->name ?? $event->player_name }}</span>
                                     </div>
                                     <div class="flex items-center gap-2 text-green-500">
                                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                                         <span class="font-semibold">IN:</span> 
-                                        <span class="text-zinc-600" :class="darkMode ? '!text-zinc-400' : ''">{{ $event->relatedPlayer->user->name ?? $event->related_player_name }}</span>
+                                        <span class="text-[var(--text-muted)]">{{ $event->relatedPlayer->user->name ?? $event->related_player_name }}</span>
                                         @if($event->relatedPlayer && $event->relatedPlayer->user)
                                              <div class="w-5 h-5 rounded-full overflow-hidden shadow-sm">
                                                  @if($event->relatedPlayer->user->photo)
@@ -309,7 +352,7 @@
                              @endif
 
                              @if($event->description)
-                                <p class="mt-2 text-xs opacity-70 italic border-l-2 pl-2" :class="darkMode ? 'border-zinc-600 text-zinc-400' : 'border-zinc-300 text-zinc-500'">
+                                <p class="mt-2 text-xs opacity-70 italic border-l-2 pl-2 border-[var(--border)] text-[var(--text-muted)]">
                                     "{{ $event->description }}"
                                 </p>
                              @endif
@@ -337,8 +380,7 @@
             <div class="space-y-6">
                 @foreach([$fixture->homeTeam, $fixture->awayTeam] as $index => $team)
                     @php $isHome = $index === 0; $teamId = $isHome ? $fixture->home_team_id : $fixture->away_team_id; @endphp
-                    <div class="rounded-2xl border overflow-hidden shadow-sm" 
-                         :class="darkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'">
+                    <div class="rounded-2xl border overflow-hidden shadow-sm bg-[var(--bg-card)] border-[var(--border)]">
                         
                         <!-- Team Header -->
                         <div class="p-3 w-full flex items-center justify-between {{ $isHome ? 'bg-indigo-600' : 'bg-pink-600' }} text-white">
@@ -348,15 +390,14 @@
                         
                         <!-- Starters -->
                         <div class="p-3">
-                            <div class="text-[10px] font-bold uppercase text-zinc-400 mb-2">Starting XI</div>
+                            <div class="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-2">Starting XI</div>
                             <div class="grid grid-cols-1 gap-2">
                                 @forelse($fixture->fixturePlayers->where('team_id', $teamId)->where('is_active', true) as $p)
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border"
-                                             :class="darkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-zinc-50 border-zinc-100 text-zinc-600'">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border bg-[var(--bg-element)] border-[var(--border)] text-[var(--text-muted)]">
                                             {{ substr($p->player ? $p->player->user->name : ($p->custom_name ?? 'G'), 0, 1) }}
                                         </div>
-                                        <div class="flex-1 text-sm font-medium" :class="darkMode ? 'text-zinc-200' : 'text-zinc-800'">
+                                        <div class="flex-1 text-sm font-medium text-[var(--text-main)]">
                                             {{ $p->player ? $p->player->user->name : ($p->custom_name ?? 'Guest') }}
                                         </div>
                                     </div>
@@ -368,16 +409,15 @@
 
                         <!-- Subs -->
                         @if($fixture->fixturePlayers->where('team_id', $teamId)->where('is_active', false)->count() > 0)
-                            <div class="p-3 border-t" :class="darkMode ? 'border-zinc-800' : 'border-zinc-100'">
-                                <div class="text-[10px] font-bold uppercase text-zinc-400 mb-2">Substitutes</div>
+                            <div class="p-3 border-t border-[var(--border)]">
+                                <div class="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-2">Substitutes</div>
                                 <div class="grid grid-cols-1 gap-2 opacity-70">
                                     @foreach($fixture->fixturePlayers->where('team_id', $teamId)->where('is_active', false) as $p)
                                         <div class="flex items-center gap-3">
-                                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border"
-                                                 :class="darkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-400' : 'bg-zinc-50 border-zinc-100 text-zinc-500'">
+                                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border bg-[var(--bg-element)] border-[var(--border)] text-[var(--text-muted)]">
                                                 {{ substr($p->player ? $p->player->user->name : ($p->custom_name ?? 'G'), 0, 1) }}
                                             </div>
-                                            <div class="flex-1 text-xs" :class="darkMode ? 'text-zinc-400' : 'text-zinc-600'">
+                                            <div class="flex-1 text-xs text-[var(--text-muted)]">
                                                 {{ $p->player ? $p->player->user->name : ($p->custom_name ?? 'Guest') }}
                                             </div>
                                         </div>
@@ -392,24 +432,24 @@
 
         <!-- Info Tab -->
         <div x-show="activeTab === 'info'" style="display: none;" x-transition.opacity.duration.300ms>
-            <div class="rounded-2xl border shadow-sm p-4" :class="darkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'">
-                <h3 class="font-bold mb-4 text-sm uppercase tracking-wider" :class="darkMode ? 'text-zinc-400' : 'text-zinc-500'">Match Details</h3>
+            <div class="rounded-2xl border shadow-sm p-4 bg-[var(--bg-card)] border-[var(--border)]">
+                <h3 class="font-bold mb-4 text-sm uppercase tracking-wider text-[var(--text-muted)]">Match Details</h3>
                 <div class="grid grid-cols-2 gap-4">
-                     <div class="p-3 rounded-xl border" :class="darkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-100'">
-                        <div class="text-[10px] uppercase font-bold text-zinc-400 mb-1">Status</div>
-                        <div class="font-medium capitalize" :class="darkMode ? 'text-white' : 'text-zinc-900'">{{ str_replace('_', ' ', $fixture->status) }}</div>
+                     <div class="p-3 rounded-xl border bg-[var(--bg-element)] border-[var(--border)]">
+                        <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Status</div>
+                        <div class="font-medium capitalize text-[var(--text-main)]">{{ str_replace('_', ' ', $fixture->status) }}</div>
                     </div>
-                    <div class="p-3 rounded-xl border" :class="darkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-100'">
-                        <div class="text-[10px] uppercase font-bold text-zinc-400 mb-1">Duration</div>
-                        <div class="font-medium" :class="darkMode ? 'text-white' : 'text-zinc-900'">{{ $fixture->match_duration }} Mins</div>
+                    <div class="p-3 rounded-xl border bg-[var(--bg-element)] border-[var(--border)]">
+                        <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Duration</div>
+                        <div class="font-medium text-[var(--text-main)]">{{ $fixture->match_duration }} Mins</div>
                     </div>
-                    <div class="p-3 rounded-xl border" :class="darkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-100'">
-                        <div class="text-[10px] uppercase font-bold text-zinc-400 mb-1">Venue</div>
-                        <div class="font-medium" :class="darkMode ? 'text-white' : 'text-zinc-900'">{{ $fixture->venue ?? 'Main Ground' }}</div>
+                    <div class="p-3 rounded-xl border bg-[var(--bg-element)] border-[var(--border)]">
+                        <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Venue</div>
+                        <div class="font-medium text-[var(--text-main)]">{{ $fixture->venue ?? 'Main Ground' }}</div>
                     </div>
-                    <div class="p-3 rounded-xl border" :class="darkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-100'">
-                        <div class="text-[10px] uppercase font-bold text-zinc-400 mb-1">Date</div>
-                        <div class="font-medium" :class="darkMode ? 'text-white' : 'text-zinc-900'">{{ $fixture->match_date ? $fixture->match_date->format('M d, Y') : 'TBD' }}</div>
+                    <div class="p-3 rounded-xl border bg-[var(--bg-element)] border-[var(--border)]">
+                        <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Date</div>
+                        <div class="font-medium text-[var(--text-main)]">{{ $fixture->match_date ? $fixture->match_date->format('M d, Y') : 'TBD' }}</div>
                     </div>
                 </div>
             </div>
@@ -419,8 +459,7 @@
     <!-- Floating Reload Button (Live Only) -->
     @if($fixture->status == 'in_progress')
         <button @click="window.location.reload()" 
-                class="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 border-4"
-                :class="darkMode ? 'bg-zinc-800 text-orange-400 border-zinc-700 shadow-zinc-900/50' : 'bg-white text-orange-600 border-orange-50 shadow-orange-100'"
+                class="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 border-4 bg-[var(--bg-card)] text-[var(--accent)] border-[var(--border)]"
                 title="Refresh Live Data">
             <i class="fa-solid fa-rotate-right text-xl"></i>
         </button>
