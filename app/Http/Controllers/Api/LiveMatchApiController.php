@@ -201,11 +201,15 @@ class LiveMatchApiController extends Controller
 
     public function storeEvent(Request $request, Fixture $fixture)
     {
-        // Simple authorization check: User must be scorer or admin or organizer
-        if ($request->user()->id !== $fixture->scorer_id && 
-            !$request->user()->is_admin && 
-            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
+        $isScorer = $request->user()->id === $fixture->scorer_id;
+        $isAdmin = $request->user()->is_admin;
+        $isOrganizer = $fixture->league && $fixture->league->organizer_id === $request->user()->id;
+
+        if (!$isScorer && !$isAdmin && !$isOrganizer) {
+            return response()->json([
+                'success' => false, 
+                'message' => "Unauthorized: User {$request->user()->id} is not Scorer {$fixture->scorer_id}, Admin, or Organizer " . ($fixture->league?->organizer_id ?? 'N/A')
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -242,11 +246,15 @@ class LiveMatchApiController extends Controller
 
     public function deleteEvent(Request $request, Fixture $fixture, $eventId)
     {
-         // Authorization check
-        if ($request->user()->id !== $fixture->scorer_id && 
-            !$request->user()->is_admin && 
-            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-             return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
+        $isScorer = $request->user()->id === $fixture->scorer_id;
+        $isAdmin = $request->user()->is_admin;
+        $isOrganizer = $fixture->league && $fixture->league->organizer_id === $request->user()->id;
+
+        if (!$isScorer && !$isAdmin && !$isOrganizer) {
+             return response()->json([
+                'success' => false, 
+                'message' => "Unauthorized: User {$request->user()->id} is not Scorer {$fixture->scorer_id}, Admin, or Organizer " . ($fixture->league?->organizer_id ?? 'N/A')
+            ], 403);
         }
 
         $event = \App\Models\MatchEvent::findOrFail($eventId);
@@ -276,11 +284,15 @@ class LiveMatchApiController extends Controller
 
     public function substitute(Request $request, Fixture $fixture)
     {
-        // Authorization
-        if ($request->user()->id !== $fixture->scorer_id && 
-            !$request->user()->is_admin && 
-            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
+        $isScorer = $request->user()->id === $fixture->scorer_id;
+        $isAdmin = $request->user()->is_admin;
+        $isOrganizer = $fixture->league && $fixture->league->organizer_id === $request->user()->id;
+
+        if (!$isScorer && !$isAdmin && !$isOrganizer) {
+            return response()->json([
+                'success' => false, 
+                'message' => "Unauthorized: User {$request->user()->id} is not Scorer {$fixture->scorer_id}, Admin, or Organizer " . ($fixture->league?->organizer_id ?? 'N/A')
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -327,11 +339,15 @@ class LiveMatchApiController extends Controller
 
     public function finishMatch(Request $request, Fixture $fixture)
     {
-         // Authorization
-        if ($request->user()->id !== $fixture->scorer_id && 
-            !$request->user()->is_admin && 
-            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
+        $isScorer = $request->user()->id === $fixture->scorer_id;
+        $isAdmin = $request->user()->is_admin;
+        $isOrganizer = $fixture->league && $fixture->league->organizer_id === $request->user()->id;
+
+        if (!$isScorer && !$isAdmin && !$isOrganizer) {
+            return response()->json([
+                'success' => false, 
+                'message' => "Unauthorized: User {$request->user()->id} is not Scorer {$fixture->scorer_id}, Admin, or Organizer " . ($fixture->league?->organizer_id ?? 'N/A')
+            ], 403);
         }
 
         $fixture->update([
