@@ -205,7 +205,7 @@ class LiveMatchApiController extends Controller
         if ($request->user()->id !== $fixture->scorer_id && 
             !$request->user()->is_admin && 
             ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
         }
 
         $validated = $request->validate([
@@ -246,7 +246,7 @@ class LiveMatchApiController extends Controller
         if ($request->user()->id !== $fixture->scorer_id && 
             !$request->user()->is_admin && 
             ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+             return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
         }
 
         $event = \App\Models\MatchEvent::findOrFail($eventId);
@@ -280,7 +280,7 @@ class LiveMatchApiController extends Controller
         if ($request->user()->id !== $fixture->scorer_id && 
             !$request->user()->is_admin && 
             ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
         }
 
         $validated = $request->validate([
@@ -331,7 +331,7 @@ class LiveMatchApiController extends Controller
         if ($request->user()->id !== $fixture->scorer_id && 
             !$request->user()->is_admin && 
             ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized: User ' . $request->user()->id . ' is not Scorer ' . $fixture->scorer_id], 403);
         }
 
         $fixture->update([
