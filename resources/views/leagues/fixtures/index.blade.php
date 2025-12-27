@@ -38,6 +38,10 @@
                             </svg>
                             Edit fixtures
                         </a>
+                        <button onclick="openBulkScorerModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-full shadow-md hover:bg-indigo-700 transition">
+                            <i class="fa-solid fa-users-gear"></i>
+                            Bulk Assign Scorer
+                        </button>
                     @endif
                     <div class="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden text-sm">
                         <a href="{{ route('leagues.fixtures', [$league, 'sort' => 'group']) }}" class="px-3 py-1.5 font-semibold {{ $sortMode === 'group' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50' }}">Group order</a>
@@ -314,6 +318,60 @@
             </div>
         </div>
     </div>
+
+    <!-- Bulk Scorer Assignment Modal -->
+    <div id="bulk-scorer-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeBulkScorerModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form id="bulk-scorer-form" method="POST" action="{{ route('fixtures.bulk-assign-scorer', $league) }}">
+                    @csrf
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fa-solid fa-users-gear text-indigo-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Bulk Assign Scorer</h3>
+                                <div class="mt-2 space-y-4">
+                                    <div>
+                                        <label for="bulk_scorer_id" class="block text-sm font-medium text-gray-700">Select Scorer</label>
+                                        <select name="scorer_id" id="bulk_scorer_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            @foreach($scorers as $scorer)
+                                                <option value="{{ $scorer->id }}">{{ $scorer->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Assignment Scope</label>
+                                        <div class="mt-2 space-y-2">
+                                            <div class="flex items-center">
+                                                <input id="scope_unassigned" name="scope" type="radio" value="unassigned" checked class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                                <label for="scope_unassigned" class="ml-3 block text-sm font-medium text-gray-700">
+                                                    Assign only to unassigned fixtures
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="scope_all" name="scope" type="radio" value="all" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                                <label for="scope_all" class="ml-3 block text-sm font-medium text-gray-700">
+                                                    Overwrite all fixtures
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">Assign Scorer</button>
+                        <button type="button" onclick="closeBulkScorerModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -331,6 +389,14 @@
 
     function closeScorerModal() {
         document.getElementById('scorer-modal').classList.add('hidden');
+    }
+
+    function openBulkScorerModal() {
+        document.getElementById('bulk-scorer-modal').classList.remove('hidden');
+    }
+
+    function closeBulkScorerModal() {
+        document.getElementById('bulk-scorer-modal').classList.add('hidden');
     }
 
 document.addEventListener('DOMContentLoaded', () => {

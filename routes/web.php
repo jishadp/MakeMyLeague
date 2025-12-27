@@ -372,6 +372,7 @@ Route::middleware('auth')->group(function () {
         Route::post('fixtures/regenerate', [\App\Http\Controllers\LeagueMatchController::class, 'regenerateWithSchedule'])->name('fixtures.regenerate');
         Route::post('fixtures/shuffle', [\App\Http\Controllers\LeagueMatchController::class, 'shuffleFixtures'])->name('fixtures.shuffle');
         Route::get('fixtures/pdf', [\App\Http\Controllers\LeagueMatchController::class, 'exportPdf'])->name('fixtures.pdf');
+        Route::post('fixtures/bulk-assign-scorer', [\App\Http\Controllers\LeagueMatchController::class, 'bulkAssignScorer'])->name('fixtures.bulk-assign-scorer');
     });
 
 

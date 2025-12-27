@@ -559,4 +559,26 @@ class LeagueMatchController extends Controller
         
         return $pdf->download($league->name . '_fixtures.pdf');
     }
+
+    public function bulkAssignScorer(Request $request, League $league)
+    {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access to league');
+        }
+
+        $validated = $request->validate([
+            'scorer_id' => 'required|exists:users,id',
+            'scope' => 'required|in:all,unassigned',
+        ]);
+
+        $query = $league->fixtures();
+
+        if ($validated['scope'] === 'unassigned') {
+            $query->whereNull('scorer_id');
+        }
+
+        $count = $query->update(['scorer_id' => $validated['scorer_id']]);
+
+        return back()->with('success', "Scorer assigned to {$count} fixture(s).");
+    }
 }
