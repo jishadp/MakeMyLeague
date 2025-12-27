@@ -11,29 +11,104 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen bg-zinc-950 text-white font-sans selection:bg-orange-500/30" x-data="{ activeTab: 'live' }">
+<style>
+    /* Theme Variables */
+    .theme-dark {
+        --bg-page: #09090b; /* zinc-950 */
+        --bg-header: #18181b; /* zinc-900 */
+        --bg-card: #18181b; /* zinc-900 */
+        --bg-element: #27272a; /* zinc-800 */
+        --bg-hover: #27272a;
+        --text-main: #ffffff;
+        --text-muted: #a1a1aa; /* zinc-400 */
+        --border: rgba(255,255,255,0.05); /* white/5 */
+        --accent: #f97316; /* orange-500 */
+        --accent-hover: #ea580c; /* orange-600 */
+        --shadow-color: rgba(0,0,0,0.5);
+    }
+
+    .theme-white {
+        --bg-page: #f3f4f6; /* gray-100 */
+        --bg-header: #ffffff;
+        --bg-card: #ffffff;
+        --bg-element: #f3f4f6; /* gray-100 */
+        --bg-hover: #f9fafb; /* gray-50 */
+        --text-main: #111827; /* gray-900 */
+        --text-muted: #6b7280; /* gray-500 */
+        --border: #e5e7eb; /* gray-200 */
+        --accent: #f97316; /* orange-500 - Keep brand accent */
+        --accent-hover: #ea580c;
+        --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    .theme-green {
+        --bg-page: #f0fdf4; /* green-50 */
+        --bg-header: #ffffff;
+        --bg-card: #ffffff;
+        --bg-element: #dcfce7; /* green-100 */
+        --bg-hover: #f0fdf4;
+        --text-main: #14532d; /* green-900 */
+        --text-muted: #15803d; /* green-700 */
+        --border: #bbf7d0; /* green-200 */
+        --accent: #16a34a; /* green-600 */
+        --accent-hover: #15803d; /* green-700 */
+        --shadow-color: rgba(22, 163, 74, 0.1);
+    }
+
+    /* Transitions */
+    .theme-transition {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+</style>
+
+<div class="min-h-screen font-sans selection:bg-[var(--accent)]/30 theme-transition bg-[var(--bg-page)] text-[var(--text-main)]" 
+     x-data="{ activeTab: 'upcoming', theme: localStorage.getItem('league_theme') || 'dark' }"
+     x-init="$watch('theme', val => localStorage.setItem('league_theme', val))"
+     :class="'theme-' + theme">
 
     <!-- League Header -->
-    <div class="relative bg-zinc-900 border-b border-orange-500/10 py-8 sm:py-12">
-         <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-zinc-900/50"></div>
+    <div class="relative border-b py-8 sm:py-12 bg-[var(--bg-header)] border-[var(--border)] theme-transition">
+         <div class="absolute inset-0 overflow-hidden pointer-events-none">
+             <!-- Dynamic gradient overlay based on theme -->
+             <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-transparent"></div>
+         </div>
+
          <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-             <div class="flex flex-col items-center text-center gap-6">
-                 <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-zinc-800 flex items-center justify-center border border-white/5 shadow-2xl p-2 relative group">
+             
+             <!-- Top Bar with Theme Switcher -->
+             <div class="absolute top-0 right-4 sm:right-6 lg:right-8 flex gap-2">
+                <div class="flex items-center bg-[var(--bg-element)] p-1 rounded-lg border border-[var(--border)]">
+                    <button @click="theme = 'dark'" class="w-8 h-8 rounded-md flex items-center justify-center transition-all" :class="theme === 'dark' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <button @click="theme = 'white'" class="w-8 h-8 rounded-md flex items-center justify-center transition-all" :class="theme === 'white' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                    <button @click="theme = 'green'" class="w-8 h-8 rounded-md flex items-center justify-center transition-all" :class="theme === 'green' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                        <i class="fa-solid fa-leaf"></i>
+                    </button>
+                </div>
+             </div>
+
+             <div class="flex flex-col items-center text-center gap-6 mt-8 sm:mt-0">
+                 <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center shadow-2xl p-2 relative group bg-[var(--bg-element)] border border-[var(--border)]">
                      @if($league->logo)
                          <img src="{{ url(Storage::url($league->logo)) }}" class="w-full h-full object-cover rounded-xl shadow-inner" alt="{{ $league->name }}">
                      @else
-                         <i class="fa-solid fa-shield-halved text-4xl text-orange-500"></i>
+                         <i class="fa-solid fa-shield-halved text-4xl text-[var(--accent)]"></i>
                      @endif
                  </div>
                  
                  <div>
-                     <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">{{ $league->name }}</h1>
-                     <div class="flex items-center justify-center gap-3 text-sm text-zinc-400 mt-2">
+                     <h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight text-[var(--text-main)]">{{ $league->name }}</h1>
+                     <div class="flex items-center justify-center gap-3 text-sm mt-2 text-[var(--text-muted)]">
                         @if($league->game)
-                            <span class="px-2 py-0.5 rounded bg-zinc-800 border border-white/5 text-xs font-semibold uppercase tracking-wider">{{ $league->game->name }}</span>
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-[var(--bg-element)] border border-[var(--border)]">{{ $league->game->name }}</span>
                         @endif
                          @if($league->localBody && $league->localBody->district)
-                             <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-orange-500"></i> {{ $league->localBody->district->name }}</span>
+                             <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-[var(--accent)]"></i> {{ $league->localBody->district->name }}</span>
                          @endif
                      </div>
                  </div>
@@ -44,11 +119,11 @@
                         navigator.clipboard.writeText('{{ url()->current() }}');
                         $el.innerHTML = '<i class=\'fa-solid fa-check mr-2\'></i> Copied!';
                         setTimeout(() => $el.innerHTML = '<i class=\'fa-solid fa-share-nodes mr-2\'></i> Share Page', 2000);
-                    " class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-semibold hover:bg-zinc-700 hover:text-white transition-all border border-white/5 hover:border-orange-500/30">
+                    " class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)] hover:border-[var(--accent)]/30">
                         <i class="fa-solid fa-share-nodes mr-2"></i> Share Page
                     </button>
                     
-                    <a href="{{ route('auctions.live-matches') }}" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 text-sm font-semibold hover:bg-zinc-700 hover:text-white transition-all border border-white/5">
+                    <a href="{{ route('auctions.live-matches') }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
                         <i class="fa-solid fa-list mr-2"></i> All Leagues
                     </a>
                  </div>
@@ -57,7 +132,7 @@
     </div>
 
     <!-- Sticky Tabs -->
-    <div class="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-white/5">
+    <div class="sticky top-0 z-30 backdrop-blur-md border-b bg-[var(--bg-page)]/80 border-[var(--border)] theme-transition">
         <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <div class="flex justify-center gap-8">
                 @php
@@ -71,44 +146,44 @@
                 
                 <button @click="activeTab = 'live'" 
                     class="relative py-4 text-sm font-bold transition-colors flex items-center gap-2"
-                    :class="activeTab === 'live' ? 'text-orange-500' : 'text-zinc-500 hover:text-zinc-300'">
+                    :class="activeTab === 'live' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
                     LIVE
                     @if($liveMatches->count() > 0)
                         <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">{{ $liveMatches->count() }}</span>
                     @endif
-                    <div x-show="activeTab === 'live'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" x-transition></div>
+                    <div x-show="activeTab === 'live'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
                 <button @click="activeTab = 'upcoming'" 
                     class="relative py-4 text-sm font-bold transition-colors flex items-center gap-2"
-                    :class="activeTab === 'upcoming' ? 'text-orange-500' : 'text-zinc-500 hover:text-zinc-300'">
+                    :class="activeTab === 'upcoming' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
                     UPCOMING
                     @if($upcomingMatches->count() > 0)
-                         <span class="bg-zinc-800 text-zinc-400 text-[10px] px-1.5 py-0.5 rounded-full border border-white/10">{{ $upcomingMatches->count() }}</span>
+                         <span class="text-[10px] px-1.5 py-0.5 rounded-full border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)]">{{ $upcomingMatches->count() }}</span>
                     @endif
-                    <div x-show="activeTab === 'upcoming'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" x-transition></div>
+                    <div x-show="activeTab === 'upcoming'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
                  <button @click="activeTab = 'past'" 
                     class="relative py-4 text-sm font-bold transition-colors"
-                    :class="activeTab === 'past' ? 'text-orange-500' : 'text-zinc-500 hover:text-zinc-300'">
+                    :class="activeTab === 'past' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
                     RESULTS
-                    <div x-show="activeTab === 'past'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" x-transition></div>
+                    <div x-show="activeTab === 'past'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-20 theme-transition">
 
         <!-- LIVE TAB -->
         <div x-show="activeTab === 'live'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
             @if($liveMatches->isEmpty())
-                 <div class="flex flex-col items-center justify-center py-20 text-zinc-600 rounded-2xl bg-zinc-900/30 border border-dashed border-zinc-800">
-                    <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4">
+                 <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
                         <i class="fa-solid fa-stopwatch text-2xl opacity-50"></i>
                     </div>
                     <p class="text-sm font-medium">No live matches now</p>
-                    <p class="text-xs text-zinc-600 mt-1">Check upcoming fixtures</p>
+                    <p class="text-xs mt-1 opacity-70">Check upcoming fixtures</p>
                 </div>
             @else
                 <div class="space-y-4">
@@ -117,7 +192,7 @@
                             $homeTeam = $match->homeTeam?->team;
                             $awayTeam = $match->awayTeam?->team;
                         @endphp
-                        <div class="bg-zinc-900 rounded-2xl border border-white/5 overflow-hidden shadow-xl group hover:border-orange-500/20 transition-all">
+                        <div class="rounded-2xl border overflow-hidden shadow-xl group transition-all bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent)]/20">
                              <a href="{{ route('matches.live', $match->slug) }}" class="block relative">
                                 <!-- Status Banner -->
                                 <div class="bg-gradient-to-r from-red-600 to-red-500 text-white text-[10px] font-bold px-3 py-1 flex justify-between items-center">
@@ -131,34 +206,34 @@
                                      <div class="flex items-center justify-between">
                                           <!-- Home -->
                                           <div class="flex-1 flex flex-col items-center">
-                                              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-zinc-800 p-3 mb-3 border border-white/5 shadow-inner">
+                                              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-3 mb-3 border shadow-inner bg-[var(--bg-element)] border-[var(--border)]">
                                                   @if($homeTeam && $homeTeam->logo)
                                                     <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-full h-full object-contain" alt="">
                                                   @else
-                                                    <div class="w-full h-full flex items-center justify-center text-zinc-600 font-bold text-xl">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
+                                                    <div class="w-full h-full flex items-center justify-center font-bold text-xl text-[var(--text-muted)]">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
                                                   @endif
                                               </div>
-                                              <h3 class="text-sm sm:text-base font-bold text-center leading-tight">{{ $homeTeam?->name ?? 'Home' }}</h3>
+                                              <h3 class="text-sm sm:text-base font-bold text-center leading-tight text-[var(--text-main)]">{{ $homeTeam?->name ?? 'Home' }}</h3>
                                           </div>
 
                                           <!-- Score -->
                                           <div class="px-6 flex flex-col items-center">
-                                              <div class="text-4xl sm:text-5xl font-black text-white tabular-nums tracking-tighter">
-                                                  {{ $match->home_score ?? 0 }}<span class="text-zinc-700 mx-2">-</span>{{ $match->away_score ?? 0 }}
+                                              <div class="text-4xl sm:text-5xl font-black tabular-nums tracking-tighter text-[var(--text-main)]">
+                                                  {{ $match->home_score ?? 0 }}<span class="text-[var(--text-muted)] mx-2">-</span>{{ $match->away_score ?? 0 }}
                                               </div>
-                                              <p class="text-xs text-orange-500 font-bold mt-2 animate-pulse">In Progress</p>
+                                              <p class="text-xs font-bold mt-2 animate-pulse text-[var(--accent)]">In Progress</p>
                                           </div>
 
                                           <!-- Away -->
                                           <div class="flex-1 flex flex-col items-center">
-                                              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-zinc-800 p-3 mb-3 border border-white/5 shadow-inner">
+                                              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-3 mb-3 border shadow-inner bg-[var(--bg-element)] border-[var(--border)]">
                                                   @if($awayTeam && $awayTeam->logo)
                                                     <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-full h-full object-contain" alt="">
                                                   @else
-                                                    <div class="w-full h-full flex items-center justify-center text-zinc-600 font-bold text-xl">{{ substr($awayTeam?->name ?? 'A', 0, 1) }}</div>
+                                                    <div class="w-full h-full flex items-center justify-center font-bold text-xl text-[var(--text-muted)]">{{ substr($awayTeam?->name ?? 'A', 0, 1) }}</div>
                                                   @endif
                                               </div>
-                                              <h3 class="text-sm sm:text-base font-bold text-center leading-tight">{{ $awayTeam?->name ?? 'Away' }}</h3>
+                                              <h3 class="text-sm sm:text-base font-bold text-center leading-tight text-[var(--text-main)]">{{ $awayTeam?->name ?? 'Away' }}</h3>
                                           </div>
                                      </div>
                                 </div>
@@ -168,7 +243,7 @@
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
                                     <div class="px-6 pb-6 pt-0 flex justify-center">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-zinc-800 text-orange-500 hover:bg-orange-600 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-orange-500/20">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all border bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border-[var(--accent)]/20">
                                             <i class="fa-solid fa-pen-to-square"></i> Score Match
                                         </a>
                                     </div>
@@ -183,8 +258,8 @@
         <!-- UPCOMING TAB -->
         <div x-show="activeTab === 'upcoming'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
              @if($upcomingMatches->isEmpty())
-                 <div class="flex flex-col items-center justify-center py-20 text-zinc-600 rounded-2xl bg-zinc-900/30 border border-dashed border-zinc-800">
-                    <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4">
+                 <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
                         <i class="fa-regular fa-calendar-xmark text-2xl opacity-50"></i>
                     </div>
                     <p class="text-sm font-medium">No upcoming matches</p>
@@ -196,32 +271,32 @@
                             $homeTeam = $match->homeTeam?->team;
                             $awayTeam = $match->awayTeam?->team;
                         @endphp
-                        <div class="bg-zinc-900 rounded-xl border border-white/5 flex flex-col group hover:border-orange-500/20 transition-all overflow-hidden">
+                        <div class="rounded-xl border flex flex-col group transition-all overflow-hidden bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent)]/20">
                              <!-- Match Details -->
                              <a href="{{ route('matches.live', $match->slug) }}" class="p-4 sm:p-5 flex items-center justify-between flex-grow">
                                   <div class="flex items-center gap-4 flex-1">
-                                       <div class="w-10 h-10 rounded-full bg-zinc-800 p-1.5 border border-white/5 flex-shrink-0">
+                                       <div class="w-10 h-10 rounded-full p-1.5 border flex-shrink-0 bg-[var(--bg-element)] border-[var(--border)]">
                                             @if($homeTeam && $homeTeam->logo)
                                                 <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-full h-full object-contain" alt="">
                                             @else
-                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-600">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
+                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
                                             @endif
                                        </div>
-                                       <span class="font-bold text-sm sm:text-base text-zinc-200 truncate">{{ $homeTeam?->name ?? 'TBD' }}</span>
+                                       <span class="font-bold text-sm sm:text-base truncate text-[var(--text-main)]">{{ $homeTeam?->name ?? 'TBD' }}</span>
                                   </div>
                                   
                                   <div class="px-2 sm:px-4 flex flex-col items-center min-w-[80px] sm:min-w-[100px]">
-                                       <span class="text-xs font-bold text-zinc-500 bg-zinc-800 px-2 py-1 rounded mb-1">{{ $match->match_time ? $match->match_time->format('h:i A') : 'TBA' }}</span>
-                                       <span class="text-[10px] text-zinc-600 uppercase font-medium">{{ $match->match_date ? $match->match_date->format('M d') : 'Date TBA' }}</span>
+                                       <span class="text-xs font-bold px-2 py-1 rounded mb-1 bg-[var(--bg-element)] text-[var(--text-muted)]">{{ $match->match_time ? $match->match_time->format('h:i A') : 'TBA' }}</span>
+                                       <span class="text-[10px] uppercase font-medium text-[var(--text-muted)]">{{ $match->match_date ? $match->match_date->format('M d') : 'Date TBA' }}</span>
                                   </div>
 
                                   <div class="flex items-center gap-4 flex-1 justify-end">
-                                       <span class="font-bold text-sm sm:text-base text-zinc-200 text-right truncate">{{ $awayTeam?->name ?? 'TBD' }}</span>
-                                       <div class="w-10 h-10 rounded-full bg-zinc-800 p-1.5 border border-white/5 flex-shrink-0">
+                                       <span class="font-bold text-sm sm:text-base text-right truncate text-[var(--text-main)]">{{ $awayTeam?->name ?? 'TBD' }}</span>
+                                       <div class="w-10 h-10 rounded-full p-1.5 border flex-shrink-0 bg-[var(--bg-element)] border-[var(--border)]">
                                             @if($awayTeam && $awayTeam->logo)
                                                 <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-full h-full object-contain" alt="">
                                             @else
-                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-600">{{ substr($awayTeam?->name ?? 'A', 0, 1) }}</div>
+                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($awayTeam?->name ?? 'A', 0, 1) }}</div>
                                             @endif
                                        </div>
                                   </div>
@@ -230,8 +305,8 @@
                              <!-- Scorer Action for Upcoming (Separate Row) -->
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
-                                    <div class="bg-zinc-800/30 border-t border-white/5 p-2">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg hover:shadow-orange-500/20">
+                                    <div class="p-2 border-t bg-[var(--bg-element)]/30 border-[var(--border)]">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg hover:shadow-[var(--accent)]/20 bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                                             <i class="fa-solid fa-play"></i> Start Scoring
                                         </a>
                                     </div>
@@ -246,7 +321,7 @@
         <!-- PAST TAB -->
         <div x-show="activeTab === 'past'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
              @if($pastMatches->isEmpty())
-                 <div class="flex flex-col items-center justify-center py-20 text-zinc-600 rounded-2xl bg-zinc-900/30 border border-dashed border-zinc-800">
+                 <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
                     <p class="text-sm font-medium">No results available</p>
                 </div>
              @else
@@ -258,8 +333,8 @@
                             $isHomeWinner = $match->home_score > $match->away_score;
                             $isAwayWinner = $match->away_score > $match->home_score;
                         @endphp
-                        <a href="{{ route('matches.live', $match->slug) }}" class="bg-zinc-900 rounded-xl border border-white/5 p-4 hover:bg-zinc-800/50 hover:border-white/10 transition-all group">
-                             <div class="flex justify-between items-center mb-4 text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
+                        <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
+                             <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
                                  <span>{{ $match->match_date ? $match->match_date->format('M d, Y') : '' }}</span>
                                  <span>FT</span>
                              </div>
@@ -271,11 +346,11 @@
                                           @if($homeTeam && $homeTeam->logo)
                                               <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
                                           @else
-                                              <div class="w-6 h-6 rounded-full bg-zinc-800"></div>
+                                              <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
                                           @endif
-                                          <span class="text-sm font-semibold {{ $isHomeWinner ? 'text-white' : 'text-zinc-500' }}">{{ $homeTeam?->name ?? 'Home' }}</span>
+                                          <span class="text-sm font-semibold {{ $isHomeWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $homeTeam?->name ?? 'Home' }}</span>
                                       </div>
-                                      <span class="font-bold {{ $isHomeWinner ? 'text-orange-500' : 'text-zinc-600' }}">{{ $match->home_score ?? 0 }}</span>
+                                      <span class="font-bold {{ $isHomeWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->home_score ?? 0 }}</span>
                                  </div>
                                  
                                  <!-- Away -->
@@ -284,11 +359,11 @@
                                            @if($awayTeam && $awayTeam->logo)
                                               <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
                                           @else
-                                              <div class="w-6 h-6 rounded-full bg-zinc-800"></div>
+                                              <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
                                           @endif
-                                          <span class="text-sm font-semibold {{ $isAwayWinner ? 'text-white' : 'text-zinc-500' }}">{{ $awayTeam?->name ?? 'Away' }}</span>
+                                          <span class="text-sm font-semibold {{ $isAwayWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $awayTeam?->name ?? 'Away' }}</span>
                                       </div>
-                                      <span class="font-bold {{ $isAwayWinner ? 'text-orange-500' : 'text-zinc-600' }}">{{ $match->away_score ?? 0 }}</span>
+                                      <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
                                  </div>
                              </div>
                         </a>
