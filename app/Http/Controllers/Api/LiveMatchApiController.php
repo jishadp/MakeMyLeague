@@ -198,4 +198,80 @@ class LiveMatchApiController extends Controller
             'lineups' => $lineups,
         ]);
     }
+
+    public function storeEvent(Request $request, Fixture $fixture)
+    {
+        // Simple authorization check: User must be scorer or admin or organizer
+        if ($request->user()->id !== $fixture->scorer_id && 
+            !$request->user()->is_admin && 
+            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'event_type' => 'required|string',
+            'minute' => 'required|integer',
+            'team_id' => 'nullable|exists:league_teams,id',
+            'player_id' => 'nullable|exists:league_players,id',
+            'player_name' => 'nullable|string',
+            'description' => 'nullable|string',
+            'assist_player_id' => 'nullable|exists:league_players,id',
+            'assist_player_name' => 'nullable|string',
+        ]);
+
+        $event = $fixture->events()->create($validated);
+
+        // Update Score if Goal
+        if ($validated['event_type'] === 'GOAL') {
+            if ($validated['team_id'] == $fixture->home_team_id) {
+                $fixture->increment('home_score');
+            } elseif ($validated['team_id'] == $fixture->away_team_id) {
+                $fixture->increment('away_score');
+            }
+        }
+
+        return response()->json([
+            'success' => true, 
+            'event' => $event,
+            'new_scores' => [
+                'home' => $fixture->refresh()->home_score,
+                'away' => $fixture->away_score
+            ]
+        ]);
+    }
+
+    public function deleteEvent(Request $request, Fixture $fixture, $eventId)
+    {
+         // Authorization check
+        if ($request->user()->id !== $fixture->scorer_id && 
+            !$request->user()->is_admin && 
+            ($fixture->league && $fixture->league->organizer_id !== $request->user()->id)) {
+             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $event = \App\Models\MatchEvent::findOrFail($eventId);
+
+        if ($event->fixture_id !== $fixture->id) {
+            return response()->json(['success' => false, 'message' => 'Event mismatch'], 403);
+        }
+
+        // Revert Logic
+        if ($event->event_type === 'GOAL') {
+             if ($event->team_id == $fixture->home_team_id) {
+                 $fixture->decrement('home_score');
+             } elseif ($event->team_id == $fixture->away_team_id) {
+                 $fixture->decrement('away_score');
+             }
+        }
+
+        $event->delete();
+
+        return response()->json([
+            'success' => true,
+            'new_scores' => [
+                'home' => $fixture->refresh()->home_score,
+                'away' => $fixture->away_score
+            ]
+        ]);
+    }
 }

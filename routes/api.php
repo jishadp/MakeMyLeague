@@ -65,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('live-matches-listing', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'index']);
     Route::get('leagues/{league:slug}/matches', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'leagueMatches']);
     Route::get('fixtures/{fixture:slug}/details', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'show']);
+    Route::post('fixtures/{fixture:slug}/event', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'storeEvent']);
+    Route::delete('fixtures/{fixture:slug}/event/{event}', [\App\Http\Controllers\Api\LiveMatchApiController::class, 'deleteEvent']);
 });
 
 Route::prefix('auctions/league/{league:slug}')->group(function () {
