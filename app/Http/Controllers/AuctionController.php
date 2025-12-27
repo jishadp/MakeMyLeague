@@ -86,7 +86,80 @@ class AuctionController extends Controller
             ->orderBy('match_time', 'desc')
             ->get();
 
-        return view('auction.league-matches', compact('league', 'fixtures'));
+        // Calculate standings from completed matches
+        $completedMatches = $fixtures->where('status', 'completed');
+        $standings = [];
+
+        foreach ($completedMatches as $match) {
+            $homeTeamId = $match->home_team_id;
+            $awayTeamId = $match->away_team_id;
+            $homeScore = $match->home_score ?? 0;
+            $awayScore = $match->away_score ?? 0;
+
+            // Initialize team stats if not exists
+            foreach ([$homeTeamId, $awayTeamId] as $teamId) {
+                if (!isset($standings[$teamId])) {
+                    $standings[$teamId] = [
+                        'team_id' => $teamId,
+                        'team' => null,
+                        'played' => 0,
+                        'won' => 0,
+                        'drawn' => 0,
+                        'lost' => 0,
+                        'goals_for' => 0,
+                        'goals_against' => 0,
+                        'goal_difference' => 0,
+                        'points' => 0,
+                    ];
+                }
+            }
+
+            // Update home team stats
+            $standings[$homeTeamId]['played']++;
+            $standings[$homeTeamId]['goals_for'] += $homeScore;
+            $standings[$homeTeamId]['goals_against'] += $awayScore;
+
+            // Update away team stats
+            $standings[$awayTeamId]['played']++;
+            $standings[$awayTeamId]['goals_for'] += $awayScore;
+            $standings[$awayTeamId]['goals_against'] += $homeScore;
+
+            // Determine result
+            if ($homeScore > $awayScore) {
+                // Home win
+                $standings[$homeTeamId]['won']++;
+                $standings[$homeTeamId]['points'] += 3;
+                $standings[$awayTeamId]['lost']++;
+            } elseif ($awayScore > $homeScore) {
+                // Away win
+                $standings[$awayTeamId]['won']++;
+                $standings[$awayTeamId]['points'] += 3;
+                $standings[$homeTeamId]['lost']++;
+            } else {
+                // Draw
+                $standings[$homeTeamId]['drawn']++;
+                $standings[$homeTeamId]['points'] += 1;
+                $standings[$awayTeamId]['drawn']++;
+                $standings[$awayTeamId]['points'] += 1;
+            }
+        }
+
+        // Calculate goal difference and attach team objects
+        $leagueTeams = LeagueTeam::with('team')->where('league_id', $league->id)->get()->keyBy('id');
+        
+        foreach ($standings as $teamId => &$stat) {
+            $stat['goal_difference'] = $stat['goals_for'] - $stat['goals_against'];
+            $stat['team'] = $leagueTeams[$teamId]->team ?? null;
+        }
+
+        // Sort by Points (desc), then Goal Difference (desc), then Goals For (desc)
+        usort($standings, function($a, $b) {
+            if ($b['points'] !== $a['points']) return $b['points'] - $a['points'];
+            if ($b['goal_difference'] !== $a['goal_difference']) return $b['goal_difference'] - $a['goal_difference'];
+            return $b['goals_for'] - $a['goals_for'];
+        });
+
+        return view('auction.league-matches', compact('league', 'fixtures', 'standings'));
     }
     /**
      * Display the auction bidding page.

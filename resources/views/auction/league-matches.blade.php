@@ -168,6 +168,12 @@
                     RESULTS
                     <div x-show="activeTab === 'past'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
+                <button @click="activeTab = 'standings'" 
+                    class="relative py-4 text-sm font-bold transition-colors"
+                    :class="activeTab === 'standings' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                    STANDINGS
+                    <div x-show="activeTab === 'standings'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
+                </button>
             </div>
         </div>
     </div>
@@ -370,6 +376,77 @@
                      @endforeach
                 </div>
              @endif
+        </div>
+
+        <!-- STANDINGS TAB -->
+        <div x-show="activeTab === 'standings'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
+            @if(empty($standings))
+                <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
+                        <i class="fa-solid fa-trophy text-2xl opacity-50"></i>
+                    </div>
+                    <p class="text-sm font-medium">No standings available yet</p>
+                    <p class="text-xs mt-1 opacity-70">Complete some matches to see standings</p>
+                </div>
+            @else
+                <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b bg-[var(--bg-element)] border-[var(--border)]">
+                                    <th class="text-left py-3 px-4 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">#</th>
+                                    <th class="text-left py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">Team</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">P</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">W</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">D</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">L</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GF</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GA</th>
+                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">GD</th>
+                                    <th class="text-center py-3 px-4 font-bold text-[var(--accent)] text-xs uppercase tracking-wider">Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($standings as $index => $standing)
+                                    <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors">
+                                        <td class="py-3 px-4 font-bold text-[var(--text-muted)]">{{ $index + 1 }}</td>
+                                        <td class="py-3 px-2">
+                                            <div class="flex items-center gap-2">
+                                                @if($standing['team'] && $standing['team']->logo)
+                                                    <img src="{{ url(Storage::url($standing['team']->logo)) }}" class="w-6 h-6 object-contain" alt="">
+                                                @else
+                                                    <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                @endif
+                                                <span class="font-semibold text-[var(--text-main)] truncate max-w-[120px] sm:max-w-none">{{ $standing['team']->name ?? 'Team' }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['played'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium text-emerald-500">{{ $standing['won'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['drawn'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium text-rose-500">{{ $standing['lost'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_for'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_against'] }}</td>
+                                        <td class="py-3 px-2 text-center font-medium {{ $standing['goal_difference'] > 0 ? 'text-emerald-500' : ($standing['goal_difference'] < 0 ? 'text-rose-500' : 'text-[var(--text-muted)]') }}">{{ $standing['goal_difference'] > 0 ? '+' : '' }}{{ $standing['goal_difference'] }}</td>
+                                        <td class="py-3 px-4 text-center font-black text-[var(--accent)]">{{ $standing['points'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="mt-4 text-xs text-[var(--text-muted)] flex flex-wrap gap-4 justify-center">
+                    <span><strong>P</strong> = Played</span>
+                    <span><strong>W</strong> = Won</span>
+                    <span><strong>D</strong> = Drawn</span>
+                    <span><strong>L</strong> = Lost</span>
+                    <span><strong>GF</strong> = Goals For</span>
+                    <span><strong>GA</strong> = Goals Against</span>
+                    <span><strong>GD</strong> = Goal Difference</span>
+                    <span><strong>Pts</strong> = Points (Win=3, Draw=1)</span>
+                </div>
+            @endif
         </div>
 
     </div>
