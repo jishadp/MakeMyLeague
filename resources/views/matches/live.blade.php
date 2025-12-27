@@ -250,7 +250,7 @@
 
                             <!-- Main Description -->
                              <div class="text-sm md:text-lg font-bold leading-tight" :class="darkMode ? 'text-white' : 'text-zinc-800'">
-                                {{ $event->player->user->name ?? $event->player_name ?? 'Player' }}
+                                {{ $event->player->user->name ?? $event->player_name ?? $event->description ?? 'Player' }}
                              </div>
 
                              <!-- Sub / Assist Details -->

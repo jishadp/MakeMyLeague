@@ -150,18 +150,28 @@
                                     'bg-gradient-to-br from-white to-rose-50 border-rose-100': event.event_type == 'RED_CARD',
                                     'bg-gradient-to-br from-white to-amber-50 border-amber-100': event.event_type == 'YELLOW_CARD',
                                     'bg-gradient-to-br from-white to-purple-50 border-purple-100': event.event_type == 'SUB',
-                                    'bg-white border-slate-100': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB'].includes(event.event_type)
+                                    'bg-gradient-to-br from-white to-sky-50 border-sky-100': event.event_type == 'COMMENTARY',
+                                    'bg-white border-slate-100': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB', 'COMMENTARY'].includes(event.event_type)
                                  }">
                                 
                                 <!-- Player Photo -->
                                 <div class="absolute left-3 top-3">
                                     <div class="w-10 h-10 rounded-full shadow-sm relative overflow-hidden ring-1 ring-white">
-                                        <template x-if="event.player && event.player.user">
-                                            <img :src="getPhotoUrl(event.player.user.photo)" class="w-full h-full object-cover">
+                                        <template x-if="event.event_type == 'COMMENTARY'">
+                                            <div class="w-full h-full flex items-center justify-center font-bold text-xs bg-sky-100 text-sky-500">
+                                                <i class="fa-solid fa-microphone-lines"></i>
+                                            </div>
                                         </template>
-                                        <template x-if="!event.player || !event.player.user">
-                                            <div class="w-full h-full flex items-center justify-center font-bold text-xs bg-slate-100 text-slate-500">
-                                                <img :src="getPhotoUrl(null)" class="w-full h-full object-cover opacity-90">
+                                        <template x-if="event.event_type != 'COMMENTARY'">
+                                            <div>
+                                                <template x-if="event.player && event.player.user">
+                                                    <img :src="getPhotoUrl(event.player.user.photo)" class="w-full h-full object-cover">
+                                                </template>
+                                                <template x-if="!event.player || !event.player.user">
+                                                    <div class="w-full h-full flex items-center justify-center font-bold text-xs bg-slate-100 text-slate-500">
+                                                        <img :src="getPhotoUrl(null)" class="w-full h-full object-cover opacity-90">
+                                                    </div>
+                                                </template>
                                             </div>
                                         </template>
                                     </div>
@@ -183,7 +193,8 @@
                                                 'text-rose-600': event.event_type == 'RED_CARD',
                                                 'text-amber-600': event.event_type == 'YELLOW_CARD',
                                                 'text-purple-600': event.event_type == 'SUB',
-                                                'text-slate-600': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB'].includes(event.event_type)
+                                                'text-sky-600': event.event_type == 'COMMENTARY',
+                                                'text-slate-600': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB', 'COMMENTARY'].includes(event.event_type)
                                             }" x-text="event.event_type.replace('_', ' ')"></h3>
                                     </div>
                                     
@@ -626,17 +637,19 @@ function scorerConsole() {
             let awayXI = this.players.filter(p => p.team_id == {{ $fixture->away_team_id }} && p.is_active)
                                      .map(formatPlayer).join('\n');
 
-            let text = `\uD83C\uDFC6 *${leagueName}*\n` +
-                       `\u26BD ${homeTeam} \uD83C\uDD9A ${awayTeam}\n` +
-                       `\uD83D\uDCC5 ${date} | \uD83D\uDCCD ${venue}\n\n`;
+            let icon = (code) => String.fromCodePoint(code);
+
+            let text = `${icon(0x1F3C6)} *${leagueName}*\n` +
+                       `${icon(0x26BD)} ${homeTeam} ${icon(0x1F19A)} ${awayTeam}\n` +
+                       `${icon(0x1F4C5)} ${date} | ${icon(0x1F4CD)} ${venue}\n\n`;
 
             if (homeXI || awayXI) {
-                text += `\uD83D\uDCCB *LINEUPS*\n\n` +
+                text += `${icon(0x1F4CB)} *LINEUPS*\n\n` +
                         `*${homeTeam} XI:*\n${homeXI || 'Not announced'}\n\n` +
                         `*${awayTeam} XI:*\n${awayXI || 'Not announced'}\n\n`;
             }
 
-            text += `\uD83D\uDD34 *Watch Live & Score:*\n${liveLink}\n\n`;
+            text += `${icon(0x1F534)} *Watch Live & Score:*\n${liveLink}\n\n`;
             text += `_(Refresh the page for live updates)_`;
 
             let url = `https://wa.me/?text=${encodeURIComponent(text)}`;
