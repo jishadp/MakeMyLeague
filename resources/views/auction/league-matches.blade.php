@@ -174,6 +174,12 @@
                     STANDINGS
                     <div x-show="activeTab === 'standings'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
+                <button @click="activeTab = 'leaders'" 
+                    class="relative py-4 text-sm font-bold transition-colors"
+                    :class="activeTab === 'leaders' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                    LEADERS
+                    <div x-show="activeTab === 'leaders'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
+                </button>
             </div>
         </div>
     </div>
@@ -445,6 +451,89 @@
                     <span><strong>GA</strong> = Goals Against</span>
                     <span><strong>GD</strong> = Goal Difference</span>
                     <span><strong>Pts</strong> = Points (Win=3, Draw=1)</span>
+                </div>
+            @endif
+        </div>
+
+        <!-- LEADERS TAB -->
+        <div x-show="activeTab === 'leaders'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
+            @if($topScorers->isEmpty() && $topAssists->isEmpty())
+                <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
+                        <i class="fa-solid fa-star text-2xl opacity-50"></i>
+                    </div>
+                    <p class="text-sm font-medium">No leaders data available yet</p>
+                    <p class="text-xs mt-1 opacity-70">Complete some matches with goals to see leaders</p>
+                </div>
+            @else
+                <div class="grid gap-6 sm:grid-cols-2">
+                    <!-- Top Scorers -->
+                    <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                        <div class="bg-[var(--bg-element)] p-4 border-b border-[var(--border)] flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-futbol text-emerald-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-[var(--text-main)]">Top Scorers</h3>
+                                <p class="text-xs text-[var(--text-muted)]">Most goals scored</p>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-[var(--border)]">
+                            @forelse($topScorers as $index => $scorer)
+                                <div class="p-3 flex items-center gap-3 hover:bg-[var(--bg-hover)] transition-colors">
+                                    <span class="w-6 text-center font-bold text-sm {{ $index < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $index + 1 }}</span>
+                                    <div class="w-8 h-8 rounded-full overflow-hidden bg-[var(--bg-element)] flex-shrink-0">
+                                        @if($scorer['player'] && $scorer['player']->photo)
+                                            <img src="{{ url(Storage::url($scorer['player']->photo)) }}" class="w-full h-full object-cover" alt="">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($scorer['player']->name ?? 'P', 0, 1) }}</div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-sm text-[var(--text-main)] truncate">{{ $scorer['player']->name ?? 'Unknown' }}</p>
+                                        <p class="text-xs text-[var(--text-muted)] truncate">{{ $scorer['team']->name ?? '' }}</p>
+                                    </div>
+                                    <span class="font-black text-lg text-emerald-500">{{ $scorer['goals'] }}</span>
+                                </div>
+                            @empty
+                                <div class="p-6 text-center text-[var(--text-muted)] text-sm">No goals scored yet</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Top Assists -->
+                    <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                        <div class="bg-[var(--bg-element)] p-4 border-b border-[var(--border)] flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-hands-helping text-blue-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-[var(--text-main)]">Top Assists</h3>
+                                <p class="text-xs text-[var(--text-muted)]">Most assists provided</p>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-[var(--border)]">
+                            @forelse($topAssists as $index => $assist)
+                                <div class="p-3 flex items-center gap-3 hover:bg-[var(--bg-hover)] transition-colors">
+                                    <span class="w-6 text-center font-bold text-sm {{ $index < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $index + 1 }}</span>
+                                    <div class="w-8 h-8 rounded-full overflow-hidden bg-[var(--bg-element)] flex-shrink-0">
+                                        @if($assist['player'] && $assist['player']->photo)
+                                            <img src="{{ url(Storage::url($assist['player']->photo)) }}" class="w-full h-full object-cover" alt="">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($assist['player']->name ?? 'P', 0, 1) }}</div>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-sm text-[var(--text-main)] truncate">{{ $assist['player']->name ?? 'Unknown' }}</p>
+                                        <p class="text-xs text-[var(--text-muted)] truncate">{{ $assist['team']->name ?? '' }}</p>
+                                    </div>
+                                    <span class="font-black text-lg text-blue-500">{{ $assist['assists'] }}</span>
+                                </div>
+                            @empty
+                                <div class="p-6 text-center text-[var(--text-muted)] text-sm">No assists recorded yet</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>

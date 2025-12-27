@@ -159,7 +159,54 @@ class AuctionController extends Controller
             return $b['goals_for'] - $a['goals_for'];
         });
 
-        return view('auction.league-matches', compact('league', 'fixtures', 'standings'));
+        // Calculate Top Scorers (Goals) and Assist Leaders
+        $fixtureIds = $fixtures->where('status', 'completed')->pluck('id');
+        
+        // Top Scorers - count GOAL events per player
+        $topScorers = \App\Models\MatchEvent::whereIn('fixture_id', $fixtureIds)
+            ->where('event_type', 'GOAL')
+            ->whereNotNull('player_id')
+            ->selectRaw('player_id, COUNT(*) as goals')
+            ->groupBy('player_id')
+            ->orderByDesc('goals')
+            ->limit(10)
+            ->with(['player.player', 'player.leagueTeam.team'])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'player' => $item->player?->player ?? null,
+                    'team' => $item->player?->leagueTeam?->team ?? null,
+                    'goals' => $item->goals,
+                ];
+            });
+
+        // Top Assists - count events with assist_player_id
+        $topAssists = \App\Models\MatchEvent::whereIn('fixture_id', $fixtureIds)
+            ->where('event_type', 'GOAL')
+            ->whereNotNull('assist_player_id')
+            ->selectRaw('assist_player_id, COUNT(*) as assists')
+            ->groupBy('assist_player_id')
+            ->orderByDesc('assists')
+            ->limit(10)
+            ->get();
+
+        // Fetch player details for assists
+        $assistPlayerIds = $topAssists->pluck('assist_player_id');
+        $assistPlayers = \App\Models\LeaguePlayer::with(['player', 'leagueTeam.team'])
+            ->whereIn('id', $assistPlayerIds)
+            ->get()
+            ->keyBy('id');
+
+        $topAssists = $topAssists->map(function ($item) use ($assistPlayers) {
+            $lp = $assistPlayers[$item->assist_player_id] ?? null;
+            return [
+                'player' => $lp?->player ?? null,
+                'team' => $lp?->leagueTeam?->team ?? null,
+                'assists' => $item->assists,
+            ];
+        });
+
+        return view('auction.league-matches', compact('league', 'fixtures', 'standings', 'topScorers', 'topAssists'));
     }
     /**
      * Display the auction bidding page.
