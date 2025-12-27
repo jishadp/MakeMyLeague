@@ -206,7 +206,57 @@ class AuctionController extends Controller
             ];
         });
 
-        return view('auction.league-matches', compact('league', 'fixtures', 'standings', 'topScorers', 'topAssists'));
+        // Yellow Cards - count YELLOW_CARD events per player
+        $topYellowCards = \App\Models\MatchEvent::whereIn('fixture_id', $fixtureIds)
+            ->where('event_type', 'YELLOW_CARD')
+            ->whereNotNull('player_id')
+            ->selectRaw('player_id, COUNT(*) as cards')
+            ->groupBy('player_id')
+            ->orderByDesc('cards')
+            ->limit(10)
+            ->get();
+
+        $yellowPlayerIds = $topYellowCards->pluck('player_id');
+        $yellowPlayers = \App\Models\LeaguePlayer::with(['player', 'leagueTeam.team'])
+            ->whereIn('id', $yellowPlayerIds)
+            ->get()
+            ->keyBy('id');
+
+        $topYellowCards = $topYellowCards->map(function ($item) use ($yellowPlayers) {
+            $lp = $yellowPlayers[$item->player_id] ?? null;
+            return [
+                'player' => $lp?->player ?? null,
+                'team' => $lp?->leagueTeam?->team ?? null,
+                'cards' => $item->cards,
+            ];
+        });
+
+        // Red Cards - count RED_CARD events per player
+        $topRedCards = \App\Models\MatchEvent::whereIn('fixture_id', $fixtureIds)
+            ->where('event_type', 'RED_CARD')
+            ->whereNotNull('player_id')
+            ->selectRaw('player_id, COUNT(*) as cards')
+            ->groupBy('player_id')
+            ->orderByDesc('cards')
+            ->limit(10)
+            ->get();
+
+        $redPlayerIds = $topRedCards->pluck('player_id');
+        $redPlayers = \App\Models\LeaguePlayer::with(['player', 'leagueTeam.team'])
+            ->whereIn('id', $redPlayerIds)
+            ->get()
+            ->keyBy('id');
+
+        $topRedCards = $topRedCards->map(function ($item) use ($redPlayers) {
+            $lp = $redPlayers[$item->player_id] ?? null;
+            return [
+                'player' => $lp?->player ?? null,
+                'team' => $lp?->leagueTeam?->team ?? null,
+                'cards' => $item->cards,
+            ];
+        });
+
+        return view('auction.league-matches', compact('league', 'fixtures', 'standings', 'topScorers', 'topAssists', 'topYellowCards', 'topRedCards'));
     }
     /**
      * Display the auction bidding page.

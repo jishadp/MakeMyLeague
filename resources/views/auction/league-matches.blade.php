@@ -487,6 +487,11 @@
                         :class="leaderTab === 'assists' ? 'bg-blue-500 text-white shadow-lg' : 'bg-[var(--bg-element)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border)]'">
                         <i class="fa-solid fa-hands-helping mr-2"></i>Assists
                     </button>
+                    <button @click="leaderTab = 'cards'" 
+                        class="px-6 py-2.5 rounded-full text-sm font-bold transition-all"
+                        :class="leaderTab === 'cards' ? 'bg-amber-500 text-white shadow-lg' : 'bg-[var(--bg-element)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border)]'">
+                        <i class="fa-solid fa-square mr-2"></i>Cards
+                    </button>
                 </div>
 
                 <!-- Goals Tab Content -->
@@ -563,6 +568,75 @@
                             @empty
                                 <div class="p-8 text-center text-[var(--text-muted)] text-sm">No assists recorded yet</div>
                             @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards Tab Content -->
+                <div x-show="leaderTab === 'cards'" x-transition>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <!-- Yellow Cards -->
+                        <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                            <div class="bg-amber-500/10 p-4 border-b border-[var(--border)] flex items-center gap-3">
+                                <div class="w-8 h-10 bg-amber-400 rounded-sm shadow-sm"></div>
+                                <div>
+                                    <h3 class="font-bold text-[var(--text-main)]">Yellow Cards</h3>
+                                    <p class="text-xs text-[var(--text-muted)]">Most yellows received</p>
+                                </div>
+                            </div>
+                            <div class="divide-y divide-[var(--border)]">
+                                @forelse($topYellowCards as $index => $card)
+                                    <div class="p-3 flex items-center gap-3 hover:bg-[var(--bg-hover)] transition-colors">
+                                        <span class="w-6 text-center font-bold text-sm {{ $index < 3 ? 'text-amber-500' : 'text-[var(--text-muted)]' }}">{{ $index + 1 }}</span>
+                                        <div class="w-8 h-8 rounded-full overflow-hidden bg-[var(--bg-element)] flex-shrink-0">
+                                            @if($card['player'] && $card['player']->photo)
+                                                <img src="{{ url(Storage::url($card['player']->photo)) }}" class="w-full h-full object-cover" alt="">
+                                            @else
+                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($card['player']->name ?? 'P', 0, 1) }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-sm text-[var(--text-main)] truncate">{{ $card['player']->name ?? 'Unknown' }}</p>
+                                            <p class="text-xs text-[var(--text-muted)] truncate">{{ $card['team']->name ?? '' }}</p>
+                                        </div>
+                                        <span class="font-black text-lg text-amber-500">{{ $card['cards'] }}</span>
+                                    </div>
+                                @empty
+                                    <div class="p-6 text-center text-[var(--text-muted)] text-sm">No yellow cards yet</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- Red Cards -->
+                        <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                            <div class="bg-rose-500/10 p-4 border-b border-[var(--border)] flex items-center gap-3">
+                                <div class="w-8 h-10 bg-rose-500 rounded-sm shadow-sm"></div>
+                                <div>
+                                    <h3 class="font-bold text-[var(--text-main)]">Red Cards</h3>
+                                    <p class="text-xs text-[var(--text-muted)]">Most reds received</p>
+                                </div>
+                            </div>
+                            <div class="divide-y divide-[var(--border)]">
+                                @forelse($topRedCards as $index => $card)
+                                    <div class="p-3 flex items-center gap-3 hover:bg-[var(--bg-hover)] transition-colors">
+                                        <span class="w-6 text-center font-bold text-sm {{ $index < 3 ? 'text-rose-500' : 'text-[var(--text-muted)]' }}">{{ $index + 1 }}</span>
+                                        <div class="w-8 h-8 rounded-full overflow-hidden bg-[var(--bg-element)] flex-shrink-0">
+                                            @if($card['player'] && $card['player']->photo)
+                                                <img src="{{ url(Storage::url($card['player']->photo)) }}" class="w-full h-full object-cover" alt="">
+                                            @else
+                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">{{ substr($card['player']->name ?? 'P', 0, 1) }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-sm text-[var(--text-main)] truncate">{{ $card['player']->name ?? 'Unknown' }}</p>
+                                            <p class="text-xs text-[var(--text-muted)] truncate">{{ $card['team']->name ?? '' }}</p>
+                                        </div>
+                                        <span class="font-black text-lg text-rose-500">{{ $card['cards'] }}</span>
+                                    </div>
+                                @empty
+                                    <div class="p-6 text-center text-[var(--text-muted)] text-sm">No red cards yet</div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>
