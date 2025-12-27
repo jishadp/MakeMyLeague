@@ -61,9 +61,9 @@
         @yield('content')
 
         @auth
-        @if(request()->route() && request()->route()->getName() != "auction.index")
+        @if(request()->route() && !in_array(request()->route()->getName(), ['auction.index', 'scorer.console']))
             @include('partials.bottom-navigation-buttons')
-            @endif
+        @endif
         @endauth
     </main>
 
