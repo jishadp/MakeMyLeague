@@ -16,7 +16,10 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500" x-text="status.replace('_', ' ')"></span>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('matches.live', $fixture->slug) }}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm" title="Open Public Live View">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                    </a>
                     <button @click="shareMatch()" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm" title="Share Lineups & Link">
                         <i class="fa-brands fa-whatsapp text-lg"></i>
                     </button>
@@ -637,19 +640,22 @@ function scorerConsole() {
             let awayXI = this.players.filter(p => p.team_id == {{ $fixture->away_team_id }} && p.is_active)
                                      .map(formatPlayer).join('\n');
 
-            let icon = (code) => String.fromCodePoint(code);
-
-            let text = `${icon(0x1F3C6)} *${leagueName}*\n` +
-                       `${icon(0x26BD)} ${homeTeam} ${icon(0x1F19A)} ${awayTeam}\n` +
-                       `${icon(0x1F4C5)} ${date} | ${icon(0x1F4CD)} ${venue}\n\n`;
+            let separator = '--------------------------------';
+            
+            let text = `*${leagueName}*\n` +
+                       `${separator}\n` +
+                       `*${homeTeam}* vs *${awayTeam}*\n` +
+                       `${date} | ${venue}\n` +
+                       `${separator}\n\n`;
 
             if (homeXI || awayXI) {
-                text += `${icon(0x1F4CB)} *LINEUPS*\n\n` +
+                text += `*LINEUPS*\n\n` +
                         `*${homeTeam} XI:*\n${homeXI || 'Not announced'}\n\n` +
-                        `*${awayTeam} XI:*\n${awayXI || 'Not announced'}\n\n`;
+                        `*${awayTeam} XI:*\n${awayXI || 'Not announced'}\n` +
+                        `${separator}\n\n`;
             }
 
-            text += `${icon(0x1F534)} *Watch Live & Score:*\n${liveLink}\n\n`;
+            text += `*WATCH LIVE & SCORE:*\n${liveLink}\n\n`;
             text += `_(Refresh the page for live updates)_`;
 
             let url = `https://wa.me/?text=${encodeURIComponent(text)}`;

@@ -1,5 +1,17 @@
 @extends('layouts.app')
 
+@section('meta_tags')
+    <meta property="og:title" content="LIVE: {{ $fixture->homeTeam->team->name }} vs {{ $fixture->awayTeam->team->name }}">
+    <meta property="og:description" content="Watch live scores and updates for {{ $fixture->league->name }} on MakeMyLeague.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @if($fixture->league->logo)
+        <meta property="og:image" content="{{ \Illuminate\Support\Facades\Storage::url($fixture->league->logo) }}">
+    @else
+        <meta property="og:image" content="{{ asset('images/default-league.jpg') }}">
+    @endif
+@endsection
+
 @section('content')
 <div class="min-h-screen transition-colors duration-300" 
      x-data="{ activeTab: 'summary', darkMode: localStorage.getItem('liveMatchDarkMode') === 'true' }"
@@ -22,6 +34,15 @@
                  @else
                     <span>{{ str_replace('_', ' ', $fixture->status) }}</span>
                 @endif
+                
+                @auth
+                    @if(auth()->id() == $fixture->scorer_id || ($fixture->league && auth()->id() == $fixture->league->organizer_id) || auth()->user()->is_admin)
+                        <a href="{{ route('scorer.console', $fixture->slug) }}" class="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors border"
+                           :class="darkMode ? 'bg-zinc-800 text-purple-400 border-purple-500/30 hover:bg-zinc-700' : 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200'">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Score
+                        </a>
+                    @endif
+                @endauth
                 
                 <!-- Reload Button -->
                 <button @click="window.location.reload()" class="ml-2 w-5 h-5 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1"
