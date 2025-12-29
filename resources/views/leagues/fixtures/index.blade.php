@@ -198,6 +198,26 @@
                                             <div class="text-center">
                                                 @if($hasScore)
                                                     <div class="text-3xl font-black text-slate-900">{{ $fixture->home_score ?? 0 }} - {{ $fixture->away_score ?? 0 }}</div>
+                                                    @if($fixture->status == 'completed')
+                                                        @php
+                                                            $winner = null;
+                                                            if($fixture->has_penalties && $fixture->penalty_winner_team_id) {
+                                                                $winner = $fixture->penalty_winner_team_id;
+                                                            } elseif($fixture->home_score > $fixture->away_score) {
+                                                                $winner = $fixture->home_team_id;
+                                                            } elseif($fixture->away_score > $fixture->home_score) {
+                                                                $winner = $fixture->away_team_id;
+                                                            }
+                                                        @endphp
+                                                        @if($winner)
+                                                            <div class="text-xs font-bold text-amber-600 mt-1">
+                                                                {{ $winner == $fixture->home_team_id ? $fixture->homeTeam->team->name : $fixture->awayTeam->team->name }} wins
+                                                                @if($fixture->has_penalties)<span class="text-[10px]">(Pens)</span>@endif
+                                                            </div>
+                                                        @else
+                                                            <div class="text-xs font-bold text-slate-500 mt-1">Draw</div>
+                                                        @endif
+                                                    @endif
                                                 @else
                                                     <div class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">VS</div>
                                                 @endif
