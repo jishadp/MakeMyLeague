@@ -1,9 +1,20 @@
 @php
     $homeTeam = $match->homeTeam?->team;
     $awayTeam = $match->awayTeam?->team;
+    $isKnockout = !in_array($match->match_type, ['group_stage']);
+    $isCompleted = $match->status === 'completed';
+    $homeWon = $isCompleted && $match->home_score > $match->away_score;
+    $awayWon = $isCompleted && $match->away_score > $match->home_score;
+    $isDraw = $isCompleted && $match->home_score === $match->away_score;
+    
+    // Get cards for this match
+    $homeYellows = $match->events->where('team_id', $match->home_team_id)->where('event_type', 'YELLOW_CARD')->count();
+    $homeReds = $match->events->where('team_id', $match->home_team_id)->where('event_type', 'RED_CARD')->count();
+    $awayYellows = $match->events->where('team_id', $match->away_team_id)->where('event_type', 'YELLOW_CARD')->count();
+    $awayReds = $match->events->where('team_id', $match->away_team_id)->where('event_type', 'RED_CARD')->count();
 @endphp
 <div class="rounded-2xl border overflow-hidden shadow-sm group transition-all bg-[var(--bg-card)] border-[var(--border)] hover:border-[var(--accent)]/20">
-    <div class="block relative">
+    <a href="{{ route('matches.live', $match->slug) }}" class="block relative">
         <div class="p-4 sm:p-6 pb-2">
              <div class="flex items-center justify-between">
                   <!-- Home -->
@@ -14,8 +25,27 @@
                           @else
                             <div class="w-full h-full flex items-center justify-center font-bold text-lg text-[var(--text-muted)]">{{ substr($homeTeam?->name ?? 'H', 0, 1) }}</div>
                           @endif
+                          @if($homeWon && $isKnockout)
+                            <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                                <i class="fa-solid fa-trophy text-white text-[10px]"></i>
+                            </div>
+                          @endif
                       </div>
-                      <h3 class="text-xs sm:text-sm font-bold text-center leading-tight text-[var(--text-main)] max-w-[100px] truncate">{{ $homeTeam?->name ?? 'Home' }}</h3>
+                      <h3 class="text-xs sm:text-sm font-bold text-center leading-tight max-w-[100px] truncate" :class="{{ $homeWon ? '"text-[var(--accent)]"' : '"text-[var(--text-main)]"' }}">{{ $homeTeam?->name ?? 'Home' }}</h3>
+                      @if($isCompleted && ($homeYellows > 0 || $homeReds > 0))
+                        <div class="flex items-center gap-1 mt-1">
+                            @if($homeYellows > 0)
+                                <span class="flex items-center gap-0.5 text-[10px] font-bold text-amber-500">
+                                    <div class="w-2 h-3 bg-amber-400 rounded-sm"></div>{{ $homeYellows }}
+                                </span>
+                            @endif
+                            @if($homeReds > 0)
+                                <span class="flex items-center gap-0.5 text-[10px] font-bold text-rose-500">
+                                    <div class="w-2 h-3 bg-rose-500 rounded-sm"></div>{{ $homeReds }}
+                                </span>
+                            @endif
+                        </div>
+                      @endif
                   </div>
 
                   <!-- Score / Time -->
@@ -24,7 +54,11 @@
                           <div class="text-2xl sm:text-3xl font-black tabular-nums tracking-tighter text-[var(--text-main)]">
                               {{ $match->home_score ?? 0 }}<span class="text-[var(--text-muted)] mx-1">-</span>{{ $match->away_score ?? 0 }}
                           </div>
-                          <span class="text-[10px] font-bold bg-[var(--bg-element)] px-2 py-0.5 rounded text-[var(--text-muted)] mt-1">FT</span>
+                          @if($match->has_penalties)
+                            <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded mt-1">Pens: {{ $match->home_penalty_score }}-{{ $match->away_penalty_score }}</span>
+                          @else
+                            <span class="text-[10px] font-bold bg-[var(--bg-element)] px-2 py-0.5 rounded text-[var(--text-muted)] mt-1">FT</span>
+                          @endif
                       @elseif($match->status === 'in_progress')
                           <div class="text-3xl sm:text-4xl font-black tabular-nums tracking-tighter text-[var(--text-main)]">
                               {{ $match->home_score ?? 0 }}<span class="text-[var(--text-muted)] mx-1">-</span>{{ $match->away_score ?? 0 }}
@@ -44,8 +78,27 @@
                           @else
                             <div class="w-full h-full flex items-center justify-center font-bold text-lg text-[var(--text-muted)]">{{ substr($awayTeam?->name ?? 'A', 0, 1) }}</div>
                           @endif
+                          @if($awayWon && $isKnockout)
+                            <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                                <i class="fa-solid fa-trophy text-white text-[10px]"></i>
+                            </div>
+                          @endif
                       </div>
-                      <h3 class="text-xs sm:text-sm font-bold text-center leading-tight text-[var(--text-main)] max-w-[100px] truncate">{{ $awayTeam?->name ?? 'Away' }}</h3>
+                      <h3 class="text-xs sm:text-sm font-bold text-center leading-tight max-w-[100px] truncate" :class="{{ $awayWon ? '"text-[var(--accent)]"' : '"text-[var(--text-main)]"' }}">{{ $awayTeam?->name ?? 'Away' }}</h3>
+                      @if($isCompleted && ($awayYellows > 0 || $awayReds > 0))
+                        <div class="flex items-center gap-1 mt-1">
+                            @if($awayYellows > 0)
+                                <span class="flex items-center gap-0.5 text-[10px] font-bold text-amber-500">
+                                    <div class="w-2 h-3 bg-amber-400 rounded-sm"></div>{{ $awayYellows }}
+                                </span>
+                            @endif
+                            @if($awayReds > 0)
+                                <span class="flex items-center gap-0.5 text-[10px] font-bold text-rose-500">
+                                    <div class="w-2 h-3 bg-rose-500 rounded-sm"></div>{{ $awayReds }}
+                                </span>
+                            @endif
+                        </div>
+                      @endif
                   </div>
              </div>
              
@@ -62,5 +115,5 @@
                 </div>
              </div>
         </div>
-    </div>
+    </a>
 </div>

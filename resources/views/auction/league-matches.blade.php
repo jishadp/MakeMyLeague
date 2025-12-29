@@ -158,10 +158,15 @@
                         return ($match->match_date ? $match->match_date->format('Y-m-d') : '9999-12-31') . 
                                ($match->match_time ? $match->match_time->format('H:i:s') : '00:00:00');
                     });
-                    $pastMatches = $fixtures->where('status', 'completed');
+                    $pastMatches = $fixtures->where('status', 'completed')->sortByDesc(function($match) {
+                        return ($match->match_date ? $match->match_date->format('Y-m-d') : '0000-00-00') . 
+                               ($match->match_time ? $match->match_time->format('H:i:s') : '00:00:00');
+                    });
+                    $pastGroupMatches = $pastMatches->where('match_type', 'group_stage');
+                    $pastKnockoutMatches = $pastMatches->whereNotIn('match_type', ['group_stage']);
                     $knockoutMatches = $fixtures->whereNotIn('match_type', ['group_stage'])->sortBy(function($match) {
                          // Sort by logical round order then date
-                         $order = ['qualifier' => 1, 'eliminator' => 2, 'quarter_final' => 3, 'semi_final' => 4, 'final' => 5];
+                         $order = ['qualifier' => 1, 'eliminator' => 2, 'quarter_final' => 3, 'semi_final' => 4, 'final' => 5, 'third_place' => 6];
                          return ($order[$match->match_type] ?? 99) . ($match->match_date ? $match->match_date->format('Y-m-d') : '9999-12-31');
                     });
                 @endphp
@@ -418,56 +423,138 @@
                     <p class="text-sm font-medium">No results available</p>
                 </div>
              @else
-                <div class="grid gap-3 sm:grid-cols-2">
-                     @foreach($pastMatches as $match)
-                        @php
-                            $homeTeam = $match->homeTeam?->team;
-                            $awayTeam = $match->awayTeam?->team;
-                            $isHomeWinner = $match->home_score > $match->away_score;
-                            $isAwayWinner = $match->away_score > $match->home_score;
-                        @endphp
-                        <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
-                             <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
-                                 <span>{{ $match->match_date ? $match->match_date->format('M d, Y') : '' }}</span>
-                                 <span>FT</span>
-                             </div>
-                             
-                             <div class="space-y-2">
-                                 <!-- Home -->
-                                 <div class="flex justify-between items-center">
-                                      <div class="flex items-center gap-3">
-                                          @if($homeTeam && $homeTeam->logo)
-                                              <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
-                                          @else
-                                              <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
-                                          @endif
-                                          <span class="text-sm font-semibold {{ $isHomeWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $homeTeam?->name ?? 'Home' }}</span>
-                                      </div>
-                                      <span class="font-bold {{ $isHomeWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->home_score ?? 0 }}</span>
-                                 </div>
-                                 
-                                 <!-- Away -->
-                                  <div class="flex justify-between items-center">
-                                      <div class="flex items-center gap-3">
-                                           @if($awayTeam && $awayTeam->logo)
-                                              <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
-                                          @else
-                                              <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
-                                          @endif
-                                          <span class="text-sm font-semibold {{ $isAwayWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $awayTeam?->name ?? 'Away' }}</span>
-                                      </div>
-                                      <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
-                                 </div>
-                             </div>
+                <div class="space-y-8">
+                    <!-- Group Stage Results -->
+                    @if($pastGroupMatches->isNotEmpty())
+                        <div>
+                            <h3 class="font-bold text-lg mb-4 text-[var(--accent)] uppercase tracking-wide border-b border-[var(--accent)]/20 pb-2 inline-block">
+                                Group Stage Results
+                            </h3>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach($pastGroupMatches as $match)
+                                    @php
+                                        $homeTeam = $match->homeTeam?->team;
+                                        $awayTeam = $match->awayTeam?->team;
+                                        $isHomeWinner = $match->home_score > $match->away_score;
+                                        $isAwayWinner = $match->away_score > $match->home_score;
+                                    @endphp
+                                    <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
+                                         <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
+                                             <span>{{ $match->match_date ? $match->match_date->format('M d, Y') : '' }} {{ $match->match_time ? $match->match_time->format('h:i A') : '' }}</span>
+                                             <span>FT</span>
+                                         </div>
+                                         
+                                         <div class="space-y-2">
+                                             <!-- Home -->
+                                             <div class="flex justify-between items-center">
+                                                  <div class="flex items-center gap-3">
+                                                      @if($homeTeam && $homeTeam->logo)
+                                                          <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
+                                                      @else
+                                                          <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                      @endif
+                                                      <span class="text-sm font-semibold {{ $isHomeWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $homeTeam?->name ?? 'Home' }}</span>
+                                                  </div>
+                                                  <span class="font-bold {{ $isHomeWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->home_score ?? 0 }}</span>
+                                             </div>
+                                             
+                                             <!-- Away -->
+                                              <div class="flex justify-between items-center">
+                                                  <div class="flex items-center gap-3">
+                                                       @if($awayTeam && $awayTeam->logo)
+                                                          <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
+                                                      @else
+                                                          <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                      @endif
+                                                      <span class="text-sm font-semibold {{ $isAwayWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $awayTeam?->name ?? 'Away' }}</span>
+                                                  </div>
+                                                  <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
+                                             </div>
+                                         </div>
 
-                             <!-- League/Group Info for Past -->
-                             <div class="mt-3 pt-3 border-t border-[var(--border)] flex justify-center">
-                                <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)]">
-                                    <span>{{ $match->leagueGroup ? $match->leagueGroup->name : ($match->match_type ? ucfirst(str_replace('_', ' ', $match->match_type)) : 'Match') }}</span>
-                                </div>
-                             </div>
-                        </a>
-                     @endforeach
+                                         <!-- League/Group Info for Past -->
+                                         <div class="mt-3 pt-3 border-t border-[var(--border)] flex justify-center">
+                                            <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)]">
+                                                <span>{{ $match->leagueGroup ? $match->leagueGroup->name : 'Group Stage' }}</span>
+                                            </div>
+                                         </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Knockout Results -->
+                    @if($pastKnockoutMatches->isNotEmpty())
+                        <div>
+                            <h3 class="font-bold text-lg mb-4 text-[var(--accent)] uppercase tracking-wide border-b border-[var(--accent)]/20 pb-2 inline-block">
+                                Knockout Results
+                            </h3>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach($pastKnockoutMatches as $match)
+                                    @php
+                                        $homeTeam = $match->homeTeam?->team;
+                                        $awayTeam = $match->awayTeam?->team;
+                                        $isHomeWinner = $match->home_score > $match->away_score || ($match->has_penalties && $match->home_penalty_score > $match->away_penalty_score);
+                                        $isAwayWinner = $match->away_score > $match->home_score || ($match->has_penalties && $match->away_penalty_score > $match->home_penalty_score);
+                                    @endphp
+                                    <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
+                                         <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
+                                             <span>{{ $match->match_date ? $match->match_date->format('M d, Y') : '' }} {{ $match->match_time ? $match->match_time->format('h:i A') : '' }}</span>
+                                             <span>FT</span>
+                                         </div>
+                                         
+                                         <div class="space-y-2">
+                                             <!-- Home -->
+                                             <div class="flex justify-between items-center">
+                                                  <div class="flex items-center gap-3">
+                                                      @if($homeTeam && $homeTeam->logo)
+                                                          <img src="{{ url(Storage::url($homeTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
+                                                      @else
+                                                          <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                      @endif
+                                                      <span class="text-sm font-semibold {{ $isHomeWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $homeTeam?->name ?? 'Home' }}</span>
+                                                      @if($isHomeWinner)
+                                                        <i class="fa-solid fa-trophy text-[var(--accent)] text-xs"></i>
+                                                      @endif
+                                                  </div>
+                                                  <span class="font-bold {{ $isHomeWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->home_score ?? 0 }}</span>
+                                             </div>
+                                             
+                                             <!-- Away -->
+                                              <div class="flex justify-between items-center">
+                                                  <div class="flex items-center gap-3">
+                                                       @if($awayTeam && $awayTeam->logo)
+                                                          <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
+                                                      @else
+                                                          <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                      @endif
+                                                      <span class="text-sm font-semibold {{ $isAwayWinner ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]' }}">{{ $awayTeam?->name ?? 'Away' }}</span>
+                                                      @if($isAwayWinner)
+                                                        <i class="fa-solid fa-trophy text-[var(--accent)] text-xs"></i>
+                                                      @endif
+                                                  </div>
+                                                  <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
+                                             </div>
+                                         </div>
+
+                                         @if($match->has_penalties)
+                                            <div class="mt-2 text-center">
+                                                <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-1 rounded">Penalties: {{ $match->home_penalty_score }}-{{ $match->away_penalty_score }}</span>
+                                            </div>
+                                         @endif
+
+                                         <!-- Match Type Info -->
+                                         <div class="mt-3 pt-3 border-t border-[var(--border)] flex justify-center">
+                                            <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)]">
+                                                <span>{{ ucfirst(str_replace('_', ' ', $match->match_type)) }}</span>
+                                            </div>
+                                         </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
              @endif
         </div>
