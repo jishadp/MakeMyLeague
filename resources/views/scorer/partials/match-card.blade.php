@@ -88,7 +88,7 @@
                     @endif
                 </a>
                 @if(!isset($isLive))
-                <a href="{{ route('scorer.matches.edit', $match->id) }}" class="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-element)] transition-all">
+                <a href="{{ route('scorer.matches.edit', $match->slug) }}" class="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-element)] transition-all">
                     <i class="fa-solid fa-edit"></i>
                 </a>
                 @endif

@@ -231,7 +231,7 @@ function matchForm() {
 
             this.loading = true;
             try {
-                const response = await fetch('{{ route('scorer.matches.update', $fixture->id) }}', {
+                const response = await fetch('{{ route('scorer.matches.update', $fixture->slug) }}', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
