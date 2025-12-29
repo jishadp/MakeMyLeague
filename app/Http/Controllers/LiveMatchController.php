@@ -14,7 +14,8 @@ class LiveMatchController extends Controller
             'homeTeam', 
             'awayTeam', 
             'fixturePlayers.player.user', // For lineups
-            'scorer'
+            'scorer',
+            'penalties'
         ]);
 
         // Fetch paginated events
@@ -35,6 +36,9 @@ class LiveMatchController extends Controller
             ->get()
             ->groupBy('team_id');
 
-        return view('matches.live', compact('fixture', 'events', 'goals', 'redCards'));
+        // Fetch penalties ordered by attempt number
+        $penalties = $fixture->penalties()->orderBy('attempt_number')->get();
+
+        return view('matches.live', compact('fixture', 'events', 'goals', 'redCards', 'penalties'));
     }
 }

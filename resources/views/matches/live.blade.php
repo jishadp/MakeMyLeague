@@ -189,6 +189,13 @@
                             <span>{{ $fixture->away_score ?? 0 }}</span>
                         </div>
                         
+                        <!-- Penalty Score (if applicable) -->
+                        @if($fixture->has_penalties)
+                            <div class="text-xs font-bold text-[var(--text-muted)] mt-1">
+                                Penalties: <span class="text-[var(--accent)]">{{ $fixture->home_penalty_score }} - {{ $fixture->away_penalty_score }}</span>
+                            </div>
+                        @endif
+                        
                         <!-- Match State & Timer -->
                         <div class="flex flex-col items-center">
                             <span x-show="matchState && matchState !== 'NOT_STARTED'" class="text-[10px] font-bold uppercase tracking-wider mb-0.5 text-[var(--text-muted)]" x-text="matchState.replace(/_/g, ' ')"></span>
@@ -258,6 +265,42 @@
         
         <!-- Summary Tab (Paginated Timeline) -->
         <div x-show="activeTab === 'summary'" x-transition.opacity.duration.300ms>
+            
+            <!-- Penalty Shootout Section -->
+            @if($fixture->has_penalties && $penalties->count() > 0)
+            <div class="rounded-2xl border shadow-sm overflow-hidden mb-6 bg-[var(--bg-card)] border-[var(--border)]">
+                <div class="p-4 border-b border-[var(--border)] bg-[var(--bg-element)]">
+                    <h3 class="text-sm font-bold uppercase text-[var(--text-main)] tracking-wider text-center">Penalty Shootout</h3>
+                    <div class="flex items-center justify-center gap-6 mt-3">
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-[var(--text-muted)] mb-1">{{ $fixture->homeTeam->team->name }}</div>
+                            <div class="text-3xl font-black text-blue-600 font-mono">{{ $fixture->home_penalty_score }}</div>
+                        </div>
+                        <div class="text-xl font-black text-[var(--text-muted)]">-</div>
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-[var(--text-muted)] mb-1">{{ $fixture->awayTeam->team->name }}</div>
+                            <div class="text-3xl font-black text-rose-600 font-mono">{{ $fixture->away_penalty_score }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="space-y-2">
+                        @foreach($penalties as $penalty)
+                            <div class="flex items-center justify-between p-3 rounded-lg border bg-[var(--bg-element)] border-[var(--border)]">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-mono font-bold px-2 py-1 rounded bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-muted)]">#{{ $penalty->attempt_number }}</span>
+                                    <span class="text-sm font-bold text-[var(--text-main)]">{{ $penalty->player_name ?? 'Guest' }}</span>
+                                    <span class="text-xs text-[var(--text-muted)]">({{ $penalty->team_id == $fixture->home_team_id ? $fixture->homeTeam->team->name : $fixture->awayTeam->team->name }})</span>
+                                </div>
+                                <span class="text-xs font-bold px-2 py-1 rounded {{ $penalty->scored ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50' }}">
+                                    {{ $penalty->scored ? 'SCORED' : 'MISSED' }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
             
             @if($events->count() > 0)
             <div class="relative pl-6 space-y-8 my-4">
