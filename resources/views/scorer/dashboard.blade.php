@@ -17,6 +17,34 @@
         --shadow-color: rgba(0,0,0,0.5);
     }
 
+    .theme-white {
+        --bg-page: #f3f4f6; /* gray-100 */
+        --bg-header: #ffffff;
+        --bg-card: #ffffff;
+        --bg-element: #f3f4f6; /* gray-100 */
+        --bg-hover: #f9fafb; /* gray-50 */
+        --text-main: #111827; /* gray-900 */
+        --text-muted: #6b7280; /* gray-500 */
+        --border: #e5e7eb; /* gray-200 */
+        --accent: #f97316; /* orange-500 - Keep brand accent */
+        --accent-hover: #ea580c;
+        --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    .theme-green {
+        --bg-page: #f0fdf4; /* green-50 */
+        --bg-header: #ffffff;
+        --bg-card: #ffffff;
+        --bg-element: #dcfce7; /* green-100 */
+        --bg-hover: #f0fdf4;
+        --text-main: #14532d; /* green-900 */
+        --text-muted: #15803d; /* green-700 */
+        --border: #bbf7d0; /* green-200 */
+        --accent: #16a34a; /* green-600 */
+        --accent-hover: #15803d; /* green-700 */
+        --shadow-color: rgba(22, 163, 74, 0.1);
+    }
+
     /* Transitions */
     .theme-transition {
         transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
@@ -35,7 +63,7 @@
 </style>
 
 <div class="min-h-screen font-sans selection:bg-[var(--accent)]/30 theme-transition bg-[var(--bg-page)] text-[var(--text-main)]" 
-     x-data="{ activeTab: 'live', theme: localStorage.getItem('scorer_theme') || 'dark' }"
+     x-data="{ activeTab: 'live', theme: localStorage.getItem('scorer_theme') || 'green' }"
      x-init="$watch('theme', val => localStorage.setItem('scorer_theme', val))"
      :class="'theme-' + theme">
 
@@ -96,7 +124,7 @@
                         </button>
                     </div>
 
-                     <a href="{{ route('scorer.matches.create', ['league_id' => $selectedLeague->id ?? null]) }}" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all border bg-[var(--accent)] border-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20 flex items-center gap-2">
+                     <a href="{{ route('scorer.matches.create', ['league' => $selectedLeague->slug ?? null]) }}" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all border bg-[var(--accent)] border-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20 flex items-center gap-2">
                          <i class="fa-solid fa-plus"></i> Create Match
                      </a>
                  </div>
