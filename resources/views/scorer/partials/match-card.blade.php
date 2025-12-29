@@ -80,7 +80,7 @@
                     View Stats
                 </a>
             @else
-                <a href="{{ route('scorer.console', $match->slug) }}" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
+                <a href="{{ route('scorer.console', $match->slug) }}" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all shadow-md bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                     @if(isset($isLive) && $isLive)
                         <i class="fa-solid fa-pen-to-square"></i> Continue Scoring
                     @else

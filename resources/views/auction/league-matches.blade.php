@@ -296,7 +296,7 @@
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
                                     <div class="px-6 pb-6 pt-0 flex justify-center">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all border bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border-[var(--accent)]/20">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all border bg-[var(--bg-element)] text-[var(--accent)] hover:bg-[var(--accent)] border-[var(--accent)]/20">
                                             <i class="fa-solid fa-pen-to-square"></i> Score Match
                                         </a>
                                     </div>
@@ -399,7 +399,7 @@
                              @auth
                                 @if((auth()->id() === $match->scorer_id) || auth()->user()->canManageLeague($league->id))
                                     <div class="p-2 border-t bg-[var(--bg-element)]/30 border-[var(--border)]">
-                                        <a href="{{ route('scorer.console', $match->slug) }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg hover:shadow-[var(--accent)]/20 bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
+                                        <a href="{{ route('scorer.console', $match->slug) }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all shadow-lg hover:shadow-[var(--accent)]/20 bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                                             <i class="fa-solid fa-play"></i> Start Scoring
                                         </a>
                                     </div>
