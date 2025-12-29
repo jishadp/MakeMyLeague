@@ -43,7 +43,9 @@ class Fixture extends Model
     {
         parent::boot();
         static::creating(function ($fixture) {
-            $fixture->slug = $fixture->generateUniqueSlug();
+            if (!$fixture->slug) {
+                $fixture->slug = $fixture->generateUniqueSlug();
+            }
             if (!$fixture->match_state) {
                 $fixture->match_state = self::STATE_NOT_STARTED;
             }
@@ -115,11 +117,17 @@ class Fixture extends Model
 
     private function generateUniqueSlug()
     {
-        if (!$this->league) {
-            $this->load('league');
+        try {
+            // Get league slug directly from attribute or load if needed
+            $leagueSlug = $this->league_id ? 
+                League::find($this->league_id)?->slug : 
+                ($this->league?->slug ?? 'fixture');
+            
+            $base = $leagueSlug . '-fixture-' . uniqid();
+            return Str::slug($base);
+        } catch (\Exception $e) {
+            // Fallback slug if something goes wrong
+            return 'fixture-' . uniqid();
         }
-        
-        $base = $this->league->slug . '-fixture-' . uniqid();
-        return Str::slug($base);
     }
 }

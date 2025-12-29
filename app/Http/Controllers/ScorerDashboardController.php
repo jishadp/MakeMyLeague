@@ -131,54 +131,65 @@ class ScorerDashboardController extends Controller
 
     public function storeMatch(Request $request)
     {
-        $validated = $request->validate([
-            'league_id' => 'required|exists:leagues,id',
-            'match_type' => 'required|string',
-            'league_group_id' => 'nullable|exists:league_groups,id',
-            'home_team_id' => 'required|exists:league_teams,id',
-            'away_team_id' => 'required|exists:league_teams,id|different:home_team_id',
-            'match_date' => 'nullable|date',
-            // Allow H:i or H:i:s
-            'match_time' => 'nullable', 
-            'venue' => 'nullable|string'
-        ]);
+        try {
+            $validated = $request->validate([
+                'league_id' => 'required|exists:leagues,id',
+                'match_type' => 'required|string',
+                'league_group_id' => 'nullable|exists:league_groups,id',
+                'home_team_id' => 'required|exists:league_teams,id',
+                'away_team_id' => 'required|exists:league_teams,id|different:home_team_id',
+                'match_date' => 'nullable|date',
+                'match_time' => 'nullable', 
+                'venue' => 'nullable|string'
+            ]);
 
-        $league = League::findOrFail($validated['league_id']);
-        
-        // Ensure league_group_id is only set for group_stage matches
-        if ($validated['match_type'] !== 'group_stage') {
-            $validated['league_group_id'] = null;
-        }
-        
-        // Validate that if it's group_stage, league_group_id is provided
-        if ($validated['match_type'] === 'group_stage' && empty($validated['league_group_id'])) {
+            $league = League::findOrFail($validated['league_id']);
+            
+            // Ensure league_group_id is only set for group_stage matches
+            if ($validated['match_type'] !== 'group_stage') {
+                $validated['league_group_id'] = null;
+            }
+            
+            // Validate that if it's group_stage, league_group_id is provided
+            if ($validated['match_type'] === 'group_stage' && empty($validated['league_group_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Group is required for group stage matches.'
+                ], 422);
+            }
+            
+            // Status determination
+            $status = ($validated['match_date'] && $validated['match_time']) ? 'scheduled' : 'unscheduled';
+            
+            $fixture = Fixture::create([
+                'league_id' => $league->id,
+                'match_type' => $validated['match_type'],
+                'league_group_id' => $validated['league_group_id'] ?? null,
+                'home_team_id' => $validated['home_team_id'],
+                'away_team_id' => $validated['away_team_id'],
+                'match_date' => $validated['match_date'],
+                'match_time' => $validated['match_time'],
+                'venue' => $validated['venue'],
+                'status' => $status,
+                'scorer_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Match created successfully',
+                'redirect' => route('scorer.dashboard', ['league_id' => $league->id])
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Match Creation Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'request' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Group is required for group stage matches.'
-            ], 422);
+                'message' => 'Error creating match: ' . $e->getMessage()
+            ], 500);
         }
-        
-        // Status determination
-        $status = ($validated['match_date'] && $validated['match_time']) ? 'scheduled' : 'unscheduled';
-        
-        $fixture = Fixture::create([
-            'slug' => Str::slug($league->slug . '-fixture-' . uniqid()),
-            'league_id' => $league->id,
-            'match_type' => $validated['match_type'],
-            'league_group_id' => $validated['league_group_id'] ?? null,
-            'home_team_id' => $validated['home_team_id'],
-            'away_team_id' => $validated['away_team_id'],
-            'match_date' => $validated['match_date'],
-            'match_time' => $validated['match_time'],
-            'venue' => $validated['venue'],
-            'status' => $status,
-            'scorer_id' => auth()->id() // Auto-assign creator as scorer
-        ]);
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Match created successfully',
-            'redirect' => route('scorer.dashboard', ['league_id' => $league->id])
-        ]);
     }
 }

@@ -73,51 +73,89 @@
 
 
 
-                <!-- Step 3: Teams Selection -->
+                <!-- Step 3: Teams Selection with Cards -->
                 <div class="border-b pb-6 last:border-b-0">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">3</span>
                         Select Teams
                     </h2>
 
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Home Team -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Home Team <span class="text-red-500">*</span>
-                            </label>
-                            <select x-model="form.home_team_id" @change="onTeamChange()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Home Team...</option>
-                                <template x-for="team in getAvailableTeams()" :key="team.id">
-                                    <option :value="team.id" x-text="team.team.name"></option>
-                                </template>
-                            </select>
+                    <!-- Help Text -->
+                    <div x-show="!form.home_team_id || !form.away_team_id" class="mb-6 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-info-circle"></i>
+                        <span>Click on team cards below to select home and away teams</span>
+                    </div>
+
+                    <!-- Selected Teams Preview -->
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <!-- Home Team Selection Box -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <p class="text-xs font-semibold text-gray-500 mb-3 uppercase">Home Team</p>
+                            <div x-show="form.home_team_id">
+                                <p class="text-lg font-bold text-gray-900" x-text="getTeamName(form.home_team_id)"></p>
+                                <button type="button" @click="form.home_team_id = ''" class="mt-2 text-xs text-red-600 hover:text-red-800 underline">
+                                    Change
+                                </button>
+                            </div>
+                            <div x-show="!form.home_team_id" class="text-gray-500">
+                                <i class="fa-solid fa-plus text-2xl mb-2 block opacity-50"></i>
+                                <p class="text-sm">Select from teams below</p>
+                            </div>
                         </div>
 
-                        <!-- Away Team -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Away Team <span class="text-red-500">*</span>
-                            </label>
-                            <select x-model="form.away_team_id" @change="onTeamChange()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Away Team...</option>
-                                <template x-for="team in getAvailableTeams()" :key="team.id">
-                                    <option :value="team.id" 
-                                        x-text="team.team.name"
-                                        :disabled="String(team.id) === String(form.home_team_id)"></option>
-                                </template>
-                            </select>
+                        <!-- Away Team Selection Box -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <p class="text-xs font-semibold text-gray-500 mb-3 uppercase">Away Team</p>
+                            <div x-show="form.away_team_id">
+                                <p class="text-lg font-bold text-gray-900" x-text="getTeamName(form.away_team_id)"></p>
+                                <button type="button" @click="form.away_team_id = ''" class="mt-2 text-xs text-red-600 hover:text-red-800 underline">
+                                    Change
+                                </button>
+                            </div>
+                            <div x-show="!form.away_team_id" class="text-gray-500">
+                                <i class="fa-solid fa-plus text-2xl mb-2 block opacity-50"></i>
+                                <p class="text-sm">Select from teams below</p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Team Conflict Warning -->
-                    <div x-show="form.home_team_id && form.away_team_id && form.home_team_id === form.away_team_id" 
-                        class="mt-3 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2" 
-                        style="display: none;">
-                        <i class="fa-solid fa-exclamation-circle"></i>
-                        <span>You cannot select the same team for both home and away!</span>
+                    <!-- Teams Grid as Cards -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-4">Available Teams</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <template x-for="team in getAvailableTeams()" :key="team.id">
+                                <button type="button"
+                                    @click.prevent="selectTeam(team.id)"
+                                    :class="`p-4 rounded-lg border-2 transition-all text-center cursor-pointer ${
+                                        Number(form.home_team_id) === Number(team.id) ? 'border-green-500 bg-green-50 ring-2 ring-green-300' : 
+                                        Number(form.away_team_id) === Number(team.id) ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-300' : 
+                                        'border-gray-200 hover:border-blue-400 hover:bg-blue-50 bg-white'
+                                    }`">
+                                    
+                                    <!-- Team Badge -->
+                                    <div x-show="Number(form.home_team_id) === Number(team.id)" class="inline-block px-2 py-1 rounded-full bg-green-500 text-white text-xs font-bold mb-2">
+                                        HOME
+                                    </div>
+                                    <div x-show="Number(form.away_team_id) === Number(team.id)" class="inline-block px-2 py-1 rounded-full bg-orange-500 text-white text-xs font-bold mb-2">
+                                        AWAY
+                                    </div>
+
+                                    <!-- Team Logo -->
+                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <i class="fa-solid fa-shield text-gray-400"></i>
+                                    </div>
+
+                                    <!-- Team Name -->
+                                    <p class="font-semibold text-gray-900 text-sm" x-text="team.team.name"></p>
+                                </button>
+                            </template>
+                        </div>
+
+                        <!-- No Teams Message -->
+                        <div x-show="getAvailableTeams().length === 0" class="text-center py-12 text-gray-500">
+                            <i class="fa-solid fa-inbox text-3xl mb-3 block opacity-50"></i>
+                            <p>No teams available. Please select a league first.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -270,6 +308,49 @@ function matchForm() {
             }
         },
 
+        selectTeam(teamId) {
+            // Convert to number for consistency
+            const teamIdNum = Number(teamId);
+            const homeTeamNum = Number(this.form.home_team_id) || null;
+            const awayTeamNum = Number(this.form.away_team_id) || null;
+            
+            console.log('selectTeam called:', { teamIdNum, homeTeamNum, awayTeamNum });
+            
+            // If this team is already selected as home, deselect it
+            if (homeTeamNum === teamIdNum) {
+                this.form.home_team_id = '';
+                console.log('Deselected home team');
+                return;
+            }
+            
+            // If this team is already selected as away, deselect it
+            if (awayTeamNum === teamIdNum) {
+                this.form.away_team_id = '';
+                console.log('Deselected away team');
+                return;
+            }
+
+            // If home team not selected, select it
+            if (!homeTeamNum) {
+                this.form.home_team_id = teamIdNum;
+                console.log('Selected home team:', teamIdNum);
+                return;
+            }
+
+            // If away team not selected and it's different from home, select it
+            if (!awayTeamNum && homeTeamNum !== teamIdNum) {
+                this.form.away_team_id = teamIdNum;
+                console.log('Selected away team:', teamIdNum);
+                return;
+            }
+
+            // If both are selected, replace the away team
+            if (homeTeamNum && awayTeamNum) {
+                this.form.away_team_id = teamIdNum;
+                console.log('Replaced away team:', teamIdNum);
+            }
+        },
+
         setMatchMode(mode) {
              // Deprecated functionality, kept strict knockout
              this.match_mode = 'knockout';
@@ -282,7 +363,8 @@ function matchForm() {
 
         getTeamName(teamId) {
             if (!teamId) return '';
-            const team = this.teams.find(t => String(t.id) === String(teamId));
+            const teamIdNum = Number(teamId);
+            const team = this.teams.find(t => Number(t.id) === teamIdNum);
             return team ? team.team.name : '';
         },
 
@@ -298,14 +380,7 @@ function matchForm() {
 
         async submitForm() {
             if (!this.isFormValid()) {
-                let errorMsg = 'Please check the following:';
-                if (!this.form.league_id) errorMsg += '\n- Select a league';
-                
-                if (!this.form.home_team_id) errorMsg += '\n- Select a home team';
-                if (!this.form.away_team_id) errorMsg += '\n- Select an away team';
-                if (this.form.home_team_id && this.form.away_team_id && this.form.home_team_id === this.form.away_team_id) errorMsg += '\n- Home and away teams cannot be the same';
-                
-                this.showMessage(errorMsg, 'error');
+                this.showMessage('Please select a league and both teams', 'error');
                 return;
             }
 

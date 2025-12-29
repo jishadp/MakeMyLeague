@@ -14,7 +14,7 @@ return new class extends Migration
 
         DB::statement("
             ALTER TABLE fixtures
-            MODIFY match_type ENUM('group_stage','qualifier','eliminator','quarter_final','semi_final','final')
+            MODIFY match_type ENUM('group_stage','qualifier','eliminator','quarter_final','semi_final','final','third_place')
             DEFAULT 'group_stage'
         ");
     }

@@ -8,6 +8,18 @@
                 {{ ucfirst(str_replace('_', ' ', $fixture->status)) }}
             </span>
         </div>
+
+        <div class="mb-2">
+            <select class="w-full border border-gray-300 rounded px-2 py-1 text-xs bg-gray-50"
+                    onchange="updateFixture('{{ $fixture->slug }}', 'match_type', this.value, this)">
+                <option value="group_stage" {{ $fixture->match_type === 'group_stage' ? 'selected' : '' }}>League Match</option>
+                <option value="qualifier" {{ $fixture->match_type === 'qualifier' ? 'selected' : '' }}>Qualifier</option>
+                <option value="eliminator" {{ $fixture->match_type === 'eliminator' ? 'selected' : '' }}>Eliminator</option>
+                <option value="quarter_final" {{ $fixture->match_type === 'quarter_final' ? 'selected' : '' }}>Quarter Final</option>
+                <option value="semi_final" {{ $fixture->match_type === 'semi_final' ? 'selected' : '' }}>Semi Final</option>
+                <option value="final" {{ $fixture->match_type === 'final' ? 'selected' : '' }}>Final</option>
+            </select>
+        </div>
         
         <div class="space-y-2 mb-4">
             <div class="flex items-center justify-between">
@@ -44,11 +56,20 @@
         <div class="grid grid-cols-12 gap-4 items-center">
             <!-- Teams -->
             <div class="col-span-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mb-1">
                     <span class="font-medium text-gray-900">{{ $fixture->homeTeam->team->name }}</span>
                     <span class="text-sm text-gray-500">vs</span>
                     <span class="font-medium text-gray-900">{{ $fixture->awayTeam->team->name }}</span>
                 </div>
+                <select class="w-full border border-gray-200 rounded px-2 py-1 text-xs bg-gray-50 text-gray-600"
+                        onchange="updateFixture('{{ $fixture->slug }}', 'match_type', this.value, this)">
+                        <option value="group_stage" {{ $fixture->match_type === 'group_stage' ? 'selected' : '' }}>League Match</option>
+                        <option value="qualifier" {{ $fixture->match_type === 'qualifier' ? 'selected' : '' }}>Qualifier</option>
+                        <option value="eliminator" {{ $fixture->match_type === 'eliminator' ? 'selected' : '' }}>Eliminator</option>
+                        <option value="quarter_final" {{ $fixture->match_type === 'quarter_final' ? 'selected' : '' }}>Quarter Final</option>
+                        <option value="semi_final" {{ $fixture->match_type === 'semi_final' ? 'selected' : '' }}>Semi Final</option>
+                        <option value="final" {{ $fixture->match_type === 'final' ? 'selected' : '' }}>Final</option>
+                </select>
             </div>
             
             <!-- Date -->

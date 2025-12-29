@@ -302,6 +302,7 @@ class LeagueMatchController extends Controller
             'home_score' => 'nullable|integer|min:0',
             'away_score' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer|min:0',
+            'match_type' => 'nullable|in:group_stage,qualifier,eliminator,quarter_final,semi_final,final',
         ]);
 
         $fixture->update($validated);
