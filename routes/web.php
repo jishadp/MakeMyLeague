@@ -382,6 +382,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', [\App\Http\Controllers\ScorerDashboardController::class, 'index'])->name('dashboard');
         Route::get('matches/create', [\App\Http\Controllers\ScorerDashboardController::class, 'createMatch'])->name('matches.create');
         Route::post('matches', [\App\Http\Controllers\ScorerDashboardController::class, 'storeMatch'])->name('matches.store');
+        Route::get('matches/{fixture}/edit', [\App\Http\Controllers\ScorerDashboardController::class, 'editMatch'])->name('matches.edit');
+        Route::put('matches/{fixture}', [\App\Http\Controllers\ScorerDashboardController::class, 'updateMatch'])->name('matches.update');
         Route::get('leagues/{league}/teams-groups', [\App\Http\Controllers\ScorerDashboardController::class, 'getLeagueTeams'])->name('leagues.teams-groups');
     });
 

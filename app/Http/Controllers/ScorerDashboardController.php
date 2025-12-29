@@ -192,4 +192,75 @@ class ScorerDashboardController extends Controller
             ], 500);
         }
     }
+
+    public function editMatch(Fixture $fixture)
+    {
+        $user = auth()->user();
+        $leagues = collect();
+        $allowedStatuses = ['active', 'auction_completed'];
+
+        if ($user->isAdmin()) {
+            $leagues = League::whereIn('status', $allowedStatuses)->get();
+        } else {
+            $leagues = $user->approvedOrganizedLeagues()
+                ->whereIn('status', $allowedStatuses)
+                ->get();
+        }
+
+        return view('scorer.matches.edit', compact('fixture', 'leagues'));
+    }
+
+    public function updateMatch(Request $request, Fixture $fixture)
+    {
+        try {
+            $validated = $request->validate([
+                'league_id' => 'required|exists:leagues,id',
+                'match_type' => 'required|string',
+                'league_group_id' => 'nullable|exists:league_groups,id',
+                'home_team_id' => 'required|exists:league_teams,id',
+                'away_team_id' => 'required|exists:league_teams,id|different:home_team_id',
+                'match_date' => 'nullable|date',
+                'match_time' => 'nullable',
+                'venue' => 'nullable|string'
+            ]);
+
+            if ($validated['match_type'] !== 'group_stage') {
+                $validated['league_group_id'] = null;
+            }
+
+            if ($validated['match_type'] === 'group_stage' && empty($validated['league_group_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Group is required for group stage matches.'
+                ], 422);
+            }
+
+            $status = ($validated['match_date'] && $validated['match_time']) ? 'scheduled' : 'unscheduled';
+
+            $fixture->update([
+                'league_id' => $validated['league_id'],
+                'match_type' => $validated['match_type'],
+                'league_group_id' => $validated['league_group_id'] ?? null,
+                'home_team_id' => $validated['home_team_id'],
+                'away_team_id' => $validated['away_team_id'],
+                'match_date' => $validated['match_date'],
+                'match_time' => $validated['match_time'],
+                'venue' => $validated['venue'],
+                'status' => $status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Match updated successfully',
+                'redirect' => route('scorer.dashboard', ['league_id' => $fixture->league_id])
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Match Update Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating match: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

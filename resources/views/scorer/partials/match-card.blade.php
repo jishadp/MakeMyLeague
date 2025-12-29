@@ -74,7 +74,7 @@
         </div>
 
         <!-- Actions -->
-        <div class="px-4 py-3 border-t bg-[var(--bg-element)]/30 border-[var(--border)] flex justify-between items-center">
+        <div class="px-4 py-3 border-t bg-[var(--bg-element)]/30 border-[var(--border)] flex justify-between items-center gap-2">
             @if(isset($isCompleted) && $isCompleted)
                 <a href="{{ route('scorer.console', $match->slug) }}" class="flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
                     View Stats
@@ -87,6 +87,11 @@
                         <i class="fa-solid fa-play"></i> Start Scoring
                     @endif
                 </a>
+                @if(!isset($isLive))
+                <a href="{{ route('scorer.matches.edit', $match->id) }}" class="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-element)] transition-all">
+                    <i class="fa-solid fa-edit"></i>
+                </a>
+                @endif
             @endif
         </div>
     </div>
