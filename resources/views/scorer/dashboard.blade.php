@@ -50,7 +50,36 @@
              <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                  <div class="text-center md:text-left">
                      <h1 class="text-3xl font-black tracking-tight leading-tight text-[var(--text-main)]">Scorer Dashboard</h1>
-                     <p class="text-[var(--text-muted)] mt-1">Manage and score your league matches</p>
+                     
+                     <!-- League Selector -->
+                     @if(isset($leagues) && $leagues->count() > 0)
+                        <div class="mt-2 relative inline-block text-left" x-data="{ open: false }">
+                            <button @click="open = !open" @click.away="open = false" type="button" class="inline-flex items-center gap-2 text-sm font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors">
+                                {{ $selectedLeague ? $selectedLeague->name : 'Select League' }}
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </button>
+
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="origin-top-left absolute left-0 mt-2 w-56 rounded-xl shadow-lg bg-[var(--bg-card)] ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-[var(--border)] max-h-60 overflow-y-auto" 
+                                 style="display: none;">
+                                <div class="py-1">
+                                    @foreach($leagues as $league)
+                                        <a href="{{ route('scorer.dashboard', ['league_id' => $league->id]) }}" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-[var(--bg-hover)] {{ (isset($selectedLeague) && $selectedLeague->id === $league->id) ? 'bg-[var(--bg-element)] font-bold' : '' }}">
+                                            {{ $league->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                     @else
+                        <p class="text-[var(--text-muted)] mt-1">Manage and score your league matches</p>
+                     @endif
                  </div>
 
                  <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -67,7 +96,7 @@
                         </button>
                     </div>
 
-                     <a href="{{ route('scorer.matches.create') }}" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all border bg-[var(--accent)] border-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20 flex items-center gap-2">
+                     <a href="{{ route('scorer.matches.create', ['league_id' => $selectedLeague->id ?? null]) }}" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all border bg-[var(--accent)] border-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20 flex items-center gap-2">
                          <i class="fa-solid fa-plus"></i> Create Match
                      </a>
                  </div>

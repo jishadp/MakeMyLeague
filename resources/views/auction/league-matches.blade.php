@@ -138,7 +138,7 @@
 
                     @auth
                         @if(auth()->user()->canManageLeague($league->id) || auth()->user()->isAdmin())
-                            <a href="{{ route('scorer.dashboard') }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
+                            <a href="{{ route('scorer.dashboard', ['league_id' => $league->id]) }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
                                 <i class="fa-solid fa-gauge-high mr-2"></i> Scorer Dashboard
                             </a>
                         @endif

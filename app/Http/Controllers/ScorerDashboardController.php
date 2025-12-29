@@ -13,25 +13,52 @@ class ScorerDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Ideally we should scope this to the logged in user's assigned leagues or matches
-        // For now, let's assume admins/scorers can see all or we filter by their assignment if implemented
         $user = auth()->user();
+        $leagues = collect();
+        $selectedLeagueId = $request->input('league_id');
 
-        $fixtures = Fixture::query()
-            ->with(['homeTeam.team', 'awayTeam.team', 'league', 'leagueGroup'])
-            ->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'unscheduled', 'completed', 'cancelled')")
-            ->orderBy('match_date')
-            ->orderBy('match_time');
-
-        if (!$user->isAdmin()){
-             // If not admin, maybe filter by scorer_id if that exists, or just show all for now as per "Scorer Dashboard" request
-             // hinting at a general management view.
-             // If we want to be strict: $fixtures->where('scorer_id', $user->id);
+        // 1. Fetch relevant leagues for the dropdown
+        if ($user->isAdmin()) {
+            $leagues = League::where('status', 'active')->get();
+        } else {
+            // Get leagues where user is an organizer (approved)
+            $leagues = $user->approvedOrganizedLeagues;
+            
+            // Should we also include leagues where they are just a scorer? 
+            // The request says "only list leagues as user access", primarily hinting at management.
+            // If they are just a scorer for a specific match, that's trickier without a "Scorer" role on the league itself.
+            // For now, adhering to "user who access can select the league" which implies management rights.
         }
 
-        $fixtures = $fixtures->get();
+        // 2. Determine Selected League
+        $selectedLeague = null;
+        if ($selectedLeagueId) {
+            $selectedLeague = $leagues->firstWhere('id', $selectedLeagueId);
+        }
 
-        return view('scorer.dashboard', compact('fixtures'));
+        // If no valid selection (or first load), default to first available
+        if (!$selectedLeague && $leagues->isNotEmpty()) {
+            $selectedLeague = $leagues->first();
+        }
+
+        // 3. Query Fixtures
+        $fixtures = Fixture::query()
+            ->with(['homeTeam.team', 'awayTeam.team', 'league', 'leagueGroup']);
+
+        if ($selectedLeague) {
+            $fixtures->where('league_id', $selectedLeague->id);
+        } else {
+            // Fallback: If no leagues available to manage, maybe show nothing or just their assigned matches?
+            // "Show only the league based" - if no league selected, show nothing safe default.
+            $fixtures->whereRaw('0 = 1'); 
+        }
+
+        $fixtures = $fixtures->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'unscheduled', 'completed', 'cancelled')")
+            ->orderBy('match_date')
+            ->orderBy('match_time')
+            ->get();
+
+        return view('scorer.dashboard', compact('fixtures', 'leagues', 'selectedLeague'));
     }
 
     public function createMatch(Request $request) 
