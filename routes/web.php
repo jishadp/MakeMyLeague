@@ -377,6 +377,14 @@ Route::middleware('auth')->group(function () {
     });
 
 
+    // Scorer Dashboard Routes
+    Route::prefix('scorer')->name('scorer.')->group(function () {
+        Route::get('dashboard', [\App\Http\Controllers\ScorerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('matches/create', [\App\Http\Controllers\ScorerDashboardController::class, 'createMatch'])->name('matches.create');
+        Route::post('matches', [\App\Http\Controllers\ScorerDashboardController::class, 'storeMatch'])->name('matches.store');
+        Route::get('leagues/{league}/teams-groups', [\App\Http\Controllers\ScorerDashboardController::class, 'getLeagueTeams'])->name('leagues.teams-groups');
+    });
+
     // Scorer Console Routes
     Route::post('fixtures/{fixture}/assign-scorer', [FixtureController::class, 'assignScorer'])->name('fixtures.assign-scorer');
     

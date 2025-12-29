@@ -88,20 +88,54 @@ class AuctionController extends Controller
 
         // Calculate standings from completed matches
         $completedMatches = $fixtures->where('status', 'completed');
-        $standings = [];
+        $standingsByGroup = [];
 
-        foreach ($completedMatches as $match) {
+        // Fetch groups to properly label/organize
+        $groups = $league->leagueGroups()->orderBy('sort_order')->get()->keyBy('id');
+        
+        // Initialize Default Group (for matches without group or if no groups exist)
+        $defaultGroupId = 0;
+        $standingsByGroup[$defaultGroupId] = [
+            'group' => null,
+            'teams' => []
+        ];
+
+        foreach ($groups as $group) {
+            $standingsByGroup[$group->id] = [
+                'group' => $group,
+                'teams' => []
+            ];
+        }
+
+        // We need to know which group a team belongs to, or use the fixture's group.
+        // Usually, standings are based on the fixture's context (Group Stage).
+        // If it's a knockout match, it shouldn't count towards Group Standings typically?
+        // User requirement: "points table only show groupt leadershei[ with respect groups"
+        // So we should probably ONLY consider 'group_stage' matches for the points table.
+        
+        $groupStageMatches = $completedMatches->where('match_type', 'group_stage');
+
+        foreach ($groupStageMatches as $match) {
+            $groupId = $match->league_group_id ?? $defaultGroupId;
+            
+            // Ensure group entry exists (in case of null or deleted group)
+            if (!isset($standingsByGroup[$groupId])) {
+                 $standingsByGroup[$groupId] = [
+                    'group' => null,
+                    'teams' => []
+                ];
+            }
+
             $homeTeamId = $match->home_team_id;
             $awayTeamId = $match->away_team_id;
             $homeScore = $match->home_score ?? 0;
             $awayScore = $match->away_score ?? 0;
 
-            // Initialize team stats if not exists
+            // Initialize team stats if not exists in this group
             foreach ([$homeTeamId, $awayTeamId] as $teamId) {
-                if (!isset($standings[$teamId])) {
-                    $standings[$teamId] = [
+                if (!isset($standingsByGroup[$groupId]['teams'][$teamId])) {
+                    $standingsByGroup[$groupId]['teams'][$teamId] = [
                         'team_id' => $teamId,
-                        'team' => null,
                         'played' => 0,
                         'won' => 0,
                         'drawn' => 0,
@@ -115,49 +149,61 @@ class AuctionController extends Controller
             }
 
             // Update home team stats
-            $standings[$homeTeamId]['played']++;
-            $standings[$homeTeamId]['goals_for'] += $homeScore;
-            $standings[$homeTeamId]['goals_against'] += $awayScore;
+            $standingsByGroup[$groupId]['teams'][$homeTeamId]['played']++;
+            $standingsByGroup[$groupId]['teams'][$homeTeamId]['goals_for'] += $homeScore;
+            $standingsByGroup[$groupId]['teams'][$homeTeamId]['goals_against'] += $awayScore;
 
             // Update away team stats
-            $standings[$awayTeamId]['played']++;
-            $standings[$awayTeamId]['goals_for'] += $awayScore;
-            $standings[$awayTeamId]['goals_against'] += $homeScore;
+            $standingsByGroup[$groupId]['teams'][$awayTeamId]['played']++;
+            $standingsByGroup[$groupId]['teams'][$awayTeamId]['goals_for'] += $awayScore;
+            $standingsByGroup[$groupId]['teams'][$awayTeamId]['goals_against'] += $homeScore;
 
             // Determine result
             if ($homeScore > $awayScore) {
                 // Home win
-                $standings[$homeTeamId]['won']++;
-                $standings[$homeTeamId]['points'] += 3;
-                $standings[$awayTeamId]['lost']++;
+                $standingsByGroup[$groupId]['teams'][$homeTeamId]['won']++;
+                $standingsByGroup[$groupId]['teams'][$homeTeamId]['points'] += 3;
+                $standingsByGroup[$groupId]['teams'][$awayTeamId]['lost']++;
             } elseif ($awayScore > $homeScore) {
                 // Away win
-                $standings[$awayTeamId]['won']++;
-                $standings[$awayTeamId]['points'] += 3;
-                $standings[$homeTeamId]['lost']++;
+                $standingsByGroup[$groupId]['teams'][$awayTeamId]['won']++;
+                $standingsByGroup[$groupId]['teams'][$awayTeamId]['points'] += 3;
+                $standingsByGroup[$groupId]['teams'][$homeTeamId]['lost']++;
             } else {
                 // Draw
-                $standings[$homeTeamId]['drawn']++;
-                $standings[$homeTeamId]['points'] += 1;
-                $standings[$awayTeamId]['drawn']++;
-                $standings[$awayTeamId]['points'] += 1;
+                $standingsByGroup[$groupId]['teams'][$homeTeamId]['drawn']++;
+                $standingsByGroup[$groupId]['teams'][$homeTeamId]['points'] += 1;
+                $standingsByGroup[$groupId]['teams'][$awayTeamId]['drawn']++;
+                $standingsByGroup[$groupId]['teams'][$awayTeamId]['points'] += 1;
             }
         }
 
         // Calculate goal difference and attach team objects
         $leagueTeams = LeagueTeam::with('team')->where('league_id', $league->id)->get()->keyBy('id');
-        
-        foreach ($standings as $teamId => &$stat) {
-            $stat['goal_difference'] = $stat['goals_for'] - $stat['goals_against'];
-            $stat['team'] = $leagueTeams[$teamId]->team ?? null;
-        }
 
-        // Sort by Points (desc), then Goal Difference (desc), then Goals For (desc)
-        usort($standings, function($a, $b) {
-            if ($b['points'] !== $a['points']) return $b['points'] - $a['points'];
-            if ($b['goal_difference'] !== $a['goal_difference']) return $b['goal_difference'] - $a['goal_difference'];
-            return $b['goals_for'] - $a['goals_for'];
-        });
+        foreach ($standingsByGroup as $groupId => &$groupData) {
+            foreach ($groupData['teams'] as $teamId => &$stat) {
+                $stat['goal_difference'] = $stat['goals_for'] - $stat['goals_against'];
+                $stat['team'] = $leagueTeams[$teamId]->team ?? null;
+            }
+            // Sort each group
+            usort($groupData['teams'], function($a, $b) {
+                if ($b['points'] !== $a['points']) return $b['points'] - $a['points'];
+                if ($b['goal_difference'] !== $a['goal_difference']) return $b['goal_difference'] - $a['goal_difference'];
+                return $b['goals_for'] - $a['goals_for'];
+            });
+        }
+        
+        // Remove empty default group if unused
+        if (empty($standingsByGroup[$defaultGroupId]['teams'])) {
+            unset($standingsByGroup[$defaultGroupId]);
+        }
+        
+        // Flatten if only one group? No, keep structure consistent for View.
+        // Actually, existing view expects $standings array. I should pass a new variable or refactor view.
+        // I will pass $standingsByGroup to view.
+        
+        // Note: I need to update the compact() call too.
 
         // Calculate Top Scorers (Goals) and Assist Leaders
         $fixtureIds = $fixtures->where('status', 'completed')->pluck('id');
@@ -256,7 +302,7 @@ class AuctionController extends Controller
             ];
         });
 
-        return view('auction.league-matches', compact('league', 'fixtures', 'standings', 'topScorers', 'topAssists', 'topYellowCards', 'topRedCards'));
+        return view('auction.league-matches', compact('league', 'fixtures', 'standingsByGroup', 'topScorers', 'topAssists', 'topYellowCards', 'topRedCards'));
     }
     /**
      * Display the auction bidding page.

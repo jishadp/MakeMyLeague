@@ -135,6 +135,14 @@
                     <a href="{{ route('auctions.live-matches') }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
                         <i class="fa-solid fa-list mr-2"></i> All Leagues
                     </a>
+
+                    @auth
+                        @if(auth()->user()->canManageLeague($league->id) || auth()->user()->isAdmin())
+                            <a href="{{ route('scorer.dashboard') }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
+                                <i class="fa-solid fa-gauge-high mr-2"></i> Scorer Dashboard
+                            </a>
+                        @endif
+                    @endauth
                  </div>
              </div>
          </div>
@@ -151,6 +159,11 @@
                                ($match->match_time ? $match->match_time->format('H:i:s') : '00:00:00');
                     });
                     $pastMatches = $fixtures->where('status', 'completed');
+                    $knockoutMatches = $fixtures->whereNotIn('match_type', ['group_stage'])->sortBy(function($match) {
+                         // Sort by logical round order then date
+                         $order = ['qualifier' => 1, 'eliminator' => 2, 'quarter_final' => 3, 'semi_final' => 4, 'final' => 5];
+                         return ($order[$match->match_type] ?? 99) . ($match->match_date ? $match->match_date->format('Y-m-d') : '9999-12-31');
+                    });
                 @endphp
                 
                 <button @click="activeTab = 'live'" 
@@ -170,6 +183,12 @@
                          <span class="text-[10px] px-1.5 py-0.5 rounded-full border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)]">{{ $upcomingMatches->count() }}</span>
                     @endif
                     <div x-show="activeTab === 'upcoming'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
+                </button>
+                <button @click="activeTab = 'knockouts'" 
+                    class="relative py-4 text-sm font-bold transition-colors"
+                    :class="activeTab === 'knockouts' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'">
+                    KNOCKOUTS
+                    <div x-show="activeTab === 'knockouts'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" x-transition></div>
                 </button>
                  <button @click="activeTab = 'past'" 
                     class="relative py-4 text-sm font-bold transition-colors"
@@ -257,6 +276,19 @@
                                               <h3 class="text-sm sm:text-base font-bold text-center leading-tight text-[var(--text-main)]">{{ $awayTeam?->name ?? 'Away' }}</h3>
                                           </div>
                                      </div>
+
+                                     <!-- League/Group Info -->
+                                     <div class="mt-4 text-center">
+                                        <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--bg-element)] px-2 py-1 rounded-full border border-[var(--border)]">
+                                            <span>{{ $match->league->name ?? 'League' }}</span>
+                                            @if($match->leagueGroup)
+                                                <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
+                                                <span>{{ $match->leagueGroup->name }}</span>
+                                            @endif
+                                            <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
+                                            <span>{{ ucfirst(str_replace('_', ' ', $match->match_type)) }}</span>
+                                        </div>
+                                     </div>
                                 </div>
                              </a>
                              
@@ -272,6 +304,33 @@
                              @endauth
                         </div>
                      @endforeach
+                </div>
+            @endif
+        </div>
+
+        <!-- KNOCKOUTS TAB -->
+        <div x-show="activeTab === 'knockouts'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
+            @if($knockoutMatches->isEmpty())
+                 <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
+                        <i class="fa-solid fa-sitemap text-2xl opacity-50"></i>
+                    </div>
+                    <p class="text-sm font-medium">No knockout matches yet</p>
+                </div>
+            @else
+                <div class="space-y-6">
+                    @foreach($knockoutMatches->groupBy('match_type') as $type => $matches)
+                        <div>
+                            <h3 class="font-bold text-lg mb-4 text-[var(--accent)] uppercase tracking-wide border-b border-[var(--accent)]/20 pb-2 inline-block">
+                                {{ str_replace('_', ' ', $type) }}
+                            </h3>
+                            <div class="space-y-4">
+                                @foreach($matches as $match)
+                                    @include('partials.match-card', ['match' => $match])
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>
@@ -311,7 +370,7 @@
                                        <span class="text-[10px] uppercase font-medium text-[var(--text-muted)]">{{ $match->match_date ? $match->match_date->format('M d') : 'Date TBA' }}</span>
                                   </div>
 
-                                  <div class="flex items-center gap-4 flex-1 justify-end">
+                                   <div class="flex items-center gap-4 flex-1 justify-end">
                                        <span class="font-bold text-xs sm:text-sm text-right leading-tight text-[var(--text-main)] line-clamp-2">{{ $awayTeam?->name ?? 'TBD' }}</span>
                                        <div class="w-10 h-10 rounded-full p-1.5 border flex-shrink-0 bg-[var(--bg-element)] border-[var(--border)]">
                                             @if($awayTeam && $awayTeam->logo)
@@ -322,6 +381,19 @@
                                        </div>
                                   </div>
                              </a>
+
+                             <!-- League/Group Info for Upcoming -->
+                             <div class="px-4 pb-3 flex justify-center">
+                                <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--bg-element)] px-2 py-0.5 rounded-full border border-[var(--border)]">
+                                    <span>{{ $match->league->name ?? 'League' }}</span>
+                                    @if($match->leagueGroup)
+                                        <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
+                                        <span>{{ $match->leagueGroup->name }}</span>
+                                    @endif
+                                    <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
+                                    <span>{{ ucfirst(str_replace('_', ' ', $match->match_type)) }}</span>
+                                </div>
+                             </div>
 
                              <!-- Scorer Action for Upcoming (Separate Row) -->
                              @auth
@@ -375,7 +447,7 @@
                                  </div>
                                  
                                  <!-- Away -->
-                                 <div class="flex justify-between items-center">
+                                  <div class="flex justify-between items-center">
                                       <div class="flex items-center gap-3">
                                            @if($awayTeam && $awayTeam->logo)
                                               <img src="{{ url(Storage::url($awayTeam->logo)) }}" class="w-6 h-6 object-contain opacity-80" alt="">
@@ -387,6 +459,13 @@
                                       <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
                                  </div>
                              </div>
+
+                             <!-- League/Group Info for Past -->
+                             <div class="mt-3 pt-3 border-t border-[var(--border)] flex justify-center">
+                                <div class="inline-flex items-center gap-2 text-[10px] font-semibold text-[var(--text-muted)]">
+                                    <span>{{ $match->leagueGroup ? $match->leagueGroup->name : ($match->match_type ? ucfirst(str_replace('_', ' ', $match->match_type)) : 'Match') }}</span>
+                                </div>
+                             </div>
                         </a>
                      @endforeach
                 </div>
@@ -395,7 +474,7 @@
 
         <!-- STANDINGS TAB -->
         <div x-show="activeTab === 'standings'" x-transition:enter="transition ease-out duration-300 opacity-0 transform translate-y-2">
-            @if(empty($standings))
+            @if(empty($standingsByGroup))
                 <div class="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed bg-[var(--bg-element)]/30 border-[var(--border)] text-[var(--text-muted)]">
                     <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-[var(--bg-element)] border border-[var(--border)]">
                         <i class="fa-solid fa-trophy text-2xl opacity-50"></i>
@@ -404,62 +483,59 @@
                     <p class="text-xs mt-1 opacity-70">Complete some matches to see standings</p>
                 </div>
             @else
-                <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b bg-[var(--bg-element)] border-[var(--border)]">
-                                    <th class="text-left py-3 px-4 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">#</th>
-                                    <th class="text-left py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">Team</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">P</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">W</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">D</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">L</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GF</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GA</th>
-                                    <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">GD</th>
-                                    <th class="text-center py-3 px-4 font-bold text-[var(--accent)] text-xs uppercase tracking-wider">Pts</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($standings as $index => $standing)
-                                    <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors">
-                                        <td class="py-3 px-4 font-bold text-[var(--text-muted)]">{{ $index + 1 }}</td>
-                                        <td class="py-3 px-2">
-                                            <div class="flex items-center gap-2">
-                                                @if($standing['team'] && $standing['team']->logo)
-                                                    <img src="{{ url(Storage::url($standing['team']->logo)) }}" class="w-6 h-6 object-contain" alt="">
-                                                @else
-                                                    <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
-                                                @endif
-                                                <span class="font-semibold text-[var(--text-main)] truncate max-w-[120px] sm:max-w-none">{{ $standing['team']->name ?? 'Team' }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['played'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium text-emerald-500">{{ $standing['won'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['drawn'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium text-rose-500">{{ $standing['lost'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_for'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_against'] }}</td>
-                                        <td class="py-3 px-2 text-center font-medium {{ $standing['goal_difference'] > 0 ? 'text-emerald-500' : ($standing['goal_difference'] < 0 ? 'text-rose-500' : 'text-[var(--text-muted)]') }}">{{ $standing['goal_difference'] > 0 ? '+' : '' }}{{ $standing['goal_difference'] }}</td>
-                                        <td class="py-3 px-4 text-center font-black text-[var(--accent)]">{{ $standing['points'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Legend -->
-                <div class="mt-4 text-xs text-[var(--text-muted)] flex flex-wrap gap-4 justify-center">
-                    <span><strong>P</strong> = Played</span>
-                    <span><strong>W</strong> = Won</span>
-                    <span><strong>D</strong> = Drawn</span>
-                    <span><strong>L</strong> = Lost</span>
-                    <span><strong>GF</strong> = Goals For</span>
-                    <span><strong>GA</strong> = Goals Against</span>
-                    <span><strong>GD</strong> = Goal Difference</span>
-                    <span><strong>Pts</strong> = Points (Win=3, Draw=1)</span>
+                <div class="space-y-8">
+                    @foreach($standingsByGroup as $groupId => $groupData)
+                        <div class="rounded-2xl border overflow-hidden bg-[var(--bg-card)] border-[var(--border)]">
+                            @if($groupData['group'])
+                                <div class="bg-[var(--bg-element)] px-4 py-3 border-b border-[var(--border)]">
+                                    <h3 class="font-bold text-[var(--text-main)]">{{ $groupData['group']->name }}</h3>
+                                </div>
+                            @endif
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b bg-[var(--bg-element)] border-[var(--border)]">
+                                            <th class="text-left py-3 px-4 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">#</th>
+                                            <th class="text-left py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">Team</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">P</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">W</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">D</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">L</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GF</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider hidden sm:table-cell">GA</th>
+                                            <th class="text-center py-3 px-2 font-bold text-[var(--text-muted)] text-xs uppercase tracking-wider">GD</th>
+                                            <th class="text-center py-3 px-4 font-bold text-[var(--accent)] text-xs uppercase tracking-wider">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($groupData['teams'] as $index => $standing)
+                                            <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors">
+                                                <td class="py-3 px-4 font-bold text-[var(--text-muted)]">{{ $loop->iteration }}</td>
+                                                <td class="py-3 px-2">
+                                                    <div class="flex items-center gap-2">
+                                                        @if($standing['team'] && $standing['team']->logo)
+                                                            <img src="{{ url(Storage::url($standing['team']->logo)) }}" class="w-6 h-6 object-contain" alt="">
+                                                        @else
+                                                            <div class="w-6 h-6 rounded-full bg-[var(--bg-element)]"></div>
+                                                        @endif
+                                                        <span class="font-semibold text-[var(--text-main)] truncate max-w-[120px] sm:max-w-none">{{ $standing['team']->name ?? 'Team' }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['played'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium text-emerald-500">{{ $standing['won'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)]">{{ $standing['drawn'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium text-rose-500">{{ $standing['lost'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_for'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium text-[var(--text-muted)] hidden sm:table-cell">{{ $standing['goals_against'] }}</td>
+                                                <td class="py-3 px-2 text-center font-medium {{ $standing['goal_difference'] > 0 ? 'text-emerald-500' : ($standing['goal_difference'] < 0 ? 'text-rose-500' : 'text-[var(--text-muted)]') }}">{{ $standing['goal_difference'] > 0 ? '+' : '' }}{{ $standing['goal_difference'] }}</td>
+                                                <td class="py-3 px-4 text-center font-black text-[var(--accent)]">{{ $standing['points'] }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>
