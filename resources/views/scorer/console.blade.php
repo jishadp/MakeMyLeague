@@ -351,7 +351,71 @@
                 </div>
             </div>
 
-            <div class="pt-4 pb-8">
+            <!-- Penalty Shootout Section -->
+            <div x-show="hasPenalties && status !== 'completed'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="border-b border-slate-100 p-4 bg-slate-50/50">
+                    <h3 class="text-sm font-bold uppercase text-slate-700 tracking-wider text-center">Penalty Shootout</h3>
+                    <p class="text-xs text-slate-500 text-center mt-1">Match ended in draw - Record penalties</p>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <!-- Penalty Score Display -->
+                    <div class="flex items-center justify-center gap-6 py-4">
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-slate-500 mb-1">{{ $fixture->homeTeam->team->name }}</div>
+                            <div class="text-4xl font-black text-blue-600 font-mono" x-text="homePenaltyScore">0</div>
+                        </div>
+                        <div class="text-2xl font-black text-slate-300">-</div>
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-slate-500 mb-1">{{ $fixture->awayTeam->team->name }}</div>
+                            <div class="text-4xl font-black text-rose-600 font-mono" x-text="awayPenaltyScore">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Add Penalty Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="openPenaltyModal({{ $fixture->home_team_id }})" class="bg-white hover:bg-blue-50 border-2 border-blue-100 hover:border-blue-200 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
+                            <i class="fa-solid fa-circle-dot text-2xl text-blue-600"></i>
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">Home Penalty</span>
+                        </button>
+                        <button @click="openPenaltyModal({{ $fixture->away_team_id }})" class="bg-white hover:bg-rose-50 border-2 border-rose-100 hover:border-rose-200 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
+                            <i class="fa-solid fa-circle-dot text-2xl text-rose-600"></i>
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">Away Penalty</span>
+                        </button>
+                    </div>
+
+                    <!-- Penalty History -->
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Penalty Attempts</h4>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            <template x-for="penalty in penalties" :key="penalty.id">
+                                <div class="flex items-center justify-between p-2 rounded-lg border bg-white" :class="penalty.scored ? 'border-emerald-200' : 'border-rose-200'">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-mono font-bold px-2 py-1 rounded bg-slate-100 border border-slate-200" x-text="'#' + penalty.attempt_number"></span>
+                                        <span class="text-sm font-bold text-slate-700" x-text="penalty.player_name || 'Guest'"></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold px-2 py-1 rounded" :class="penalty.scored ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'" x-text="penalty.scored ? 'SCORED' : 'MISSED'"></span>
+                                        <button @click="togglePenalty(penalty.id, !penalty.scored)" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-colors">
+                                            <i class="fa-solid fa-rotate"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="penalties.length === 0">
+                                <div class="text-center py-6 text-slate-400 text-xs">No penalties recorded yet</div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Complete Penalties Button -->
+                    <button @click="completePenalties()" class="w-full bg-white border-2 border-slate-800 hover:bg-slate-800 text-slate-800 hover:text-white font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95">
+                        Complete Penalty Shootout
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="status !== 'completed' && !hasPenalties" class="pt-4 pb-8">
                  <button @click="finishMatch" class="w-full text-center text-xs font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest py-4 rounded-xl border border-rose-100 hover:bg-rose-50 transition-colors">
                     End Match
                 </button>
@@ -658,6 +722,75 @@
         </div>
     </div>
 
+    <!-- Penalty Modal -->
+    <div x-show="showPenaltyModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="closePenaltyModal"></div>
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="p-6 text-center border-b border-slate-50 shrink-0">
+                <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-600 mx-auto flex items-center justify-center text-3xl mb-3 shadow-sm">
+                    <i class="fa-solid fa-circle-dot"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900">Penalty Kick</h3>
+                <p class="text-xs text-slate-500 mt-1">Attempt #<span x-text="penaltyAttemptNumber"></span></p>
+            </div>
+
+            <div class="p-6 space-y-6 overflow-y-auto">
+                <div>
+                     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Select Player</label>
+                     <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                        <template x-for="player in getEligiblePlayers(penaltyTeamId)" :key="player.id">
+                            <button @click="penaltyPlayerId = player.id" 
+                                class="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all"
+                                :class="penaltyPlayerId == player.id 
+                                    ? 'bg-blue-50 border-blue-500 shadow-md' 
+                                    : 'bg-white border-slate-100 hover:border-blue-200 hover:bg-slate-50'">
+                                
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0" 
+                                     :class="penaltyPlayerId == player.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'">
+                                     <span x-text="(player.player?.user?.name || player.custom_name || '?').charAt(0)"></span>
+                                </div>
+                                
+                                <div class="flex-1">
+                                    <div class="font-bold text-sm" 
+                                         :class="penaltyPlayerId == player.id ? 'text-blue-900' : 'text-slate-700'"
+                                         x-text="player.player?.user?.name || player.custom_name"></div>
+                                </div>
+                                
+                                <div x-show="penaltyPlayerId == player.id" class="text-blue-500">
+                                    <i class="fa-solid fa-circle-check text-xl"></i>
+                                </div>
+                            </button>
+                        </template>
+                     </div>
+                </div>
+
+                <div>
+                     <label class="block text-xs font-bold uppercase text-slate-500 mb-3">Result</label>
+                     <div class="grid grid-cols-2 gap-3">
+                        <button @click="penaltyScored = true" 
+                                class="p-4 rounded-xl border-2 transition-all font-bold text-center"
+                                :class="penaltyScored ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'">
+                            <i class="fa-solid fa-circle-check text-2xl mb-2 block"></i>
+                            Scored
+                        </button>
+                        <button @click="penaltyScored = false" 
+                                class="p-4 rounded-xl border-2 transition-all font-bold text-center"
+                                :class="!penaltyScored ? 'bg-rose-50 border-rose-500 text-rose-700 shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'">
+                            <i class="fa-solid fa-circle-xmark text-2xl mb-2 block"></i>
+                            Missed
+                        </button>
+                     </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-4 shrink-0">
+                <button @click="closePenaltyModal" class="py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                <button @click="submitPenalty" class="py-4 rounded-xl bg-white border-2 border-blue-600 hover:bg-blue-50 text-blue-600 font-bold shadow-lg shadow-blue-100 transition-all disabled:opacity-50" :disabled="!penaltyPlayerId">Record Penalty</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Logic Script (Unchanged) -->
@@ -673,6 +806,10 @@ function scorerConsole() {
         awayRoster: @json($fixture->awayTeam->leaguePlayers),
         homeScore: {{ $fixture->home_score ?? 0 }},
         awayScore: {{ $fixture->away_score ?? 0 }},
+        hasPenalties: {{ $fixture->has_penalties ? 'true' : 'false' }},
+        penalties: @json($fixture->penalties ?? []),
+        homePenaltyScore: {{ $fixture->home_penalty_score ?? 0 }},
+        awayPenaltyScore: {{ $fixture->away_penalty_score ?? 0 }},
 
         currentMinute: {{ $fixture->current_minute }},
         currentSeconds: 0, 
@@ -728,6 +865,13 @@ function scorerConsole() {
         confirmTitle: 'Are you sure?',
         confirmMessage: '',
         confirmCallback: null,
+
+        // Penalty Modal State
+        showPenaltyModal: false,
+        penaltyTeamId: null,
+        penaltyPlayerId: null,
+        penaltyScored: true,
+        penaltyAttemptNumber: 1,
 
         init() {
             // Initialize Seconds from Last Tick if running
@@ -1052,18 +1196,98 @@ function scorerConsole() {
         },
 
         finishMatch() {
-             this.openConfirm('End Match', 'Are you sure you want to end the match? This cannot be undone.', () => {
+             this.openConfirm('End Match', 'Are you sure you want to end the match?', () => {
                  fetch('{{ route("scorer.finish", $fixture->slug) }}', {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
                 }).then(r => r.json()).then(data => {
                     if(data.success) {
-                        this.status = 'completed';
-                        this.matchState = data.fixture.match_state;
-                        this.isRunning = false;
+                        if(data.requires_penalties) {
+                            this.hasPenalties = true;
+                            this.matchState = data.fixture.match_state;
+                            this.isRunning = false;
+                        } else {
+                            this.status = 'completed';
+                            this.matchState = data.fixture.match_state;
+                            this.isRunning = false;
+                        }
                     }
                 });
              });
+        },
+
+        openPenaltyModal(teamId) {
+            this.penaltyTeamId = teamId;
+            this.penaltyPlayerId = null;
+            this.penaltyScored = true;
+            this.penaltyAttemptNumber = this.penalties.length + 1;
+            this.showPenaltyModal = true;
+        },
+
+        closePenaltyModal() {
+            this.showPenaltyModal = false;
+        },
+
+        submitPenalty() {
+            if(!this.penaltyPlayerId) return;
+            
+            let player = this.players.find(p => p.id == this.penaltyPlayerId);
+            
+            fetch('{{ route("scorer.penalty", $fixture->slug) }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    team_id: this.penaltyTeamId,
+                    player_id: player?.player_id,
+                    player_name: player?.player?.user?.name || player?.custom_name,
+                    scored: this.penaltyScored,
+                    attempt_number: this.penaltyAttemptNumber
+                })
+            }).then(r => r.json()).then(res => {
+                if(res.success) {
+                    this.penalties.push(res.penalty);
+                    this.homePenaltyScore = res.home_penalty_score;
+                    this.awayPenaltyScore = res.away_penalty_score;
+                    this.closePenaltyModal();
+                }
+            });
+        },
+
+        togglePenalty(penaltyId, newScored) {
+            fetch('{{ route("scorer.penalty.update", [$fixture->slug, "PENALTY_ID"]) }}'.replace('PENALTY_ID', penaltyId), {
+                method: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ scored: newScored })
+            }).then(r => r.json()).then(res => {
+                if(res.success) {
+                    let penalty = this.penalties.find(p => p.id == penaltyId);
+                    if(penalty) penalty.scored = newScored;
+                    this.homePenaltyScore = res.home_penalty_score;
+                    this.awayPenaltyScore = res.away_penalty_score;
+                }
+            });
+        },
+
+        completePenalties() {
+            if(this.homePenaltyScore === this.awayPenaltyScore) {
+                alert('Penalty shootout is still tied! Continue until there is a winner.');
+                return;
+            }
+            
+            let winnerId = this.homePenaltyScore > this.awayPenaltyScore ? {{ $fixture->home_team_id }} : {{ $fixture->away_team_id }};
+            
+            this.openConfirm('Complete Penalties', 'Confirm penalty shootout winner and end match?', () => {
+                fetch('{{ route("scorer.complete-penalties", $fixture->slug) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ winner_team_id: winnerId })
+                }).then(r => r.json()).then(res => {
+                    if(res.success) {
+                        this.status = 'completed';
+                        this.hasPenalties = false;
+                    }
+                });
+            });
         },
 
         recordEvent(type, teamId = null, playerId = null, description = null) {

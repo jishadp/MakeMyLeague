@@ -396,6 +396,9 @@ Route::middleware('auth')->group(function () {
         Route::post('substitute', [ScorerController::class, 'substitute'])->name('substitute');
         Route::post('timer', [ScorerController::class, 'updateTimer'])->name('timer');
         Route::post('finish', [ScorerController::class, 'finishMatch'])->name('finish');
+        Route::post('penalty', [ScorerController::class, 'storePenalty'])->name('penalty');
+        Route::patch('penalty/{penalty}', [ScorerController::class, 'updatePenalty'])->name('penalty.update');
+        Route::post('complete-penalties', [ScorerController::class, 'completePenalties'])->name('complete-penalties');
     });
 });
 

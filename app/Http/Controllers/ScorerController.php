@@ -22,7 +22,8 @@ class ScorerController extends Controller
             'events.assistPlayer.user',
             'events.relatedPlayer.user',
             'events.team.team',
-            'fixturePlayers.player.user'
+            'fixturePlayers.player.user',
+            'penalties'
         ]);
         
         return view('scorer.console', compact('fixture'));
@@ -307,6 +308,27 @@ class ScorerController extends Controller
     {
         $this->authorize('viewScoringConsole', $fixture);
 
+        // Check if knockout and draw - enable penalties
+        $isDraw = $fixture->home_score === $fixture->away_score;
+        $isKnockout = $fixture->is_knockout;
+
+        if ($isKnockout && $isDraw) {
+            // Enable penalty mode
+            $fixture->update([
+                'match_state' => Fixture::STATE_FULL_TIME,
+                'is_running' => false,
+                'last_tick_at' => null,
+                'has_penalties' => true
+            ]);
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Match ended in draw - Penalties required', 
+                'fixture' => $fixture->fresh(),
+                'requires_penalties' => true
+            ]);
+        }
+
         $fixture->update([
             'status' => 'completed',
             'match_state' => Fixture::STATE_FULL_TIME,
@@ -314,7 +336,74 @@ class ScorerController extends Controller
             'last_tick_at' => null
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Match Finished', 'fixture' => $fixture->fresh()]);
+        return response()->json([
+            'success' => true, 
+            'message' => 'Match Finished', 
+            'fixture' => $fixture->fresh(),
+            'requires_penalties' => false
+        ]);
+    }
+
+    public function storePenalty(Request $request, Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        $validated = $request->validate([
+            'team_id' => 'required|exists:league_teams,id',
+            'player_id' => 'nullable|exists:league_players,id',
+            'player_name' => 'nullable|string',
+            'scored' => 'required|boolean',
+            'attempt_number' => 'required|integer|min:1',
+        ]);
+
+        $penalty = $fixture->penalties()->create($validated);
+
+        return response()->json([
+            'success' => true,
+            'penalty' => $penalty,
+            'home_penalty_score' => $fixture->home_penalty_score,
+            'away_penalty_score' => $fixture->away_penalty_score
+        ]);
+    }
+
+    public function updatePenalty(Request $request, Fixture $fixture, $penaltyId)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        $penalty = $fixture->penalties()->findOrFail($penaltyId);
+
+        $validated = $request->validate([
+            'scored' => 'required|boolean',
+        ]);
+
+        $penalty->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'penalty' => $penalty,
+            'home_penalty_score' => $fixture->home_penalty_score,
+            'away_penalty_score' => $fixture->away_penalty_score
+        ]);
+    }
+
+    public function completePenalties(Request $request, Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        $validated = $request->validate([
+            'winner_team_id' => 'required|exists:league_teams,id',
+        ]);
+
+        $fixture->update([
+            'status' => 'completed',
+            'penalty_winner_team_id' => $validated['winner_team_id']
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Penalties completed',
+            'fixture' => $fixture->fresh()
+        ]);
     }
     public function deleteEvent(Request $request, Fixture $fixture, $eventId)
     {

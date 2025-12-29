@@ -36,6 +36,8 @@ class Fixture extends Model
         'match_date' => 'date',
         'match_time' => 'datetime:H:i',
         'is_running' => 'boolean',
+        'is_knockout' => 'boolean',
+        'has_penalties' => 'boolean',
         'last_tick_at' => 'datetime',
     ];
 
@@ -103,6 +105,26 @@ class Fixture extends Model
     public function events()
     {
         return $this->hasMany(MatchEvent::class);
+    }
+
+    public function penalties()
+    {
+        return $this->hasMany(FixturePenalty::class);
+    }
+
+    public function penaltyWinnerTeam()
+    {
+        return $this->belongsTo(LeagueTeam::class, 'penalty_winner_team_id');
+    }
+
+    public function getHomePenaltyScoreAttribute()
+    {
+        return $this->penalties()->where('team_id', $this->home_team_id)->where('scored', true)->count();
+    }
+
+    public function getAwayPenaltyScoreAttribute()
+    {
+        return $this->penalties()->where('team_id', $this->away_team_id)->where('scored', true)->count();
     }
 
     public function scopeLive($query)
