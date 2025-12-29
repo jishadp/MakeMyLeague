@@ -122,7 +122,12 @@
                      </div>
                  </div>
 
-                 <div class="flex items-center gap-3 w-full sm:w-auto">
+                 <div class="flex items-center gap-3 w-full sm:w-auto flex-wrap justify-center">
+                    <!-- Teams Link -->
+                    <a href="{{ route('leagues.public-teams', $league->slug) }}" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border bg-[var(--bg-element)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-main)]">
+                        <i class="fa-solid fa-users mr-2"></i> Teams
+                    </a>
+
                     <!-- Share Button -->
                     <button @click="
                         navigator.clipboard.writeText('{{ url()->current() }}');
