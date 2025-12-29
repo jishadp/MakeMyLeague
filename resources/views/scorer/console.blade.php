@@ -95,8 +95,8 @@
                 </div>
             </div>
             
-            <!-- Moved Match Controls (Below Scoreboard) - Hidden when completed -->
-            <div x-show="status !== 'completed'" class="bg-slate-800 text-white rounded-xl p-3 shadow-lg mt-4">
+            <!-- Moved Match Controls (Below Scoreboard) -->
+            <div class="bg-slate-800 text-white rounded-xl p-3 shadow-lg mt-4">
                 <div class="flex items-center justify-between">
                      <div class="flex items-center gap-3">
                          <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Control Panel</span>
