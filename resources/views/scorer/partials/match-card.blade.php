@@ -79,6 +79,9 @@
                 <a href="{{ route('scorer.console', $match->slug) }}" class="flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
                     View Stats
                 </a>
+                <a href="{{ route('scorer.matches.edit', $match->slug) }}" class="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-element)] transition-all">
+                    <i class="fa-solid fa-edit"></i>
+                </a>
             @else
                 <a href="{{ route('scorer.console', $match->slug) }}" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all shadow-md bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                     @if(isset($isLive) && $isLive)
