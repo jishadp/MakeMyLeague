@@ -405,6 +405,30 @@ class ScorerController extends Controller
             'fixture' => $fixture->fresh()
         ]);
     }
+
+    public function continueMatch(Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        // Delete all penalties
+        $fixture->penalties()->delete();
+
+        // Reset match to in_progress state
+        $fixture->update([
+            'status' => 'in_progress',
+            'match_state' => Fixture::STATE_SECOND_HALF,
+            'has_penalties' => false,
+            'penalty_winner_team_id' => null,
+            'is_running' => false,
+            'last_tick_at' => null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Match resumed - penalties cleared',
+            'fixture' => $fixture->fresh()
+        ]);
+    }
     public function deleteEvent(Request $request, Fixture $fixture, $eventId)
     {
         $this->authorize('viewScoringConsole', $fixture);

@@ -412,6 +412,12 @@
                     <button @click="completePenalties()" class="w-full bg-white border-2 border-slate-800 hover:bg-slate-800 text-slate-800 hover:text-white font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95">
                         Complete Penalty Shootout
                     </button>
+                    
+                    <!-- Continue Match Button -->
+                    <button @click="continueMatch()" class="w-full bg-white border-2 border-amber-500 hover:bg-amber-50 text-amber-600 font-bold py-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Continue Match (Reset Penalties)</span>
+                    </button>
                 </div>
             </div>
 
@@ -1285,6 +1291,24 @@ function scorerConsole() {
                     if(res.success) {
                         this.status = 'completed';
                         this.hasPenalties = false;
+                    }
+                });
+            });
+        },
+
+        continueMatch() {
+            this.openConfirm('Continue Match', 'This will delete all penalty records and return the match to live state. Continue?', () => {
+                fetch('{{ route("scorer.continue-match", $fixture->slug) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                }).then(r => r.json()).then(res => {
+                    if(res.success) {
+                        this.status = 'in_progress';
+                        this.matchState = res.fixture.match_state;
+                        this.hasPenalties = false;
+                        this.penalties = [];
+                        this.homePenaltyScore = 0;
+                        this.awayPenaltyScore = 0;
                     }
                 });
             });
