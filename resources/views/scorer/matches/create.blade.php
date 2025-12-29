@@ -54,19 +54,90 @@
                         </div>
 
                         <!-- Knockout Type Selection -->
-                        <div class="col-span-2">
+                        <div class="col-span-2" x-data="{ showMatchTypes: false }">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Match Stage <span class="text-red-500">*</span>
                             </label>
-                            <select x-model="form.match_type" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="qualifier">Qualifier</option>
-                                <option value="eliminator">Eliminator</option>
-                                <option value="quarter_final">Quarter Final</option>
-                                <option value="semi_final">Semi Final</option>
-                                <option value="final">Final</option>
-                                <option value="third_place">Third Place</option>
-                            </select>
+                            <button type="button" @click="showMatchTypes = true"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center justify-between bg-white hover:bg-gray-50">
+                                <span x-text="form.match_type ? form.match_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Select Match Stage'"></span>
+                                <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                            </button>
+
+                            <!-- Tailwind Modal -->
+                            <div x-show="showMatchTypes" 
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                @click.self="showMatchTypes = false"
+                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                                style="display: none;">
+                                <div @click.away="showMatchTypes = false"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 scale-100"
+                                    x-transition:leave-end="opacity-0 scale-95"
+                                    class="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+                                    
+                                    <!-- Modal Header -->
+                                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
+                                        <h3 class="text-lg font-bold text-gray-900">Select Match Stage</h3>
+                                        <button @click="showMatchTypes = false" class="text-gray-400 hover:text-gray-600">
+                                            <i class="fa-solid fa-times text-xl"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body -->
+                                    <div class="p-6 space-y-2">
+                                        <button type="button" @click="form.match_type = 'qualifier'; showMatchTypes = false"
+                                            :class="form.match_type === 'qualifier' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Qualifier</span>
+                                            <i x-show="form.match_type === 'qualifier'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+
+                                        <button type="button" @click="form.match_type = 'eliminator'; showMatchTypes = false"
+                                            :class="form.match_type === 'eliminator' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Eliminator</span>
+                                            <i x-show="form.match_type === 'eliminator'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+
+                                        <button type="button" @click="form.match_type = 'quarter_final'; showMatchTypes = false"
+                                            :class="form.match_type === 'quarter_final' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Quarter Final</span>
+                                            <i x-show="form.match_type === 'quarter_final'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+
+                                        <button type="button" @click="form.match_type = 'semi_final'; showMatchTypes = false"
+                                            :class="form.match_type === 'semi_final' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Semi Final</span>
+                                            <i x-show="form.match_type === 'semi_final'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+
+                                        <button type="button" @click="form.match_type = 'final'; showMatchTypes = false"
+                                            :class="form.match_type === 'final' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Final</span>
+                                            <i x-show="form.match_type === 'final'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+
+                                        <button type="button" @click="form.match_type = 'third_place'; showMatchTypes = false"
+                                            :class="form.match_type === 'third_place' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                                            class="w-full px-4 py-3 border-2 rounded-lg text-left font-medium transition-all flex items-center justify-between">
+                                            <span>Third Place</span>
+                                            <i x-show="form.match_type === 'third_place'" class="fa-solid fa-check text-blue-600"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
