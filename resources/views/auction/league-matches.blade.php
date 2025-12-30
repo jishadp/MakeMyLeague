@@ -450,8 +450,13 @@
                                     @php
                                         $homeTeam = $match->homeTeam?->team;
                                         $awayTeam = $match->awayTeam?->team;
-                                        $isHomeWinner = $match->home_score > $match->away_score || ($match->has_penalties && $match->home_penalty_score > $match->away_penalty_score);
-                                        $isAwayWinner = $match->away_score > $match->home_score || ($match->has_penalties && $match->away_penalty_score > $match->home_penalty_score);
+                                        if ($match->toss_conducted) {
+                                            $isHomeWinner = $match->toss_winner_team_id == $match->home_team_id;
+                                            $isAwayWinner = $match->toss_winner_team_id == $match->away_team_id;
+                                        } else {
+                                            $isHomeWinner = $match->home_score > $match->away_score || ($match->has_penalties && $match->home_penalty_score > $match->away_penalty_score);
+                                            $isAwayWinner = $match->away_score > $match->home_score || ($match->has_penalties && $match->away_penalty_score > $match->home_penalty_score);
+                                        }
                                     @endphp
                                     <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
                                          <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
@@ -493,7 +498,11 @@
                                              </div>
                                          </div>
 
-                                         @if($match->has_penalties)
+                                         @if($match->toss_conducted)
+                                            <div class="mt-2 text-center">
+                                                <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-1 rounded">Won by Toss</span>
+                                            </div>
+                                         @elseif($match->has_penalties)
                                             <div class="mt-2 text-center">
                                                 <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-1 rounded">Penalties: {{ $match->home_penalty_score }}-{{ $match->away_penalty_score }}</span>
                                             </div>
@@ -522,8 +531,13 @@
                                     @php
                                         $homeTeam = $match->homeTeam?->team;
                                         $awayTeam = $match->awayTeam?->team;
-                                        $isHomeWinner = $match->home_score > $match->away_score;
-                                        $isAwayWinner = $match->away_score > $match->home_score;
+                                        if ($match->toss_conducted) {
+                                            $isHomeWinner = $match->toss_winner_team_id == $match->home_team_id;
+                                            $isAwayWinner = $match->toss_winner_team_id == $match->away_team_id;
+                                        } else {
+                                            $isHomeWinner = $match->home_score > $match->away_score;
+                                            $isAwayWinner = $match->away_score > $match->home_score;
+                                        }
                                     @endphp
                                     <a href="{{ route('matches.live', $match->slug) }}" class="rounded-xl border p-4 transition-all group bg-[var(--bg-card)] border-[var(--border)] hover:bg-[var(--bg-hover)]">
                                          <div class="flex justify-between items-center mb-4 text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
@@ -558,6 +572,12 @@
                                                   <span class="font-bold {{ $isAwayWinner ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]' }}">{{ $match->away_score ?? 0 }}</span>
                                              </div>
                                          </div>
+
+                                         @if($match->toss_conducted)
+                                            <div class="mt-2 text-center">
+                                                <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-1 rounded">Won by Toss</span>
+                                            </div>
+                                         @endif
 
                                          <!-- League/Group Info for Past -->
                                          <div class="mt-3 pt-3 border-t border-[var(--border)] flex justify-center">

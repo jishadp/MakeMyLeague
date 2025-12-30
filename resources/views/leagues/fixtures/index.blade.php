@@ -201,7 +201,9 @@
                                                     @if($fixture->status == 'completed')
                                                         @php
                                                             $winner = null;
-                                                            if($fixture->has_penalties && $fixture->penalty_winner_team_id) {
+                                                            if($fixture->toss_conducted && $fixture->toss_winner_team_id) {
+                                                                $winner = $fixture->toss_winner_team_id;
+                                                            } elseif($fixture->has_penalties && $fixture->penalty_winner_team_id) {
                                                                 $winner = $fixture->penalty_winner_team_id;
                                                             } elseif($fixture->home_score > $fixture->away_score) {
                                                                 $winner = $fixture->home_team_id;
@@ -212,7 +214,7 @@
                                                         @if($winner)
                                                             <div class="text-xs font-bold text-amber-600 mt-1">
                                                                 {{ $winner == $fixture->home_team_id ? $fixture->homeTeam->team->name : $fixture->awayTeam->team->name }} wins
-                                                                @if($fixture->has_penalties)<span class="text-[10px]">(Pens)</span>@endif
+                                                                @if($fixture->toss_conducted)<span class="text-[10px]">(Toss)</span>@elseif($fixture->has_penalties)<span class="text-[10px]">(Pens)</span>@endif
                                                             </div>
                                                         @else
                                                             <div class="text-xs font-bold text-slate-500 mt-1">Draw</div>
