@@ -421,6 +421,39 @@
                 </div>
             </div>
 
+            <!-- Toss Section -->
+            <div x-show="(status === 'completed' || hasPenalties) && !tossConducted" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="border-b border-slate-100 p-4 bg-slate-50/50">
+                    <h3 class="text-sm font-bold uppercase text-slate-700 tracking-wider text-center">Toss to Decide Winner</h3>
+                    <p class="text-xs text-slate-500 text-center mt-1">Conduct a toss to determine the match winner</p>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <!-- Toss Button -->
+                    <button @click="openTossModal()" class="w-full bg-white border-2 border-purple-600 hover:bg-purple-50 text-purple-600 font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-coins text-xl"></i>
+                        <span>Conduct Toss</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toss Winner Display -->
+            <div x-show="tossConducted" class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-sm border-2 border-purple-200 overflow-hidden">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 shadow-sm">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-purple-900 mb-2">Toss Winner</h3>
+                    <p class="text-2xl font-bold text-purple-700" x-text="tossWinnerName"></p>
+                    <p class="text-xs text-purple-600 mt-2" x-text="'Decided at ' + tossTime"></p>
+                    
+                    <!-- Clear Toss Button -->
+                    <button @click="clearToss()" class="mt-4 px-4 py-2 bg-white border border-purple-300 hover:bg-purple-50 text-purple-600 font-bold text-sm rounded-lg shadow-sm transition-all">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Clear Toss
+                    </button>
+                </div>
+            </div>
+
             <div x-show="status !== 'completed' && !hasPenalties" class="pt-4 pb-8">
                  <button @click="finishMatch" class="w-full text-center text-xs font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest py-4 rounded-xl border border-rose-100 hover:bg-rose-50 transition-colors">
                     End Match
@@ -797,6 +830,223 @@
         </div>
     </div>
 
+    <!-- Toss Modal -->
+    <div x-show="showTossModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="closeTossModal"></div>
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="p-6 text-center border-b border-slate-50 shrink-0">
+                <div class="w-16 h-16 rounded-full bg-purple-100 text-purple-600 mx-auto flex items-center justify-center text-3xl mb-3 shadow-sm">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900">Conduct Toss</h3>
+                <p class="text-xs text-slate-500 mt-1">Select the team that won the toss</p>
+            </div>
+
+            <div class="p-6 space-y-4 overflow-y-auto">
+                <!-- Home Team Button -->
+                <button @click="tossWinnerTeamId = {{ $fixture->home_team_id }}" 
+                    class="w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all"
+                    :class="tossWinnerTeamId == {{ $fixture->home_team_id }} 
+                        ? 'bg-blue-50 border-blue-500 shadow-md' 
+                        : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50'">
+                    
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-slate-100">
+                        @if($fixture->homeTeam->team->logo)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->homeTeam->team->logo) }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                        @endif
+                    </div>
+                    
+                    <div class="flex-1">
+                        <div class="font-bold text-lg" 
+                             :class="tossWinnerTeamId == {{ $fixture->home_team_id }} ? 'text-blue-900' : 'text-slate-700'">
+                            {{ $fixture->homeTeam->team->name }}
+                        </div>
+                        <div class="text-xs text-slate-500">Home Team</div>
+                    </div>
+                    
+                    <div x-show="tossWinnerTeamId == {{ $fixture->home_team_id }}" class="text-blue-500">
+                        <i class="fa-solid fa-circle-check text-2xl"></i>
+                    </div>
+                </button>
+
+                <!-- Away Team Button -->
+                <button @click="tossWinnerTeamId = {{ $fixture->away_team_id }}" 
+                    class="w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all"
+                    :class="tossWinnerTeamId == {{ $fixture->away_team_id }} 
+                        ? 'bg-rose-50 border-rose-500 shadow-md' 
+                        : 'bg-white border-slate-200 hover:border-rose-300 hover:bg-slate-50'">
+                    
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-slate-100">
+                        @if($fixture->awayTeam->team->logo)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->awayTeam->team->logo) }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                        @endif
+                    </div>
+                    
+                    <div class="flex-1">
+                        <div class="font-bold text-lg" 
+                             :class="tossWinnerTeamId == {{ $fixture->away_team_id }} ? 'text-rose-900' : 'text-slate-700'">
+                            {{ $fixture->awayTeam->team->name }}
+                        </div>
+                        <div class="text-xs text-slate-500">Away Team</div>
+                    </div>
+                    
+                    <div x-show="tossWinnerTeamId == {{ $fixture->away_team_id }}" class="text-rose-500">
+                        <i class="fa-solid fa-circle-check text-2xl"></i>
+                    </div>
+                </button>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-4 shrink-0">
+                <button @click="closeTossModal" class="py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                <button @click="submitToss" class="py-4 rounded-xl bg-white border-2 border-purple-600 hover:bg-purple-50 text-purple-600 font-bold shadow-lg shadow-purple-100 transition-all disabled:opacity-50" :disabled="!tossWinnerTeamId">Confirm Toss</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Summary Modal -->
+    <div x-show="showMatchSummaryModal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"></div>
+        <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- Header -->
+            <div class="p-6 text-center border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white shrink-0">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white mx-auto flex items-center justify-center text-3xl mb-3 shadow-lg">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900">Match Summary</h3>
+                <p class="text-sm text-slate-500 mt-1">Review final results before ending match</p>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-6 overflow-y-auto">
+                
+                <!-- Final Score -->
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
+                    <h4 class="text-xs font-bold uppercase text-slate-500 text-center mb-4">Final Score</h4>
+                    <div class="flex items-center justify-center gap-8">
+                        <!-- Home Team -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-slate-200 shadow-sm">
+                                @if($fixture->homeTeam->team->logo)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->homeTeam->team->logo) }}" class="w-full h-full object-cover">
+                                @else
+                                    <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                                @endif
+                            </div>
+                            <div class="text-center">
+                                <p class="font-bold text-slate-900">{{ $fixture->homeTeam->team->name }}</p>
+                                <p class="text-xs text-slate-500">Home</p>
+                            </div>
+                            <div class="text-5xl font-black text-blue-600 font-mono" x-text="homeScore"></div>
+                        </div>
+
+                        <div class="text-3xl font-black text-slate-300">-</div>
+
+                        <!-- Away Team -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-slate-200 shadow-sm">
+                                @if($fixture->awayTeam->team->logo)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($fixture->awayTeam->team->logo) }}" class="w-full h-full object-cover">
+                                @else
+                                    <img src="{{ asset('images/default.jpeg') }}" class="w-full h-full object-cover opacity-80">
+                                @endif
+                            </div>
+                            <div class="text-center">
+                                <p class="font-bold text-slate-900">{{ $fixture->awayTeam->team->name }}</p>
+                                <p class="text-xs text-slate-500">Away</p>
+                            </div>
+                            <div class="text-5xl font-black text-rose-600 font-mono" x-text="awayScore"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Statistics -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-200">
+                        <i class="fa-solid fa-futbol text-2xl text-emerald-600 mb-2"></i>
+                        <div class="text-3xl font-black text-emerald-700" x-text="totalGoals"></div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase">Total Goals</div>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-4 text-center border border-amber-200">
+                        <i class="fa-solid fa-square text-2xl text-amber-600 mb-2"></i>
+                        <div class="text-3xl font-black text-amber-700" x-text="totalCards"></div>
+                        <div class="text-xs font-bold text-amber-600 uppercase">Cards</div>
+                    </div>
+                    <div class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-2xl text-purple-600 mb-2"></i>
+                        <div class="text-3xl font-black text-purple-700" x-text="totalSubs"></div>
+                        <div class="text-xs font-bold text-purple-600 uppercase">Subs</div>
+                    </div>
+                </div>
+
+                <!-- Match Duration -->
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-blue-600"></i>
+                            <span class="text-sm font-bold text-blue-900">Match Duration</span>
+                        </div>
+                        <span class="text-lg font-black text-blue-700 font-mono" x-text="currentMinute + ' minutes'"></span>
+                    </div>
+                </div>
+
+                <!-- Penalty Shootout Results -->
+                <div x-show="hasPenalties" class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border-2 border-indigo-200">
+                    <h4 class="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-dot"></i>
+                        Penalty Shootout
+                    </h4>
+                    <div class="flex items-center justify-center gap-6">
+                        <div class="text-center">
+                            <p class="text-xs font-bold text-slate-600 mb-1">{{ $fixture->homeTeam->team->name }}</p>
+                            <p class="text-3xl font-black text-blue-600 font-mono" x-text="homePenaltyScore"></p>
+                        </div>
+                        <div class="text-xl font-black text-slate-300">-</div>
+                        <div class="text-center">
+                            <p class="text-xs font-bold text-slate-600 mb-1">{{ $fixture->awayTeam->team->name }}</p>
+                            <p class="text-3xl font-black text-rose-600 font-mono" x-text="awayPenaltyScore"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toss Winner -->
+                <div x-show="tossConducted" class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
+                    <h4 class="text-sm font-bold text-purple-900 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-trophy"></i>
+                        Toss Winner
+                    </h4>
+                    <p class="text-xl font-black text-purple-700" x-text="tossWinnerName"></p>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-exclamation-triangle text-amber-600 text-xl mt-0.5"></i>
+                        <div>
+                            <p class="font-bold text-amber-900 text-sm">Confirm Match Completion</p>
+                            <p class="text-xs text-amber-700 mt-1">This action will end the live match and mark it as completed. This cannot be undone.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 grid grid-cols-2 gap-4 shrink-0">
+                <button @click="closeMatchSummary" class="py-4 rounded-xl font-bold text-slate-600 bg-white border-2 border-slate-300 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Cancel
+                </button>
+                <button @click="confirmEndMatch" class="py-4 rounded-xl font-bold text-white bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 shadow-lg shadow-rose-200 transition-all">
+                    <i class="fa-solid fa-flag-checkered mr-2"></i>Confirm & End Match
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Logic Script (Unchanged) -->
@@ -879,6 +1129,16 @@ function scorerConsole() {
         penaltyScored: true,
         penaltyAttemptNumber: 1,
 
+        // Toss State
+        showTossModal: false,
+        tossConducted: {{ $fixture->toss_conducted ? 'true' : 'false' }},
+        tossWinnerTeamId: {{ $fixture->toss_winner_team_id ?? 'null' }},
+        tossWinnerName: '{{ $fixture->tossWinnerTeam->team->name ?? "" }}',
+        tossTime: '{{ $fixture->toss_conducted_at ? $fixture->toss_conducted_at->format("h:i A") : "" }}',
+
+        // Match Summary Modal State
+        showMatchSummaryModal: false,
+
         init() {
             // Initialize Seconds from Last Tick if running
             if (this.isRunning && this.lastTickAt) {
@@ -923,6 +1183,19 @@ function scorerConsole() {
             
             // Normal MM:SS format
             return String(m).padStart(2, '0') + ':' + s;
+        },
+
+        // Computed Properties for Match Summary
+        get totalGoals() {
+            return this.events.filter(e => e.event_type === 'GOAL').length;
+        },
+
+        get totalCards() {
+            return this.events.filter(e => e.event_type === 'YELLOW_CARD' || e.event_type === 'RED_CARD').length;
+        },
+
+        get totalSubs() {
+            return this.events.filter(e => e.event_type === 'SUB').length;
         },
 
         get periodInfo() {
@@ -1202,24 +1475,62 @@ function scorerConsole() {
         },
 
         finishMatch() {
-             this.openConfirm('End Match', 'Are you sure you want to end the match?', () => {
-                 fetch('{{ route("scorer.finish", $fixture->slug) }}', {
+            // Show match summary modal instead of confirmation dialog
+            this.showMatchSummaryModal = true;
+        },
+
+        closeMatchSummary() {
+            this.showMatchSummaryModal = false;
+        },
+
+        confirmEndMatch() {
+            // Check if knockout and draw - enable penalties
+            const isDraw = this.homeScore === this.awayScore;
+            const isKnockout = {{ $fixture->is_knockout ? 'true' : 'false' }};
+
+            if (isKnockout && isDraw && !this.hasPenalties && !this.tossConducted) {
+                this.showMatchSummaryModal = false;
+                alert('⚠️ Match ended in a draw. Please conduct penalties or toss to decide the winner.');
+                
+                // Enable penalty mode
+                fetch('{{ route("scorer.finish", $fixture->slug) }}', {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
                 }).then(r => r.json()).then(data => {
-                    if(data.success) {
-                        if(data.requires_penalties) {
-                            this.hasPenalties = true;
-                            this.matchState = data.fixture.match_state;
-                            this.isRunning = false;
-                        } else {
-                            this.status = 'completed';
-                            this.matchState = data.fixture.match_state;
-                            this.isRunning = false;
-                        }
+                    if(data.requires_penalties) {
+                        this.hasPenalties = true;
+                        this.matchState = data.fixture.match_state;
+                        this.isRunning = false;
                     }
                 });
-             });
+                return;
+            }
+
+            // Confirm and end match
+            fetch('{{ route("scorer.finish", $fixture->slug) }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+            }).then(r => r.json()).then(data => {
+                if(data.success) {
+                    if(data.requires_penalties) {
+                        this.hasPenalties = true;
+                        this.matchState = data.fixture.match_state;
+                        this.isRunning = false;
+                        this.showMatchSummaryModal = false;
+                    } else {
+                        this.status = 'completed';
+                        this.matchState = data.fixture.match_state;
+                        this.isRunning = false;
+                        this.showMatchSummaryModal = false;
+                        alert('✅ Match completed successfully!');
+                        
+                        // Optionally redirect to match view
+                        setTimeout(() => {
+                            window.location.href = '{{ route("matches.live", $fixture->slug) }}';
+                        }, 1500);
+                    }
+                }
+            });
         },
 
         openPenaltyModal(teamId) {
@@ -1291,6 +1602,15 @@ function scorerConsole() {
                     if(res.success) {
                         this.status = 'completed';
                         this.hasPenalties = false;
+                        this.matchState = 'FULL_TIME';
+                        this.isRunning = false;
+                        
+                        alert('🏁 Match completed! Winner decided by penalties.');
+                        
+                        // Redirect to live match view
+                        setTimeout(() => {
+                            window.location.href = '{{ route("matches.live", $fixture->slug) }}';
+                        }, 2000);
                     }
                 });
             });
@@ -1312,6 +1632,107 @@ function scorerConsole() {
                     }
                 });
             });
+        },
+
+        // Toss Methods
+        openTossModal() {
+            this.showTossModal = true;
+            this.tossWinnerTeamId = null;
+        },
+
+        closeTossModal() {
+            this.showTossModal = false;
+            this.tossWinnerTeamId = null;
+        },
+
+        async submitToss() {
+            if (!this.tossWinnerTeamId) {
+                alert('Please select a team');
+                return;
+            }
+
+            try {
+                const res = await fetch('/console/{{ $fixture->slug }}/conduct-toss', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        winner_team_id: this.tossWinnerTeamId
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    this.tossConducted = true;
+                    this.tossWinnerName = data.fixture.toss_winner_team?.team?.name || '';
+                    const tossDate = new Date(data.fixture.toss_conducted_at);
+                    this.tossTime = tossDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    this.closeTossModal();
+                    
+                    // Automatically end the match after toss
+                    alert('✅ Toss recorded successfully! Match will now be completed.');
+                    
+                    // End the match
+                    const endRes = await fetch('{{ route("scorer.finish", $fixture->slug) }}', {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                            'Content-Type': 'application/json' 
+                        }
+                    });
+                    
+                    const endData = await endRes.json();
+                    if (endData.success) {
+                        this.status = 'completed';
+                        this.matchState = 'FULL_TIME';
+                        this.isRunning = false;
+                        
+                        alert('🏁 Match completed! Winner decided by toss.');
+                        
+                        // Redirect to live match view
+                        setTimeout(() => {
+                            window.location.href = '{{ route("matches.live", $fixture->slug) }}';
+                        }, 2000);
+                    }
+                } else {
+                    alert('❌ Failed to record toss: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Toss error:', error);
+                alert('❌ Error recording toss');
+            }
+        },
+
+        async clearToss() {
+            if (!confirm('Are you sure you want to clear the toss result?')) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/console/{{ $fixture->slug }}/clear-toss', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    this.tossConducted = false;
+                    this.tossWinnerTeamId = null;
+                    this.tossWinnerName = '';
+                    this.tossTime = '';
+                    alert('✅ Toss cleared successfully!');
+                } else {
+                    alert('❌ Failed to clear toss: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Clear toss error:', error);
+                alert('❌ Error clearing toss');
+            }
         },
 
         recordEvent(type, teamId = null, playerId = null, description = null) {

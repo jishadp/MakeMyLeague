@@ -154,6 +154,9 @@
                         if($fixture->has_penalties && $fixture->penalty_winner_team_id) {
                             $winner = $fixture->penalty_winner_team_id;
                             $winnerName = $winner == $fixture->home_team_id ? $fixture->homeTeam->team->name : $fixture->awayTeam->team->name;
+                        } elseif($fixture->toss_conducted && $fixture->toss_winner_team_id) {
+                            $winner = $fixture->toss_winner_team_id;
+                            $winnerName = $fixture->tossWinnerTeam->team->name ?? ($winner == $fixture->home_team_id ? $fixture->homeTeam->team->name : $fixture->awayTeam->team->name);
                         } elseif($fixture->home_score > $fixture->away_score) {
                             $winner = $fixture->home_team_id;
                             $winnerName = $fixture->homeTeam->team->name;
@@ -167,7 +170,9 @@
                         <div class="mb-4 p-3 rounded-xl border-2 text-center bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300">
                             <div class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">Match Result</div>
                             <div class="text-lg font-black text-amber-900">{{ $winnerName }} Wins!</div>
-                            @if($fixture->has_penalties)
+                            @if($fixture->toss_conducted)
+                                <div class="text-xs text-amber-700 mt-1">Won by Toss</div>
+                            @elseif($fixture->has_penalties)
                                 <div class="text-xs text-amber-700 mt-1">Won on penalties</div>
                             @endif
                         </div>

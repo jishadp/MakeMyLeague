@@ -39,6 +39,8 @@ class Fixture extends Model
         'is_knockout' => 'boolean',
         'has_penalties' => 'boolean',
         'last_tick_at' => 'datetime',
+        'toss_conducted' => 'boolean',
+        'toss_conducted_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -115,6 +117,11 @@ class Fixture extends Model
     public function penaltyWinnerTeam()
     {
         return $this->belongsTo(LeagueTeam::class, 'penalty_winner_team_id');
+    }
+
+    public function tossWinnerTeam()
+    {
+        return $this->belongsTo(LeagueTeam::class, 'toss_winner_team_id');
     }
 
     public function getHomePenaltyScoreAttribute()

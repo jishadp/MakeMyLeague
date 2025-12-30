@@ -402,6 +402,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('penalty/{penalty}', [ScorerController::class, 'updatePenalty'])->name('penalty.update');
         Route::post('complete-penalties', [ScorerController::class, 'completePenalties'])->name('complete-penalties');
         Route::post('continue-match', [ScorerController::class, 'continueMatch'])->name('continue-match');
+        Route::post('conduct-toss', [ScorerController::class, 'conductToss'])->name('conduct-toss');
+        Route::post('clear-toss', [ScorerController::class, 'clearToss'])->name('clear-toss');
     });
 });
 

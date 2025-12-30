@@ -23,7 +23,8 @@ class ScorerController extends Controller
             'events.relatedPlayer.user',
             'events.team.team',
             'fixturePlayers.player.user',
-            'penalties'
+            'penalties',
+            'tossWinnerTeam.team'
         ]);
         
         return view('scorer.console', compact('fixture'));
@@ -312,7 +313,7 @@ class ScorerController extends Controller
         $isDraw = $fixture->home_score === $fixture->away_score;
         $isKnockout = $fixture->is_knockout;
 
-        if ($isKnockout && $isDraw) {
+        if ($isKnockout && $isDraw && !$fixture->toss_conducted) {
             // Enable penalty mode
             $fixture->update([
                 'match_state' => Fixture::STATE_FULL_TIME,
@@ -472,6 +473,52 @@ class ScorerController extends Controller
                 'home' => $fixture->refresh()->home_score,
                 'away' => $fixture->away_score
             ]
+        ]);
+    }
+
+    public function conductToss(Request $request, Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        $validated = $request->validate([
+            'winner_team_id' => 'required|exists:league_teams,id',
+        ]);
+
+        // Verify the team is part of this fixture
+        if ($validated['winner_team_id'] != $fixture->home_team_id && $validated['winner_team_id'] != $fixture->away_team_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid team selected'
+            ], 400);
+        }
+
+        $fixture->update([
+            'toss_winner_team_id' => $validated['winner_team_id'],
+            'toss_conducted' => true,
+            'toss_conducted_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Toss recorded successfully',
+            'fixture' => $fixture->fresh(['tossWinnerTeam.team'])
+        ]);
+    }
+
+    public function clearToss(Fixture $fixture)
+    {
+        $this->authorize('viewScoringConsole', $fixture);
+
+        $fixture->update([
+            'toss_winner_team_id' => null,
+            'toss_conducted' => false,
+            'toss_conducted_at' => null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Toss cleared',
+            'fixture' => $fixture->fresh()
         ]);
     }
 }

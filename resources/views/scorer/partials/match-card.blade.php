@@ -39,7 +39,13 @@
                           <div class="text-2xl sm:text-3xl font-black tabular-nums tracking-tighter text-[var(--text-main)]">
                               {{ $match->home_score ?? 0 }}<span class="text-[var(--text-muted)] mx-1">-</span>{{ $match->away_score ?? 0 }}
                           </div>
-                          <span class="text-[10px] font-bold bg-[var(--bg-element)] px-2 py-0.5 rounded text-[var(--text-muted)] mt-1">FT</span>
+                          @if($match->has_penalties)
+                            <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded mt-1">Pens: {{ $match->home_penalty_score }}-{{ $match->away_penalty_score }}</span>
+                          @elseif($match->toss_conducted)
+                            <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded mt-1">Won by Toss</span>
+                          @else
+                            <span class="text-[10px] font-bold bg-[var(--bg-element)] px-2 py-0.5 rounded text-[var(--text-muted)] mt-1">FT</span>
+                          @endif
                       @else
                           <span class="text-sm font-bold px-2 py-1 rounded mb-1 bg-[var(--bg-element)] text-[var(--text-muted)] whitespace-nowrap">{{ $match->match_time ? $match->match_time->format('h:i A') : 'TBA' }}</span>
                           <span class="text-[10px] uppercase font-medium text-[var(--text-muted)] whitespace-nowrap">{{ $match->match_date ? $match->match_date->format('M d') : 'Date TBA' }}</span>

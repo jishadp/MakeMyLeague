@@ -3,9 +3,9 @@
     $awayTeam = $match->awayTeam?->team;
     $isKnockout = !in_array($match->match_type, ['group_stage']);
     $isCompleted = $match->status === 'completed';
-    $homeWon = $isCompleted && $match->home_score > $match->away_score;
-    $awayWon = $isCompleted && $match->away_score > $match->home_score;
-    $isDraw = $isCompleted && $match->home_score === $match->away_score;
+    $homeWon = $isCompleted && ($match->home_score > $match->away_score || ($match->has_penalties && $match->penalty_winner_team_id == $match->home_team_id) || ($match->toss_conducted && $match->toss_winner_team_id == $match->home_team_id));
+    $awayWon = $isCompleted && ($match->away_score > $match->home_score || ($match->has_penalties && $match->penalty_winner_team_id == $match->away_team_id) || ($match->toss_conducted && $match->toss_winner_team_id == $match->away_team_id));
+    $isDraw = $isCompleted && !$homeWon && !$awayWon;
     
     // Get cards for this match
     $homeYellows = $match->events->where('team_id', $match->home_team_id)->where('event_type', 'YELLOW_CARD')->count();
@@ -56,6 +56,8 @@
                           </div>
                           @if($match->has_penalties)
                             <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded mt-1">Pens: {{ $match->home_penalty_score }}-{{ $match->away_penalty_score }}</span>
+                          @elseif($match->toss_conducted)
+                            <span class="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded mt-1">Won by Toss</span>
                           @else
                             <span class="text-[10px] font-bold bg-[var(--bg-element)] px-2 py-0.5 rounded text-[var(--text-muted)] mt-1">FT</span>
                           @endif
