@@ -234,7 +234,7 @@
 
                         <!-- Stats Footer -->
                         @php
-                            $playerSpend = $players->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0);
+                            $playerSpend = $sortedPlayers->sum(fn($p) => $p->bid_price ?? $p->base_price ?? 0);
                             $remainingWallet = $leagueTeam->wallet_balance;
                             $totalSpent = $league->team_wallet_limit
                                 ? max(0, ($league->team_wallet_limit - $remainingWallet))
@@ -250,7 +250,7 @@
                                 <div class="text-[11px] text-gray-500">Spent</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-base sm:text-lg font-bold text-yellow-600 leading-tight">{{ $players->where('retention', true)->count() }}</div>
+                                <div class="text-base sm:text-lg font-bold text-yellow-600 leading-tight">{{ $sortedPlayers->where('retention', true)->count() }}</div>
                                 <div class="text-[11px] text-gray-500">Retained</div>
                             </div>
                         </div>
