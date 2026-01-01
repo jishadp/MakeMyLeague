@@ -182,8 +182,10 @@
 
                                 // Foreign status is now pre-calculated in the sort function
                                 $isForeign = $player->is_foreign ?? false;
+                                $placeName = $player->user?->localBody?->name ?? 'Unknown';
                             @endphp
-                            <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-white' }} shadow-sm px-3 py-2 player-card" 
+                            <a href="{{ route('players.show', $player->user->id) }}" class="block text-decoration-none">
+                            <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_15px_rgba(251,191,36,0.4)]' : 'border-slate-200 bg-white shadow-sm' }} px-3 py-2 player-card" 
                                  data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                  data-status="{{ $status }}" 
                                  data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -213,14 +215,14 @@
                                         @endif
                                         @if($isForeign)
                                             <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
-                                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-indigo-600">
+                                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600">
                                                     <svg class="w-4 h-4 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow z-10" title="Foreign Player">
-                                                <span class="text-[10px] font-bold">FP</span>
+                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center px-1.5 h-4 rounded-full bg-amber-500 text-white shadow z-10" title="{{ $placeName }}">
+                                                <span class="text-[8px] font-bold uppercase tracking-wider max-w-[60px] truncate">{{ $placeName }}</span>
                                             </span>
                                         @endif
                                         <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$status] ?? 'bg-gray-400 text-white' }}">
@@ -234,6 +236,7 @@
                                     </p>
                                 </div>
                             </div>
+                            </a>
                         @endforeach
                     </div>
                 </div>
@@ -268,8 +271,10 @@
                                             
                                             // Foreign status pre-calculated
                                             $isForeign = $player->is_foreign ?? false;
+                                            $placeName = $player->user?->localBody?->name ?? 'Unknown';
                                         @endphp
-                                        <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-white' }} shadow-sm px-3 py-2 player-card" 
+                                        <a href="{{ route('players.show', $player->user->id) }}" class="block text-decoration-none">
+                                        <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_15px_rgba(251,191,36,0.4)]' : 'border-slate-200 bg-white shadow-sm' }} px-3 py-2 player-card" 
                                              data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                              data-status="{{ $player->status ?? 'available' }}"
                                              data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -298,14 +303,14 @@
                                                     @endif
                                                     @if($isForeign)
                                                         <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
-                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-indigo-600">
+                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600">
                                                                 <svg class="w-3 h-3 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                                 </svg>
                                                             </div>
                                                         </div>
-                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow z-10" title="Foreign Player">
-                                                            <span class="text-[8px] font-bold">FP</span>
+                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center px-1.5 h-4 rounded-full bg-amber-500 text-white shadow z-10" title="{{ $placeName }}">
+                                                            <span class="text-[8px] font-bold uppercase tracking-wider max-w-[60px] truncate">{{ $placeName }}</span>
                                                         </span>
                                                     @endif
                                                     <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$player->status ?? 'available'] ?? 'bg-gray-400 text-white' }}">
@@ -319,6 +324,7 @@
                                                 </p>
                                             </div>
                                         </div>
+                                        </a>
                                     @endforeach
                                 </div>
                             </div>
