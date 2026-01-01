@@ -162,6 +162,11 @@
                                 ];
                                 $statusLetter = $letterMap[$status] ?? 'A';
                                 $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
+                                
+                                // Check for foreign player (different district)
+                                $leagueDistrictId = $league->localBody?->district_id;
+                                $playerDistrictId = $player->user?->localBody?->district_id;
+                                $isForeign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
                             @endphp
                             <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
                                  data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
@@ -187,6 +192,14 @@
                                             <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
                                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                            </span>
+                                            </span>
+                                        @endif
+                                        @if($isForeign)
+                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow" title="Foreign Player">
+                                                <svg class="w-3 h-3 transform rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                 </svg>
                                             </span>
                                         @endif
@@ -228,7 +241,14 @@
                                                 'unsold' => 'bg-red-100 text-red-800',
                                                 'skip' => 'bg-gray-100 text-gray-800',
                                             ];
+                                                'skip' => 'bg-gray-100 text-gray-800',
+                                            ];
                                             $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
+                                            
+                                            // Check for foreign player (different district)
+                                            $leagueDistrictId = $league->localBody?->district_id;
+                                            $playerDistrictId = $player->user?->localBody?->district_id;
+                                            $isForeign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
                                         @endphp
                                         <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
                                              data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
@@ -254,6 +274,13 @@
                                                         <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
                                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                            </svg>
+                                                        </span>
+                                                    @endif
+                                                    @if($isForeign)
+                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow" title="Foreign Player">
+                                                            <svg class="w-3 h-3 transform rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                             </svg>
                                                         </span>
                                                     @endif
