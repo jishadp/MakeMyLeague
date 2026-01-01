@@ -3130,6 +3130,36 @@ function openWhatsAppShare(message) {
     const unsoldPlayerPool = parsePlayers(unsoldPlayersScript);
     let playerQueue = loadQueue();
     let autoStartEnabled = loadAutoStartSetting();
+    
+    // Sync localStorage with current server data before rebuilding pools
+    // This is done inline here since the function is defined later (hoisted)
+    (function syncOnLoad() {
+        const availableIds = new Set((availablePlayerPool || []).map(p => String(p.id)));
+        const unsoldIds = new Set((unsoldPlayerPool || []).map(p => String(p.id)));
+        
+        // Clean stale IDs from completed sets
+        availableCompletedSet.forEach(id => {
+            if (!availableIds.has(id)) availableCompletedSet.delete(id);
+        });
+        unsoldCompletedSet.forEach(id => {
+            if (!unsoldIds.has(id)) unsoldCompletedSet.delete(id);
+        });
+        
+        // Clean stale IDs from served sets
+        availableServedSet.forEach(id => {
+            if (!availableIds.has(id)) availableServedSet.delete(id);
+        });
+        unsoldServedSet.forEach(id => {
+            if (!unsoldIds.has(id)) unsoldServedSet.delete(id);
+        });
+        
+        // Save cleaned sets
+        if (availableCompletedStorageKey) saveIdSet(availableCompletedStorageKey, availableCompletedSet);
+        if (unsoldCompletedStorageKey) saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
+        if (availableServedStorageKey) saveIdSet(availableServedStorageKey, availableServedSet);
+        if (unsoldServedStorageKey) saveIdSet(unsoldServedStorageKey, unsoldServedSet);
+    })();
+    
     rebuildRandomPools();
     enforcePhaseConsistency();
     handlePhaseTransitions({ showToast: false });
@@ -3179,23 +3209,30 @@ function openWhatsAppShare(message) {
             return;
         }
 
-        const availableCount = uniqueCount(availableRandomPool);
-        const unsoldCount = uniqueCount(unsoldRandomPool);
+        const availablePoolTotal = uniqueCount(availablePlayerPool);
+        const unsoldPoolTotal = uniqueCount(unsoldPlayerPool);
+        const availableRemaining = uniqueCount(availableRandomPool);
+        const unsoldRemaining = uniqueCount(unsoldRandomPool);
+        const availableCompleted = availablePoolTotal - availableRemaining;
+        const unsoldCompleted = unsoldPoolTotal - unsoldRemaining;
         
         if (currentRandomPhase === 'available') {
             phaseInfo.style.display = 'block';
             phaseTitle.textContent = '📋 Available Phase';
-            phaseDesc.textContent = `Random picks will select from ${availableCount} available player${availableCount !== 1 ? 's' : ''}. After all available players are done, you'll move to unsold players.`;
-            randomButtonText.textContent = 'Random available player';
+            phaseDesc.innerHTML = `<strong>${availableRemaining}</strong> of ${availablePoolTotal} available players remaining to pick. ` +
+                `${availableCompleted > 0 ? `(${availableCompleted} already served) ` : ''}` + 
+                `${unsoldPoolTotal > 0 ? `<br><span class="text-amber-700">${unsoldPoolTotal} unsold player${unsoldPoolTotal !== 1 ? 's' : ''} waiting.</span>` : ''}`;
+            randomButtonText.textContent = `Random (${availableRemaining} left)`;
         } else if (currentRandomPhase === 'unsold') {
             phaseInfo.style.display = 'block';
             phaseTitle.textContent = '🔄 Unsold Phase';
-            phaseDesc.textContent = `Random picks now select from ${unsoldCount} unsold player${unsoldCount !== 1 ? 's' : ''}. These are players who were skipped during the available phase.`;
-            randomButtonText.textContent = 'Random unsold player';
+            phaseDesc.innerHTML = `<strong>${unsoldRemaining}</strong> of ${unsoldPoolTotal} unsold players remaining. ` +
+                `${unsoldCompleted > 0 ? `(${unsoldCompleted} already served)` : ''}`;
+            randomButtonText.textContent = `Random unsold (${unsoldRemaining} left)`;
         } else if (currentRandomPhase === 'completed') {
             phaseInfo.style.display = 'block';
             phaseTitle.textContent = '✅ Auction Complete';
-            phaseDesc.textContent = 'All players have been processed. No more random selections available.';
+            phaseDesc.textContent = `All ${availablePoolTotal + unsoldPoolTotal} players have been processed. No more random selections available.`;
             randomButtonText.textContent = 'Auction completed';
         } else {
             phaseInfo.style.display = 'none';
@@ -3218,6 +3255,66 @@ function openWhatsAppShare(message) {
         availableRandomPool = buildRandomPool(availablePlayerPool, availableCompletedSet, availableServedSet);
         unsoldRandomPool = buildRandomPool(unsoldPlayerPool, unsoldCompletedSet, unsoldServedSet);
         updateRandomPhaseUI();
+    }
+
+    // Sync localStorage sets with current server pools - remove stale IDs that are no longer in the pools
+    function syncCompletedSetsWithServerData() {
+        const availableIds = new Set((availablePlayerPool || []).map(p => String(p.id)));
+        const unsoldIds = new Set((unsoldPlayerPool || []).map(p => String(p.id)));
+        
+        let availableChanged = false;
+        let unsoldChanged = false;
+        let availableServedChanged = false;
+        let unsoldServedChanged = false;
+
+        // Clean up completed sets - remove IDs not in current pools
+        availableCompletedSet.forEach(id => {
+            if (!availableIds.has(id)) {
+                availableCompletedSet.delete(id);
+                availableChanged = true;
+            }
+        });
+        
+        unsoldCompletedSet.forEach(id => {
+            if (!unsoldIds.has(id)) {
+                unsoldCompletedSet.delete(id);
+                unsoldChanged = true;
+            }
+        });
+
+        // Clean up served sets - remove IDs not in current pools
+        availableServedSet.forEach(id => {
+            if (!availableIds.has(id)) {
+                availableServedSet.delete(id);
+                availableServedChanged = true;
+            }
+        });
+        
+        unsoldServedSet.forEach(id => {
+            if (!unsoldIds.has(id)) {
+                unsoldServedSet.delete(id);
+                unsoldServedChanged = true;
+            }
+        });
+
+        // Save updated sets if changes were made
+        if (availableChanged) {
+            saveIdSet(availableCompletedStorageKey, availableCompletedSet);
+        }
+        if (unsoldChanged) {
+            saveIdSet(unsoldCompletedStorageKey, unsoldCompletedSet);
+        }
+        if (availableServedChanged) {
+            saveIdSet(availableServedStorageKey, availableServedSet);
+        }
+        if (unsoldServedChanged) {
+            saveIdSet(unsoldServedStorageKey, unsoldServedSet);
+        }
+
+        // Rebuild pools with synced data
+        if (availableChanged || unsoldChanged || availableServedChanged || unsoldServedChanged) {
+            rebuildRandomPools();
+        }
     }
 
     function isAvailablePlayer(id) {
