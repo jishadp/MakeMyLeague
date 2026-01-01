@@ -439,8 +439,10 @@ class AuctionController extends Controller
             ->orderBy('team_id')
             ->get();
         // For reserve calculation, use available players first, fall back to unsold if none available
+        // Exclude retained players as they are already assigned to teams
         $availableBasePrices = $league->leaguePlayers()
             ->where('status', 'available')
+            ->where('retention', false)
             ->orderBy('base_price')
             ->pluck('base_price')
             ->map(fn ($price) => max((float) $price, 0))
@@ -450,11 +452,24 @@ class AuctionController extends Controller
         if ($availableBasePrices->isEmpty()) {
             $availableBasePrices = $league->leaguePlayers()
                 ->where('status', 'unsold')
+                ->where('retention', false)
                 ->orderBy('base_price')
                 ->pluck('base_price')
                 ->map(fn ($price) => max((float) $price, 0))
                 ->values();
         }
+        
+        // If still empty or all zeros, use the league's default base price as fallback
+        if ($availableBasePrices->isEmpty() || $availableBasePrices->sum() == 0) {
+            $defaultBasePrice = $league->default_base_price ?? 100;
+            $totalAvailableCount = $league->leaguePlayers()
+                ->whereIn('status', ['available', 'unsold'])
+                ->where('retention', false)
+                ->count();
+            // Create a collection with the default base price for each available slot
+            $availableBasePrices = collect(array_fill(0, max($totalAvailableCount, 20), $defaultBasePrice));
+        }
+
         $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
 
             ->where('retention', true)
@@ -1580,8 +1595,10 @@ class AuctionController extends Controller
         $futureSlots = max($playersNeeded - 1, 0);
         
         // For reserve calculation, use available players first, fall back to unsold if none available
+        // Exclude retained players as they are already assigned to teams
         $availableBasePrices = $league->leaguePlayers()
             ->where('status', 'available')
+            ->where('retention', false)
             ->orderBy('base_price')
             ->pluck('base_price')
             ->map(fn ($price) => max((float) $price, 0))
@@ -1591,10 +1608,21 @@ class AuctionController extends Controller
         if ($availableBasePrices->isEmpty()) {
             $availableBasePrices = $league->leaguePlayers()
                 ->where('status', 'unsold')
+                ->where('retention', false)
                 ->orderBy('base_price')
                 ->pluck('base_price')
                 ->map(fn ($price) => max((float) $price, 0))
                 ->values();
+        }
+        
+        // If still empty or all zeros, use the league's default base price as fallback
+        if ($availableBasePrices->isEmpty() || $availableBasePrices->sum() == 0) {
+            $defaultBasePrice = $league->default_base_price ?? 100;
+            $totalAvailableCount = $league->leaguePlayers()
+                ->whereIn('status', ['available', 'unsold'])
+                ->where('retention', false)
+                ->count();
+            $availableBasePrices = collect(array_fill(0, max($totalAvailableCount, 20), $defaultBasePrice));
         }
 
         $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
@@ -1603,6 +1631,7 @@ class AuctionController extends Controller
             : max((float) ($team->wallet_balance ?? 0), 0);
 
         return max($availableWallet - $reserveAmount, 0);
+
     }
 
 
