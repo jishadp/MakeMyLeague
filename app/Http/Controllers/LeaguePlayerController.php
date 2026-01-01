@@ -811,9 +811,31 @@ class LeaguePlayerController extends Controller
         $count = count($request->player_ids);
         return back()->with('success', "{$count} players updated successfully!");
     }
+    
+    /**
+     * Bulk update value for existing retained players.
+     */
+    public function bulkRetainWithValue(Request $request, League $league)
+    {
+        $data = $request->validate([
+            'retained_value' => 'required|numeric|min:0',
+        ]);
+        
+        // Update ONLY players that are already retained
+        $updated = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->update([
+                'base_price' => $data['retained_value'],
+            ]);
+            
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', "Updated retained value to " . number_format($data['retained_value']) . " for {$updated} retained player(s).");
+    }
 
     /**
      * Bulk update base price for all available players in the league.
+     *
      */
     public function bulkUpdateBasePrice(Request $request, League $league)
     {

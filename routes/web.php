@@ -298,6 +298,7 @@ Route::middleware('auth')->group(function () {
     Route::post('leagues/{league}/players/bulk-store', [LeaguePlayerController::class, 'bulkStore'])->name('league-players.bulk-store')->middleware('league.organizer');
     Route::post('leagues/{league}/players/import-location', [LeaguePlayerController::class, 'importByLocation'])->name('league-players.import-location')->middleware('league.organizer');
     Route::post('leagues/{league}/players/bulk-base-price', [LeaguePlayerController::class, 'bulkUpdateBasePrice'])->name('league-players.bulk-base-price')->middleware('league.organizer');
+    Route::post('leagues/{league}/players/bulk-retain-value', [LeaguePlayerController::class, 'bulkRetainWithValue'])->name('league-players.bulk-retain-value')->middleware('league.organizer');
     Route::post('leagues/{league}/players/bulk-assign-default-role', [LeaguePlayerController::class, 'bulkAssignDefaultRole'])->name('league-players.bulk-default-role')->middleware('league.organizer');
     Route::post('leagues/{league}/players', [LeaguePlayerController::class, 'store'])->name('league-players.store')->middleware('league.organizer');
     Route::get('leagues/{league}/players/{leaguePlayer}', [LeaguePlayerController::class, 'show'])->name('league-players.show')->middleware('league.viewer');

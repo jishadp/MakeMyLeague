@@ -234,7 +234,31 @@
                     </form>
                 </div>
 
-                <!-- Retention to Sold Card -->
+                <!-- Bulk Update Retained Value Card -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">Bulk Update Retained Value</h2>
+                            <p class="text-sm text-gray-600 mt-1">Update the retained value (Base Price) for all players currently marked as <span class="font-medium text-green-700">Retained</span>.</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('league-players.bulk-retain-value', $league) }}" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        @csrf
+                        <div>
+                            <label for="retained_value" class="block text-sm font-medium text-gray-700 mb-2">New Retained Value</label>
+                            <input id="retained_value" type="number" name="retained_value" min="0" step="1" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   placeholder="Enter amount">
+                        </div>
+                        <div class="md:col-span-2 flex items-end">
+                            <button type="submit"
+                                    onclick="return confirm('This will update the value for ALL existing retained players. Continue?');"
+                                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                Update Retained Values
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Bulk Role Replacement Card -->
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
