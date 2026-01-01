@@ -22,6 +22,12 @@
         return '1-' . sprintf('%012d', $value); // Normal priority
     });
 
+    // Assign SL numbers
+    $sl = 1;
+    foreach ($playersOrdered as $player) {
+        $player->sl_number = $sl++;
+    }
+
     $foreignRetained = $playersOrdered->filter(function($p) {
         return ($p->is_foreign ?? false) && $p->retention;
     });
@@ -374,7 +380,7 @@
         
         if (visiblePlayers.length > 0) {
             visiblePlayers.forEach(p => {
-                shareText += `• ${p}\n`;
+                shareText += `${p}\n`;
             });
         } else {
             shareText += `No players found for this filter.\n`;

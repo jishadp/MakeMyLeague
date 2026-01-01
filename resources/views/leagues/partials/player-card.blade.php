@@ -29,13 +29,16 @@
     // In the main view, we set $player->is_foreign.
     $isForeign = $player->is_foreign ?? false;
     $placeName = $player->user?->localBody?->name ?? 'Unknown';
+    $slNumber = $player->sl_number ?? 'N/A';
+    $isAdmin = auth()->check() && auth()->user()->isAdmin();
+    $mobile = $player->user?->mobile ?? '';
 @endphp
 <a href="{{ route('players.show', $player->user) }}" class="block text-decoration-none h-full">
 <div class="relative h-full rounded-xl border transition-all duration-300 {{ $isForeign ? 'foreign-card' : 'border-slate-200 bg-white shadow-sm hover:shadow-md' }} px-3 py-4 flex flex-col justify-between player-card" 
      data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
      data-status="{{ $status }}" 
      data-retained="{{ $player->retention ? 'true' : 'false' }}"
-     data-share-info="{{ $displayName }} - {{ $displayRole }} ({{ $displayValue }})"
+     data-share-info="{{ $slNumber }}. *{{ $displayName }}* - {{ $displayRole }}"
      data-csv-name="{{ $displayName }}"
      data-csv-role="{{ $displayRole }}"
      data-csv-price="{{ $val }}"
@@ -47,6 +50,11 @@
             {{ Str::limit(strtoupper($placeName), 12) }}
         </div>
     @endif
+    
+    <div class="absolute top-2 left-3 z-10">
+        <span class="text-[10px] font-bold text-slate-400">#{{ $slNumber }}</span>
+    </div>
+
     <div class="flex flex-col items-center text-center space-y-2 mt-1 {{ $isForeign ? 'relative z-10' : '' }}">
         <div class="relative inline-block">
             @if($player->user?->photo)
@@ -81,6 +89,9 @@
         <p class="text-sm font-bold {{ in_array($status, ['sold','available']) ? 'text-green-700' : ($status === 'auctioning' ? 'text-amber-700' : ($status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
             {{ $displayValue }}
         </p>
+        @if($isAdmin && $mobile)
+             <p class="text-[10px] font-mono text-slate-500 mt-1">{{ $mobile }}</p>
+        @endif
     </div>
 </div>
 </a>
