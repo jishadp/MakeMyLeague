@@ -2100,5 +2100,89 @@ class AuctionController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * API: Update a sold player's bid price and adjust team wallet accordingly.
+     */
+    public function updatePlayerBidPrice(Request $request)
+    {
+        $validated = $request->validate([
+            'league_player_id' => ['required', 'integer', 'exists:league_players,id'],
+            'new_bid_price' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $leaguePlayer = LeaguePlayer::with(['league', 'leagueTeam'])->find($validated['league_player_id']);
+        
+        if (!$leaguePlayer) {
+            return response()->json(['success' => false, 'message' => 'Player not found.'], 404);
+        }
+
+        if ($leaguePlayer->status !== 'sold') {
+            return response()->json(['success' => false, 'message' => 'Only sold players can have their bid price updated.'], 422);
+        }
+
+        if (!$leaguePlayer->leagueTeam) {
+            return response()->json(['success' => false, 'message' => 'Player is not assigned to a team.'], 422);
+        }
+
+        $this->authorize('markSoldUnsold', $leaguePlayer->league);
+
+        $oldBidPrice = (float) ($leaguePlayer->bid_price ?? 0);
+        $newBidPrice = (float) $validated['new_bid_price'];
+        $priceDifference = $oldBidPrice - $newBidPrice;
+
+        $team = $leaguePlayer->leagueTeam;
+
+        // Log the action
+        \App\Models\AuctionLog::logAction(
+            $leaguePlayer->league_id,
+            auth()->id(),
+            'player_bid_price_updated',
+            'LeaguePlayer',
+            $leaguePlayer->id,
+            [
+                'old_bid_price' => $oldBidPrice,
+                'new_bid_price' => $newBidPrice,
+                'team_id' => $team->id,
+                'wallet_adjustment' => $priceDifference
+            ]
+        );
+
+        DB::transaction(function () use ($leaguePlayer, $newBidPrice, $team, $priceDifference) {
+            // Update player's bid_price
+            $leaguePlayer->update(['bid_price' => $newBidPrice]);
+            
+            // Adjust team wallet: positive difference = refund, negative = extra deduction
+            if ($priceDifference != 0) {
+                $team->increment('wallet_balance', $priceDifference);
+            }
+        });
+
+        // Refresh models to get updated values
+        $leaguePlayer->refresh();
+        $team->refresh();
+
+        // Calculate new team totals
+        $soldPlayers = $team->leaguePlayers()->where('status', 'sold')->get();
+        $totalSpent = $soldPlayers->sum('bid_price');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Player bid price updated successfully.',
+            'player' => [
+                'id' => $leaguePlayer->id,
+                'name' => $leaguePlayer->player->name ?? 'Unknown',
+                'new_bid_price' => $newBidPrice,
+            ],
+            'team' => [
+                'id' => $team->id,
+                'name' => $team->team->name ?? 'Unknown',
+                'wallet_balance' => $team->wallet_balance,
+                'total_spent' => $totalSpent,
+                'player_count' => $soldPlayers->count(),
+            ],
+            'adjustment' => $priceDifference,
+        ]);
+    }
+
 
 }

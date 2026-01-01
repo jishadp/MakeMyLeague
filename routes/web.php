@@ -343,6 +343,7 @@ Route::middleware('auth')->group(function () {
         Route::get('recent-bids/{league}', [AuctionController::class, 'getRecentBids'])->name('recent-bids')->middleware('live.auction:view');
         Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances')->middleware('live.auction:view');
         Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('live.auction:view');
+        Route::post('update-player-value', [AuctionController::class, 'updatePlayerBidPrice'])->name('update-player-value');
     });
 
     // Poster routes

@@ -1469,18 +1469,24 @@
                             <p class="text-xs font-semibold text-slate-600 mb-2">Squad</p>
                             <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
                                 @foreach($soldPlayers as $soldPlayer)
-                                <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                                <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-indigo-100 transition-colors cursor-pointer group"
+                                     onclick="openPlayerValueModal({{ $soldPlayer->id }}, '{{ addslashes($soldPlayer->player->name ?? 'Unknown') }}', {{ $soldPlayer->bid_price ?? 0 }}, {{ $leagueTeam->id }}, '{{ addslashes($leagueTeam->team->name) }}')"
+                                     title="Click to edit value">
                                     <img src="{{ $soldPlayer->player->photo ? \Illuminate\Support\Facades\Storage::url($soldPlayer->player->photo) : asset('images/defaultplayer.jpeg') }}" 
                                          alt="{{ $soldPlayer->player->name }}" 
                                          class="w-8 h-8 rounded-lg object-cover bg-slate-200 flex-shrink-0"
                                          onerror="this.src='{{ asset('images/defaultplayer.jpeg') }}'">
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-900 truncate">{{ $soldPlayer->player->name }}</p>
+                                        <p class="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600">{{ $soldPlayer->player->name }}</p>
                                         <p class="text-[10px] text-slate-500">{{ $soldPlayer->player->primaryGameRole->gamePosition->name ?? $soldPlayer->player->position->name ?? 'Player' }}</p>
                                     </div>
-                                    <span class="text-xs font-bold text-green-700 whitespace-nowrap">₹{{ number_format($soldPlayer->bid_price) }}</span>
+                                    <span class="text-xs font-bold text-green-700 whitespace-nowrap group-hover:text-indigo-600" data-player-value-{{ $soldPlayer->id }}>₹{{ number_format($soldPlayer->bid_price) }}</span>
+                                    <svg class="w-3 h-3 text-slate-400 group-hover:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
                                 </div>
                                 @endforeach
+
                             </div>
                         </div>
                         @else
@@ -1628,7 +1634,59 @@
         </div>
     </div>
 </div>
+
+<!-- Player Value Edit Modal -->
+<div id="player-value-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+        <button type="button" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" onclick="closePlayerValueModal()">
+            <span class="sr-only">Close</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        
+        <div class="space-y-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-widest text-indigo-500">Edit Player Value</p>
+                <h3 class="text-xl font-bold text-slate-900 mt-1" id="player-value-modal-name">Player Name</h3>
+                <p class="text-sm text-slate-500" id="player-value-modal-team">Team Name</p>
+            </div>
+            
+            <div>
+                <label for="player-value-input" class="block text-sm font-medium text-slate-700 mb-2">New Value (₹)</label>
+                <input type="number" 
+                       id="player-value-input" 
+                       min="0" 
+                       step="1" 
+                       class="w-full rounded-xl border border-slate-200 px-4 py-3 text-lg font-semibold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                       placeholder="Enter new value">
+            </div>
+            
+            <div class="bg-slate-50 rounded-xl p-3">
+                <p class="text-xs text-slate-500 mb-1">Current Value</p>
+                <p class="text-lg font-bold text-green-700" id="player-value-modal-current">₹0</p>
+            </div>
+            
+            <input type="hidden" id="player-value-modal-player-id">
+            <input type="hidden" id="player-value-modal-team-id">
+            
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" 
+                        onclick="savePlayerValue()" 
+                        class="flex-1 px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors">
+                    Save Changes
+                </button>
+                <button type="button" 
+                        onclick="closePlayerValueModal()" 
+                        class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
 
 @section('scripts')
 <script>
@@ -1678,6 +1736,84 @@ function openWhatsAppShare(message) {
         controllerToast('Please allow pop-ups to share on WhatsApp.', 'error');
     }
 }
+
+// Player Value Edit Modal Functions
+function openPlayerValueModal(playerId, playerName, currentValue, teamId, teamName) {
+    const modal = document.getElementById('player-value-modal');
+    if (!modal) return;
+    
+    document.getElementById('player-value-modal-name').textContent = playerName;
+    document.getElementById('player-value-modal-team').textContent = teamName;
+    document.getElementById('player-value-modal-current').textContent = '₹' + Number(currentValue).toLocaleString('en-IN');
+    document.getElementById('player-value-input').value = currentValue;
+    document.getElementById('player-value-modal-player-id').value = playerId;
+    document.getElementById('player-value-modal-team-id').value = teamId;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.getElementById('player-value-input').focus();
+}
+
+function closePlayerValueModal() {
+    const modal = document.getElementById('player-value-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+async function savePlayerValue() {
+    const playerId = document.getElementById('player-value-modal-player-id').value;
+    const newValue = document.getElementById('player-value-input').value;
+    const teamId = document.getElementById('player-value-modal-team-id').value;
+    
+    if (!playerId || !newValue || newValue < 0) {
+        controllerToast('Please enter a valid value.', 'error');
+        return;
+    }
+    
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
+    try {
+        const response = await fetch('{{ route("auction.update-player-value") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                league_player_id: playerId,
+                new_bid_price: parseFloat(newValue)
+            })
+        });
+        
+        const data = await response.json().catch(() => ({ success: false }));
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to update player value.');
+        }
+        
+        // Update the UI with new values
+        controllerToast(`Updated ${data.player.name} to ₹${Number(data.player.new_bid_price).toLocaleString('en-IN')}`, 'success');
+        
+        // Refresh the page to show updated team stats
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+        
+        closePlayerValueModal();
+        
+    } catch (error) {
+        controllerToast(error.message || 'Failed to update player value.', 'error');
+    }
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePlayerValueModal();
+    }
+});
 </script>
 <script>
 (function() {
