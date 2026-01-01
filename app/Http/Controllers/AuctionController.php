@@ -438,13 +438,25 @@ class AuctionController extends Controller
             ], 'bid_price')
             ->orderBy('team_id')
             ->get();
+        // For reserve calculation, use available players first, fall back to unsold if none available
         $availableBasePrices = $league->leaguePlayers()
             ->where('status', 'available')
             ->orderBy('base_price')
             ->pluck('base_price')
             ->map(fn ($price) => max((float) $price, 0))
             ->values();
+        
+        // If no available players, use unsold players for reserve calculation
+        if ($availableBasePrices->isEmpty()) {
+            $availableBasePrices = $league->leaguePlayers()
+                ->where('status', 'unsold')
+                ->orderBy('base_price')
+                ->pluck('base_price')
+                ->map(fn ($price) => max((float) $price, 0))
+                ->values();
+        }
         $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
+
             ->where('retention', true)
             ->groupBy('league_team_id')
             ->select('league_team_id', DB::raw('count(*) as count'))
@@ -1566,12 +1578,24 @@ class AuctionController extends Controller
     protected function calculateMaxBidCap(LeagueTeam $team, League $league, int $playersNeeded, ?float $overrideWallet = null): float
     {
         $futureSlots = max($playersNeeded - 1, 0);
+        
+        // For reserve calculation, use available players first, fall back to unsold if none available
         $availableBasePrices = $league->leaguePlayers()
             ->where('status', 'available')
             ->orderBy('base_price')
             ->pluck('base_price')
             ->map(fn ($price) => max((float) $price, 0))
             ->values();
+        
+        // If no available players, use unsold players for reserve calculation
+        if ($availableBasePrices->isEmpty()) {
+            $availableBasePrices = $league->leaguePlayers()
+                ->where('status', 'unsold')
+                ->orderBy('base_price')
+                ->pluck('base_price')
+                ->map(fn ($price) => max((float) $price, 0))
+                ->values();
+        }
 
         $reserveAmount = $futureSlots > 0 ? $availableBasePrices->take($futureSlots)->sum() : 0;
         $availableWallet = $overrideWallet !== null
@@ -1580,6 +1604,7 @@ class AuctionController extends Controller
 
         return max($availableWallet - $reserveAmount, 0);
     }
+
 
     /**
      * Mirror UI max bid cap calculation to keep validations aligned with the control room.
