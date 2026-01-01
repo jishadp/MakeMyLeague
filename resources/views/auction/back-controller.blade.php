@@ -2859,27 +2859,42 @@ function openWhatsAppShare(message) {
         const overrideAmount = document.getElementById('controller-override-amount')?.value;
         const playerBasePrice = Number(playerBasePriceInput?.value || 0);
         const currentBidAmount = Number(controllerBaseInput?.value || 0);
-        const finalAmount = Number(overrideAmount || currentBidAmount);
+        let finalAmount = Number(overrideAmount || currentBidAmount);
         const teamMaxCap = Number(teamButton?.dataset.teamMax || 0);
         const teamWalletBalance = Number(teamButton?.dataset.teamWallet || 0);
         const teamName = teamButton?.dataset.teamName || 'Selected team';
+        
+        // For the final slot (last player needed), auto-calculate to use full remaining balance
+        // The server will also enforce this, but we compute here for the confirmation dialog
+        const isFinalSlot = teamNeeded === 1;
+        if (isFinalSlot) {
+            // Calculate total remaining: current wallet + amount already deducted for this bid
+            // If there was a bid placed, the wallet was already decremented by currentBidAmount
+            const totalRemainingBalance = teamWalletBalance + currentBidAmount;
+            if (totalRemainingBalance > finalAmount) {
+                finalAmount = totalRemainingBalance;
+            }
+        }
 
         if (!finalAmount || finalAmount < playerBasePrice) {
             showControllerMessage('Bid amount is below base price.', 'error');
             return;
         }
 
-        if (teamMaxCap && finalAmount > teamMaxCap) {
-            showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
-            return;
+        // Skip max cap/wallet checks for the final slot - server will handle it
+        if (!isFinalSlot) {
+            if (teamMaxCap && finalAmount > teamMaxCap) {
+                showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
+                return;
+            }
+
+            if (!Number.isNaN(teamWalletBalance) && finalAmount > teamWalletBalance) {
+                showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
+                return;
+            }
         }
 
-        if (!Number.isNaN(teamWalletBalance) && finalAmount > teamWalletBalance) {
-            showControllerMessage("Bid exceeds team's max cap/balance.", 'error');
-            return;
-        }
-
-        const confirmMessage = `Confirm sale?\n\nTeam: ${teamName}\nAmount: ${formatCurrency(finalAmount)}`;
+        const confirmMessage = `Confirm sale?\n\nTeam: ${teamName}\nAmount: ${formatCurrency(finalAmount)}${isFinalSlot ? '\n(Full remaining balance for final slot)' : ''}`;
         if (!window.confirm(confirmMessage)) {
             return;
         }

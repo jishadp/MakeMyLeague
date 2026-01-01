@@ -1117,6 +1117,8 @@ class AuctionController extends Controller
         $totalRemainingBalance = max((float) ($team->wallet_balance ?? 0), 0) + $alreadyDeducted;
 
         if ($isFinalSlot || $playersNeeded === 1) {
+            // Always use the full remaining balance for the final player slot
+            // This ensures teams spend all their money on the last player
             if ($totalRemainingBalance > $finalAmount) {
                 $finalAmount = $totalRemainingBalance;
                 $hasOverride = true;
