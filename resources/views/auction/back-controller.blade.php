@@ -2864,15 +2864,14 @@ function openWhatsAppShare(message) {
         const teamWalletBalance = Number(teamButton?.dataset.teamWallet || 0);
         const teamName = teamButton?.dataset.teamName || 'Selected team';
         
-        // For the final slot (last player needed), auto-calculate to use full remaining balance
-        // The server will also enforce this, but we compute here for the confirmation dialog
+        // For the final slot (last player needed), use the team's full remaining wallet balance
+        // This ensures the team spends all their money on the last player
         const isFinalSlot = teamNeeded === 1;
         if (isFinalSlot) {
-            // Calculate total remaining: current wallet + amount already deducted for this bid
-            // If there was a bid placed, the wallet was already decremented by currentBidAmount
-            const totalRemainingBalance = teamWalletBalance + currentBidAmount;
-            if (totalRemainingBalance > finalAmount) {
-                finalAmount = totalRemainingBalance;
+            // Use the team's actual wallet balance - this is what they have available
+            // The server will also enforce this and may adjust based on any pending bids
+            if (teamWalletBalance > finalAmount) {
+                finalAmount = teamWalletBalance;
             }
         }
 
