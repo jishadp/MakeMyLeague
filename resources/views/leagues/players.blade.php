@@ -184,8 +184,8 @@
                                 $isForeign = $player->is_foreign ?? false;
                                 $placeName = $player->user?->localBody?->name ?? 'Unknown';
                             @endphp
-                            <a href="{{ route('players.show', $player->user->id) }}" class="block text-decoration-none">
-                            <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_15px_rgba(251,191,36,0.4)]' : 'border-slate-200 bg-white shadow-sm' }} px-3 py-2 player-card" 
+                            <a href="{{ route('players.show', $player->user) }}" class="block text-decoration-none h-full">
+                            <div class="relative h-full rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_20px_rgba(245,158,11,0.6)] ring-1 ring-amber-400' : 'border-slate-200 bg-white shadow-sm hover:shadow-md' }} px-3 py-4 flex flex-col justify-between player-card" 
                                  data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                  data-status="{{ $status }}" 
                                  data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -196,36 +196,37 @@
                                  data-csv-status="{{ ucfirst($status) }}"
                                  data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
                                  >
-                                <div class="flex flex-col items-center text-center space-y-1">
-                                    <div class="relative">
+                                @if($isForeign)
+                                    <div class="absolute top-0 left-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg shadow-sm z-10">
+                                        {{ Str::limit(strtoupper($placeName), 12) }}
+                                    </div>
+                                @endif
+                                <div class="flex flex-col items-center text-center space-y-2 mt-1">
+                                    <div class="relative inline-block">
                                         @if($player->user?->photo)
-                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100">
+                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100 relative z-0">
                                         @else
-                                            <div class="w-14 h-14 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow">
+                                            <div class="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow relative z-0">
                                                 {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
                                             </div>
                                         @endif
                                         @if($player->retention)
-                                            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white shadow z-10 border-2 border-white">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                 </svg>
                                             </span>
-                                            </span>
                                         @endif
                                         @if($isForeign)
-                                            <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
-                                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600">
-                                                    <svg class="w-4 h-4 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                                            <div class="absolute inset-[-8px] pointer-events-none flight-orbit z-20">
+                                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600 drop-shadow-sm">
+                                                    <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center px-1.5 h-4 rounded-full bg-amber-500 text-white shadow z-10" title="{{ $placeName }}">
-                                                <span class="text-[8px] font-bold uppercase tracking-wider max-w-[60px] truncate">{{ $placeName }}</span>
-                                            </span>
                                         @endif
-                                        <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$status] ?? 'bg-gray-400 text-white' }}">
+                                        <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold {{ $statusColors[$status] ?? 'bg-gray-400 text-white' }} border-2 border-white z-10">
                                             {{ $statusLetter }}
                                         </span>
                                     </div>
@@ -267,14 +268,12 @@
 
                                             $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                             
-                                            $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
-                                            
                                             // Foreign status pre-calculated
                                             $isForeign = $player->is_foreign ?? false;
                                             $placeName = $player->user?->localBody?->name ?? 'Unknown';
                                         @endphp
-                                        <a href="{{ route('players.show', $player->user->id) }}" class="block text-decoration-none">
-                                        <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_15px_rgba(251,191,36,0.4)]' : 'border-slate-200 bg-white shadow-sm' }} px-3 py-2 player-card" 
+                                        <a href="{{ route('players.show', $player->user) }}" class="block text-decoration-none h-full">
+                                        <div class="relative h-full rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-amber-400 bg-amber-50 shadow-[0_0_20px_rgba(245,158,11,0.6)] ring-1 ring-amber-400' : 'border-slate-200 bg-white shadow-sm hover:shadow-md' }} px-3 py-4 flex flex-col justify-between player-card" 
                                              data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                              data-status="{{ $player->status ?? 'available' }}"
                                              data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -285,35 +284,37 @@
                                              data-csv-status="{{ ucfirst($player->status ?? 'available') }}"
                                              data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
                                              >
-                                            <div class="flex flex-col items-center text-center space-y-1">
-                                                <div class="relative">
+                                            @if($isForeign)
+                                                <div class="absolute top-0 left-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg shadow-sm z-10">
+                                                    {{ Str::limit(strtoupper($placeName), 12) }}
+                                                </div>
+                                            @endif
+                                            <div class="flex flex-col items-center text-center space-y-2 mt-1">
+                                                <div class="relative inline-block">
                                                     @if($player->user?->photo)
-                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100">
+                                                        <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow ring-2 ring-slate-100 relative z-0">
                                                     @else
-                                                        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow">
+                                                        <div class="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 ring-2 ring-slate-100 shadow relative z-0">
                                                             {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
                                                         </div>
                                                     @endif
                                                     @if($player->retention)
-                                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white shadow">
-                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white shadow z-10 border-2 border-white">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                             </svg>
                                                         </span>
                                                     @endif
                                                     @if($isForeign)
-                                                        <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
-                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600">
-                                                                <svg class="w-3 h-3 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                                                        <div class="absolute inset-[-8px] pointer-events-none flight-orbit z-20">
+                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600 drop-shadow-sm">
+                                                                <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                                                                 </svg>
                                                             </div>
                                                         </div>
-                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center px-1.5 h-4 rounded-full bg-amber-500 text-white shadow z-10" title="{{ $placeName }}">
-                                                            <span class="text-[8px] font-bold uppercase tracking-wider max-w-[60px] truncate">{{ $placeName }}</span>
-                                                        </span>
                                                     @endif
-                                                    <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$player->status ?? 'available'] ?? 'bg-gray-400 text-white' }}">
+                                                    <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold {{ $statusColors[$player->status ?? 'available'] ?? 'bg-gray-400 text-white' }} border-2 border-white z-10">
                                                         {{ $statusLetter }}
                                                     </span>
                                                 </div>
