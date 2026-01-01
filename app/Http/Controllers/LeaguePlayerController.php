@@ -853,6 +853,23 @@ class LeaguePlayerController extends Controller
     }
 
     /**
+     * Bulk clear all retention flags for players in the league.
+     */
+    public function bulkClearRetention(League $league)
+    {
+        $updated = LeaguePlayer::where('league_id', $league->id)
+            ->where('retention', true)
+            ->update([
+                'retention' => false,
+                'league_team_id' => null,
+            ]);
+            
+        return redirect()
+            ->route('league-players.index', $league)
+            ->with('success', "Cleared retention status and removed team assignment for {$updated} player(s).");
+    }
+
+    /**
      * Bulk assign "All-rounder" role to every player without a role in this league.
      */
     public function bulkAssignDefaultRole(League $league)
