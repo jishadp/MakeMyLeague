@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-    <title>{{config('app.name')}} - Professional Cricket League Management Platform</title>
-    <meta name="description" content="Create tournaments, host live auctions, manage players & teams — all in one place. Professional cricket league management made simple with {{config('app.name')}}.">
-    <meta name="keywords" content="cricket league management, live auctions, player statistics, team management, tournament organization, IPL style auctions">
+    <title>{{config('app.name')}} - Professional Sports League Management Platform</title>
+    <meta name="description" content="Create tournaments, host live auctions, manage players & teams — all in one place. Professional sports league management made simple with {{config('app.name')}}.">
+    <meta name="keywords" content="sports league management, live auctions, player statistics, team management, tournament organization, IPL style auctions">
     <meta name="author" content="{{config('app.name')}}">
     
     <!-- Open Graph Meta Tags -->
