@@ -4,9 +4,16 @@
     use Illuminate\Support\Str;
 
     $players = $league->leaguePlayers ?? collect();
-    $playersOrdered = $players->sortByDesc(function ($player) {
+    $leagueDistrictId = $league->localBody?->district_id;
+    $playersOrdered = $players->sortByDesc(function ($player) use ($leagueDistrictId) {
+        // Pre-calculate foreign status for sorting and display
+        $playerDistrictId = $player->user?->localBody?->district_id;
+        $isForeign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
+        $player->is_foreign = $isForeign;
+
         $value = (int) ($player->bid_price ?? $player->base_price ?? 0);
-        return sprintf('%d-%012d', $player->retention ? 1 : 0, $value);
+        // Sort Priority: Foreign > Retained > Value
+        return sprintf('%d-%d-%012d', $isForeign ? 1 : 0, $player->retention ? 1 : 0, $value);
     });
 
     $statusCounts = [
@@ -34,6 +41,15 @@
 @endphp
 
 @section('content')
+<style>
+    @keyframes orbit-flight {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .flight-orbit {
+        animation: orbit-flight 4s linear infinite;
+    }
+</style>
 <div class="min-h-screen bg-slate-50 py-10">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="flex items-center justify-between gap-4 flex-wrap">
@@ -163,12 +179,11 @@
                                 $statusLetter = $letterMap[$status] ?? 'A';
                                 $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                 
-                                // Check for foreign player (different district)
-                                $leagueDistrictId = $league->localBody?->district_id;
-                                $playerDistrictId = $player->user?->localBody?->district_id;
-                                $isForeign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
+
+                                // Foreign status is now pre-calculated in the sort function
+                                $isForeign = $player->is_foreign ?? false;
                             @endphp
-                            <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
+                            <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-white' }} shadow-sm px-3 py-2 player-card" 
                                  data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                  data-status="{{ $status }}" 
                                  data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -197,10 +212,15 @@
                                             </span>
                                         @endif
                                         @if($isForeign)
-                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow" title="Foreign Player">
-                                                <svg class="w-3 h-3 transform rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                                                </svg>
+                                            <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
+                                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-indigo-600">
+                                                    <svg class="w-4 h-4 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow z-10" title="Foreign Player">
+                                                <span class="text-[10px] font-bold">FP</span>
                                             </span>
                                         @endif
                                         <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$status] ?? 'bg-gray-400 text-white' }}">
@@ -244,12 +264,12 @@
 
                                             $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                             
-                                            // Check for foreign player (different district)
-                                            $leagueDistrictId = $league->localBody?->district_id;
-                                            $playerDistrictId = $player->user?->localBody?->district_id;
-                                            $isForeign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
+                                            $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
+                                            
+                                            // Foreign status pre-calculated
+                                            $isForeign = $player->is_foreign ?? false;
                                         @endphp
-                                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2 player-card" 
+                                        <div class="rounded-xl border transition-all duration-300 {{ $isForeign ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-white' }} shadow-sm px-3 py-2 player-card" 
                                              data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
                                              data-status="{{ $player->status ?? 'available' }}"
                                              data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -277,10 +297,15 @@
                                                         </span>
                                                     @endif
                                                     @if($isForeign)
-                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow" title="Foreign Player">
-                                                            <svg class="w-3 h-3 transform rotate-45" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                                                            </svg>
+                                                        <div class="absolute inset-0 -m-1 pointer-events-none flight-orbit">
+                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-indigo-600">
+                                                                <svg class="w-3 h-3 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                        <span class="absolute -top-1 -left-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-500 text-white shadow z-10" title="Foreign Player">
+                                                            <span class="text-[8px] font-bold">FP</span>
                                                         </span>
                                                     @endif
                                                     <span class="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold {{ $statusColors[$player->status ?? 'available'] ?? 'bg-gray-400 text-white' }}">
