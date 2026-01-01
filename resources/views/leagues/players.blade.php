@@ -241,8 +241,7 @@
                                                 'unsold' => 'bg-red-100 text-red-800',
                                                 'skip' => 'bg-gray-100 text-gray-800',
                                             ];
-                                                'skip' => 'bg-gray-100 text-gray-800',
-                                            ];
+
                                             $firstName = $player->user?->name ? explode(' ', trim($player->user->name))[0] : 'Unknown';
                                             
                                             // Check for foreign player (different district)
