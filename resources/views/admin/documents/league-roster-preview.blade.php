@@ -212,6 +212,9 @@
                 <a href="{{ $downloadUrl }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
                     Download PDF
                 </a>
+                <a href="{{ route('admin.documents.leagues.csv', array_filter($filterQuery)) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-colors">
+                    Export CSV
+                </a>
                 <div class="inline-flex items-center rounded-xl border border-slate-200 overflow-hidden">
                     @foreach(['grid' => 'Compact Grid', 'wide' => 'Wide Detail'] as $variant => $label)
                         @php

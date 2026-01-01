@@ -199,6 +199,7 @@ Route::middleware('auth')->group(function () {
         Route::get('documents/players/{player:slug}', [AdminDocumentController::class, 'showPlayerCard'])->name('documents.players.show');
         Route::get('documents/players/{player:slug}/download', [AdminDocumentController::class, 'downloadPlayerCard'])->name('documents.players.download');
         Route::get('documents/leagues/download', [AdminDocumentController::class, 'downloadLeagueRoster'])->name('documents.leagues.download');
+        Route::get('documents/leagues/csv', [AdminDocumentController::class, 'downloadLeagueRosterCsv'])->name('documents.leagues.csv');
         
         // Analytics Routes
         Route::get('analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');

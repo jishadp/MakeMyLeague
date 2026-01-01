@@ -131,6 +131,72 @@ class DocumentController extends Controller
 
         return $pdf->download($filename);
     }
+
+    /**
+     * Download a consolidated CSV of league players.
+     */
+    public function downloadLeagueRosterCsv(Request $request): Response
+    {
+        $payload = $this->prepareLeagueRosterData($request);
+        $rosterEntries = $payload['players'] ?? collect();
+        $league = $payload['league'] ?? null;
+        
+        $seasonSegment = $league && $league->season ? '-s' . $league->season : '';
+        $filenameLeagueSegment = $league
+            ? Str::slug(($league->name ?? 'league') . $seasonSegment)
+            : 'all-leagues';
+        $filenameLeagueSegment = $filenameLeagueSegment ?: 'league';
+        
+        $filename = 'league-roster-' . $filenameLeagueSegment . '-' . now()->format('Ymd-His') . '.csv';
+
+        $headers = [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($rosterEntries) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for Excel compatibility
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Header row
+            fputcsv($file, [
+                'Serial No',
+                'Player Name',
+                'Role',
+                'Place',
+                'Phone',
+                'Team',
+                'League',
+                'Season',
+                'Retained',
+                'Joined At',
+            ]);
+
+            foreach ($rosterEntries as $entry) {
+                fputcsv($file, [
+                    $entry['serial'],
+                    $entry['name'],
+                    $entry['role'],
+                    $entry['place'],
+                    $entry['phone'],
+                    $entry['team'],
+                    $entry['league_name'],
+                    $entry['season'],
+                    $entry['retained'] ? 'Yes' : 'No',
+                    $entry['joined_at']->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
     
     /**
      * Prepare data set shared between the roster preview and PDF.
