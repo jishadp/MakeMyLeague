@@ -36,12 +36,82 @@
             <h2 class="text-2xl font-bold text-gray-900">Teams ({{ $league->leagueTeams->count() }}/{{ $league->max_teams }})</h2>
         </div>
 
+        <style>
+            @keyframes orbit-flight {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            
+            @keyframes glow-pulse {
+                0%, 100% { 
+                    box-shadow: 
+                        0 0 10px rgba(245, 158, 11, 0.3),
+                        0 0 20px rgba(245, 158, 11, 0.2),
+                        inset 0 0 5px rgba(245, 158, 11, 0.1);
+                }
+                50% { 
+                    box-shadow: 
+                        0 0 15px rgba(245, 158, 11, 0.4),
+                        0 0 30px rgba(245, 158, 11, 0.3),
+                        inset 0 0 10px rgba(245, 158, 11, 0.15);
+                }
+            }
+            
+            @keyframes shine {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+                100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+            }
+            
+            .foreign-card-sm {
+                position: relative;
+                overflow: hidden;
+                animation: glow-pulse 3s ease-in-out infinite;
+                background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+                border: 1px solid #f59e0b !important;
+            }
+            
+            .foreign-card-sm::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+                animation: shine 4s infinite;
+                pointer-events: none;
+                z-index: 1;
+            }
+            
+            .foreign-plane-sm {
+                filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.6));
+            }
+        </style>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($league->leagueTeams->sortByDesc('created_at') as $leagueTeam)
                 @php
-                    $players = $leagueTeam->leaguePlayers->sortByDesc(function ($player) {
+                    $leagueDistrictId = $league->localBody?->district_id;
+                    $allPlayers = $leagueTeam->leaguePlayers->map(function($player) use ($leagueDistrictId) {
+                        $playerDistrictId = $player->user?->localBody?->district_id;
+                        $player->is_foreign = $leagueDistrictId && $playerDistrictId && $leagueDistrictId !== $playerDistrictId;
+                        return $player;
+                    });
+
+                    $sortedPlayers = $allPlayers->sortByDesc(function ($player) {
                         $value = (int) ($player->bid_price ?? $player->base_price ?? 0);
-                        return sprintf('%d-%012d', $player->retention ? 1 : 0, $value);
+                        // Sort: Foreign Retained (3) > Regular Retained (2) > Value (1)
+                        if ($player->is_foreign && $player->retention) return '3-' . sprintf('%012d', $value);
+                        if ($player->retention) return '2-' . sprintf('%012d', $value);
+                        return '1-' . sprintf('%012d', $value);
+                    });
+
+                    $foreignRetained = $sortedPlayers->filter(function($p) {
+                        return $p->is_foreign && $p->retention;
+                    });
+
+                    $otherPlayers = $sortedPlayers->reject(function($p) {
+                        return $p->is_foreign && $p->retention;
                     });
                 @endphp
                 <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
@@ -73,16 +143,65 @@
                         </div>
 
                         <!-- SQUAD Section -->
-                        @if($players->count() > 0)
+                        @if($sortedPlayers->count() > 0)
                             <div class="mb-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wide">SQUAD</h4>
-                                    <span class="text-xs text-gray-500">{{ $players->count() }} players</span>
+                                    <span class="text-xs text-gray-500">{{ $sortedPlayers->count() }} players</span>
                                 </div>
                                 
-                                <!-- Players Grid -->
+                                <!-- Foreign Retained Players -->
+                                @if($foreignRetained->count() > 0)
+                                    <div class="mb-4">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase tracking-wide">Foreign Stars</span>
+                                            <div class="h-px bg-amber-200 flex-1"></div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            @foreach($foreignRetained as $player)
+                                                @php
+                                                    $placeName = $player->user?->localBody?->name ?? 'Unknown';
+                                                @endphp
+                                                <div class="text-center p-2 rounded-lg foreign-card-sm">
+                                                    <div class="relative inline-block mb-1.5">
+                                                        <div class="absolute top-0 left-0 bg-amber-600 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-tl-md rounded-br-sm z-10 leading-none">
+                                                            {{ Str::limit(strtoupper($placeName), 8) }}
+                                                        </div>
+                                                        
+                                                        @if($player->user?->photo)
+                                                            <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover mx-auto border-2 border-amber-400 shadow-sm relative z-10">
+                                                        @else
+                                                            <div class="w-12 h-12 rounded-full bg-amber-100 border-2 border-amber-300 flex items-center justify-center mx-auto relative z-10">
+                                                                <span class="text-xs font-bold text-amber-800">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
+                                                            </div>
+                                                        @endif
+
+                                                        <!-- Plane Icon -->
+                                                        <div class="absolute inset-[-4px] pointer-events-none flight-orbit z-20">
+                                                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 transform text-amber-600 foreign-plane-sm">
+                                                                <svg class="w-4 h-4 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center border border-white z-20 shadow-sm">
+                                                            <span class="text-[10px] text-white">⭐</span>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-slate-900 truncate px-1 leading-tight relative z-10">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                                    <p class="text-[9px] font-bold text-amber-700 leading-tight flex items-center justify-center gap-1 relative z-10">
+                                                        Retained
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Other Players -->
                                 <div class="grid grid-cols-3 gap-2">
-                                    @foreach($players as $player)
+                                    @foreach($otherPlayers as $player)
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
                                         @endphp

@@ -258,7 +258,7 @@
                 <div id="player-tab-all" class="player-tab-panel">
                     
                     @if($foreignRetained->count() > 0)
-                        <div class="mb-8">
+                        <div class="mb-8" id="foreign-section">
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded border border-amber-200 uppercase tracking-wide">Foreign Stars</span>
                                 <div class="h-px bg-amber-200 flex-1"></div>
@@ -486,6 +486,14 @@
             
             card.classList.toggle('hidden', !(matchesName && matchesStatus));
         });
+
+        // Hide foreign section if no partials are visible in it
+        const foreignSection = document.querySelector('.player-tab-panel #foreign-section');
+        if (foreignSection) {
+            const foreignCards = foreignSection.querySelectorAll('.player-card');
+            const hasVisibleForeign = Array.from(foreignCards).some(card => !card.classList.contains('hidden'));
+            foreignSection.classList.toggle('hidden', !hasVisibleForeign);
+        }
         
         // Update share link after filtering
         setTimeout(updateShareLink, 100);
