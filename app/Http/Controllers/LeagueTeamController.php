@@ -260,6 +260,34 @@ class LeagueTeamController extends Controller
     }
 
     /**
+     * Bulk update wallet balance for all teams in the league.
+     * Blocks update if any player is designated as 'sold'.
+     */
+    public function bulkUpdateBalance(Request $request, League $league)
+    {
+        $request->validate([
+            'wallet_balance' => 'required|numeric|min:0',
+        ]);
+
+        // Check for sold players (Auction Started check)
+        $hasSoldPlayers = $league->leaguePlayers()
+            ->where('status', 'sold')
+            ->exists();
+
+        if ($hasSoldPlayers) {
+            return back()->with('error', 'Cannot update balances in bulk. The auction has started (sold players exist).');
+        }
+
+        // Update the league's global wallet limit
+        $league->update(['team_wallet_limit' => $request->wallet_balance]);
+
+        // Update all teams belonging to this league
+        $league->leagueTeams()->update(['wallet_balance' => $request->wallet_balance]);
+
+        return back()->with('success', 'Wallet balance and league limit updated for all teams successfully!');
+    }
+
+    /**
      * Display the manage teams page for a league.
      */
     public function manageTeams(League $league): View

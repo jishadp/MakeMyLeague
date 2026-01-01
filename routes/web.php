@@ -282,6 +282,7 @@ Route::middleware('auth')->group(function () {
     Route::get('leagues/{league}/teams/create', [LeagueTeamController::class, 'create'])->name('league-teams.create')->middleware('league.organizer');
     Route::get('leagues/{league}/manage-teams', [LeagueTeamController::class, 'manageTeams'])->name('league-teams.manage')->middleware('team.owner');
     Route::get('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'show'])->name('league-teams.show')->middleware('league.viewer');
+    Route::post('leagues/{league}/teams/bulk-balance', [LeagueTeamController::class, 'bulkUpdateBalance'])->name('league-teams.bulk-balance')->middleware('league.organizer');
     Route::post('leagues/{league}/teams', [LeagueTeamController::class, 'store'])->name('league-teams.store')->middleware('league.organizer');
     Route::get('leagues/{league}/teams/{leagueTeam}/edit', [LeagueTeamController::class, 'edit'])->name('league-teams.edit')->middleware('league.organizer');
     Route::put('leagues/{league}/teams/{leagueTeam}', [LeagueTeamController::class, 'update'])->name('league-teams.update')->middleware('league.organizer');
