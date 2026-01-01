@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-3">
-                    <a href="https://wa.me/919847449593?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" 
+                    <a href="https://wa.me/918301867613?text={{ urlencode('Hi, I would like to complete player registration payment for ' . $league->name) }}" 
                        target="_blank" rel="noopener" 
                        class="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] rounded-xl text-sm font-bold text-black transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5">
                         <i class="fa-brands fa-whatsapp text-lg group-hover:scale-110 transition-transform"></i>
@@ -189,7 +189,7 @@
                     <div class="space-y-1.5 group">
                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
                         <div class="relative">
-                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. Virat Kohli" 
+                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="e.g. MESSI" 
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 pl-11 text-slate-900 placeholder-slate-400 font-medium focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300" 
                                 @if(!$registrationOpen) disabled @endif>
                             <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
