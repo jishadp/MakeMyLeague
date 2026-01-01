@@ -139,7 +139,7 @@
                         @foreach($playersOrdered as $player)
                             @php
                                 $val = $player->bid_price ?? $player->base_price ?? 0;
-                                $displayValue = '₹' . number_format($val);
+                                $displayValue = $player->retention ? '∞' : '₹' . number_format($val);
                                 $displayRole = $player->user?->position?->name ?? 'Role';
                                 $displayName = $player->user?->name ? trim($player->user->name) : 'Unknown';
                                 
@@ -233,7 +233,7 @@
                                     @foreach($localPlayers as $player)
                                         @php
                                             $val = $player->bid_price ?? $player->base_price ?? 0;
-                                            $displayValue = '₹' . number_format($val);
+                                            $displayValue = $player->retention ? '∞' : '₹' . number_format($val);
                                             $statusColors = [
                                                 'pending' => 'bg-yellow-100 text-yellow-800',
                                                 'available' => 'bg-blue-100 text-blue-800',
