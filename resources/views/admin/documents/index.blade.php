@@ -44,7 +44,7 @@
                     </select>
                 </div>
                 <div class="lg:col-span-1 flex gap-3">
-                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-100 text-slate-900 font-semibold shadow-sm hover:bg-indigo-200 transition-colors">
                         Apply
                     </button>
                     <a href="{{ route('admin.documents.index') }}" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-600 text-slate-100 font-semibold hover:bg-slate-700 transition-colors">
@@ -95,32 +95,50 @@
                 </div>
                 <div class="lg:col-span-2 space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Show Mobile</label>
-                    <div class="inline-flex rounded-full border border-slate-200 bg-slate-50 overflow-hidden text-sm text-slate-700">
+                    <div 
+                        class="inline-flex rounded-full border border-slate-200 bg-slate-100 overflow-hidden text-sm font-medium"
+                        x-data="{ mobileVal: '{{ $rosterFilters['show_mobile'] ?? '1' }}' }"
+                    >
                         @php
                             $mobileOn = ($rosterFilters['show_mobile'] ?? '1') === '1';
                         @endphp
-                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ $mobileOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
-                            <input type="radio" name="show_mobile" value="1" @checked($mobileOn) class="sr-only">
+                        <label 
+                            class="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors {{ $mobileOn ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200' }}"
+                            :class="{ 'bg-indigo-600 text-white shadow-sm': mobileVal == '1', 'text-slate-600 hover:bg-slate-200': mobileVal != '1' }"
+                        >
+                            <input type="radio" name="show_mobile" value="1" x-model="mobileVal" class="sr-only">
                             <span>Show</span>
                         </label>
-                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ !$mobileOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
-                            <input type="radio" name="show_mobile" value="0" @checked(!$mobileOn) class="sr-only">
+                        <label 
+                            class="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors {{ !$mobileOn ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200' }}"
+                            :class="{ 'bg-slate-600 text-white shadow-sm': mobileVal == '0', 'text-slate-600 hover:bg-slate-200': mobileVal != '0' }"
+                        >
+                            <input type="radio" name="show_mobile" value="0" x-model="mobileVal" class="sr-only">
                             <span>Hide</span>
                         </label>
                     </div>
                 </div>
                 <div class="lg:col-span-2 space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 tracking-wide uppercase">Show Location</label>
-                    <div class="inline-flex rounded-full border border-slate-200 bg-slate-50 overflow-hidden text-sm text-slate-700">
+                    <div 
+                        class="inline-flex rounded-full border border-slate-200 bg-slate-100 overflow-hidden text-sm font-medium"
+                        x-data="{ locationVal: '{{ $rosterFilters['show_location'] ?? '1' }}' }"
+                    >
                         @php
                             $locationOn = ($rosterFilters['show_location'] ?? '1') === '1';
                         @endphp
-                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ $locationOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
-                            <input type="radio" name="show_location" value="1" @checked($locationOn) class="sr-only">
+                        <label 
+                            class="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors {{ $locationOn ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200' }}"
+                            :class="{ 'bg-indigo-600 text-white shadow-sm': locationVal == '1', 'text-slate-600 hover:bg-slate-200': locationVal != '1' }"
+                        >
+                            <input type="radio" name="show_location" value="1" x-model="locationVal" class="sr-only">
                             <span>Show</span>
                         </label>
-                        <label class="flex items-center gap-2 px-3 py-2 cursor-pointer {{ !$locationOn ? 'bg-white text-slate-900 shadow-sm' : '' }}">
-                            <input type="radio" name="show_location" value="0" @checked(!$locationOn) class="sr-only">
+                        <label 
+                            class="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors {{ !$locationOn ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200' }}"
+                            :class="{ 'bg-slate-600 text-white shadow-sm': locationVal == '0', 'text-slate-600 hover:bg-slate-200': locationVal != '0' }"
+                        >
+                            <input type="radio" name="show_location" value="0" x-model="locationVal" class="sr-only">
                             <span>Hide</span>
                         </label>
                     </div>
@@ -129,10 +147,10 @@
                     <button type="submit"
                         formaction="{{ route('admin.documents.leagues.preview') }}"
                         formtarget="_blank"
-                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-slate-800 text-slate-100 font-semibold shadow hover:bg-slate-900 transition-colors">
+                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold shadow-sm hover:bg-slate-50 transition-colors">
                         View Roster Preview
                     </button>
-                    <button type="submit" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-600 text-indigo-50 font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-3 rounded-xl bg-indigo-100 text-slate-900 font-semibold shadow-sm hover:bg-indigo-200 transition-colors">
                         Download League Roster PDF
                     </button>
                 </div>
