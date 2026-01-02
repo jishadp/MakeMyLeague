@@ -427,7 +427,7 @@
                                     <div class="w-full aspect-square rounded-full border-4 border-white p-1 bg-white/10 shadow-lg shadow-white/30 overflow-hidden relative">
                                         <img src="{{ $owner->photo ? Storage::url($owner->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                     </div>
-                                    <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $owner->name }}</p>
+                                    <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm text-wrap leading-tight w-full text-center">{{ $owner->name }}</p>
                                     <span class="text-[8px] text-white font-bold uppercase tracking-wider">Owner</span>
                                 </div>
                                 @endif
@@ -437,7 +437,7 @@
                                         <div class="w-full aspect-square rounded-full border-4 border-[#FFD700] p-1 bg-white/10 shadow-lg shadow-amber-500/30 overflow-hidden relative">
                                             <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                         </div>
-                                        <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm truncate w-full text-center">{{ $player->user->name }}</p>
+                                        <p class="text-white font-bold text-xs uppercase mt-1 text-shadow-sm text-wrap leading-tight w-full text-center">{{ $player->user->name }}</p>
                                         <span class="text-[8px] text-[#FFD700] font-bold uppercase tracking-wider">Star</span>
                                     </div>
                                 @endforeach
@@ -450,7 +450,7 @@
                                     <div class="w-full aspect-square rounded-full border-2 border-white p-0.5 bg-white/10 shadow-md overflow-hidden">
                                         <img src="{{ $player->user->photo ? Storage::url($player->user->photo) : asset('images/defaultplayer.jpeg') }}" class="w-full h-full object-cover rounded-full">
                                     </div>
-                                    <p class="text-white font-bold text-[10px] uppercase mt-1 text-center leading-tight truncate w-full">{{ $player->user->name }}</p>
+                                    <p class="text-white font-bold text-[10px] uppercase mt-1 text-center leading-tight text-wrap w-full">{{ $player->user->name }}</p>
                                 </div>
                             @endforeach
                          </div>
