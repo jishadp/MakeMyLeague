@@ -47,6 +47,7 @@
      data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
      data-status="{{ $status }}" 
      data-retained="{{ $player->retention ? 'true' : 'false' }}"
+     data-team="{{ strtolower($player->leagueTeam?->team?->name ?? '') }}"
      data-share-info="{{ $slNumber }}. *{{ $displayName }}* - {{ $displayRole }}"
      data-csv-name="{{ $displayName }}"
      data-csv-role="{{ $displayRole }}"
@@ -98,8 +99,8 @@
         <p class="text-sm font-bold {{ in_array($status, ['sold','available']) ? 'text-green-700' : ($status === 'auctioning' ? 'text-amber-700' : ($status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
             {{ $displayValue }}
         </p>
-        @if($player->retention && $player->leagueTeam?->team?->name)
-            <p class="text-[10px] text-center leading-tight {{ $isRetainedLocal ? 'text-purple-600' : 'text-amber-600' }} font-medium mt-0.5 line-clamp-2 w-full">
+        @if(($player->retention || $status === 'sold') && $player->leagueTeam?->team?->name)
+            <p class="text-[10px] text-center leading-tight {{ $status === 'sold' ? 'text-green-600' : ($isRetainedLocal ? 'text-purple-600' : 'text-amber-600') }} font-medium mt-0.5 line-clamp-2 w-full">
                 {{ $player->leagueTeam->team->name }}
             </p>
         @endif

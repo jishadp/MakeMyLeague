@@ -546,6 +546,23 @@
             card.classList.toggle('hidden', !(matchesName && matchesStatus));
         });
 
+        // Sort by team when filtering by 'sold' or 'retained'
+        if (activeStatus === 'sold' || activeStatus === 'retained') {
+            const activePanel = document.querySelector(`#player-tab-${activeTab}`);
+            if (activePanel) {
+                const playerLists = activePanel.querySelectorAll('[data-player-list]');
+                playerLists.forEach(list => {
+                    const cards = Array.from(list.querySelectorAll('.player-card'));
+                    cards.sort((a, b) => {
+                        const teamA = a.dataset.team || 'zzz';
+                        const teamB = b.dataset.team || 'zzz';
+                        return teamA.localeCompare(teamB);
+                    });
+                    cards.forEach(card => list.appendChild(card));
+                });
+            }
+        }
+
         // Hide foreign section if no partials are visible in it
         const foreignSection = document.querySelector('.player-tab-panel #foreign-section');
         if (foreignSection) {
