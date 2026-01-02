@@ -1382,13 +1382,7 @@
                             <input id="quick-jump-step" type="number" min="1" step="1" class="quick-jump-input" value="50" aria-label="Jump step in rupees">
                         </div>
                     </div>
-                    <div class="quick-grid static-jump-grid">
-                        @foreach(range(500, 2000, 100) as $jumpAmount)
-                            <button type="button" class="quick-button {{ $currentPlayer ? '' : 'opacity-50 cursor-not-allowed' }}" data-static-jump="{{ $jumpAmount }}" {{ $currentPlayer ? '' : 'disabled' }}>
-                                ₹{{ number_format($jumpAmount) }}
-                            </button>
-                        @endforeach
-                    </div>
+                    <div id="static-jump-grid" class="quick-grid static-jump-grid"></div>
                     <div id="quick-jump-grid" class="quick-grid"></div>
                 </div>
             </div>
@@ -2307,6 +2301,51 @@ document.addEventListener('keydown', function(e) {
         return increment;
     }
 
+    // Calculate appropriate step size based on wallet total
+    function calculateWalletBasedStep(walletTotal) {
+        const wallet = Number(walletTotal) || 0;
+        if (wallet <= 10000) return 1000;      // Up to ₹10k: steps of ₹1,000
+        if (wallet <= 50000) return 5000;      // Up to ₹50k: steps of ₹5,000
+        return 10000;                           // Above ₹50k: steps of ₹10,000
+    }
+
+    // Render wallet-based quick jump buttons
+    function renderStaticJumpButtons() {
+        const staticJumpGrid = document.getElementById('static-jump-grid');
+        if (!staticJumpGrid) return;
+
+        const teamId = controllerTeamSelect?.value || controllerDefaultTeam?.value;
+        const teamButton = teamId ? getTeamButton(teamId) : null;
+        const walletTotal = teamButton ? Number(teamButton.dataset.teamWallet || 0) : 0;
+
+        staticJumpGrid.innerHTML = '';
+
+        if (walletTotal <= 0) {
+            return; // No team selected or no wallet
+        }
+
+        const step = calculateWalletBasedStep(walletTotal);
+        const maxButtons = 10; // Show up to 10 buttons
+        const buttonCount = Math.min(maxButtons, Math.ceil(walletTotal / step));
+
+        for (let i = 1; i <= buttonCount; i++) {
+            const amount = step * i;
+            if (amount > walletTotal) break; // Don't show amounts exceeding wallet
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `quick-button ${controllerBaseInput?.value ? '' : 'opacity-50 cursor-not-allowed'}`;
+            btn.textContent = `₹${amount.toLocaleString('en-IN')}`;
+            btn.disabled = !controllerBaseInput?.value;
+            
+            btn.addEventListener('click', () => {
+                applyStaticJump(amount);
+            });
+
+            staticJumpGrid.appendChild(btn);
+        }
+    }
+
     function buildJumpTargets(base) {
         const step = getJumpStep();
         const count = 2;
@@ -2581,6 +2620,7 @@ document.addEventListener('keydown', function(e) {
         controllerBidInput.value = target;
         updatePreview(target);
         updateQuickButtonLabel();
+        renderStaticJumpButtons();
         renderJumpTargets();
     }
 
@@ -3003,6 +3043,7 @@ document.addEventListener('keydown', function(e) {
             controllerBidInput.dataset.defaultIncrement = nextIncrement;
             updatePreview(nextTarget);
             updateQuickButtonLabel();
+            renderStaticJumpButtons();
             renderJumpTargets();
             const bidLabel = document.getElementById('controller-current-bid-label');
             if (bidLabel) {
@@ -3026,6 +3067,7 @@ document.addEventListener('keydown', function(e) {
         updatePreview(controllerBidInput?.value || controllerBaseInput?.value || 0);
         updateQuickButtonLabel();
     }
+    renderStaticJumpButtons();
     renderJumpTargets();
     updateSoldButtonLabel();
 
