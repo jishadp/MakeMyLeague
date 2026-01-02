@@ -1372,7 +1372,7 @@
                     </td>
                     <td data-label="Team">
                         ${player.team_name ? `
-                            <div class="team-cell" style="justify-content: flex-end;">
+                            <div class="team-cell">
                                 <div class="team-cell__logo">
                                     <img src="${player.team_logo || defaultTeamLogo}" alt="${escapeHtml(player.team_name)}" onerror="this.src='${defaultTeamLogo}'">
                                 </div>

@@ -2345,7 +2345,8 @@ class AuctionController extends Controller
             $query->where('status', $status);
         }
 
-        $players = $query->orderBy('updated_at', 'desc')
+        $players = $query->orderByRaw("CASE WHEN status = 'auctioning' THEN 0 ELSE 1 END")
+            ->latest('updated_at')
             ->get()
             ->map(function ($lp) {
                 return [
