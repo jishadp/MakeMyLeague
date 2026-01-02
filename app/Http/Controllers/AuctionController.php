@@ -107,14 +107,50 @@ class AuctionController extends Controller
             ];
         }
 
-        // We need to know which group a team belongs to, or use the fixture's group.
-        // Usually, standings are based on the fixture's context (Group Stage).
+        // We need to know which group a team belongs to, or use the fixture's context (Group Stage).
         // If it's a knockout match, it shouldn't count towards Group Standings typically?
         // User requirement: "points table only show groupt leadershei[ with respect groups"
         // So we should probably ONLY consider 'group_stage' matches for the points table.
         
         $groupStageMatches = $completedMatches->where('match_type', 'group_stage');
 
+        // First, initialize all teams from scheduled/unscheduled group stage fixtures
+        // This ensures teams appear in standings even before matches are played
+        $allGroupStageFixtures = $fixtures->where('match_type', 'group_stage');
+        
+        foreach ($allGroupStageFixtures as $match) {
+            $groupId = $match->league_group_id ?? $defaultGroupId;
+            
+            // Ensure group entry exists
+            if (!isset($standingsByGroup[$groupId])) {
+                $standingsByGroup[$groupId] = [
+                    'group' => null,
+                    'teams' => []
+                ];
+            }
+
+            $homeTeamId = $match->home_team_id;
+            $awayTeamId = $match->away_team_id;
+
+            // Initialize team stats if not exists in this group
+            foreach ([$homeTeamId, $awayTeamId] as $teamId) {
+                if ($teamId && !isset($standingsByGroup[$groupId]['teams'][$teamId])) {
+                    $standingsByGroup[$groupId]['teams'][$teamId] = [
+                        'team_id' => $teamId,
+                        'played' => 0,
+                        'won' => 0,
+                        'drawn' => 0,
+                        'lost' => 0,
+                        'goals_for' => 0,
+                        'goals_against' => 0,
+                        'goal_difference' => 0,
+                        'points' => 0,
+                    ];
+                }
+            }
+        }
+
+        // Now process completed matches to update stats
         foreach ($groupStageMatches as $match) {
             $groupId = $match->league_group_id ?? $defaultGroupId;
             
