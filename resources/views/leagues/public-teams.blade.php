@@ -12,18 +12,18 @@
             </a>
         </div>
         
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <div class="title-card rounded-xl p-6 mb-8 border">
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div class="flex items-center">
                     @if($league->logo)
-                        <img src="{{ Storage::url($league->logo) }}" class="w-16 h-16 rounded-full object-cover mr-4">
+                        <img src="{{ Storage::url($league->logo) }}" class="w-16 h-16 rounded-full object-cover mr-4 title-logo shadow-lg border-4 border-white">
                     @endif
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ $league->name }}</h1>
-                        <p class="text-gray-600">{{ $league->game->name }} • Season {{ $league->season }}</p>
+                        <h1 class="text-3xl font-bold text-gray-900 title-heading">{{ $league->name }}</h1>
+                        <p class="text-gray-600 title-subtext">{{ $league->game->name }} • Season {{ $league->season }}</p>
                     </div>
                 </div>
-                <span class="px-4 py-2 rounded-full text-sm font-medium
+                <span class="status-badge px-4 py-2 rounded-full text-sm font-medium
                     @if($league->status === 'active') bg-green-100 text-green-800
                     @elseif($league->status === 'completed') bg-blue-100 text-blue-800
                     @else bg-gray-100 text-gray-800 @endif">
@@ -33,10 +33,11 @@
         </div>
 
         <div class="mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Teams ({{ $league->leagueTeams->count() }}/{{ $league->max_teams }})</h2>
+            <h2 class="text-2xl font-bold text-gray-900 section-title">Teams ({{ $league->leagueTeams->count() }}/{{ $league->max_teams }})</h2>
         </div>
 
         <style>
+            /* GPU Acceleration Helper */
             @keyframes orbit-flight {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
@@ -62,12 +63,162 @@
                 100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
             }
             
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) scale(1); }
+                50% { transform: translateY(-8px) scale(1.02); }
+            }
+            
+            /* Title Card Animations */
+            @keyframes title-card-glow {
+                0%, 100% { 
+                    box-shadow: 
+                        0 2px 12px rgba(99, 102, 241, 0.15),
+                        0 4px 20px rgba(99, 102, 241, 0.1),
+                        inset 0 0 8px rgba(99, 102, 241, 0.05);
+                }
+                50% { 
+                    box-shadow: 
+                        0 4px 16px rgba(99, 102, 241, 0.2),
+                        0 8px 32px rgba(99, 102, 241, 0.15),
+                        inset 0 0 12px rgba(99, 102, 241, 0.08);
+                }
+            }
+            
+            @keyframes title-card-enter {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px) translateZ(0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) translateZ(0);
+                }
+            }
+            
+            @keyframes title-slide-in {
+                from {
+                    opacity: 0;
+                    transform: translateX(-30px) translateZ(0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0) translateZ(0);
+                }
+            }
+            
+            @keyframes status-badge-pop {
+                from {
+                    opacity: 0;
+                    transform: scale(0.8) translateZ(0);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateZ(0);
+                }
+            }
+            
+            .title-card {
+                animation: title-card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                           title-card-glow 3s ease-in-out infinite 0.6s;
+                background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+                border: 1px solid #e0e7ff !important;
+                will-change: box-shadow, transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+            }
+            
+            .title-card:hover {
+                transform: translateY(-4px) translateZ(0);
+                box-shadow: 
+                    0 6px 24px rgba(99, 102, 241, 0.25),
+                    0 10px 40px rgba(99, 102, 241, 0.15);
+            }
+            
+            .title-heading {
+                animation: title-slide-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+            }
+            
+            .title-subtext {
+                animation: title-slide-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
+            }
+            
+            .title-logo {
+                animation: float 3s ease-in-out infinite;
+                will-change: transform;
+            }
+            
+            .status-badge {
+                animation: status-badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s backwards;
+                will-change: transform;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .status-badge:hover {
+                transform: scale(1.05) translateZ(0);
+            }
+            
+            /* Teams section title */
+            @keyframes section-title-enter {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px) translateZ(0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0) translateZ(0);
+                }
+            }
+            
+            .section-title {
+                animation: section-title-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+            }
+            
+            /* GPU acceleration for smooth animations */
+            .flight-orbit {
+                animation: orbit-flight 4s linear infinite;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+            }
+            
+            /* Foreign card with blue sky theme */
+            @keyframes foreign-glow-sm {
+                0%, 100% { 
+                    box-shadow: 
+                        0 0 12px rgba(245, 158, 11, 0.3),
+                        0 0 20px rgba(245, 158, 11, 0.2),
+                        inset 0 0 8px rgba(245, 158, 11, 0.1);
+                }
+                50% { 
+                    box-shadow: 
+                        0 0 18px rgba(245, 158, 11, 0.4),
+                        0 0 35px rgba(245, 158, 11, 0.3),
+                        inset 0 0 12px rgba(245, 158, 11, 0.15);
+                }
+            }
+            
+            @keyframes shine-sm {
+                0% { transform: translateX(-100%) rotate(45deg); }
+                100% { transform: translateX(200%) rotate(45deg); }
+            }
+            
             .foreign-card-sm {
                 position: relative;
                 overflow: hidden;
-                animation: glow-pulse 3s ease-in-out infinite;
+                animation: foreign-glow-sm 3s ease-in-out infinite;
                 background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
                 border: 1px solid #f59e0b !important;
+                will-change: box-shadow;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .foreign-card-sm:hover {
+                transform: translateY(-2px) scale(1.01) translateZ(0);
+                box-shadow: 
+                    0 0 15px rgba(245, 158, 11, 0.5),
+                    0 0 25px rgba(245, 158, 11, 0.3);
             }
             
             .foreign-card-sm::before {
@@ -81,10 +232,167 @@
                 animation: shine 4s infinite;
                 pointer-events: none;
                 z-index: 1;
+                will-change: transform;
             }
             
             .foreign-plane-sm {
                 filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.6));
+                will-change: filter;
+            }
+            
+            /* Regular player card in team list */
+            @keyframes regular-glow-sm {
+                0%, 100% { 
+                    box-shadow: 
+                        0 0 8px rgba(59, 130, 246, 0.15),
+                        inset 0 0 4px rgba(59, 130, 246, 0.08);
+                }
+                50% { 
+                    box-shadow: 
+                        0 0 12px rgba(59, 130, 246, 0.25),
+                        inset 0 0 6px rgba(59, 130, 246, 0.12);
+                }
+            }
+            
+            .player-card-sm {
+                position: relative;
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border: 1px solid #93c5fd;
+                border-radius: 0.5rem;
+                padding: 0.5rem;
+                text-align: center;
+                animation: regular-glow-sm 3s ease-in-out infinite;
+                will-change: box-shadow;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .player-card-sm:hover {
+                transform: translateY(-2px) scale(1.01) translateZ(0);
+                box-shadow: 
+                    0 0 12px rgba(59, 130, 246, 0.3),
+                    0 0 20px rgba(59, 130, 246, 0.15);
+            }
+            
+            .player-card-sm::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 50%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(59, 130, 246, 0.15),
+                    transparent
+                );
+                animation: shine-sm 4s infinite;
+                pointer-events: none;
+                z-index: 0;
+                will-change: transform;
+            }
+            
+            /* Team card animations */
+            @keyframes team-card-enter {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px) translateZ(0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) translateZ(0);
+                }
+            }
+            
+            @keyframes team-stats-pulse {
+                0%, 100% { 
+                    box-shadow: 
+                        0 1px 3px rgba(0, 0, 0, 0.1),
+                        inset 0 0 4px rgba(100, 116, 139, 0.05);
+                }
+                50% { 
+                    box-shadow: 
+                        0 2px 4px rgba(0, 0, 0, 0.15),
+                        inset 0 0 6px rgba(100, 116, 139, 0.08);
+                }
+            }
+            
+            .team-card {
+                animation: team-card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+                will-change: transform, opacity;
+                transform: translateZ(0);
+            }
+            
+            .team-card:nth-child(1) { animation-delay: 0.1s; }
+            .team-card:nth-child(2) { animation-delay: 0.2s; }
+            .team-card:nth-child(3) { animation-delay: 0.3s; }
+            .team-card:nth-child(4) { animation-delay: 0.4s; }
+            .team-card:nth-child(5) { animation-delay: 0.5s; }
+            .team-card:nth-child(6) { animation-delay: 0.6s; }
+            
+            .team-stats {
+                animation: team-stats-pulse 3s ease-in-out infinite;
+                will-change: box-shadow;
+                transform: translateZ(0);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .team-stats:hover {
+                transform: scale(1.02) translateZ(0);
+            }
+            
+            /* Reduce motion for accessibility */
+            @media (prefers-reduced-motion: reduce) {
+                .foreign-card-sm,
+                .player-card-sm,
+                .flight-orbit,
+                .foreign-plane-sm,
+                .team-card,
+                .team-stats,
+                .title-card,
+                .title-heading,
+                .title-subtext,
+                .title-logo,
+                .status-badge,
+                .section-title {
+                    animation: none !important;
+                    will-change: auto;
+                }
+                
+                .foreign-card-sm:hover,
+                .player-card-sm:hover,
+                .team-stats:hover,
+                .title-card:hover,
+                .status-badge:hover {
+                    transform: none;
+                }
+            }
+            
+            /* Optimize for mobile devices */
+            @media (max-width: 768px) {
+                .foreign-card-sm,
+                .player-card-sm,
+                .team-stats,
+                .title-card {
+                    animation-duration: 4s;
+                }
+                
+                .flight-orbit {
+                    animation-duration: 5s;
+                }
+                
+                .team-card {
+                    animation: team-card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+                }
+                
+                .title-heading,
+                .title-subtext,
+                .status-badge,
+                .section-title {
+                    animation-duration: 0.5s;
+                }
             }
         </style>
 
@@ -114,12 +422,12 @@
                         return $p->is_foreign && $p->retention;
                     });
                 @endphp
-                <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden team-card">
                     <!-- Team Header with Gradient -->
                     @if($leagueTeam->team->banner)
                         <div class="h-24 bg-cover bg-center" style="background-image: url('{{ Storage::url($leagueTeam->team->banner) }}')"></div>
                     @else
-                        <div class="h-24 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                        <div class="h-24 bg-gradient-to-r from-slate-400 to-slate-500"></div>
                     @endif
                     
                     <div class="p-4">
@@ -205,26 +513,28 @@
                                         @php
                                             $value = $player->bid_price ?? $player->base_price ?? 0;
                                         @endphp
-                                        <div class="text-center">
+                                        <div class="text-center player-card-sm relative">
                                             <div class="relative inline-block mb-1.5">
                                                 @if($player->user?->photo)
-                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover mx-auto border {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
+                                                    <img src="{{ Storage::url($player->user->photo) }}" class="w-12 h-12 rounded-full object-cover mx-auto border-2 {{ $player->retention ? 'border-purple-400' : 'border-blue-300' }} shadow relative z-10">
                                                 @else
-                                                    <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mx-auto border {{ $player->retention ? 'border-yellow-400' : 'border-gray-200' }}">
-                                                        <span class="text-xs font-bold text-gray-600">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
+                                                    <div class="w-12 h-12 rounded-full {{ $player->retention ? 'bg-purple-100' : 'bg-blue-100' }} flex items-center justify-center mx-auto border-2 {{ $player->retention ? 'border-purple-300' : 'border-blue-300' }} shadow relative z-10">
+                                                        <span class="text-xs font-bold {{ $player->retention ? 'text-purple-800' : 'text-blue-800' }}">{{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}</span>
                                                     </div>
                                                 @endif
                                                 @if($player->retention)
-                                                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center border border-white">
-                                                        <span class="text-[10px]">⭐</span>
+                                                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white z-20 shadow-sm">
+                                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                        </svg>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p class="text-[10px] font-semibold text-gray-900 truncate px-1 leading-tight">{{ $player->user?->name ?? 'Unknown' }}</p>
+                                            <p class="text-[10px] font-semibold text-gray-900 truncate px-1 leading-tight relative z-10">{{ $player->user?->name ?? 'Unknown' }}</p>
                                             @if($player->retention)
-                                                <p class="text-[10px] font-bold text-yellow-600 leading-tight">Retained</p>
+                                                <p class="text-[10px] font-bold text-purple-600 leading-tight relative z-10">Retained</p>
                                             @else
-                                                <p class="text-[10px] font-bold text-green-600 leading-tight break-words">₹{{ number_format($value) }}</p>
+                                                <p class="text-[10px] font-bold text-blue-600 leading-tight break-words relative z-10">₹{{ number_format($value) }}</p>
                                             @endif
                                         </div>
                                     @endforeach
@@ -240,7 +550,7 @@
                                 ? max(0, ($league->team_wallet_limit - $remainingWallet))
                                 : $playerSpend;
                         @endphp
-                        <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
+                        <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100 team-stats rounded-lg p-3">
                             <div class="text-center">
                                 <div class="text-base sm:text-lg font-bold text-gray-900 break-words leading-tight">₹{{ number_format($remainingWallet) }}</div>
                                 <div class="text-[11px] text-gray-500">Remaining</div>
@@ -250,7 +560,7 @@
                                 <div class="text-[11px] text-gray-500">Spent</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-base sm:text-lg font-bold text-yellow-600 leading-tight">{{ $sortedPlayers->where('retention', true)->count() }}</div>
+                                <div class="text-base sm:text-lg font-bold text-purple-600 leading-tight">{{ $sortedPlayers->where('retention', true)->count() }}</div>
                                 <div class="text-[11px] text-gray-500">Retained</div>
                             </div>
                         </div>
