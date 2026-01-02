@@ -94,17 +94,24 @@
         50% { transform: translateY(-8px) scale(1.02); }
     }
     
+    /* GPU acceleration for smooth animations */
     .flight-orbit {
         animation: orbit-flight 4s linear infinite;
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
     
     .foreign-card {
         position: relative;
         transform-style: preserve-3d;
-        animation: glow-pulse 3s ease-in-out infinite, float 4s ease-in-out infinite;
+        animation: glow-pulse 3s ease-in-out infinite;
         background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
         border: 1px solid #f59e0b !important;
         overflow: hidden;
+        will-change: box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
     
     .foreign-card::before {
@@ -123,6 +130,7 @@
         animation: shine 4s infinite;
         pointer-events: none;
         z-index: 1;
+        will-change: transform;
     }
     
     .foreign-card::after {
@@ -135,7 +143,7 @@
     }
     
     .foreign-card:hover {
-        transform: translateY(-8px) scale(1.02);
+        transform: translateY(-8px) scale(1.02) translateZ(0);
         box-shadow: 
             0 0 20px rgba(245, 158, 11, 0.6),
             0 0 40px rgba(245, 158, 11, 0.4);
@@ -188,6 +196,9 @@
         border: 1px solid #a855f7 !important;
         animation: retained-glow 3s ease-in-out infinite;
         overflow: hidden;
+        will-change: box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
     
     .retained-card::before {
@@ -206,10 +217,11 @@
         animation: retained-shine 4s infinite;
         pointer-events: none;
         z-index: 1;
+        will-change: transform;
     }
     
     .retained-card:hover {
-        transform: translateY(-4px) scale(1.01);
+        transform: translateY(-4px) scale(1.01) translateZ(0);
         box-shadow: 
             0 0 15px rgba(168, 85, 247, 0.5),
             0 0 30px rgba(168, 85, 247, 0.3);
@@ -217,6 +229,7 @@
     
     .retained-card .retained-star {
         animation: star-pulse 2s ease-in-out infinite;
+        will-change: transform;
     }
 
     /* Category player card styles */
@@ -241,6 +254,9 @@
         border: 1px solid #ec4899 !important;
         animation: category-glow 3s ease-in-out infinite;
         overflow: hidden;
+        will-change: box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
     
     .category-card::before {
@@ -259,10 +275,11 @@
         animation: retained-shine 4s infinite;
         pointer-events: none;
         z-index: 1;
+        will-change: transform;
     }
     
     .category-card:hover {
-        transform: translateY(-4px) scale(1.01);
+        transform: translateY(-4px) scale(1.01) translateZ(0);
         box-shadow: 
             0 0 15px rgba(236, 72, 153, 0.5),
             0 0 30px rgba(236, 72, 153, 0.3);
@@ -295,6 +312,9 @@
         border: 1px solid #93c5fd !important;
         animation: regular-glow 3s ease-in-out infinite;
         overflow: hidden;
+        will-change: box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
     
     .regular-card::before {
@@ -313,10 +333,11 @@
         animation: retained-shine 4s infinite;
         pointer-events: none;
         z-index: 1;
+        will-change: transform;
     }
     
     .regular-card:hover {
-        transform: translateY(-3px) scale(1.01);
+        transform: translateY(-3px) scale(1.01) translateZ(0);
         box-shadow: 
             0 0 15px rgba(59, 130, 246, 0.35),
             0 0 25px rgba(59, 130, 246, 0.2);
@@ -325,6 +346,160 @@
     .crown-icon {
         animation: float 3s ease-in-out infinite;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        will-change: transform;
+        transform: translateZ(0);
+    }
+    
+    /* Stats Card Animations */
+    @keyframes stats-glow-total {
+        0%, 100% { 
+            box-shadow: 
+                0 2px 8px rgba(100, 116, 139, 0.1),
+                inset 0 0 6px rgba(100, 116, 139, 0.05);
+        }
+        50% { 
+            box-shadow: 
+                0 4px 12px rgba(100, 116, 139, 0.15),
+                inset 0 0 8px rgba(100, 116, 139, 0.08);
+        }
+    }
+    
+    @keyframes stats-glow-retained {
+        0%, 100% { 
+            box-shadow: 
+                0 2px 8px rgba(217, 119, 6, 0.15),
+                inset 0 0 6px rgba(217, 119, 6, 0.05);
+        }
+        50% { 
+            box-shadow: 
+                0 4px 12px rgba(217, 119, 6, 0.25),
+                inset 0 0 8px rgba(217, 119, 6, 0.1);
+        }
+    }
+    
+    @keyframes stats-glow-sold {
+        0%, 100% { 
+            box-shadow: 
+                0 2px 8px rgba(34, 197, 94, 0.15),
+                inset 0 0 6px rgba(34, 197, 94, 0.05);
+        }
+        50% { 
+            box-shadow: 
+                0 4px 12px rgba(34, 197, 94, 0.25),
+                inset 0 0 8px rgba(34, 197, 94, 0.1);
+        }
+    }
+    
+    @keyframes stats-glow-available {
+        0%, 100% { 
+            box-shadow: 
+                0 2px 8px rgba(37, 99, 235, 0.15),
+                inset 0 0 6px rgba(37, 99, 235, 0.05);
+        }
+        50% { 
+            box-shadow: 
+                0 4px 12px rgba(37, 99, 235, 0.25),
+                inset 0 0 8px rgba(37, 99, 235, 0.1);
+        }
+    }
+    
+    @keyframes stats-glow-unsold {
+        0%, 100% { 
+            box-shadow: 
+                0 2px 8px rgba(239, 68, 68, 0.15),
+                inset 0 0 6px rgba(239, 68, 68, 0.05);
+        }
+        50% { 
+            box-shadow: 
+                0 4px 12px rgba(239, 68, 68, 0.25),
+                inset 0 0 8px rgba(239, 68, 68, 0.1);
+        }
+    }
+    
+    @keyframes stats-count-pop {
+        0% { transform: scale(0.95) translateZ(0); opacity: 0.8; }
+        50% { transform: scale(1.05) translateZ(0); }
+        100% { transform: scale(1) translateZ(0); opacity: 1; }
+    }
+    
+    .stats-card {
+        position: relative;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0 !important;
+        overflow: hidden;
+        will-change: box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-4px) translateZ(0);
+    }
+    
+    .stats-card.total {
+        animation: stats-glow-total 3s ease-in-out infinite;
+    }
+    
+    .stats-card.retained {
+        animation: stats-glow-retained 3s ease-in-out infinite;
+    }
+    
+    .stats-card.sold {
+        animation: stats-glow-sold 3s ease-in-out infinite;
+    }
+    
+    .stats-card.available {
+        animation: stats-glow-available 3s ease-in-out infinite;
+    }
+    
+    .stats-card.unsold {
+        animation: stats-glow-unsold 3s ease-in-out infinite;
+    }
+    
+    .stats-count {
+        animation: stats-count-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: inline-block;
+        will-change: transform;
+    }
+    
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+        .foreign-card,
+        .retained-card,
+        .category-card,
+        .regular-card,
+        .retained-card .retained-star,
+        .flight-orbit,
+        .foreign-plane,
+        .crown-icon,
+        .stats-card {
+            animation: none !important;
+            will-change: auto;
+        }
+        
+        .foreign-card:hover,
+        .retained-card:hover,
+        .category-card:hover,
+        .regular-card:hover,
+        .stats-card:hover {
+            transform: none;
+        }
+    }
+    
+    /* Optimize for mobile devices */
+    @media (max-width: 768px) {
+        .foreign-card,
+        .retained-card,
+        .category-card,
+        .regular-card,
+        .stats-card {
+            animation-duration: 4s;
+        }
+        
+        .flight-orbit {
+            animation-duration: 5s;
+        }
     }
 </style>
 
@@ -350,24 +525,24 @@
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
-                <p class="text-2xl font-bold text-slate-900">{{ $statusCounts['total'] }}</p>
+            <div class="stats-card total rounded-xl p-3 text-center">
+                <p class="text-2xl font-bold text-slate-900"><span class="stats-count">{{ $statusCounts['total'] }}</span></p>
                 <p class="text-xs text-slate-500">Total Players</p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
-                <p class="text-2xl font-bold text-amber-600">{{ $statusCounts['retained'] }}</p>
+            <div class="stats-card retained rounded-xl p-3 text-center">
+                <p class="text-2xl font-bold text-amber-600"><span class="stats-count">{{ $statusCounts['retained'] }}</span></p>
                 <p class="text-xs text-slate-500">Retained</p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
-                <p class="text-2xl font-bold text-green-600">{{ $statusCounts['sold'] }}</p>
+            <div class="stats-card sold rounded-xl p-3 text-center">
+                <p class="text-2xl font-bold text-green-600"><span class="stats-count">{{ $statusCounts['sold'] }}</span></p>
                 <p class="text-xs text-slate-500">Sold</p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
-                <p class="text-2xl font-bold text-blue-600">{{ $statusCounts['available'] }}</p>
+            <div class="stats-card available rounded-xl p-3 text-center">
+                <p class="text-2xl font-bold text-blue-600"><span class="stats-count">{{ $statusCounts['available'] }}</span></p>
                 <p class="text-xs text-slate-500">Available</p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
-                <p class="text-2xl font-bold text-red-600">{{ $statusCounts['unsold'] }}</p>
+            <div class="stats-card unsold rounded-xl p-3 text-center">
+                <p class="text-2xl font-bold text-red-600"><span class="stats-count">{{ $statusCounts['unsold'] }}</span></p>
                 <p class="text-xs text-slate-500">Unsold</p>
             </div>
         </div>
