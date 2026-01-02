@@ -28,13 +28,22 @@
     // but here we fall back to checking the property if not set, or re-calculating if needed.
     // In the main view, we set $player->is_foreign.
     $isForeign = $player->is_foreign ?? false;
+    $isRetainedLocal = $player->retention && !$isForeign;
     $placeName = $player->user?->localBody?->name ?? 'Unknown';
     $slNumber = $player->sl_number ?? 'N/A';
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
     $mobile = $player->user?->mobile ?? '';
+    
+    // Determine card class based on player type
+    $cardClass = 'border-slate-200 bg-white shadow-sm hover:shadow-md';
+    if ($isForeign) {
+        $cardClass = 'foreign-card';
+    } elseif ($isRetainedLocal) {
+        $cardClass = 'retained-card';
+    }
 @endphp
 <a href="{{ route('players.show', $player->user) }}" class="block text-decoration-none h-full">
-<div class="relative h-full rounded-xl border transition-all duration-300 {{ $isForeign ? 'foreign-card' : 'border-slate-200 bg-white shadow-sm hover:shadow-md' }} px-3 py-4 flex flex-col justify-between player-card" 
+<div class="relative h-full rounded-xl border transition-all duration-300 {{ $cardClass }} px-3 py-4 flex flex-col justify-between player-card" 
      data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
      data-status="{{ $status }}" 
      data-retained="{{ $player->retention ? 'true' : 'false' }}"
@@ -58,14 +67,14 @@
     <div class="flex flex-col items-center text-center space-y-2 mt-1 {{ $isForeign ? 'relative z-10' : '' }}">
         <div class="relative inline-block">
             @if($player->user?->photo)
-                <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 {{ $isForeign ? 'border-amber-400' : 'border-white' }} shadow ring-2 {{ $isForeign ? 'ring-amber-300' : 'ring-slate-100' }} relative z-0">
+                <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 {{ $isForeign ? 'border-amber-400' : ($isRetainedLocal ? 'border-purple-400' : 'border-white') }} shadow ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : 'ring-slate-100') }} relative z-0">
             @else
-                <div class="w-16 h-16 rounded-full {{ $isForeign ? 'bg-amber-100 border-amber-300' : 'bg-slate-100 border-slate-200' }} border flex items-center justify-center text-sm font-semibold {{ $isForeign ? 'text-amber-800' : 'text-slate-600' }} ring-2 {{ $isForeign ? 'ring-amber-300' : 'ring-slate-100' }} shadow relative z-0">
+                <div class="w-16 h-16 rounded-full {{ $isForeign ? 'bg-amber-100 border-amber-300' : ($isRetainedLocal ? 'bg-purple-100 border-purple-300' : 'bg-slate-100 border-slate-200') }} border flex items-center justify-center text-sm font-semibold {{ $isForeign ? 'text-amber-800' : ($isRetainedLocal ? 'text-purple-800' : 'text-slate-600') }} ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : 'ring-slate-100') }} shadow relative z-0">
                     {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
                 </div>
             @endif
             @if($player->retention)
-                <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white shadow z-10 border-2 border-white">
+                <span class="absolute -top-1 -right-1 inline-flex items-center justify-center w-6 h-6 rounded-full {{ $isRetainedLocal ? 'bg-purple-500 retained-star' : 'bg-amber-500' }} text-white shadow z-10 border-2 border-white">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>

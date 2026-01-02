@@ -153,6 +153,69 @@
         0%, 100% { filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6)); }
         50% { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); }
     }
+    
+    /* Retained (non-foreign) player card styles */
+    @keyframes retained-glow {
+        0%, 100% { 
+            box-shadow: 
+                0 0 10px rgba(168, 85, 247, 0.3),
+                0 0 20px rgba(168, 85, 247, 0.2),
+                inset 0 0 8px rgba(168, 85, 247, 0.1);
+        }
+        50% { 
+            box-shadow: 
+                0 0 18px rgba(168, 85, 247, 0.4),
+                0 0 35px rgba(168, 85, 247, 0.3),
+                inset 0 0 12px rgba(168, 85, 247, 0.15);
+        }
+    }
+    
+    @keyframes retained-shine {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(200%) rotate(45deg); }
+    }
+    
+    @keyframes star-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
+    
+    .retained-card {
+        position: relative;
+        background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        border: 1px solid #a855f7 !important;
+        animation: retained-glow 3s ease-in-out infinite;
+        overflow: hidden;
+    }
+    
+    .retained-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(168, 85, 247, 0.15),
+            transparent
+        );
+        animation: retained-shine 4s infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .retained-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 
+            0 0 15px rgba(168, 85, 247, 0.5),
+            0 0 30px rgba(168, 85, 247, 0.3);
+    }
+    
+    .retained-card .retained-star {
+        animation: star-pulse 2s ease-in-out infinite;
+    }
 </style>
 
 <div class="min-h-screen bg-slate-50 py-10">
@@ -210,16 +273,14 @@
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
                         
-                        <!-- Mobile: Dropdown filter -->
-                        <div class="sm:hidden">
-                            <select id="statusFilterMobile" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 bg-white shadow-sm text-slate-700">
-                                <option value="all">All Players</option>
-                                <option value="available">Available</option>
-                                <option value="sold">Sold</option>
-                            </select>
+                        <!-- Mobile: Button filters (simplified) -->
+                        <div class="flex sm:hidden items-center gap-2 text-xs flex-wrap">
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow flex-shrink-0" data-filter="all">All</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0" data-filter="available">Available</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0" data-filter="sold">Sold</button>
                         </div>
                         
-                        <!-- Desktop: Button filters -->
+                        <!-- Desktop: Button filters (full options) -->
                         <div class="hidden sm:flex items-center gap-2 text-xs flex-wrap">
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow flex-shrink-0" data-filter="all">All</button>
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-amber-600 text-white border border-amber-600 flex-shrink-0" data-filter="retained">Retained</button>
@@ -230,18 +291,20 @@
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 flex-shrink-0" data-filter="pending">Pending</button>
                         </div>
 
-                        <a id="whatsappShareBtn" href="https://wa.me/?text={{ urlencode('Check out players for ' . $league->name . ': ' . request()->url()) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 shadow flex-shrink-0">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 .5C5.648.5.5 5.648.5 12c0 2.016.527 3.964 1.527 5.679L.5 23.5l6.012-1.513C8.16 22.973 10.056 23.5 12 23.5c6.352 0 11.5-5.148 11.5-11.5S18.352.5 12 .5zm0 20.905c-1.793 0-3.538-.48-5.05-1.385l-.361-.213-3.57.897.951-3.48-.235-.359A9.39 9.39 0 012.61 12C2.61 6.536 6.536 2.61 12 2.61c5.465 0 9.39 3.926 9.39 9.39 0 5.465-3.925 9.405-9.39 9.405z"/><path d="M17.174 14.83c-.293-.146-1.733-.853-2.002-.949-.27-.098-.468-.146-.666.146-.195.293-.768.949-.94 1.146-.171.195-.342.22-.635.073-.293-.146-1.236-.456-2.353-1.454-.869-.775-1.456-1.733-1.627-2.025-.171-.293-.018-.451.129-.597.132-.132.293-.342.439-.513.146-.171.195-.293.293-.488.098-.195.049-.366-.024-.512-.073-.146-.666-1.607-.914-2.2-.241-.579-.487-.5-.666-.51l-.566-.01c-.195 0-.512.073-.78.366-.269.293-1.024.999-1.024 2.438 0 1.438 1.05 2.826 1.195 3.018.146.195 2.07 3.163 5.018 4.433.702.303 1.25.484 1.676.62.704.223 1.344.192 1.852.116.565-.085 1.733-.707 1.979-1.389.244-.683.244-1.268.171-1.389-.073-.122-.268-.195-.561-.342z"/>
-                            </svg>
-                            Share
-                        </a>
-                        <button id="exportCsvBtn" type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow flex-shrink-0">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            Export
-                        </button>
+                        @if(auth()->check() && (auth()->user()->isOrganizerForLeague($league->id) || auth()->user()->isAdmin()))
+                            <a id="whatsappShareBtn" href="https://wa.me/?text={{ urlencode('Check out players for ' . $league->name . ': ' . request()->url()) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 shadow flex-shrink-0">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 .5C5.648.5.5 5.648.5 12c0 2.016.527 3.964 1.527 5.679L.5 23.5l6.012-1.513C8.16 22.973 10.056 23.5 12 23.5c6.352 0 11.5-5.148 11.5-11.5S18.352.5 12 .5zm0 20.905c-1.793 0-3.538-.48-5.05-1.385l-.361-.213-3.57.897.951-3.48-.235-.359A9.39 9.39 0 012.61 12C2.61 6.536 6.536 2.61 12 2.61c5.465 0 9.39 3.926 9.39 9.39 0 5.465-3.925 9.405-9.39 9.405z"/><path d="M17.174 14.83c-.293-.146-1.733-.853-2.002-.949-.27-.098-.468-.146-.666.146-.195.293-.768.949-.94 1.146-.171.195-.342.22-.635.073-.293-.146-1.236-.456-2.353-1.454-.869-.775-1.456-1.733-1.627-2.025-.171-.293-.018-.451.129-.597.132-.132.293-.342.439-.513.146-.171.195-.293.293-.488.098-.195.049-.366-.024-.512-.073-.146-.666-1.607-.914-2.2-.241-.579-.487-.5-.666-.51l-.566-.01c-.195 0-.512.073-.78.366-.269.293-1.024.999-1.024 2.438 0 1.438 1.05 2.826 1.195 3.018.146.195 2.07 3.163 5.018 4.433.702.303 1.25.484 1.676.62.704.223 1.344.192 1.852.116.565-.085 1.733-.707 1.979-1.389.244-.683.244-1.268.171-1.389-.073-.122-.268-.195-.561-.342z"/>
+                                </svg>
+                                Share
+                            </a>
+                            <button id="exportCsvBtn" type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow flex-shrink-0">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Export
+                            </button>
+                        @endif
                         
                         <div class="flex items-center gap-2 flex-wrap">
                              <button type="button" class="player-tab inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg border bg-indigo-600 text-white border-indigo-600 shadow" data-player-tab="all">All</button>
@@ -525,15 +588,6 @@
             applyFilters();
         });
     });
-
-    // Mobile dropdown filter handler
-    const mobileFilterSelect = document.getElementById('statusFilterMobile');
-    if (mobileFilterSelect) {
-        mobileFilterSelect.addEventListener('change', (e) => {
-            activeStatus = e.target.value || 'all';
-            applyFilters();
-        });
-    }
 
     if (searchInput) {
         searchInput.addEventListener('input', () => {
