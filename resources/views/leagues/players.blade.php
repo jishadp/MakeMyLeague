@@ -58,7 +58,7 @@
         ->map(function ($fixtures) {
             return $fixtures->values();
         });
-    $categories = \App\Models\LeaguePlayerCategory::where('league_id', $league->id)->get();
+    $categories = \App\Models\LeaguePlayerCategory::where('league_id', $league->id)->withCount('players')->get();
 @endphp
 
 @section('content')
@@ -338,7 +338,10 @@
                             <!-- Category Buttons (Visible on all devices) -->
                             <div class="flex overflow-x-auto gap-2 w-full sm:w-auto no-scrollbar pb-1">
                                 @foreach($categories as $category)
-                                    <button type="button" class="category-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-white text-slate-700 border border-slate-200 flex-shrink-0" data-category="{{ $category->id }}">{{ $category->name }}</button>
+                                    <button type="button" class="category-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-white text-slate-700 border border-slate-200 flex-shrink-0 flex items-center gap-1.5" data-category="{{ $category->id }}">
+                                        <span>{{ $category->name }}</span>
+                                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">{{ $category->players_count }}</span>
+                                    </button>
                                 @endforeach
                             </div>
                         @endif
