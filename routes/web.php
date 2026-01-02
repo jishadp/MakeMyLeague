@@ -322,6 +322,7 @@ Route::middleware('auth')->group(function () {
     Route::post('leagues/{league}/categories/assign-player', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'assignPlayer'])->name('leagues.categories.assign-player')->middleware('league.organizer');
     Route::get('leagues/{league}/categories/players', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'getPlayers'])->name('leagues.categories.players')->middleware('league.organizer');
     Route::get('leagues/{league}/categories/search-players', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'searchLeaguePlayers'])->name('leagues.categories.search-players')->middleware('league.organizer');
+    Route::post('leagues/{league}/categories/bulk-assign', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'bulkAssign'])->name('leagues.categories.bulk-assign')->middleware('league.organizer');
 
 
     // Auction routes - organizers manage, team owners and auctioneers can bid

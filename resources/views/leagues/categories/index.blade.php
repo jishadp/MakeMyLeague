@@ -18,6 +18,27 @@
     .player-row:hover {
         background-color: #f8fafc;
     }
+    /* Bulk selection styles */
+    .bulk-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    .bulk-action-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        z-index: 9999;
+    }
+    .bulk-action-bar.visible {
+        transform: translateY(0);
+    }
+    #bulk-assign-modal {
+        z-index: 10000 !important;
+    }
 </style>
 @endsection
 
@@ -137,6 +158,9 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th scope="col" class="px-4 py-3 text-left">
+                                <input type="checkbox" id="select-all-checkbox" class="bulk-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onclick="toggleSelectAll()">
+                            </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -283,6 +307,68 @@
     </div>
 </div>
 
+<!-- Bulk Action Bar -->
+<div id="bulk-action-bar" class="bulk-action-bar bg-indigo-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="text-white font-medium">
+                    <span id="selected-count">0</span> players selected
+                </span>
+                <button onclick="clearSelection()" class="text-indigo-200 hover:text-white text-sm underline">
+                    Clear selection
+                </button>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openBulkAssignModal()" 
+                        class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 font-semibold text-sm rounded-md hover:bg-indigo-50 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 10V5a2 2 0 012-2zm0 0v.01"/>
+                    </svg>
+                    Assign to Category
+                </button>
+                <button onclick="bulkRemoveCategory()" 
+                        class="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold text-sm rounded-md hover:bg-red-600 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Remove Category
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Assign Modal -->
+<div id="bulk-assign-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onclick="closeBulkAssignModal()"></div>
+        <div class="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-md sm:w-full sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Assign Players to Category</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                <span id="bulk-modal-count">0</span> players selected
+            </p>
+            
+            <div class="space-y-2 max-h-60 overflow-y-auto mb-4">
+                @foreach($categories as $cat)
+                <button onclick="submitBulkAssign({{ $cat->id }})" 
+                        class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-700 border border-gray-200 hover:border-indigo-300 transition flex items-center justify-between group">
+                    <span class="font-medium">{{ $cat->name }}</span>
+                    <span class="text-xs text-gray-400 group-hover:text-indigo-500">{{ $cat->players_count }} players</span>
+                </button>
+                @endforeach
+            </div>
+            
+            <div class="flex justify-end pt-4 border-t">
+                <button type="button" onclick="closeBulkAssignModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -389,21 +475,29 @@
         });
     }
     
+    // Bulk selection state
+    let selectedPlayers = new Set();
+    
     function renderTable(players) {
         const tbody = document.getElementById('players-table-body');
         tbody.innerHTML = '';
         
         if(players.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No players found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No players found.</td></tr>';
             return;
         }
         
         players.forEach(p => {
              const catName = p.category ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${p.category.name}</span>` : '<span class="text-gray-400 italic">Uncategorized</span>';
+             const isChecked = selectedPlayers.has(p.id) ? 'checked' : '';
              
              const tr = document.createElement('tr');
              tr.className = 'player-row';
              tr.innerHTML = `
+                <td class="px-4 py-4">
+                    <input type="checkbox" class="bulk-checkbox player-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" 
+                           data-id="${p.id}" ${isChecked} onclick="togglePlayerSelect(${p.id})">
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.player ? p.player.name : 'Unknown'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${catName}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -413,6 +507,9 @@
              `;
              tbody.appendChild(tr);
         });
+        
+        updateSelectAllState();
+        updateBulkActionBar();
     }
     
     function renderPagination(data) {
@@ -583,6 +680,114 @@
             else alert(r.message);
         })
         .finally(() => showLoading(false));
+    }
+    
+    // --- Bulk Selection Logic ---
+    function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        const checkboxes = document.querySelectorAll('.player-checkbox');
+        
+        checkboxes.forEach(cb => {
+            const playerId = parseInt(cb.dataset.id);
+            cb.checked = selectAllCheckbox.checked;
+            if(selectAllCheckbox.checked) {
+                selectedPlayers.add(playerId);
+            } else {
+                selectedPlayers.delete(playerId);
+            }
+        });
+        
+        updateBulkActionBar();
+    }
+    
+    function togglePlayerSelect(playerId) {
+        if(selectedPlayers.has(playerId)) {
+            selectedPlayers.delete(playerId);
+        } else {
+            selectedPlayers.add(playerId);
+        }
+        
+        updateSelectAllState();
+        updateBulkActionBar();
+    }
+    
+    function updateSelectAllState() {
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        const checkboxes = document.querySelectorAll('.player-checkbox');
+        const allChecked = checkboxes.length > 0 && [...checkboxes].every(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+    }
+    
+    function updateBulkActionBar() {
+        const bar = document.getElementById('bulk-action-bar');
+        const countSpan = document.getElementById('selected-count');
+        const count = selectedPlayers.size;
+        
+        countSpan.textContent = count;
+        
+        if(count > 0) {
+            bar.classList.add('visible');
+        } else {
+            bar.classList.remove('visible');
+        }
+    }
+    
+    function clearSelection() {
+        selectedPlayers.clear();
+        document.querySelectorAll('.player-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('select-all-checkbox').checked = false;
+        updateBulkActionBar();
+    }
+    
+    function openBulkAssignModal() {
+        document.getElementById('bulk-modal-count').textContent = selectedPlayers.size;
+        document.getElementById('bulk-assign-modal').classList.remove('hidden');
+    }
+    
+    function closeBulkAssignModal() {
+        document.getElementById('bulk-assign-modal').classList.add('hidden');
+    }
+    
+    function submitBulkAssign(categoryId) {
+        if(selectedPlayers.size === 0) {
+            alert('No players selected');
+            return;
+        }
+        
+        showLoading(true);
+        closeBulkAssignModal();
+        
+        fetch('{{ route("leagues.categories.bulk-assign", $league) }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken},
+            body: JSON.stringify({ 
+                player_ids: [...selectedPlayers], 
+                category_id: categoryId 
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.success) {
+                clearSelection();
+                loadPlayers(1);
+                // Show success message
+                alert(res.message);
+            } else {
+                alert(res.message);
+            }
+        })
+        .finally(() => showLoading(false));
+    }
+    
+    function bulkRemoveCategory() {
+        if(selectedPlayers.size === 0) {
+            alert('No players selected');
+            return;
+        }
+        
+        if(!confirm(`Remove category from ${selectedPlayers.size} selected players?`)) return;
+        
+        submitBulkAssign(null);
     }
     
 </script>

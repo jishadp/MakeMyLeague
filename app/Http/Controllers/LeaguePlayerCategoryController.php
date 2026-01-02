@@ -149,4 +149,27 @@ class LeaguePlayerCategoryController extends Controller
 
         return response()->json($players);
     }
+
+    public function bulkAssign(Request $request, League $league)
+    {
+        $request->validate([
+            'player_ids' => 'required|array|min:1',
+            'player_ids.*' => 'exists:league_players,id',
+            'category_id' => 'nullable|exists:league_player_categories,id',
+        ]);
+
+        // Verify all players belong to this league
+        $count = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('id', $request->player_ids)
+            ->update(['league_player_category_id' => $request->category_id]);
+
+        $categoryName = $request->category_id 
+            ? LeaguePlayerCategory::find($request->category_id)->name 
+            : 'Uncategorized';
+
+        return response()->json([
+            'success' => true, 
+            'message' => "{$count} players assigned to {$categoryName} successfully"
+        ]);
+    }
 }
