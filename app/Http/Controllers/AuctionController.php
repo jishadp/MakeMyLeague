@@ -1052,11 +1052,12 @@ class AuctionController extends Controller
             }
         }
 
-        // Check if team has sufficient balance
-        if ($bidTeam->wallet_balance < $newBid) {
+        // Check if team has sufficient balance (including any refundable amount from previous bid)
+        $availableBalance = $bidTeam->wallet_balance + $refundableAmount;
+        if ($availableBalance < $newBid) {
             return response()->json([
                 'success' => false,
-                'message' => 'Insufficient team balance. Available: ₹' . $bidTeam->wallet_balance . ', Required: ₹' . $newBid
+                'message' => 'Insufficient team balance. Available: ₹' . number_format($availableBalance) . ', Required: ₹' . number_format($newBid)
             ], 400);
         }
 
