@@ -1273,33 +1273,44 @@ class AuctionController extends Controller
         }
 
         DB::transaction(function () use ($leaguePlayer, $team, $finalAmount, $teamId, $leaguePlayerId) {
-            // Refund all other bids for this player
-            $bids = Auction::where('league_player_id', $leaguePlayer->id)->get();
+            // Get all bids for this player
+            $bids = Auction::where('league_player_id', $leaguePlayer->id)->orderBy('id')->get();
             
-            // Winning Bid (if any)
-            $winningBid = $bids->first(function($bid) use ($team) {
-                return $bid->league_team_id == $team->id;
-            });
+            // Get the LATEST (current/winning) bid for the winning team
+            $winningBid = $bids->where('league_team_id', $team->id)->sortByDesc('id')->first();
 
+            // Refund all non-winning bids that haven't been refunded yet
+            // (In normal flow, these should already be refunded by the call() method, but we ensure it here for safety)
             foreach ($bids as $bid) {
-                if ($bid->status === 'refunded') continue;
+                if ($bid->status === 'refunded') {
+                    // Already refunded, skip
+                    continue;
+                }
 
                 if ($bid->league_team_id != $team->id) {
-                     LeagueTeam::where('id', $bid->league_team_id)->increment('wallet_balance', $bid->amount);
-                     $bid->update(['status' => 'refunded']);
-                 } else {
-                     $bid->update(['status' => 'won']); 
-                 }
+                    // This is a non-winning bid, refund it
+                    LeagueTeam::where('id', $bid->league_team_id)->increment('wallet_balance', $bid->amount);
+                    $bid->update(['status' => 'refunded']);
+                }
             }
             
-            // Adjust winning team's balance if necessary (difference between already deducted and final amount)
-            // If winningBid existed, its amount was deducted.
-            // If no previous bid, 0 deducted.
-            $alreadyDeducted = $winningBid ? $winningBid->amount : 0;
+            // Mark the winning bid
+            if ($winningBid) {
+                $winningBid->update(['status' => 'won']);
+            }
+            
+            // Calculate the amount that was already deducted from the winning team's wallet
+            // This is the amount of the winning bid (if it exists)
+            $alreadyDeducted = $winningBid ? (float) $winningBid->amount : 0;
+            
+            // Calculate the adjustment needed for the final amount
+            // balanceAdjustment = alreadyDeducted - finalAmount
+            // If positive: refund the difference (finalAmount is less than bid)
+            // If negative: deduct more (finalAmount is more than bid)
             $balanceAdjustment = $alreadyDeducted - $finalAmount;
             
             if ($balanceAdjustment != 0) {
-                 $team->increment('wallet_balance', $balanceAdjustment);
+                $team->increment('wallet_balance', $balanceAdjustment);
             }
 
             // Update Player
@@ -1310,8 +1321,8 @@ class AuctionController extends Controller
             ]);
             
             // Clear caches
-             \Cache::forget("auction_current_bid_{$leaguePlayer->id}");
-             \Cache::forget("auction_latest_bid_{$leaguePlayer->league_id}");
+            \Cache::forget("auction_current_bid_{$leaguePlayer->id}");
+            \Cache::forget("auction_latest_bid_{$leaguePlayer->league_id}");
         });
         
         // Broadcast
