@@ -98,6 +98,11 @@
         <p class="text-sm font-bold {{ in_array($status, ['sold','available']) ? 'text-green-700' : ($status === 'auctioning' ? 'text-amber-700' : ($status === 'unsold' ? 'text-red-700' : 'text-slate-800')) }}">
             {{ $displayValue }}
         </p>
+        @if($player->retention && $player->leagueTeam?->team?->name)
+            <p class="text-[10px] text-center leading-tight {{ $isRetainedLocal ? 'text-purple-600' : 'text-amber-600' }} font-medium mt-0.5 line-clamp-2 w-full">
+                {{ $player->leagueTeam->team->name }}
+            </p>
+        @endif
         @if($isAdmin && $mobile)
              <p class="text-[10px] font-mono text-slate-500 mt-1">{{ $mobile }}</p>
         @endif
