@@ -663,12 +663,23 @@
         }
 
         .fixture-poster-team-section {
-            padding: 6px 8px;
+            padding: 8px 10px;
             gap: 8px;
+            align-items: center;
+            min-height: 50px;
         }
 
         .fixture-poster-team-name {
             font-size: 11px;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+            max-height: 2.6em;
         }
 
         .fixture-poster-team-logo {
