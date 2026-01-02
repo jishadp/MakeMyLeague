@@ -1016,7 +1016,14 @@
                     <th>SL</th>
                     <th>Player</th>
                     <th>Status</th>
-                    <th>Team</th>
+                    <th class="cursor-pointer hover:bg-slate-100 transition-colors" onclick="sortBy('team_name')" title="Click to sort">
+                        <div class="flex items-center gap-1">
+                            Team
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                            </svg>
+                        </div>
+                    </th>
                     <th>Amount</th>
                     <th>Actions</th>
                 </tr>
@@ -1202,7 +1209,8 @@
     let currentFilter = 'all';
     let currentPage = 1;
     let searchQuery = '';
-    const perPage = 20;
+    const perPage = 15;
+    let currentSort = { column: null, direction: 'asc' };
 
     const defaultPhoto = '{{ asset("images/defaultplayer.jpeg") }}';
     const defaultTeamLogo = '{{ asset("images/default.jpeg") }}';
@@ -1282,7 +1290,39 @@
         } else {
             filteredPlayers = [...allPlayers];
         }
+
+        if (currentSort.column) {
+            sortPlayers();
+        }
+
         renderPlayers();
+    }
+
+    window.sortBy = function(column) {
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        applyFilters();
+    };
+
+    function sortPlayers() {
+        const { column, direction } = currentSort;
+        if (!column) return;
+
+        filteredPlayers.sort((a, b) => {
+            let valA = a[column] || '';
+            let valB = b[column] || '';
+
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+
+            if (valA < valB) return direction === 'asc' ? -1 : 1;
+            if (valA > valB) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
     }
 
     function updateCounts(counts) {
