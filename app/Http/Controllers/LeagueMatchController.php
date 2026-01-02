@@ -582,4 +582,35 @@ class LeagueMatchController extends Controller
 
         return back()->with('success', "Scorer assigned to {$count} fixture(s).");
     }
+
+    public function deleteFixture(League $league, Fixture $fixture)
+    {
+        if (!auth()->user()->isOrganizerForLeague($league->id) && !auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Make sure the fixture belongs to this league
+        if ($fixture->league_id !== $league->id) {
+            return response()->json(['success' => false, 'message' => 'Fixture does not belong to this league'], 404);
+        }
+
+        DB::transaction(function () use ($fixture) {
+            // Delete related match events
+            $fixture->events()->delete();
+            
+            // Delete related penalties
+            $fixture->penalties()->delete();
+            
+            // Delete fixture players
+            $fixture->fixturePlayers()->delete();
+            
+            // Finally delete the fixture
+            $fixture->delete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Match deleted successfully!'
+        ]);
+    }
 }
