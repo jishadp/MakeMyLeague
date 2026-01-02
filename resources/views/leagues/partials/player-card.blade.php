@@ -29,6 +29,11 @@
     // In the main view, we set $player->is_foreign.
     $isForeign = $player->is_foreign ?? false;
     $isRetainedLocal = $player->retention && !$isForeign;
+    
+    // Category check
+    $hasCategory = ($league->auction_category_rules_enabled ?? false) && $player->category;
+    $isCategoryOnly = $hasCategory && !$isForeign && !$player->retention;
+
     $placeName = $player->user?->localBody?->name ?? 'Unknown';
     $slNumber = $player->sl_number ?? 'N/A';
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
@@ -40,24 +45,32 @@
         $cardClass = 'foreign-card';
     } elseif ($isRetainedLocal) {
         $cardClass = 'retained-card';
+    } elseif ($isCategoryOnly) {
+        $cardClass = 'category-card';
     }
 @endphp
-<a href="{{ route('players.show', $player->user) }}" class="block text-decoration-none h-full">
-<div class="relative h-full rounded-xl border transition-all duration-300 {{ $cardClass }} px-3 py-4 flex flex-col justify-between player-card" 
-     data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
-     data-status="{{ $status }}" 
-     data-retained="{{ $player->retention ? 'true' : 'false' }}"
-     data-team="{{ strtolower($player->leagueTeam?->team?->name ?? '') }}"
-     data-share-info="{{ $slNumber }}. *{{ $displayName }}* - {{ $displayRole }}"
-     data-csv-name="{{ $displayName }}"
-     data-csv-role="{{ $displayRole }}"
-     data-csv-price="{{ $val }}"
-     data-csv-status="{{ ucfirst($status) }}"
-     data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
-     >
+<a href="{{ route('players.show', $player->user) }}" 
+   class="block text-decoration-none h-full player-card"
+   data-player-name="{{ strtolower($player->user?->name ?? '') }}" 
+   data-status="{{ $status }}" 
+   data-retained="{{ $player->retention ? 'true' : 'false' }}"
+   data-category-id="{{ $player->league_player_category_id ?? '' }}"
+   data-team="{{ strtolower($player->leagueTeam?->team?->name ?? '') }}"
+   data-share-info="{{ $slNumber }}. *{{ $displayName }}* - {{ $displayRole }}"
+   data-csv-name="{{ $displayName }}"
+   data-csv-role="{{ $displayRole }}"
+   data-csv-price="{{ $val }}"
+   data-csv-status="{{ ucfirst($status) }}"
+   data-csv-retained="{{ $player->retention ? 'Yes' : 'No' }}"
+>
+<div class="relative h-full rounded-xl border transition-all duration-300 {{ $cardClass }} px-3 py-4 flex flex-col justify-between">
     @if($isForeign)
         <div class="absolute top-0 left-0 foreign-badge text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10">
             {{ Str::limit(strtoupper($placeName), 12) }}
+        </div>
+    @elseif($isCategoryOnly)
+        <div class="absolute top-0 left-0 category-badge text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10">
+            {{ Str::limit(strtoupper($player->category->name ?? 'CATEGORY'), 12) }}
         </div>
     @endif
     
@@ -67,10 +80,13 @@
 
     <div class="flex flex-col items-center text-center space-y-2 mt-1 {{ $isForeign ? 'relative z-10' : '' }}">
         <div class="relative inline-block">
+            <!-- Crown for Category Players who are also Foreign or Retained -->
+
+
             @if($player->user?->photo)
-                <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 {{ $isForeign ? 'border-amber-400' : ($isRetainedLocal ? 'border-purple-400' : 'border-white') }} shadow ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : 'ring-slate-100') }} relative z-0">
+                <img src="{{ Storage::url($player->user->photo) }}" class="w-16 h-16 rounded-full object-cover border-2 {{ $isForeign ? 'border-amber-400' : ($isRetainedLocal ? 'border-purple-400' : ($isCategoryOnly ? 'border-pink-400' : 'border-white')) }} shadow ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : ($isCategoryOnly ? 'ring-pink-300' : 'ring-slate-100')) }} relative z-0">
             @else
-                <div class="w-16 h-16 rounded-full {{ $isForeign ? 'bg-amber-100 border-amber-300' : ($isRetainedLocal ? 'bg-purple-100 border-purple-300' : 'bg-slate-100 border-slate-200') }} border flex items-center justify-center text-sm font-semibold {{ $isForeign ? 'text-amber-800' : ($isRetainedLocal ? 'text-purple-800' : 'text-slate-600') }} ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : 'ring-slate-100') }} shadow relative z-0">
+                <div class="w-16 h-16 rounded-full {{ $isForeign ? 'bg-amber-100 border-amber-300' : ($isRetainedLocal ? 'bg-purple-100 border-purple-300' : ($isCategoryOnly ? 'bg-pink-100 border-pink-300' : 'bg-slate-100 border-slate-200')) }} border flex items-center justify-center text-sm font-semibold {{ $isForeign ? 'text-amber-800' : ($isRetainedLocal ? 'text-purple-800' : ($isCategoryOnly ? 'text-pink-800' : 'text-slate-600')) }} ring-2 {{ $isForeign ? 'ring-amber-300' : ($isRetainedLocal ? 'ring-purple-300' : ($isCategoryOnly ? 'ring-pink-300' : 'ring-slate-100')) }} shadow relative z-0">
                     {{ strtoupper(substr($player->user?->name ?? 'P', 0, 1)) }}
                 </div>
             @endif

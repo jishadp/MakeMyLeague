@@ -316,6 +316,14 @@ Route::middleware('auth')->group(function () {
     Route::post('leagues/{league}/players/{leaguePlayer}/toggle-retention', [LeaguePlayerController::class, 'toggleRetention'])->name('league-players.toggle-retention')->middleware('team.owner');
     Route::post('leagues/{league}/players/add-retention', [LeaguePlayerController::class, 'addRetentionPlayer'])->name('league-players.add-retention')->middleware('team.owner');
 
+    // League Player Category routes
+    Route::resource('leagues.categories', \App\Http\Controllers\LeaguePlayerCategoryController::class)->only(['index', 'store', 'destroy'])->middleware('league.organizer');
+    Route::post('leagues/{league}/categories/auto-assign', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'autoAssign'])->name('leagues.categories.auto-assign')->middleware('league.organizer');
+    Route::post('leagues/{league}/categories/assign-player', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'assignPlayer'])->name('leagues.categories.assign-player')->middleware('league.organizer');
+    Route::get('leagues/{league}/categories/players', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'getPlayers'])->name('leagues.categories.players')->middleware('league.organizer');
+    Route::get('leagues/{league}/categories/search-players', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'searchLeaguePlayers'])->name('leagues.categories.search-players')->middleware('league.organizer');
+
+
     // Auction routes - organizers manage, team owners and auctioneers can bid
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('live.auction:view');
@@ -329,6 +337,8 @@ Route::middleware('auth')->group(function () {
         Route::post('reset', [LeagueController::class, 'resetAuction'])->name('reset')->middleware('live.auction:organizer');
         Route::post('skip-player', [AuctionController::class, 'skipPlayer'])->name('skip-player')->middleware('live.auction:organizer');
         Route::post('current-bids', [AuctionController::class, 'getCurrentBids'])->name('current-bids')->middleware('live.auction:view');
+        
+
     });
 
     Route::prefix('auction')->name('auction.')->group(function () {
@@ -340,6 +350,8 @@ Route::middleware('auth')->group(function () {
         Route::get('search-players', [AuctionController::class, 'searchPlayers'])->name('search-players');
         Route::post('skip-player/{league}', [AuctionController::class, 'skipPlayer'])->name('global-skip-player');
         Route::post('update-rules/{league}', [AuctionController::class, 'updateBidRules'])->name('update-rules');
+        Route::post('toggle-category-rules/{league}', [AuctionController::class, 'toggleCategoryRules'])->name('toggle-category-rules');
+        Route::post('update-category-rules/{league}', [AuctionController::class, 'updateCategoryRules'])->name('update-category-rules');
 
         
         // League-specific auction routes
@@ -349,6 +361,7 @@ Route::middleware('auth')->group(function () {
         Route::post('update-player-value', [AuctionController::class, 'updatePlayerBidPrice'])->name('update-player-value');
         Route::post('revert-to-available', [AuctionController::class, 'revertPlayerToAvailable'])->name('revert-to-available');
         Route::post('replace-player', [AuctionController::class, 'replaceLeaguePlayer'])->name('replace-player');
+        Route::get('search-local-bodies', [\App\Http\Controllers\LeaguePlayerCategoryController::class, 'searchLocalBodies'])->name('search-local-bodies');
     });
 
     // Poster routes

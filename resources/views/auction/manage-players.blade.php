@@ -265,8 +265,22 @@
     }
 
     .status-badge--unsold {
-        background: #fef3c7;
-        color: #92400e;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+        white-space: nowrap;
+        transition: all 0.2s;
     }
 
     .team-cell {
@@ -977,6 +991,12 @@
                 </svg>
                 Back to Control Room
             </a>
+            <a href="{{ route('leagues.categories.index', $league) }}" class="action-btn bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                Categories
+            </a>
         </div>
     </div>
 
@@ -1015,6 +1035,7 @@
                 <tr>
                     <th>SL</th>
                     <th>Player</th>
+                    <th>Category</th>
                     <th>Status</th>
                     <th class="cursor-pointer hover:bg-slate-100 transition-colors" onclick="sortBy('team_name')" title="Click to sort">
                         <div class="flex items-center gap-1">
@@ -1179,6 +1200,44 @@
     </div>
 </div>
 
+    <!-- Category Management Modal -->
+
+
+    <!-- Assign Category Modal (Manual) -->
+    <div id="assign-category-modal" class="replace-modal hidden">
+        <div class="replace-modal__backdrop" onclick="closeAssignCategoryModal()"></div>
+        <div class="replace-modal__content">
+            <div class="replace-modal__header">
+                <h3 class="replace-modal__title">Assign Category to Player</h3>
+                <button type="button" class="replace-modal__close" onclick="closeAssignCategoryModal()">&times;</button>
+            </div>
+            <div class="replace-modal__body">
+                <input type="hidden" id="assign-player-id">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Select Category</label>
+                    <div class="grid grid-cols-1 gap-2">
+                        <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="assign_category" value="" class="mr-3">
+                            <span>None (Remove Category)</span>
+                        </label>
+                        @foreach($categories as $cat)
+                        <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="assign_category" value="{{ $cat->id }}" class="mr-3">
+                            <span>{{ $cat->name }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div class="replace-modal__footer">
+                <button type="button" class="btn-secondary" onclick="closeAssignCategoryModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="confirmAssignCategory()">Save</button>
+            </div>
+        </div>
+    </div>
+
+
+
 <!-- Loading Overlay -->
 <div id="loading-overlay" class="loading-overlay hidden">
     <div class="loading-spinner"></div>
@@ -1194,7 +1253,7 @@
 
 @section('scripts')
 <script>
-(function() {
+// IIFE removed to expose functions globally
     const leagueSlug = document.getElementById('league-slug')?.value;
     const csrfToken = document.getElementById('csrf-token')?.value;
     const tbody = document.getElementById('players-tbody');
@@ -1364,7 +1423,7 @@
             let actionButton = '';
             if (player.status === 'unsold') {
                 actionButton = `
-                    <button type="button" class="action-btn action-btn--primary" onclick="confirmMakeAvailable(${player.id}, '${escapeHtml(player.name)}')">
+                    <button type="button" class="action-btn action-btn--primary" onclick="event.stopPropagation(); confirmMakeAvailable(${player.id}, '${escapeHtml(player.name)}')">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -1373,7 +1432,7 @@
                 `;
             } else if (player.status === 'available') {
                 actionButton = `
-                    <button type="button" class="action-btn" style="background: #f1f5f9; color: #475569;" onclick="confirmReplacePlayer(${player.id}, '${escapeHtml(player.name)}')">
+                    <button type="button" class="action-btn" style="background: #f1f5f9; color: #475569;" onclick="event.stopPropagation(); confirmReplacePlayer(${player.id}, '${escapeHtml(player.name)}')">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -1382,7 +1441,7 @@
                 `;
             } else if (player.status === 'sold') {
                 actionButton = `
-                    <button type="button" class="action-btn action-btn--warning" onclick="confirmRevertSold(${player.id}, '${escapeHtml(player.name)}', '${escapeHtml(player.team_name || '')}', ${player.bid_price || 0})">
+                    <button type="button" class="action-btn action-btn--warning" onclick="event.stopPropagation(); confirmRevertSold(${player.id}, '${escapeHtml(player.name)}', '${escapeHtml(player.team_name || '')}', ${player.bid_price || 0})">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                         </svg>
@@ -1394,7 +1453,7 @@
             }
 
             return `
-                <tr data-player-id="${player.id}">
+                <tr data-player-id="${player.id}" onclick="openAssignCategoryModal(${player.id}, ${player.category_id || 'null'})" class="cursor-pointer hover:bg-slate-50 transition-colors">
                     <td class="font-bold text-slate-900" data-label="SL">${serialNumber}</td>
                     <td data-label="Player">
                         <div class="player-cell">
@@ -1406,6 +1465,11 @@
                                 <div class="player-cell__role">${escapeHtml(player.role)}</div>
                             </div>
                         </div>
+                    </td>
+                    <td data-label="Category">
+                        <span class="category-badge cursor-pointer hover:bg-slate-200" title="Click to assign category">
+                            ${player.category_name || '<span class="text-slate-400 font-normal">None</span>'}
+                        </span>
                     </td>
                     <td data-label="Status">
                         <span class="status-badge ${statusClass}">${player.status}</span>
@@ -1680,6 +1744,52 @@
             closeConfirmModal();
         }
     });
-})();
+
+    
+    // Assign Category JS
+    function openAssignCategoryModal(playerId, currentCatId) {
+        document.getElementById('assign-player-id').value = playerId;
+        // Reset radios
+        document.querySelectorAll('input[name="assign_category"]').forEach(r => r.checked = false);
+        // Select current
+        if (currentCatId) {
+            const r = document.querySelector(`input[name="assign_category"][value="${currentCatId}"]`);
+            if(r) r.checked = true;
+        } else {
+            const r = document.querySelector(`input[name="assign_category"][value=""]`);
+            if(r) r.checked = true;
+        }
+        document.getElementById('assign-category-modal').classList.remove('hidden');
+    }
+    
+    function closeAssignCategoryModal() {
+        document.getElementById('assign-category-modal').classList.add('hidden');
+    }
+    
+    function confirmAssignCategory() {
+        const playerId = document.getElementById('assign-player-id').value;
+        const catId = document.querySelector('input[name="assign_category"]:checked')?.value;
+        
+        showLoading(true);
+        fetch('{{ route("leagues.categories.assign-player", $league) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ league_player_id: playerId, category_id: catId || null })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message);
+                location.reload(); 
+            }
+        })
+        .finally(() => showLoading(false));
+    }
+    
+
+// End of script
 </script>
 @endsection

@@ -221,6 +221,16 @@
                                         </div>
                                         <p class="text-[11px] text-blue-100">Needs <span data-team-needed>{{ $team->players_needed }}</span> | Reserve &#8377; <span data-team-reserve>{{ number_format($team->reserve_amount) }}</span></p>
                                         <p class="text-[11px] text-emerald-200">Max bid now &#8377; <span data-team-max>{{ number_format($team->max_bid_cap) }}</span></p>
+                                        @if($league->auction_category_rules_enabled && isset($team->category_compliance) && $team->category_compliance->count() > 0)
+                                            <div class="flex flex-col items-end gap-0.5 mt-1 border-t border-white/10 pt-1">
+                                                @foreach($team->category_compliance as $cat)
+                                                    <p class="text-[10px] {{ $cat['met'] ? 'text-blue-200' : 'text-orange-300 font-semibold' }}">
+                                                        {{ $cat['name'] }}: {{ $cat['current'] }}/{{ $cat['min'] }}
+                                                        @if($cat['max']) <span class="text-[9px] opacity-80">(Max {{ $cat['max'] }})</span> @endif
+                                                    </p>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <button type="button" data-team-toggle aria-controls="teamRoster-{{ $team->id }}" aria-expanded="false" class="mt-4 inline-flex items-center justify-between gap-3 rounded-xl border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white/90 transition-colors lg:hidden w-full">
@@ -247,11 +257,20 @@
                                                 @foreach($retainedPlayers as $playerIndex => $leaguePlayer)
                                                     <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
                                                         <div class="flex items-center space-x-2">
-                                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
-                                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                            <div class="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-100 flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-yellow-400 to-orange-500">
+                                                                @if($leaguePlayer->player->photo)
+                                                                    <img src="{{ asset('storage/' . $leaguePlayer->player->photo) }}" alt="" class="w-full h-full object-cover">
+                                                                @else
+                                                                    {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                                @endif
                                                             </div>
                                                             <div>
-                                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                                <p class="font-medium text-gray-900 flex items-center gap-1">
+                                                                    {{ $leaguePlayer->player->name }}
+                                                                    @if(isset($leaguePlayer->category) && stripos($leaguePlayer->category->name, 'Marquee') !== false)
+                                                                         <i class="fa-solid fa-crown text-yellow-500 text-[10px]" title="Marquee Player"></i>
+                                                                    @endif
+                                                                </p>
                                                                 <p class="text-[11px] text-gray-500">
                                                                     @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
                                                                         {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
@@ -281,11 +300,20 @@
                                                 @foreach($boughtPlayers as $leaguePlayer)
                                                     <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
                                                         <div class="flex items-center space-x-2">
-                                                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                                                                {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                            <div class="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-100 flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-blue-400 to-purple-500">
+                                                                @if($leaguePlayer->player->photo)
+                                                                    <img src="{{ asset('storage/' . $leaguePlayer->player->photo) }}" alt="" class="w-full h-full object-cover">
+                                                                @else
+                                                                    {{ strtoupper(substr($leaguePlayer->player->name, 0, 1)) }}
+                                                                @endif
                                                             </div>
                                                             <div>
-                                                                <p class="font-medium text-gray-900">{{ $leaguePlayer->player->name }}</p>
+                                                                <p class="font-medium text-gray-900 flex items-center gap-1">
+                                                                    {{ $leaguePlayer->player->name }}
+                                                                    @if(isset($leaguePlayer->category) && stripos($leaguePlayer->category->name, 'Marquee') !== false)
+                                                                         <i class="fa-solid fa-crown text-yellow-500 text-[10px]" title="Marquee Player"></i>
+                                                                    @endif
+                                                                </p>
                                                                 <p class="text-[11px] text-gray-500">
                                                                     @if($leaguePlayer->player->primaryGameRole && $leaguePlayer->player->primaryGameRole->gamePosition)
                                                                         {{ $leaguePlayer->player->primaryGameRole->gamePosition->name }}
@@ -307,6 +335,30 @@
                                 @else
                                 <div class="p-4 text-center text-gray-500 bg-gray-50 text-sm">
                                     <p>No players yet</p>
+                                </div>
+                                @endif
+
+                                <!-- Category Stats -->
+                                @if($league->auction_category_rules_enabled && isset($team->category_compliance) && $team->category_compliance->count() > 0)
+                                <div class="bg-gray-100 px-3 py-2 border-t border-gray-200 grid grid-cols-2 gap-2 text-xs">
+                                    @foreach($team->category_compliance as $cat)
+                                    <div>
+                                        <div class="flex justify-between items-center mb-0.5">
+                                            <span class="font-bold text-gray-500 uppercase tracking-tighter" title="{{ $cat['name'] }}">{{ \Illuminate\Support\Str::limit($cat['name'], 8) }}</span>
+                                            <div class="flex flex-col items-end">
+                                                <span class="font-bold {{ $cat['met'] ? 'text-green-600' : 'text-amber-600' }}">
+                                                    {{ $cat['current'] }}/{{ $cat['min'] }}
+                                                </span>
+                                                @if($cat['max'])
+                                                    <span class="text-[9px] text-gray-400 leading-none">Max {{ $cat['max'] }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="h-1 w-full bg-gray-300 rounded-full overflow-hidden">
+                                            <div class="h-full {{ $cat['met'] ? 'bg-green-500' : 'bg-amber-400' }}" style="width: {{ min(($cat['current'] / max($cat['min'], 1)) * 100, 100) }}%"></div>
+                                        </div>
+                                    </div>
+                                    @endforeach
                                 </div>
                                 @endif
 

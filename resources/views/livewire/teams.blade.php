@@ -95,6 +95,27 @@
                 </div>
                 @endif
 
+                <!-- Category Compliance -->
+                @if(isset($team->category_compliance) && $team->category_compliance->count() > 0)
+                <div class="px-4 py-3 bg-white border-t border-gray-100">
+                    <div class="grid grid-cols-2 gap-3">
+                         @foreach($team->category_compliance as $cat)
+                         <div class="text-xs">
+                             <div class="flex justify-between mb-1">
+                                 <span class="text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ Str::limit($cat['name'], 15) }}</span>
+                                 <span class="{{ $cat['met'] ? 'text-green-600' : 'text-amber-600' }} font-bold">
+                                     {{ $cat['current'] }}/{{ $cat['min'] }}
+                                 </span>
+                             </div>
+                             <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                  <div class="h-full {{ $cat['met'] ? 'bg-green-500' : 'bg-amber-400' }}" style="width: {{ min(($cat['current'] / max($cat['min'], 1)) * 100, 100) }}%"></div>
+                             </div>
+                         </div>
+                         @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <!-- Team Stats Footer -->
                 <div class="bg-gray-100 px-4 py-2 flex items-center justify-between text-xs text-gray-600">
                     <span>Total Spent: <strong class="text-gray-900">₹{{ number_format($team->leaguePlayers->sum('bid_price') ?? 0) }}</strong></span>

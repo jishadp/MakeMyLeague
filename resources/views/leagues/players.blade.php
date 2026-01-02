@@ -58,10 +58,12 @@
         ->map(function ($fixtures) {
             return $fixtures->values();
         });
+    $categories = \App\Models\LeaguePlayerCategory::where('league_id', $league->id)->get();
 @endphp
 
 @section('content')
 <style>
+
     @keyframes orbit-flight {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
@@ -216,6 +218,65 @@
     .retained-card .retained-star {
         animation: star-pulse 2s ease-in-out infinite;
     }
+
+    /* Category player card styles */
+    @keyframes category-glow {
+        0%, 100% { 
+            box-shadow: 
+                0 0 10px rgba(236, 72, 153, 0.3),
+                0 0 20px rgba(236, 72, 153, 0.2),
+                inset 0 0 8px rgba(236, 72, 153, 0.1);
+        }
+        50% { 
+            box-shadow: 
+                0 0 18px rgba(236, 72, 153, 0.4),
+                0 0 35px rgba(236, 72, 153, 0.3),
+                inset 0 0 12px rgba(236, 72, 153, 0.15);
+        }
+    }
+    
+    .category-card {
+        position: relative;
+        background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+        border: 1px solid #ec4899 !important;
+        animation: category-glow 3s ease-in-out infinite;
+        overflow: hidden;
+    }
+    
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(236, 72, 153, 0.15),
+            transparent
+        );
+        animation: retained-shine 4s infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 
+            0 0 15px rgba(236, 72, 153, 0.5),
+            0 0 30px rgba(236, 72, 153, 0.3);
+    }
+    
+    .category-badge {
+        background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+    }
+
+    .crown-icon {
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
 </style>
 
 <div class="min-h-screen bg-slate-50 py-10">
@@ -272,6 +333,15 @@
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <input type="text" id="playerSearch" placeholder="Search players..." class="w-40 sm:w-56 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" />
+                        
+                        @if($categories->count() > 0)
+                            <!-- Category Buttons (Visible on all devices) -->
+                            <div class="flex overflow-x-auto gap-2 w-full sm:w-auto no-scrollbar pb-1">
+                                @foreach($categories as $category)
+                                    <button type="button" class="category-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-white text-slate-700 border border-slate-200 flex-shrink-0" data-category="{{ $category->id }}">{{ $category->name }}</button>
+                                @endforeach
+                            </div>
+                        @endif
                         
                         <!-- Mobile: Button filters (simplified) -->
                         <div class="flex sm:hidden items-center gap-2 text-xs flex-wrap">
@@ -381,11 +451,13 @@
     const tabs = document.querySelectorAll('.player-tab');
     const panels = document.querySelectorAll('.player-tab-panel');
     const searchInput = document.getElementById('playerSearch');
+    const categoryButtons = document.querySelectorAll('.category-filter');
     const playerCards = document.querySelectorAll('[data-player-name]');
     const statusButtons = document.querySelectorAll('.status-filter');
     const whatsappBtn = document.getElementById('whatsappShareBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
     let activeStatus = 'all';
+    let activeCategory = 'all';
     let activeTab = 'all'; // Track current active tab
 
     // League info for share text
@@ -532,8 +604,10 @@
             const name = card.dataset.playerName || '';
             const status = card.dataset.status || '';
             const retained = card.dataset.retained === 'true';
+            const categoryId = card.dataset.categoryId || '';
             
             const matchesName = !term || name.includes(term);
+            const matchesCategory = activeCategory === 'all' || categoryId === activeCategory;
             let matchesStatus = false;
             
             if (activeStatus === 'all') {
@@ -544,7 +618,7 @@
                 matchesStatus = status === activeStatus;
             }
             
-            card.classList.toggle('hidden', !(matchesName && matchesStatus));
+            card.classList.toggle('hidden', !(matchesName && matchesStatus && matchesCategory));
         });
 
         // Sort by team when filtering by 'sold' or 'retained'
@@ -621,6 +695,33 @@
         });
         applyFilters();
     }
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const clickedCategory = button.dataset.category;
+            
+            // Toggle logic: if clicking active category, deselect it (set to 'all')
+            if (activeCategory === clickedCategory) {
+                activeCategory = 'all';
+            } else {
+                activeCategory = clickedCategory;
+            }
+            
+            // Update button styles
+            categoryButtons.forEach(btn => {
+                const isActive = btn.dataset.category === activeCategory;
+                btn.classList.toggle('bg-pink-600', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('border-pink-600', isActive);
+                btn.classList.toggle('shadow', isActive);
+                btn.classList.toggle('bg-white', !isActive);
+                btn.classList.toggle('text-slate-700', !isActive);
+                btn.classList.toggle('border-slate-200', !isActive);
+            });
+            
+            applyFilters();
+        });
+    });
     
     // Initial share link update
     updateShareLink();

@@ -21,6 +21,7 @@ class LiveAuctionDataService
                 'player.position',
                 'player.primaryGameRole.gamePosition',
                 'player.localBody.district.state',
+                'category', // Add category relation
             ])
             ->first();
 
@@ -46,7 +47,7 @@ class LiveAuctionDataService
                 'auctioneer',
                 'teamAuctioneer.auctioneer',
                 'leaguePlayers' => function ($query) {
-                    $query->with(['player.position', 'player.primaryGameRole.gamePosition'])
+                    $query->with(['player.position', 'player.primaryGameRole.gamePosition', 'category'])
                         ->with(['player.localBody.district.state'])
                         ->where(function ($q) {
                             $q->whereIn('status', ['retained', 'sold'])
@@ -75,9 +76,18 @@ class LiveAuctionDataService
             ->groupBy('league_team_id')
             ->select('league_team_id', DB::raw('count(*) as count'))
             ->pluck('count', 'league_team_id');
+            
+        $categories = $league->playerCategories()->get();
+        $categoryCounts = LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['sold', 'retained'])
+            ->whereNotNull('league_player_category_id')
+            ->select('league_team_id', 'league_player_category_id', DB::raw('count(*) as count'))
+            ->groupBy('league_team_id', 'league_player_category_id')
+            ->get()
+            ->groupBy('league_team_id');
 
         $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $league, $retainedCounts, $auctionSlotsPerTeam) {
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $league, $retainedCounts, $auctionSlotsPerTeam, $categories, $categoryCounts) {
             $soldCount = $team->sold_players_count ?? 0;
             $retainedCount = $retainedCounts[$team->id] ?? 0;
             $playersNeeded = max($auctionSlotsPerTeam - $soldCount, 0);
@@ -92,6 +102,20 @@ class LiveAuctionDataService
             $team->max_bid_cap = $maxBidCap;
             $team->display_wallet = $availableWallet;
             $team->retained_players_count = $retainedCount;
+            
+            $teamStats = $categoryCounts[$team->id] ?? collect();
+            $team->category_compliance = $categories->map(function($cat) use ($teamStats) {
+                $count = $teamStats->where('league_player_category_id', $cat->id)->first()->count ?? 0;
+                return [
+                    'name' => $cat->name,
+                    'min' => $cat->min_requirement,
+                    'max' => $cat->max_requirement,
+                    'current' => $count,
+                    'met' => $count >= $cat->min_requirement,
+                    'exceeded' => $cat->max_requirement && $count > $cat->max_requirement,
+                ];
+            });
+            
             return $team;
         });
 
@@ -113,6 +137,7 @@ class LiveAuctionDataService
                 'player.primaryGameRole.gamePosition',
                 'player.localBody.district.state',
                 'leagueTeam.team',
+                'category', // Add category relation
             ])
             ->latest('updated_at')
             ->first();
@@ -123,6 +148,7 @@ class LiveAuctionDataService
                 'user',
                 'user.position',
                 'league',
+                'category', // Add category relation
                 'league.localBody.district',
                 'leagueTeam.team.localBody',
             ]);

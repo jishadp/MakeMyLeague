@@ -33,6 +33,16 @@ class Teams extends Component
 
     public function render()
     {
+        $categories = \App\Models\LeaguePlayerCategory::where('league_id', $this->leagueId)->get();
+        
+        $categoryCounts = \App\Models\LeaguePlayer::where('league_id', $this->leagueId)
+            ->whereIn('status', ['sold', 'retained'])
+            ->whereNotNull('league_player_category_id')
+            ->select('league_team_id', 'league_player_category_id', \DB::raw('count(*) as count'))
+            ->groupBy('league_team_id', 'league_player_category_id')
+            ->get()
+            ->groupBy('league_team_id');
+
         $this->teams = LeagueTeam::where('league_id', $this->leagueId)
             ->with([
                 'team',
@@ -49,7 +59,22 @@ class Teams extends Component
                 }
             ])
             ->withCount('leaguePlayers')
-            ->get();
+            ->get()
+            ->map(function($team) use ($categories, $categoryCounts) {
+                  $teamStats = $categoryCounts[$team->id] ?? collect();
+                  $team->category_compliance = $categories->map(function($cat) use ($teamStats) {
+                       $count = $teamStats->where('league_player_category_id', $cat->id)->first()->count ?? 0;
+                       return [
+                           'name' => $cat->name,
+                           'min' => $cat->min_requirement,
+                           'max' => $cat->max_requirement,
+                           'current' => $count,
+                           'met' => $count >= $cat->min_requirement,
+                       ];
+                  });
+                  return $team;
+            });
+            
         return view('livewire.teams');
     }
 }

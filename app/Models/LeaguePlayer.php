@@ -141,6 +141,11 @@ class LeaguePlayer extends Model
         return $this->belongsTo(League::class);
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(LeaguePlayerCategory::class, 'league_player_category_id');
+    }
+
     /**
      * Get the user (player) for this league player.
      */

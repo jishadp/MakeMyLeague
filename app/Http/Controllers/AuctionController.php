@@ -402,7 +402,9 @@ class AuctionController extends Controller
                 ->first();
         }
             
-        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams', 'userAuctioneerAssignment', 'userRole', 'userTeamId'));
+        $categories = $league->playerCategories()->get();
+            
+        return view('auction.index', compact('leaguePlayers', 'league', 'currentPlayer', 'currentHighestBid', 'teams', 'userAuctioneerAssignment', 'userRole', 'userTeamId', 'categories'));
     }
 
     /**
@@ -506,6 +508,15 @@ class AuctionController extends Controller
             $availableBasePrices = collect(array_fill(0, max($totalAvailableCount, 20), $defaultBasePrice));
         }
 
+        $categories = $league->playerCategories()->get();
+        $categoryCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
+            ->whereIn('status', ['sold', 'retained'])
+            ->whereNotNull('league_player_category_id')
+            ->select('league_team_id', 'league_player_category_id', DB::raw('count(*) as count'))
+            ->groupBy('league_team_id', 'league_player_category_id')
+            ->get()
+            ->groupBy('league_team_id');
+            
         $retainedCounts = \App\Models\LeaguePlayer::where('league_id', $league->id)
 
             ->where('retention', true)
@@ -513,7 +524,7 @@ class AuctionController extends Controller
             ->select('league_team_id', DB::raw('count(*) as count'))
             ->pluck('count', 'league_team_id');
         $auctionSlotsPerTeam = max(($league->max_team_players ?? 0) - ($league->retention_players ?? 0), 0);
-        $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts) {
+        $teams = $teams->map(function ($team) use ($availableBasePrices, $auctionSlotsPerTeam, $league, $retainedCounts, $categoryCounts, $categories) {
             $retainedCount = $retainedCounts[$team->id] ?? 0;
             $playersNeeded = max($auctionSlotsPerTeam - ($team->sold_players_count ?? 0), 0);
             $futureSlots = max($playersNeeded - 1, 0);
@@ -527,6 +538,20 @@ class AuctionController extends Controller
             $team->max_bid_cap = $maxBidCap;
             $team->display_wallet = $availableWallet;
             $team->retained_players_count = $retainedCount;
+
+            $teamStats = $categoryCounts[$team->id] ?? collect();
+            $team->category_compliance = $categories->map(function($cat) use ($teamStats) {
+                $count = $teamStats->where('league_player_category_id', $cat->id)->first()->count ?? 0;
+                return [
+                    'name' => $cat->name,
+                    'min' => $cat->min_requirement,
+                    'max' => $cat->max_requirement,
+                    'current' => $count,
+                    'met' => $count >= $cat->min_requirement,
+                    'exceeded' => $cat->max_requirement && $count > $cat->max_requirement,
+                ];
+            });
+
             $team->balance_audit = [
                 'base_wallet' => $baseWallet,
                 'spent_amount' => $spentAmount,
@@ -592,6 +617,7 @@ class AuctionController extends Controller
             'switchableLeagues' => $switchableLeagues,
             'liveFixtures' => $liveFixtures,
             'upcomingFixtures' => $upcomingFixtures,
+            'categories' => $categories,
         ]);
     }
 
@@ -2085,6 +2111,8 @@ class AuctionController extends Controller
             'predefined_increments' => $request->rules,
         ]);
 
+
+
         return response()->json([
             'success' => true,
             'message' => 'Bid rules updated successfully',
@@ -2094,6 +2122,13 @@ class AuctionController extends Controller
                 'rules' => $league->predefined_increments,
             ]
         ]);
+    }
+
+    public function toggleCategoryRules(Request $request, League $league)
+    {
+        $request->validate(['enabled' => 'required|boolean']);
+        $league->update(['auction_category_rules_enabled' => $request->enabled]);
+        return response()->json(['success' => true, 'message' => 'Category rules updated.']);
     }
 
     /**
@@ -2327,7 +2362,10 @@ class AuctionController extends Controller
                 ];
             });
 
-        return view('auction.manage-players', compact('league', 'statusCounts', 'teams', 'user'));
+        $categories = $league->playerCategories()->get();
+        $districts = \App\Models\District::select('id', 'name')->orderBy('name')->get();
+
+        return view('auction.manage-players', compact('league', 'statusCounts', 'teams', 'user', 'categories', 'districts'));
     }
 
     /**
@@ -2339,7 +2377,7 @@ class AuctionController extends Controller
 
         $query = LeaguePlayer::where('league_id', $league->id)
             ->where('retention', false)
-            ->with(['player.primaryGameRole.gamePosition', 'player.position', 'leagueTeam.team']);
+            ->with(['player.primaryGameRole.gamePosition', 'player.position', 'leagueTeam.team', 'category']);
 
         if ($status && in_array($status, ['available', 'sold', 'unsold'])) {
             $query->where('status', $status);
@@ -2363,6 +2401,8 @@ class AuctionController extends Controller
                     'team_logo' => $lp->leagueTeam && $lp->leagueTeam->team->logo 
                         ? url(Storage::url($lp->leagueTeam->team->logo)) 
                         : null,
+                    'category_id' => $lp->league_player_category_id,
+                    'category_name' => $lp->category->name ?? null,
                     'updated_at' => $lp->updated_at->toIso8601String(),
                 ];
             });
@@ -2573,4 +2613,35 @@ class AuctionController extends Controller
             'message' => "Player replaced successfully. $oldPlayerName → {$newUser->name}",
         ]);
     }
+
+    public function updateCategoryRules(Request $request, League $league)
+    {
+        $validated = $request->validate([
+            'enabled' => 'required|boolean',
+            'categories' => 'present|array',
+            'categories.*.id' => 'required|exists:league_player_categories,id',
+            'categories.*.min_requirement' => 'nullable|integer|min:0',
+            'categories.*.max_requirement' => 'nullable|integer|min:0',
+        ]);
+
+        // Toggle global setting
+        $league->update(['auction_category_rules_enabled' => $validated['enabled']]);
+
+        // Update each category
+        foreach ($validated['categories'] as $catData) {
+            $category = \App\Models\LeaguePlayerCategory::where('league_id', $league->id)
+                ->where('id', $catData['id'])
+                ->first();
+
+            if ($category) {
+                $category->update([
+                    'min_requirement' => $catData['min_requirement'] ?? 0,
+                    'max_requirement' => $catData['max_requirement'] ?? null,
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Category rules updated successfully.']);
+    }
+
 }

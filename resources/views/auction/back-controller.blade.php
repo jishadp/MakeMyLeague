@@ -1325,9 +1325,12 @@
                     </div>
                     <div class="flex items-center justify-between gap-4 mt-2">
                          <p class="text-[11px] text-slate-400" data-override-label>Current override: None</p>
-                         <button type="button" class="text-[11px] font-semibold text-slate-500 hover:text-indigo-600 underline" onclick="openQuickRulesModal()">
-                             Quick Bid Rules
-                         </button>
+                         <div class="flex items-center gap-3">
+
+                             <button type="button" class="text-[11px] font-semibold text-slate-500 hover:text-indigo-600 underline" onclick="openQuickRulesModal()">
+                                 Quick Bid Rules
+                             </button>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -1395,7 +1398,19 @@
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <p class="text-sm font-semibold text-slate-600">Team Statistics</p>
-                        <p class="text-xs text-slate-500">Overview of all teams with their spending and balance</p>
+                        <div class="flex items-center gap-2">
+                            <p class="text-xs text-slate-500">Overview of all teams</p>
+                            @if($league->auction_category_rules_enabled)
+                                <span class="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 text-[10px] font-bold border border-indigo-200">
+                                    Rules Active
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 border border-indigo-200 transition-colors" onclick="openCategoryRulesModal()">
+                            Category Rules
+                        </button>
                     </div>
                 </div>
 
@@ -1403,7 +1418,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($teams as $leagueTeam)
                     @php
-                        $soldPlayers = $leagueTeam->leaguePlayers()->where('status', 'sold')->with('player')->get();
+                        $soldPlayers = $leagueTeam->leaguePlayers()->where('status', 'sold')->with(['player', 'category'])->get();
                         $soldCount = $soldPlayers->count();
                         $totalSpent = $soldPlayers->sum('bid_price');
                         $walletBalance = $leagueTeam->wallet_balance ?? 0;
@@ -1461,6 +1476,30 @@
                                 </div>
                                 <span class="text-sm font-bold text-green-700">₹{{ number_format($walletBalance) }}</span>
                             </div>
+
+                            <!-- Category Stats -->
+                            @if($league->auction_category_rules_enabled && isset($leagueTeam->category_compliance) && $leagueTeam->category_compliance->count() > 0)
+                            <div class="mt-2 pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
+                                @foreach($leagueTeam->category_compliance as $cat)
+                                <div class="px-2 py-1 rounded bg-slate-50 border border-slate-100">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] uppercase font-bold text-slate-500" title="{{ $cat['name'] }}">{{ \Illuminate\Support\Str::limit($cat['name'], 8) }}</span>
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-[10px] font-bold {{ $cat['met'] ? 'text-green-600' : 'text-amber-600' }}">
+                                                {{ $cat['current'] }} / {{ $cat['min'] }}
+                                            </span>
+                                            @if($cat['max'])
+                                                <span class="text-[9px] text-slate-400 leading-none">Max {{ $cat['max'] }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                                        <div class="h-full {{ $cat['met'] ? 'bg-green-500' : 'bg-amber-400' }}" style="width: {{ min(($cat['current'] / max($cat['min'], 1)) * 100, 100) }}%"></div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
 
                         <!-- Players List -->
@@ -1477,7 +1516,14 @@
                                          class="w-8 h-8 rounded-lg object-cover bg-slate-200 flex-shrink-0"
                                          onerror="this.src='{{ asset('images/defaultplayer.jpeg') }}'">
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600">{{ $soldPlayer->player->name }}</p>
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600">{{ $soldPlayer->player->name }}</p>
+                                            @if($soldPlayer->category && stripos($soldPlayer->category->name, 'Marquee') !== false)
+                                                <span class="inline-flex items-center justify-center bg-amber-100 text-amber-600 border border-amber-200 rounded-full w-4 h-4" title="Marquee Player">
+                                                    <i class="fa-solid fa-crown text-[10px]"></i>
+                                                </span>
+                                            @endif
+                                        </div>
                                         <p class="text-[10px] text-slate-500">{{ $soldPlayer->player->primaryGameRole->gamePosition->name ?? $soldPlayer->player->position->name ?? 'Player' }}</p>
                                     </div>
                                     <span class="text-xs font-bold text-green-700 whitespace-nowrap group-hover:text-indigo-600" data-player-value-{{ $soldPlayer->id }}>₹{{ number_format($soldPlayer->bid_price) }}</span>
@@ -1653,6 +1699,62 @@
     </div>
 </div>
 
+    <!-- Category Rules Modal -->
+    <div id="category-rules-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+        <div class="w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+            <div class="px-6 py-4 border-b border-orange-100 flex items-center justify-between bg-orange-50/50">
+                <h3 class="font-bold text-slate-900">Category Rules</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 transition-colors" onclick="closeCategoryRulesModal()">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-100">
+                    <div>
+                        <p class="font-semibold text-orange-900">Enable Category Rules</p>
+                        <p class="text-xs text-orange-700">Enforce min/max limits during auction</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="category-rules-toggle" class="sr-only peer" {{ $league->auction_category_rules_enabled ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                </div>
+                
+                <div class="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    @foreach($categories as $category)
+                    <div class="flex items-center gap-4 py-3 border-b border-orange-100/50 last:border-0" data-category-row="{{ $category->id }}">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-900 text-sm">{{ $category->name }}</p>
+                            <p class="text-xs text-slate-500 font-medium">{{ $category->players_count ?? 0 }} players in pool</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col items-center">
+                                <label class="text-[10px] uppercase font-bold text-slate-500 mb-1 tracking-wider">Min</label>
+                                <input type="number" min="0" class="w-16 px-2 py-1.5 text-center text-sm font-bold text-slate-900 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-slate-300 shadow-sm" 
+                                    value="{{ $category->min_requirement ?? 0 }}" data-cat-min>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <label class="text-[10px] uppercase font-bold text-slate-500 mb-1 tracking-wider">Max</label>
+                                <input type="number" min="0" class="w-16 px-2 py-1.5 text-center text-sm font-bold text-slate-900 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-slate-300 shadow-sm" 
+                                    value="{{ $category->max_requirement ?? '' }}" placeholder="∞" data-cat-max>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-orange-50/50 border-t border-orange-100 flex justify-end gap-3">
+                <button type="button" class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors" onclick="closeCategoryRulesModal()">
+                    Cancel
+                </button>
+                <button type="button" class="px-5 py-2.5 text-sm font-bold text-slate-900 bg-gradient-to-r from-orange-400 to-amber-400 rounded-xl shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98] transition-all" onclick="saveCategoryRules(this)">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
 <!-- Player Value Edit Modal -->
 <div id="player-value-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
@@ -1720,7 +1822,7 @@ function controllerToast(message, type = 'success') {
     }
 }
 
-function copyTextWithFallback(text, successMessage = 'Link copied!') {
+window.copyTextWithFallback = function(text, successMessage = 'Link copied!') {
     if (navigator.clipboard?.writeText) {
         navigator.clipboard.writeText(text)
             .then(() => controllerToast(successMessage, 'success'))
@@ -1728,7 +1830,7 @@ function copyTextWithFallback(text, successMessage = 'Link copied!') {
     } else {
         fallbackCopy(text, successMessage);
     }
-}
+};
 
 function fallbackCopy(text, successMessage) {
     const area = document.createElement('textarea');
@@ -1747,16 +1849,16 @@ function fallbackCopy(text, successMessage) {
     document.body.removeChild(area);
 }
 
-function openWhatsAppShare(message) {
+window.openWhatsAppShare = function(message) {
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     const popup = window.open(url, '_blank');
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
         controllerToast('Please allow pop-ups to share on WhatsApp.', 'error');
     }
-}
+};
 
 // Player Value Edit Modal Functions
-function openPlayerValueModal(playerId, playerName, currentValue, teamId, teamName) {
+window.openPlayerValueModal = function(playerId, playerName, currentValue, teamId, teamName) {
     const modal = document.getElementById('player-value-modal');
     if (!modal) return;
     
@@ -1770,16 +1872,16 @@ function openPlayerValueModal(playerId, playerName, currentValue, teamId, teamNa
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.getElementById('player-value-input').focus();
-}
+};
 
-function closePlayerValueModal() {
+window.closePlayerValueModal = function() {
     const modal = document.getElementById('player-value-modal');
     if (!modal) return;
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-}
+};
 
-async function savePlayerValue() {
+window.savePlayerValue = async function() {
     const playerId = document.getElementById('player-value-modal-player-id').value;
     const newValue = document.getElementById('player-value-input').value;
     const teamId = document.getElementById('player-value-modal-team-id').value;
@@ -2596,7 +2698,7 @@ document.addEventListener('keydown', function(e) {
             return {
                 min: isNaN(min) ? 0 : min,
                 max: rawMax === '' ? null : Number(rawMax),
-                increment
+        increment
             };
         });
     }
@@ -2617,12 +2719,15 @@ document.addEventListener('keydown', function(e) {
             return;
         }
         renderQuickRuleRows(quickRules);
+        modalState = 'open';
         quickRulesModal.classList.remove('hidden');
     }
+    window.openQuickRulesModal = openQuickRulesModal;
 
     function closeQuickRulesModal() {
         quickRulesModal?.classList.add('hidden');
     }
+    window.closeQuickRulesModal = closeQuickRulesModal;
 
     addQuickRuleBtn?.addEventListener('click', () => addQuickRuleRow());
     saveQuickRulesBtn?.addEventListener('click', async () => {
@@ -2829,7 +2934,7 @@ document.addEventListener('keydown', function(e) {
         }, 3500);
     }
 
-    async function placeControllerBid(button) {
+    window.placeControllerBid = async function(button) {
         const playerId = document.getElementById('controller-player-id')?.value;
         const leaguePlayerId = document.getElementById('controller-league-player-id')?.value;
         const leagueId = document.getElementById('controller-league-id')?.value;
@@ -3631,10 +3736,12 @@ document.addEventListener('keydown', function(e) {
         }
         unsoldModal.classList.remove('hidden');
     }
+    window.openUnsoldModal = openUnsoldModal;
 
     function closeUnsoldModal() {
         unsoldModal?.classList.add('hidden');
     }
+    window.closeUnsoldModal = closeUnsoldModal;
 
     function startUnsoldRound() {
         saveRandomPhase('unsold');
@@ -4276,6 +4383,77 @@ document.addEventListener('keydown', function(e) {
             showControllerMessage('Failed to download CSV. Please try again.', 'error');
         }
     };
+
+    async function toggleCategoryRules() {
+        // Legacy function: redirects to open modal
+        openCategoryRulesModal();
+    }
+    window.toggleCategoryRules = toggleCategoryRules;
+
+    function openCategoryRulesModal() {
+        const modal = document.getElementById('category-rules-modal');
+        if(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+    window.openCategoryRulesModal = openCategoryRulesModal;
+
+    function closeCategoryRulesModal() {
+        const modal = document.getElementById('category-rules-modal');
+        if(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+    window.closeCategoryRulesModal = closeCategoryRulesModal;
+
+    async function saveCategoryRules(btn) {
+        const modal = document.getElementById('category-rules-modal');
+        if (!modal) return;
+
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Saving...';
+
+        const enabled = document.getElementById('category-rules-toggle').checked;
+        const rows = modal.querySelectorAll('[data-category-row]');
+        const categories = Array.from(rows).map(row => {
+            const id = row.getAttribute('data-category-row');
+            const min = row.querySelector('[data-cat-min]').value;
+            const max = row.querySelector('[data-cat-max]').value;
+            return {
+                id: id,
+                min_requirement: min ? Number(min) : null,
+                max_requirement: max ? Number(max) : null
+            };
+        });
+
+        try {
+            const response = await fetch('{{ route("auction.update-category-rules", $league) }}', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRF-TOKEN': getControllerToken() 
+                },
+                body: JSON.stringify({ enabled, categories })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showControllerMessage('Category rules updated successfully.', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            } else {
+                throw new Error(data.message || 'Failed to update rules');
+            }
+        } catch (error) {
+            console.error(error);
+            showControllerMessage('Failed to update rules. Try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+    window.saveCategoryRules = saveCategoryRules;
 
     // Fetch sold players on page load
     fetchSoldPlayers();

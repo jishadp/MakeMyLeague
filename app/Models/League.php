@@ -44,6 +44,7 @@ class League extends Model
         'runner_prize' => 'decimal:2',
         'custom_bid_increment' => 'decimal:2',
         'predefined_increments' => 'array',
+        'auction_category_rules_enabled' => 'boolean',
 
     ];
 
@@ -249,6 +250,11 @@ class League extends Model
     public function leaguePlayers(): HasMany
     {
         return $this->hasMany(LeaguePlayer::class);
+    }
+
+    public function playerCategories(): HasMany
+    {
+        return $this->hasMany(LeaguePlayerCategory::class);
     }
 
     /**

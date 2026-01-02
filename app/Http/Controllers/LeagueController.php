@@ -942,6 +942,7 @@ class LeagueController
             'game',
             'leaguePlayers.user.localBody',
             'leaguePlayers.leagueTeam.team',
+            'leaguePlayers.category',
             'fixtures.homeTeam.team',
             'fixtures.awayTeam.team',
             'localBody',
