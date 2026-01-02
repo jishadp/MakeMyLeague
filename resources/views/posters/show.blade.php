@@ -408,7 +408,7 @@
                         @if($league->logo) <img src="{{ Storage::url($league->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
                          <div>
                             <h2 class="text-3xl font-black text-white text-center uppercase leading-none font-sports">{{ $leagueTeam->team->name }}</h2>
-                            <p class="text-center text-blue-100 text-xs tracking-widest uppercase mt-1">{{ $league->name }} <span class="opacity-50 mx-1">|</span> {{ $league->season ?? date('Y') }}</p>
+                            <p class="text-center text-blue-100 text-xs tracking-widest uppercase mt-1">{{ $league->name }} <span class="opacity-50 mx-1">|</span> Season {{ $league->season ?? date('Y') }}</p>
                          </div>
                         @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-16 w-16 object-contain drop-shadow-md"> @endif
                     </div>
@@ -479,7 +479,7 @@
                             @if($leagueTeam->team->logo) <img src="{{ Storage::url($leagueTeam->team->logo) }}" class="h-24 w-24 object-contain drop-shadow-lg"> @endif
                             <div>
                                 <h1 class="text-6xl font-black text-white uppercase leading-none font-sports">{{ $leagueTeam->team->name }}</h1>
-                                <p class="text-blue-200 text-sm tracking-[0.5em] uppercase">{{ $league->name }} <span class="opacity-50 mx-2">|</span> {{ $league->season ?? date('Y') }}</p>
+                                <p class="text-blue-200 text-sm tracking-[0.5em] uppercase">{{ $league->name }} <span class="opacity-50 mx-2">|</span> Season {{ $league->season ?? date('Y') }}</p>
                             </div>
                         </div>
                         <div class="text-right">
