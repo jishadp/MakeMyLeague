@@ -40,7 +40,7 @@
     $mobile = $player->user?->mobile ?? '';
     
     // Determine card class based on player type
-    $cardClass = 'border-slate-200 bg-white shadow-sm hover:shadow-md';
+    $cardClass = 'regular-card';
     if ($isForeign) {
         $cardClass = 'foreign-card';
     } elseif ($isRetainedLocal) {

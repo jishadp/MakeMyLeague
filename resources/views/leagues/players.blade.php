@@ -273,6 +273,55 @@
         box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
     }
 
+    /* Regular player card styles */
+    @keyframes regular-glow {
+        0%, 100% { 
+            box-shadow: 
+                0 0 10px rgba(59, 130, 246, 0.2),
+                0 0 20px rgba(59, 130, 246, 0.1),
+                inset 0 0 8px rgba(59, 130, 246, 0.08);
+        }
+        50% { 
+            box-shadow: 
+                0 0 15px rgba(59, 130, 246, 0.3),
+                0 0 30px rgba(59, 130, 246, 0.15),
+                inset 0 0 12px rgba(59, 130, 246, 0.12);
+        }
+    }
+    
+    .regular-card {
+        position: relative;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #93c5fd !important;
+        animation: regular-glow 3s ease-in-out infinite;
+        overflow: hidden;
+    }
+    
+    .regular-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(59, 130, 246, 0.15),
+            transparent
+        );
+        animation: retained-shine 4s infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .regular-card:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 
+            0 0 15px rgba(59, 130, 246, 0.35),
+            0 0 25px rgba(59, 130, 246, 0.2);
+    }
+
     .crown-icon {
         animation: float 3s ease-in-out infinite;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
