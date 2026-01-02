@@ -276,6 +276,7 @@
                         <!-- Mobile: Button filters (simplified) -->
                         <div class="flex sm:hidden items-center gap-2 text-xs flex-wrap">
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-indigo-600 text-white border border-indigo-600 shadow flex-shrink-0" data-filter="all">All</button>
+                            <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 flex-shrink-0" data-filter="retained">Retained</button>
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex-shrink-0" data-filter="available">Available</button>
                             <button type="button" class="status-filter whitespace-nowrap px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0" data-filter="sold">Sold</button>
                         </div>
@@ -563,12 +564,20 @@
             }
         }
 
-        // Hide foreign section if no partials are visible in it
-        const foreignSection = document.querySelector('.player-tab-panel #foreign-section');
+        // Hide foreign section completely if no cards are visible in it (removes gap)
+        const foreignSection = document.querySelector('#player-tab-all #foreign-section');
         if (foreignSection) {
             const foreignCards = foreignSection.querySelectorAll('.player-card');
             const hasVisibleForeign = Array.from(foreignCards).some(card => !card.classList.contains('hidden'));
-            foreignSection.classList.toggle('hidden', !hasVisibleForeign);
+            if (hasVisibleForeign) {
+                foreignSection.classList.remove('hidden');
+                foreignSection.style.display = '';
+                foreignSection.style.marginBottom = '';
+            } else {
+                foreignSection.classList.add('hidden');
+                foreignSection.style.display = 'none';
+                foreignSection.style.marginBottom = '0';
+            }
         }
         
         // Update share link after filtering
