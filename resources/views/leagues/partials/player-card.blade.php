@@ -65,12 +65,12 @@
 >
 <div class="relative h-full rounded-xl border transition-all duration-300 {{ $cardClass }} px-3 py-4 flex flex-col justify-between">
     @if($isForeign)
-        <div class="absolute top-0 left-0 foreign-badge text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10">
-            {{ Str::limit(strtoupper($placeName), 12) }}
+        <div class="absolute top-0 left-0 foreign-badge text-white text-[8px] sm:text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10 max-w-[90%] truncate">
+            {{ strtoupper($placeName) }}
         </div>
     @elseif($isCategoryOnly)
-        <div class="absolute top-0 left-0 category-badge text-white text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10">
-            {{ Str::limit(strtoupper($player->category->name ?? 'CATEGORY'), 12) }}
+        <div class="absolute top-0 left-0 category-badge text-white text-[8px] sm:text-[9px] font-bold px-2 py-0.5 rounded-tl-xl rounded-br-lg z-10 max-w-[90%] truncate">
+            {{ strtoupper($player->category->name ?? 'CATEGORY') }}
         </div>
     @endif
     
