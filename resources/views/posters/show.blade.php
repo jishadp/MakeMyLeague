@@ -37,6 +37,12 @@
         scrollbar-width: none;
     }
     
+    /* Hide bottom navbar */
+    .bottom-navigation-buttons {
+        display: none !important;
+    }
+
+    
     @media print {
         @page {
             margin: 0;
@@ -98,7 +104,7 @@
                 </button>
             </div>
 
-            <div class="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+            <div class="hidden flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
                 <button onclick="setRatio('9/16')" id="btn-ratio-9-16" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all flex items-center gap-1">
                    <svg class="w-4 h-4" viewBox="0 0 10 16" fill="currentColor"><rect width="10" height="16" rx="1" stroke="currentColor" fill="none"/></svg> 9:16
                 </button>
