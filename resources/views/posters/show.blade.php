@@ -104,7 +104,7 @@
                 </button>
             </div>
 
-            <div class="hidden flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+            <div class="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
                 <button onclick="setRatio('9/16')" id="btn-ratio-9-16" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-all flex items-center gap-1">
                    <svg class="w-4 h-4" viewBox="0 0 10 16" fill="currentColor"><rect width="10" height="16" rx="1" stroke="currentColor" fill="none"/></svg> 9:16
                 </button>
@@ -116,7 +116,7 @@
                 </button>
             </div>
             
-            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 shadow-sm transition-colors flex items-center gap-2">
+            <button onclick="window.print()" class="hidden px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 shadow-sm transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Download/Print
             </button>
