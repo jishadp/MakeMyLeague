@@ -214,12 +214,8 @@
                         <div class="sm:hidden">
                             <select id="statusFilterMobile" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 bg-white shadow-sm text-slate-700">
                                 <option value="all">All Players</option>
-                                <option value="retained">Retained</option>
                                 <option value="available">Available</option>
-                                <option value="auctioning">Auctioning</option>
                                 <option value="sold">Sold</option>
-                                <option value="unsold">Unsold</option>
-                                <option value="pending">Pending</option>
                             </select>
                         </div>
                         
@@ -271,7 +267,7 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-3 gap-3" data-player-list>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" data-player-list>
                         @foreach($otherPlayers as $player)
                             @include('leagues.partials.player-card', ['player' => $player])
                         @endforeach
