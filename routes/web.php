@@ -320,6 +320,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('leagues/{league}/auction')->name('auction.')->group(function () {
         Route::get('/', [AuctionController::class, 'index'])->name('index')->middleware('live.auction:view');
         Route::get('control-room', [AuctionController::class, 'controlRoom'])->name('control-room')->middleware(['auth', 'league.organizer']);
+        Route::get('summary', [AuctionController::class, 'summary'])->name('summary');
+        Route::get('manage-players', [AuctionController::class, 'managePlayers'])->name('manage-players')->middleware(['auth', 'league.organizer']);
+        Route::get('search-replacement-players', [AuctionController::class, 'searchReplaceablePlayers'])->name('search-replacement-players')->middleware(['auth', 'league.organizer']);
         Route::post('place-bid', [AuctionController::class, 'placeBid'])->name('place-bid')->middleware('live.auction:auctioneer');
         Route::post('accept-bid', [AuctionController::class, 'acceptBid'])->name('accept-bid')->middleware('live.auction:organizer');
         Route::post('complete', [LeagueController::class, 'completeAuction'])->name('complete')->middleware('live.auction:organizer');
@@ -344,6 +347,8 @@ Route::middleware('auth')->group(function () {
         Route::get('team-balances/{league}', [AuctionController::class, 'getTeamBalances'])->name('team-balances')->middleware('live.auction:view');
         Route::get('access/{league}', [AuctionController::class, 'getAuctionAccess'])->name('access')->middleware('live.auction:view');
         Route::post('update-player-value', [AuctionController::class, 'updatePlayerBidPrice'])->name('update-player-value');
+        Route::post('revert-to-available', [AuctionController::class, 'revertPlayerToAvailable'])->name('revert-to-available');
+        Route::post('replace-player', [AuctionController::class, 'replaceLeaguePlayer'])->name('replace-player');
     });
 
     // Poster routes
