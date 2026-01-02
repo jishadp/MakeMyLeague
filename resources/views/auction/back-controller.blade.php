@@ -273,6 +273,40 @@
         color: #c7d2fe;
         text-decoration: underline;
     }
+
+    /* Layout Cards */
+    .layout-card {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.9rem;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: #ffffff;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .layout-card:hover {
+        border-color: #4f46e5;
+        background: #f0f4ff;
+        color: #4f46e5;
+    }
+
+    .layout-card.active {
+        border-color: #4f46e5;
+        background: #4f46e5;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .layout-card:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     .team-pill {
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
@@ -417,6 +451,52 @@
         width: min(240px, 42%);
         max-width: 300px;
         padding: 0.75rem 0.9rem;
+    }
+
+    /* Layout: Flexible (3,3,4) for 10 teams - arrange in 3-3-4 pattern */
+    .round-table--layout-flexible .round-table__orbit {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        max-width: 100%;
+    }
+    .round-table--layout-flexible .round-table__seat:nth-child(-n+3) {
+        grid-column: span 1;
+    }
+    .round-table--layout-flexible .round-table__seat:nth-child(n+4):nth-child(-n+6) {
+        grid-column: span 1;
+    }
+    .round-table--layout-flexible .round-table__seat:nth-child(n+7):nth-child(-n+10) {
+        grid-column: span 1;
+    }
+    @media (max-width: 1024px) {
+        .round-table--layout-flexible.round-table--portrait .round-table__orbit {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 768px) {
+        .round-table--layout-flexible.round-table--portrait .round-table__orbit {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+
+    /* Portrait Layouts */
+    .round-table--layout-2x-portrait .round-table__orbit {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+    }
+
+    .round-table--layout-3x-portrait .round-table__orbit {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+    }
+
+    .round-table--layout-4x-portrait .round-table__orbit {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 100%;
+    }
+
+    .round-table--layout-5x-portrait .round-table__orbit {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 100%;
     }
     .round-table__center--placeholder {
         background: linear-gradient(135deg, #0b1223, #0f172a);
@@ -1182,11 +1262,44 @@
                         <p class="text-sm font-semibold text-slate-600">Choose Team</p>
                         <p class="text-xs text-slate-500">Seat them around the table and tap to assign the bid target.</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <button type="button" class="round-table__link" data-seat-sort-toggle>Show sort</button>
                         <button type="button" class="round-table__link" data-round-table-toggle>Compact view</button>
                         <a href="{{ route('auction.index', $league) }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Open live auction</a>
                     </div>
+                </div>
+                
+                <!-- Layout Options as Cards -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs text-slate-500 font-semibold">Layout:</span>
+                    
+                    <!-- Wide Layout Cards -->
+                    <div id="wide-layouts" class="flex gap-1.5 flex-wrap">
+                        <button type="button" class="layout-card" data-layout="auto">
+                            <span class="text-xs">Auto</span>
+                        </button>
+                        <button type="button" class="layout-card" data-layout="flexible">
+                            <span class="text-xs">Flexible</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Portrait Layout Cards (hidden by default) -->
+                    <div id="portrait-layouts" class="flex gap-1.5 flex-wrap hidden">
+                        <button type="button" class="layout-card" data-layout="2x-portrait">
+                            <span class="text-xs">2×Portrait</span>
+                        </button>
+                        <button type="button" class="layout-card" data-layout="3x-portrait">
+                            <span class="text-xs">3×Portrait</span>
+                        </button>
+                        <button type="button" class="layout-card" data-layout="4x-portrait">
+                            <span class="text-xs">4×Portrait</span>
+                        </button>
+                        <button type="button" class="layout-card" data-layout="5x-portrait">
+                            <span class="text-xs">5×Portrait</span>
+                        </button>
+                    </div>
+                    
+                    <button type="button" id="portrait-toggle" class="round-table__link text-xs" title="Toggle portrait/landscape">↗️</button>
                 </div>
                 <input type="hidden" id="controller-team" value="{{ $currentHighestBid?->league_team_id ?? '' }}">
                 @php
@@ -2000,6 +2113,10 @@ document.addEventListener('keydown', function(e) {
     const roundTable = document.querySelector('.round-table');
     const roundTableStorageKey = leagueIdValue ? `league_${leagueIdValue}_round_table_compact` : null;
     const roundTableOrbit = document.querySelector('.round-table__orbit');
+    const layoutCards = document.querySelectorAll('[data-layout]');
+    const portraitToggle = document.getElementById('portrait-toggle');
+    const layoutStorageKey = leagueIdValue ? `league_${leagueIdValue}_table_layout` : null;
+    const portraitStorageKey = leagueIdValue ? `league_${leagueIdValue}_table_portrait` : null;
     const seatSortList = document.getElementById('seat-sort-list');
     const seatOrderStorageKey = leagueIdValue ? `league_${leagueIdValue}_seat_order` : null;
     const seatSorter = document.getElementById('seat-sorter');
@@ -2032,6 +2149,7 @@ document.addEventListener('keydown', function(e) {
     let availableRandomPool = [];
     let unsoldRandomPool = [];
     initRoundTableSizing();
+    initLayoutSelector();
     initSeatOrdering();
     initSeatSortToggle();
     const teamNameMap = {};
@@ -2089,6 +2207,108 @@ document.addEventListener('keydown', function(e) {
         roundTable.classList.toggle('round-table--compact', !!enabled);
         if (roundTableToggle) {
             roundTableToggle.textContent = enabled ? 'Expand view' : 'Compact view';
+        }
+    }
+
+    function initLayoutSelector() {
+        const wideLayouts = document.getElementById('wide-layouts');
+        const portraitLayouts = document.getElementById('portrait-layouts');
+        if (!wideLayouts || !portraitLayouts || !roundTable || !portraitToggle) return;
+
+        // Load stored layout preference
+        const storedLayout = layoutStorageKey ? localStorage.getItem(layoutStorageKey) : 'auto';
+        const storedPortrait = portraitStorageKey ? localStorage.getItem(portraitStorageKey) === '1' : false;
+
+        // Initialize portrait mode
+        if (storedPortrait) {
+            roundTable.classList.add('round-table--portrait');
+            portraitToggle.textContent = '↙️';
+            wideLayouts.classList.add('hidden');
+            portraitLayouts.classList.remove('hidden');
+        } else {
+            portraitToggle.textContent = '↗️';
+            wideLayouts.classList.remove('hidden');
+            portraitLayouts.classList.add('hidden');
+        }
+
+        // Get all layout cards (both wide and portrait)
+        const allLayoutCards = document.querySelectorAll('[data-layout]');
+        
+        // Set initial active state on cards
+        allLayoutCards.forEach(card => {
+            if (card.dataset.layout === storedLayout) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+
+        // Layout card clicks
+        allLayoutCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const layout = card.dataset.layout;
+                
+                // Update active state on all cards
+                allLayoutCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                applyLayout(layout);
+                if (layoutStorageKey) {
+                    localStorage.setItem(layoutStorageKey, layout);
+                }
+            });
+        });
+
+        // Portrait toggle - switch between wide and portrait layout sets
+        portraitToggle.addEventListener('click', () => {
+            const isPortrait = roundTable.classList.toggle('round-table--portrait');
+            portraitToggle.textContent = isPortrait ? '↙️' : '↗️';
+            
+            // Toggle visibility of layout sets
+            if (isPortrait) {
+                wideLayouts.classList.add('hidden');
+                portraitLayouts.classList.remove('hidden');
+            } else {
+                wideLayouts.classList.remove('hidden');
+                portraitLayouts.classList.add('hidden');
+            }
+            
+            if (portraitStorageKey) {
+                localStorage.setItem(portraitStorageKey, isPortrait ? '1' : '0');
+            }
+        });
+
+        // Apply initial layout
+        applyLayout(storedLayout);
+    }
+
+    function applyLayout(layout) {
+        if (!roundTable) return;
+
+        // Remove all layout classes
+        roundTable.classList.remove('round-table--layout-flexible', 'round-table--layout-2x-portrait', 'round-table--layout-3x-portrait', 'round-table--layout-4x-portrait', 'round-table--layout-5x-portrait');
+
+        // Apply selected layout
+        switch (layout) {
+            case 'flexible':
+                roundTable.classList.add('round-table--layout-flexible');
+                break;
+            case '2x-portrait':
+                roundTable.classList.add('round-table--layout-2x-portrait');
+                break;
+            case '3x-portrait':
+                roundTable.classList.add('round-table--layout-3x-portrait');
+                break;
+            case '4x-portrait':
+                roundTable.classList.add('round-table--layout-4x-portrait');
+                break;
+            case '5x-portrait':
+                roundTable.classList.add('round-table--layout-5x-portrait');
+                break;
+            case 'auto':
+            default:
+                // Auto layout - no specific class, uses default
+                break;
         }
     }
 
