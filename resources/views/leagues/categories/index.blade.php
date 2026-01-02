@@ -162,6 +162,7 @@
                                 <input type="checkbox" id="select-all-checkbox" class="bulk-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" onclick="toggleSelectAll()">
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -483,7 +484,7 @@
         tbody.innerHTML = '';
         
         if(players.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No players found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No players found.</td></tr>';
             return;
         }
         
@@ -499,6 +500,7 @@
                            data-id="${p.id}" ${isChecked} onclick="togglePlayerSelect(${p.id})">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.player ? p.player.name : 'Unknown'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.player && p.player.mobile ? p.player.mobile : '-'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${catName}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onclick="openChangeCatModal(${p.id})" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</button>
