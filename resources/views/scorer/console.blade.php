@@ -96,12 +96,12 @@
             </div>
             
             <!-- Moved Match Controls (Below Scoreboard) -->
-            <div class="bg-slate-800 text-white rounded-xl p-3 shadow-lg mt-4">
+            <div class="bg-slate-800 rounded-xl p-3 shadow-lg mt-4">
                 <div class="flex items-center justify-between">
                      <div class="flex items-center gap-3">
                          <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Control Panel</span>
                          <div class="w-px h-6 bg-slate-600 mx-1"></div>
-                         <div class="font-mono font-black text-xl tabular-nums leading-none tracking-tight text-white">
+                         <div class="font-mono font-black text-xl tabular-nums leading-none tracking-tight ">
                             <span x-text="timeDisplay"></span>
                          </div>
                          <!-- Period Info (Added Time) -->
@@ -113,11 +113,11 @@
                     <!-- Main Controls -->
                     <div class="flex items-center gap-2">
                          <button @click="togglePause()" class="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95"
-                                :class="isRunning ? 'bg-slate-700 hover:bg-slate-600 text-rose-400' : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/30'">
+                                :class="isRunning ? 'bg-slate-700 hover:bg-slate-600 text-rose-400' : 'bg-emerald-500 hover:bg-emerald-400  shadow-lg shadow-emerald-500/30'">
                             <i class="fa-solid" :class="isRunning ? 'fa-pause' : 'fa-play ps-0.5'"></i>
                         </button>
                         
-                        <button @click="showTimeAdjust = !showTimeAdjust" class="w-9 h-9 rounded-full bg-slate-700 text-slate-300 hover:text-white hover:bg-slate-600 flex items-center justify-center transition-colors">
+                        <button @click="showTimeAdjust = !showTimeAdjust" class="w-9 h-9 rounded-full bg-slate-700 text-slate-300 hover: hover:bg-slate-600 flex items-center justify-center transition-colors">
                             <i class="fa-solid fa-gear text-sm"></i>
                         </button>
                     </div>
@@ -145,8 +145,8 @@
                     <div class="mb-4 bg-slate-900/50 p-2 rounded border border-slate-700">
                         <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Add Injury Time (Mins)</div>
                         <div class="flex items-center gap-2">
-                             <input type="number" x-model="injuryTimeInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="submitInjuryTime()">
-                             <button @click="submitInjuryTime()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded uppercase tracking-wide">Update</button>
+                             <input type="number" x-model="injuryTimeInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1  font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="submitInjuryTime()">
+                             <button @click="submitInjuryTime()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500  text-xs font-bold rounded uppercase tracking-wide">Update</button>
                         </div>
                     </div>
                     
@@ -154,8 +154,8 @@
                     <div>
                         <h4 class="text-[10px] font-bold uppercase text-slate-400 mb-2">Manual Clock (Minute)</h4>
                         <div class="flex items-center gap-2 bg-slate-900/50 rounded p-2 border border-slate-700">
-                             <input type="number" x-model="manualMinuteInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-blue-500 focus:outline-none" @keydown.enter="setManualTime()">
-                             <button @click="setManualTime()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded uppercase tracking-wide">Set</button>
+                             <input type="number" x-model="manualMinuteInput" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1  font-mono text-center focus:border-blue-500 focus:outline-none" @keydown.enter="setManualTime()">
+                             <button @click="setManualTime()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500  text-xs font-bold rounded uppercase tracking-wide">Set</button>
                         </div>
                     </div>
                     
@@ -163,8 +163,8 @@
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <h4 class="text-[10px] font-bold uppercase text-slate-400 mb-2">Total Match Duration (Mins)</h4>
                         <div class="flex items-center gap-2 bg-slate-900/50 rounded p-2 border border-slate-700">
-                             <input type="number" x-model="matchDuration" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="updateDuration()">
-                             <button @click="updateDuration()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded uppercase tracking-wide">Update</button>
+                             <input type="number" x-model="matchDuration" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1  font-mono text-center focus:border-emerald-500 focus:outline-none" @keydown.enter="updateDuration()">
+                             <button @click="updateDuration()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500  text-xs font-bold rounded uppercase tracking-wide">Update</button>
                         </div>
                     </div>
                 </div>
@@ -229,6 +229,37 @@
                 </button>
             </div>
 
+            <!-- Goals Feed (Edit Capability) -->
+            <div class="mb-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" x-show="events.filter(e => e.event_type === 'GOAL' || e.event_type === 'OWN_GOAL').length > 0">
+                <div class="border-b border-slate-100 p-3 bg-slate-50/50 flex items-center justify-between">
+                     <h3 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Goals</h3>
+                </div>
+                <div class="p-3 space-y-2">
+                    <template x-for="event in events.filter(e => e.event_type === 'GOAL' || e.event_type === 'OWN_GOAL')" :key="'goal-'+event.id">
+                        <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <div class="flex items-center gap-3">
+                                <div class="font-mono font-bold text-slate-500 text-xs" x-text="event.minute + '\''"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900" x-text="event.player?.user?.name || event.player_name || 'Unknown'"></div>
+                                    <div class="text-[10px] text-slate-500 uppercase tracking-wider" x-text="event.event_type.replace('_', ' ')"></div>
+                                    <template x-if="event.event_type == 'GOAL' && (event.assistPlayer || event.assist_player_name)">
+                                        <div class="text-[10px] text-slate-500 flex items-center gap-1">
+                                            <span class="text-slate-400">Ast:</span>
+                                            <span class="font-bold" x-text="event.assistPlayer?.user?.name || event.assist_player_name"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- Edit Button -->
+                            <!-- Edit Button -->
+                            <a :href="'{{ route('scorer.event.edit', ['fixture' => $fixture->slug, 'event' => 'EVENT_ID']) }}'.replace('EVENT_ID', event.id)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 shadow-sm hover:text-blue-600 hover:border-blue-200 transition-all">
+                                Edit
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
             <!-- Commentary & Feed -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="border-b border-slate-100 p-3 bg-slate-50/50 flex items-center justify-between">
@@ -248,7 +279,7 @@
                             <div class="relative rounded-xl border p-3 pl-16 shadow-sm overflow-hidden group transition-all"
                                  :class="{
                                     'bg-gradient-to-br from-white to-emerald-50 border-emerald-100': event.event_type == 'GOAL',
-                                    'bg-gradient-to-br from-white to-rose-50 border-rose-100': event.event_type == 'RED_CARD',
+                                    'bg-gradient-to-br from-white to-rose-50 border-rose-100': event.event_type == 'RED_CARD' || event.event_type == 'OWN_GOAL',
                                     'bg-gradient-to-br from-white to-amber-50 border-amber-100': event.event_type == 'YELLOW_CARD',
                                     'bg-gradient-to-br from-white to-purple-50 border-purple-100': event.event_type == 'SUB',
                                     'bg-gradient-to-br from-white to-sky-50 border-sky-100': event.event_type == 'COMMENTARY',
@@ -295,10 +326,13 @@
                                                 'text-amber-600': event.event_type == 'YELLOW_CARD',
                                                 'text-purple-600': event.event_type == 'SUB',
                                                 'text-sky-600': event.event_type == 'COMMENTARY',
-                                                'text-slate-600': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB', 'COMMENTARY'].includes(event.event_type)
+                                                'text-rose-500': event.event_type == 'OWN_GOAL',
+                                                'text-slate-600': !['GOAL', 'RED_CARD', 'YELLOW_CARD', 'SUB', 'COMMENTARY', 'OWN_GOAL'].includes(event.event_type)
                                             }" x-text="event.event_type.replace('_', ' ')"></h3>
                                     </div>
                                     
+
+
                                     <!-- Delete Button (Only for latest) -->
                                     <div x-show="index === 0">
                                         <button @click="deleteEvent(event.id)" class="text-slate-400 hover:text-rose-500 transition-colors p-1">
@@ -311,6 +345,12 @@
                                 <div class="text-sm font-bold text-slate-900 leading-tight">
                                     <span x-text="event.player?.user?.name || event.player_name || event.description"></span>
                                 </div>
+                                
+                                <template x-if="event.event_type == 'OWN_GOAL'">
+                                     <div class="mt-1">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-100 px-1.5 py-0.5 rounded">Own Goal</span>
+                                     </div>
+                                </template>
 
                                 <!-- Sub / Assist Details -->
                                 <template x-if="event.event_type == 'GOAL' && (event.assistPlayer || event.assist_player_name)">
@@ -409,7 +449,7 @@
                     </div>
 
                     <!-- Complete Penalties Button -->
-                    <button @click="completePenalties()" class="w-full bg-white border-2 border-slate-800 hover:bg-slate-800 text-slate-800 hover:text-white font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95">
+                    <button @click="completePenalties()" class="w-full bg-white border-2 border-slate-800 hover:bg-slate-800 text-slate-800 hover: font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95">
                         Complete Penalty Shootout
                     </button>
                     
@@ -422,7 +462,7 @@
             </div>
 
             <!-- Toss Section -->
-            <div x-show="(status === 'completed' || hasPenalties) && !tossConducted" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div x-show="((status === 'completed' && isKnockout) || hasPenalties) && !tossConducted" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="border-b border-slate-100 p-4 bg-slate-50/50">
                     <h3 class="text-sm font-bold uppercase text-slate-700 tracking-wider text-center">Toss to Decide Winner</h3>
                     <p class="text-xs text-slate-500 text-center mt-1">Conduct a toss to determine the match winner</p>
@@ -433,6 +473,11 @@
                     <button @click="openTossModal()" class="w-full bg-white border-2 border-purple-600 hover:bg-purple-50 text-purple-600 font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-coins text-xl"></i>
                         <span>Conduct Toss</span>
+                    </button>
+                    <!-- End as Draw -->
+                    <button @click="forceEndDraw()" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-500 hover:text-slate-600 font-bold py-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm mt-3">
+                        <i class="fa-regular fa-handshake"></i>
+                        <span>End Match as Draw</span>
                     </button>
                 </div>
             </div>
@@ -548,7 +593,7 @@
                 <button @click="closeConfirmModal" class="flex-1 py-3 rounded-xl font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition-colors">
                     Cancel
                 </button>
-                <button @click="triggerConfirm" class="flex-1 py-3 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-200 transition-colors">
+                <button @click="triggerConfirm" class="flex-1 py-3 rounded-xl font-bold  bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-200 transition-colors">
                     Confirm
                 </button>
             </div>
@@ -579,7 +624,7 @@
                      </template>
 
                      <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto mb-3">
-                        <template x-for="player in getEligiblePlayers(goalTeamId)" :key="player.id">
+                        <template x-for="player in getEligiblePlayers(isOwnGoal ? (goalTeamId == {{ $fixture->home_team_id }} ? {{ $fixture->away_team_id }} : {{ $fixture->home_team_id }}) : goalTeamId)" :key="player.id">
                             <button @click="goalPlayerId = player.id; isGuestGoal = false" 
                                 class="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all relative overflow-hidden group"
                                 :class="goalPlayerId == player.id 
@@ -587,7 +632,7 @@
                                     : 'bg-white border-slate-100 hover:border-emerald-200 hover:bg-slate-50'">
                                 
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-colors" 
-                                     :class="goalPlayerId == player.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
+                                     :class="goalPlayerId == player.id ? 'bg-emerald-500 ' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
                                      <span x-text="(player.player?.user?.name || player.custom_name || '?').charAt(0)"></span>
                                 </div>
                                 
@@ -607,8 +652,7 @@
                         </template>
                      </div>
                      
-                     <!-- Debug Info (Temporary) -->
-                     <div x-show="goalPlayerId" class="text-[10px] text-emerald-500 font-mono text-center mb-2">Selected ID: <span x-text="goalPlayerId"></span></div>
+
                     
                     <!-- Validation Error -->
                     <div x-show="showGoalError" class="text-rose-500 text-xs font-bold mt-1 animate-pulse">
@@ -621,6 +665,19 @@
                             <span class="text-sm font-medium text-slate-600">Guest / Custom Name</span>
                         </label>
                         <input x-show="isGuestGoal" type="text" x-model="goalGuestName" class="mt-2 w-full p-3 rounded-xl border border-slate-200 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none" placeholder="Enter name...">
+                    </div>
+
+                    <!-- Own Goal Toggle -->
+                    <div class="mt-2">
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-rose-50 transition-colors border border-transparent hover:border-rose-100">
+                             <input type="checkbox" x-model="isOwnGoal" 
+                                    @change="goalPlayerId = ''; goalAssistId = ''; isGuestGoal = false; goalGuestName = ''"
+                                    class="w-5 h-5 rounded border-rose-300 text-rose-500 focus:ring-rose-500">
+                             <div class="flex flex-col">
+                                 <span class="text-sm font-bold text-rose-600">Own Goal</span>
+                                 <span class="text-[10px] text-slate-400">Record as opponent score</span>
+                             </div>
+                        </label>
                     </div>
                 </div>
 
@@ -640,7 +697,7 @@
                                     : 'bg-white border-slate-100 hover:border-blue-200 hover:bg-slate-50'">
                                 
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-colors" 
-                                     :class="goalAssistId == player.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
+                                     :class="goalAssistId == player.id ? 'bg-blue-500 ' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
                                      <span x-text="(player.player?.user?.name || player.custom_name || '?').charAt(0)"></span>
                                 </div>
                                 
@@ -786,7 +843,7 @@
                                     : 'bg-white border-slate-100 hover:border-blue-200 hover:bg-slate-50'">
                                 
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0" 
-                                     :class="penaltyPlayerId == player.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'">
+                                     :class="penaltyPlayerId == player.id ? 'bg-blue-500 ' : 'bg-slate-100 text-slate-500'">
                                      <span x-text="(player.player?.user?.name || player.custom_name || '?').charAt(0)"></span>
                                 </div>
                                 
@@ -915,7 +972,7 @@
             
             <!-- Header -->
             <div class="p-6 text-center border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white shrink-0">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white mx-auto flex items-center justify-center text-3xl mb-3 shadow-lg">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600  mx-auto flex items-center justify-center text-3xl mb-3 shadow-lg">
                     <i class="fa-solid fa-flag-checkered"></i>
                 </div>
                 <h3 class="text-2xl font-black text-slate-900">Match Summary</h3>
@@ -1023,6 +1080,8 @@
                     <p class="text-xl font-black text-purple-700" x-text="tossWinnerName"></p>
                 </div>
 
+
+
                 <!-- Warning Message -->
                 <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
                     <div class="flex items-start gap-3">
@@ -1040,7 +1099,7 @@
                 <button @click="closeMatchSummary" class="py-4 rounded-xl font-bold text-slate-600 bg-white border-2 border-slate-300 hover:bg-slate-50 transition-colors">
                     <i class="fa-solid fa-arrow-left mr-2"></i>Cancel
                 </button>
-                <button @click="confirmEndMatch" class="py-4 rounded-xl font-bold text-white bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 shadow-lg shadow-rose-200 transition-all">
+                <button @click="confirmEndMatch" class="py-4 rounded-xl font-bold  bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 shadow-lg shadow-rose-200 transition-all">
                     <i class="fa-solid fa-flag-checkered mr-2"></i>Confirm & End Match
                 </button>
             </div>
@@ -1049,12 +1108,15 @@
 
 </div>
 
+
+
 <!-- Logic Script (Unchanged) -->
 <script>
 function scorerConsole() {
     return {
         status: '{{ $fixture->status }}',
         matchState: '{{ $fixture->match_state }}',
+        isKnockout: {{ ($fixture->is_knockout && !$fixture->league_group_id) ? 'true' : 'false' }},
         currentTime: '{{ now() }}',
         events: @json($fixture->events),
         players: @json($fixture->fixturePlayers->load('player.user')),
@@ -1393,6 +1455,7 @@ function scorerConsole() {
         goalAssistId: '',
         goalAssistName: '',
         isGuestAssist: false,
+        isOwnGoal: false,
 
         // ...
 
@@ -1405,6 +1468,8 @@ function scorerConsole() {
             this.goalAssistId = '';
             this.goalAssistName = '';
             this.isGuestAssist = false;
+            this.isGuestAssist = false;
+            this.isOwnGoal = false;
             this.showGoalError = false;
             this.showGoalModal = true;
         },
@@ -1412,6 +1477,11 @@ function scorerConsole() {
         closeGoalModal() {
             this.showGoalModal = false;
         },
+
+
+
+
+
 
         submitGoal() {
              if (!this.goalPlayerId && (!this.isGuestGoal || !this.goalGuestName)) {
@@ -1434,15 +1504,28 @@ function scorerConsole() {
                 ? (selectedAssist.player?.user?.name || selectedAssist.custom_name) 
                 : (this.isGuestAssist ? this.goalAssistName : null);
 
+
+            // Determine the team ID to send to the backend
+            // If Own Goal, we swap the team ID because backend logic uses team_id as the CONCEDING player's team.
+            // But we clicked "+1 Home Goal" (goalTeamId = Home) expecting Home Score +1.
+            // Backend rule: team_id = Home -> Away Score +1.
+            // So if we want Home Score +1, we need to send team_id = Away.
+            let eventTeamId = this.goalTeamId;
+            if (this.isOwnGoal) {
+                 eventTeamId = (this.goalTeamId == {{ $fixture->home_team_id }}) 
+                    ? {{ $fixture->away_team_id }} 
+                    : {{ $fixture->home_team_id }};
+            }
+
             this.postEvent({
-                event_type: 'GOAL',
+                event_type: this.isOwnGoal ? 'OWN_GOAL' : 'GOAL',
                 minute: this.currentMinute,
-                team_id: this.goalTeamId,
+                team_id: eventTeamId, 
                 player_id: scorerId,
                 player_name: scorerName,
-                assist_player_id: assistId,
-                assist_player_name: assistName,
-                description: 'Goal Scored'
+                assist_player_id: !this.isOwnGoal ? assistId : null, // No assists for OG usually
+                assist_player_name: !this.isOwnGoal ? assistName : null,
+                description: this.isOwnGoal ? 'Own Goal' : 'Goal Scored'
             });
 
             this.closeGoalModal();
@@ -1483,10 +1566,26 @@ function scorerConsole() {
             this.showMatchSummaryModal = false;
         },
 
+        forceEndDraw() {
+            if(!confirm('Are you sure you want to end this match as a DRAW? This will skip penalties/toss.')) return;
+
+            fetch('{{ route("scorer.finish", $fixture->slug) }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ force_draw: true })
+            }).then(r => r.json()).then(data => {
+                if(data.success) {
+                    this.status = 'completed';
+                    this.matchState = data.fixture.match_state;
+                    window.location.reload();
+                }
+            });
+        },
+
         confirmEndMatch() {
             // Check if knockout and draw - enable penalties
             const isDraw = this.homeScore === this.awayScore;
-            const isKnockout = {{ $fixture->is_knockout ? 'true' : 'false' }};
+            const isKnockout = {{ ($fixture->is_knockout && !$fixture->league_group_id) ? 'true' : 'false' }};
 
             if (isKnockout && isDraw && !this.hasPenalties && !this.tossConducted) {
                 this.showMatchSummaryModal = false;

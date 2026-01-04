@@ -429,6 +429,8 @@ Route::middleware('auth')->group(function () {
         Route::post('continue-match', [ScorerController::class, 'continueMatch'])->name('continue-match');
         Route::post('conduct-toss', [ScorerController::class, 'conductToss'])->name('conduct-toss');
         Route::post('clear-toss', [ScorerController::class, 'clearToss'])->name('clear-toss');
+        Route::patch('update-event/{event}', [ScorerController::class, 'updateEvent'])->name('event.update');
+        Route::get('event/{event}/edit', [ScorerController::class, 'editEventForm'])->name('event.edit');
     });
 });
 

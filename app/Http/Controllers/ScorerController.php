@@ -244,6 +244,22 @@ class ScorerController extends Controller
                 $fixture->away_score = ($fixture->away_score ?? 0) + 1;
                 $fixture->save();
             }
+        } elseif ($validated['event_type'] === 'OWN_GOAL') {
+            // Own Goal: Increment *Opponent* Score
+            // The team_id stored in event is the team of the player who scored the own goal (the one defaulting/conceding)
+            // So we increment the OTHER team's score.
+            
+            if ($validated['team_id'] == $fixture->home_team_id) {
+                // Home player scored own goal -> Away gets point
+                $fixture->refresh();
+                $fixture->away_score = ($fixture->away_score ?? 0) + 1;
+                $fixture->save();
+            } elseif ($validated['team_id'] == $fixture->away_team_id) {
+                // Away player scored own goal -> Home gets point
+                $fixture->refresh();
+                $fixture->home_score = ($fixture->home_score ?? 0) + 1;
+                $fixture->save();
+            }
         }
 
         return response()->json([
@@ -305,7 +321,7 @@ class ScorerController extends Controller
         return response()->json(['success' => true, 'message' => 'Substitution recorded']);
     }
 
-    public function finishMatch(Fixture $fixture)
+    public function finishMatch(Request $request, Fixture $fixture)
     {
         $this->authorize('viewScoringConsole', $fixture);
 
@@ -313,7 +329,7 @@ class ScorerController extends Controller
         $isDraw = $fixture->home_score === $fixture->away_score;
         $isKnockout = $fixture->is_knockout;
 
-        if ($isKnockout && $isDraw && !$fixture->toss_conducted) {
+        if ($isKnockout && $isDraw && !$fixture->toss_conducted && !$request->boolean('force_draw')) {
             // Enable penalty mode
             $fixture->update([
                 'match_state' => Fixture::STATE_FULL_TIME,
@@ -430,6 +446,81 @@ class ScorerController extends Controller
             'fixture' => $fixture->fresh()
         ]);
     }
+
+    public function editEventForm(Fixture $fixture, MatchEvent $event)
+    {
+        // Ensure event belongs to fixture
+        if ($event->fixture_id !== $fixture->id) {
+            abort(404);
+        }
+
+        // Determine which team's players to show
+        // For GOAL: Show same team players
+        // For OWN_GOAL: Show opponent team players (who scored the OG)
+        $teamId = $event->team_id;
+        
+        // No logic needed for OWN_GOAL team swap here because the event->team_id ALREADY points to the player's team (the one who scored the OG).
+        // In console, we see "Home Goal (Own Goal)" -> event.team_id is AWAY (scorer).
+        // So we just load players for event->team_id.
+
+        $team = $fixture->home_team_id == $teamId ? $fixture->homeTeam : $fixture->awayTeam;
+        
+        // Load players for the dropdown
+        $players = $fixture->fixturePlayers()
+            ->where('team_id', $teamId)
+            ->with('player.user')
+            ->get();
+            
+        return view('scorer.edit-event', compact('fixture', 'event', 'players', 'team'));
+    }
+
+    public function updateEvent(Request $request, Fixture $fixture, MatchEvent $event)
+    {
+        // Auth check or Scorer Token/Session check (Assuming middleware handles basic access)
+
+        $validated = $request->validate([
+            'player_id' => 'nullable|exists:fixture_players,id', // Matches fixture_player id
+            'player_name' => 'nullable|string',
+            'assist_player_id' => 'nullable|exists:fixture_players,id',
+            'assist_player_name' => 'nullable|string',
+        ]);
+
+        $updates = [];
+
+        // Handle Scorer Change
+        if ($request->has('player_id')) { // Only update if present
+             if ($validated['player_id']) {
+                $player = \App\Models\FixturePlayer::find($validated['player_id']);
+                $updates['player_id'] = $player->player_id; // real user/player id
+                $updates['player_name'] = $player->player?->user?->name ?? $player->custom_name;
+             } else {
+                 $updates['player_id'] = null;
+                 $updates['player_name'] = $validated['player_name'] ?? null; // Custom name or null
+             }
+        }
+
+        // Handle Assist Change
+        if ($request->has('assist_player_id')) {
+            if ($validated['assist_player_id']) {
+                $player = \App\Models\FixturePlayer::find($validated['assist_player_id']);
+                $updates['assist_player_id'] = $player->player_id;
+                $updates['assist_player_name'] = $player->player?->user?->name ?? $player->custom_name;
+            } else {
+                $updates['assist_player_id'] = null;
+                $updates['assist_player_name'] = $validated['assist_player_name'] ?? null;
+            }
+        }
+
+        if (!empty($updates)) {
+            $event->update($updates);
+        }
+
+        // Load relationships for response
+        $event->load(['player.user', 'assistPlayer.user', 'team.team']);
+
+        return redirect()->route('scorer.console', $fixture->slug)->with('success', 'Goal updated successfully');
+    }
+
     public function deleteEvent(Request $request, Fixture $fixture, $eventId)
     {
         $this->authorize('viewScoringConsole', $fixture);
@@ -446,6 +537,17 @@ class ScorerController extends Controller
                  $fixture->decrement('home_score');
              } elseif ($event->team_id == $fixture->away_team_id) {
                  $fixture->decrement('away_score');
+             }
+        }
+
+        // Revert Own Goal
+        if ($event->event_type === 'OWN_GOAL') {
+             // Event team_id is the one who scored own goal (conceded). 
+             // Logic reverses the addition: if Home committed OG, Away got score, so decrement Away.
+             if ($event->team_id == $fixture->home_team_id) {
+                 $fixture->decrement('away_score');
+             } elseif ($event->team_id == $fixture->away_team_id) {
+                 $fixture->decrement('home_score');
              }
         }
 
